@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTTO - Organic Timing Trigger Orchestrator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="interface-container">
+        <!-- Splash Screen -->
+        <div id="splash-screen" class="splash-screen">
+            <img src="Images/OTTO_Splash_Screen.png" alt="OTTO" class="splash-logo">
+        </div>
+
+        <!-- Main Interface - 6 Rows -->
+        <div class="main-interface">
+            
+            <!-- Row 1: Top Bar (8% height) - Transport, Global Controls -->
+            <div class="top-bar">
+                <div class="left-controls">
+                    <button class="icon-btn" id="settings-btn">
+                        <img src="Images/Settings.png" alt="Settings">
+                    </button>
+                    <button class="icon-btn" id="link-btn">
+                        <img src="Images/Link.png" alt="Link">
+                    </button>
+                    <button class="icon-btn" id="upload-btn">
+                        <img src="Images/Upload.png" alt="Upload">
+                    </button>
+                </div>
+                
+                <div class="center-program">
+                    <button class="preset-nav-btn preset-prev">‹</button>
+                    <select class="program-select">
+                        <option value="default">Default</option>
+                        <option value="rock-ballad">Rock Ballad</option>
+                        <option value="jazz-combo">Jazz Combo</option>
+                        <option value="funk-groove">Funk Groove</option>
+                        <option value="latin-rhythm">Latin Rhythm</option>
+                        <option value="electronic-pulse">Electronic Pulse</option>
+                        <option value="acoustic-folk">Acoustic Folk</option>
+                        <option value="blues-shuffle">Blues Shuffle</option>
+                        <option value="pop-modern">Pop Modern</option>
+                        <option value="world-fusion">World Fusion</option>
+                    </select>
+                    <button class="preset-nav-btn preset-next">›</button>
+                </div>
+                
+                <div class="transport-controls">
+                    <button class="tap-tempo-btn" id="tap-tempo-btn">TAP</button>
+                    <div class="tempo-display" id="tempo-display" contenteditable="true">120</div>
+                </div>
+                
+                <div class="version-info">Otto Ver. 1.0</div>
+            </div>
+
+            <!-- Row 2: Player Tabs (15% height) - 8 Player Selection (expanded from original 4) -->
+            <div class="player-tabs-section">
+                <div class="player-tabs">
+                    <button class="player-tab active" data-player="1">PLAYER 1</button>
+                    <button class="player-tab" data-player="2">PLAYER 2</button>
+                    <button class="player-tab" data-player="3">PLAYER 3</button>
+                    <button class="player-tab" data-player="4">PLAYER 4</button>
+                    <button class="player-tab" data-player="5">PLAYER 5</button>
+                    <button class="player-tab" data-player="6">PLAYER 6</button>
+                    <button class="player-tab" data-player="7">PLAYER 7</button>
+                    <button class="player-tab" data-player="8">PLAYER 8</button>
+                </div>
+            </div>
+
+            <!-- Row 3: Drum Kit Section (12% height) - Kit Selection & Controls -->
+            <div class="drum-kit-section">
+                <div class="player-number-display">
+                    <span class="player-number" id="current-player-number">1</span>
+                </div>
+                
+                <div class="kit-controls">
+                    <button class="edit-btn">
+                        <img src="Images/KitEditIcon.png" alt="Edit Kit">
+                    </button>
+                    <button class="kit-nav-btn kit-prev">‹</button>
+                    <select class="kit-select">
+                        <option value="acoustic">Acoustic</option>
+                        <option value="electronic">Electronic</option>
+                        <option value="rock">Rock</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="pop">Pop</option>
+                        <option value="funk">Funk</option>
+                        <option value="latin">Latin</option>
+                        <option value="vintage">Vintage</option>
+                    </select>
+                    <button class="kit-nav-btn kit-next">›</button>
+                </div>
+                
+                <div class="drum-kit-icon">
+                    <button class="kit-mixer-btn" id="kit-mixer-btn">
+                        <img src="Images/RhythmKitMixerIcon50x300.png" alt="Drum Kit Mixer" class="kit-visual">
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 4: Pattern Groups (14% height) - Pattern Groups -->
+            <div class="pattern-groups-section">
+                <div class="pattern-group-controls">
+                    <button class="edit-btn">
+                        <img src="Images/KitEditIcon.png" alt="Edit">
+                    </button>
+                    <button class="group-nav-btn group-prev">‹</button>
+                    <select class="favorites-select">
+                        <option value="favorites">Favorites</option>
+                        <option value="all">All Patterns</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <button class="group-nav-btn group-next">›</button>
+                </div>
+            </div>
+
+            <!-- Row 5: Pattern Matrix (45% height) - 50/50 Split -->
+            <div class="pattern-matrix-section">
+                <!-- Left Half: 4x4 Pattern Grid -->
+                <div class="left-half">
+                    <div class="pattern-grid">
+                        <button class="pattern-btn" data-pattern="basic">Basic</button>
+                        <button class="pattern-btn" data-pattern="bassa">Bassa</button>
+                        <button class="pattern-btn" data-pattern="busybeat">BusyBeat</button>
+                        <button class="pattern-btn" data-pattern="buyoun">Buyoun</button>
+                        <button class="pattern-btn" data-pattern="chacha">ChaCha</button>
+                        <button class="pattern-btn active" data-pattern="funk">Funk</button>
+                        <button class="pattern-btn" data-pattern="jazz">Jazz</button>
+                        <button class="pattern-btn" data-pattern="just-hat">Just Hat</button>
+                        <button class="pattern-btn" data-pattern="just-kick">Just Kick</button>
+                        <button class="pattern-btn" data-pattern="polka">Polka</button>
+                        <button class="pattern-btn" data-pattern="push">Push</button>
+                        <button class="pattern-btn" data-pattern="shuffle">Shuffle</button>
+                        <button class="pattern-btn" data-pattern="ska">Ska</button>
+                        <button class="pattern-btn" data-pattern="surf">Surf</button>
+                        <button class="pattern-btn" data-pattern="swing">Swing</button>
+                        <button class="pattern-btn" data-pattern="waltz">Waltz</button>
+                    </div>
+                </div>
+                
+                <!-- Right Half: Controls -->
+                <div class="right-half">
+                    <!-- Top 20%: Control Labels -->
+                    <div class="control-labels-row">
+                        <div class="label toggles-label">Toggles</div>
+                        <div class="label fills-label">Fills</div>
+                        <div class="label-group sliders-labels">
+                            <span>Swing</span>
+                            <span>Energy</span>
+                            <span>Volume</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom 80%: Controls -->
+                    <div class="controls-area">
+                        <div class="toggles-column">
+                            <button class="toggle-btn active" data-toggle="auto">Auto</button>
+                            <button class="toggle-btn" data-toggle="manual">Manual</button>
+                            <button class="toggle-btn" data-toggle="stick">Stick</button>
+                            <button class="toggle-btn" data-toggle="ride">Ride</button>
+                            <button class="toggle-btn" data-toggle="lock">Lock</button>
+                        </div>
+                        
+                        <div class="fills-column">
+                            <button class="fill-btn" data-fill="4">4</button>
+                            <button class="fill-btn" data-fill="8">8</button>
+                            <button class="fill-btn" data-fill="16">16</button>
+                            <button class="fill-btn" data-fill="32">32</button>
+                            <button class="fill-btn solo" data-fill="solo">Solo</button>
+                        </div>
+                        
+                        <div class="sliders-column">
+                            <div class="main-sliders">
+                                <div class="slider-container">
+                                    <input type="range" class="main-slider" min="0" max="100" value="25" orient="vertical" data-param="swing">
+                                    <div class="link-icon"></div>
+                                </div>
+                                <div class="slider-container">
+                                    <input type="range" class="main-slider" min="0" max="100" value="50" orient="vertical" data-param="energy">
+                                    <div class="link-icon"></div>
+                                </div>
+                                <div class="slider-container">
+                                    <input type="range" class="main-slider" min="0" max="100" value="75" orient="vertical" data-param="volume">
+                                    <div class="link-icon"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 6: Loop Section (12% height) - Timeline Controls -->
+            <div class="loop-section">
+                <div class="loop-start-label">LOOP START</div>
+                <div class="loop-timeline">
+                    <div class="timeline-track">
+                        <div class="timeline-handle" id="timeline-handle"></div>
+                    </div>
+                </div>
+                <div class="loop-end-label">LOOP END</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

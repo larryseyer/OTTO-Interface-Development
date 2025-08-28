@@ -1,0 +1,880 @@
+/* OTTO - Organic Timing Trigger Orchestrator - ACCURATE Web Interface */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Oxygen:wght@300;400;700&display=swap');
+
+:root {
+    /* Accurate colors from HISE interface */
+    --bg-primary: #3a3a3a;
+    --bg-secondary: #2a2a2a;
+    --bg-darker: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-muted: #999999;
+    --border-color: #555555;
+    
+    /* Button colors - 3D metallic style */
+    --button-face: #888888;
+    --button-highlight: #aaaaaa;
+    --button-shadow: #333333;
+    --button-active-face: #999999;
+    --button-active-highlight: #bbbbbb;
+    
+    /* Interface dimensions */
+    --interface-width: 1280px;
+    --interface-height: 720px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Playfair Display', 'Lato', serif;
+    background: var(--bg-darker);
+    color: var(--text-primary);
+    overflow: hidden;
+    font-size: 14px;
+}
+
+.interface-container {
+    width: var(--interface-width);
+    height: var(--interface-height);
+    margin: 0 auto;
+    background: var(--bg-primary);
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+/* Splash Screen */
+.splash-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease-out;
+}
+
+.splash-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.splash-logo {
+    max-width: 400px;
+    max-height: 300px;
+    object-fit: contain;
+}
+
+/* Main Interface - 6 Row Layout */
+.main-interface {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Row 1: Top Bar (8% height) - Transport, Global Controls */
+.top-bar {
+    height: 8%;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: relative;
+}
+
+.left-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.icon-btn {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.icon-btn:hover {
+    opacity: 1;
+}
+
+.icon-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: invert(0.8);
+}
+
+.center-program {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.preset-nav-btn {
+    width: 32px;
+    height: 32px;
+    background-image: url('Images/Button080.png');
+    background-size: 100% 600%;
+    background-position: 0 0%;
+    background-repeat: no-repeat;
+    border: none;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.preset-nav-btn:hover {
+    background-position: 0 40%; /* WHITE button for hover */
+}
+
+.preset-nav-btn:active {
+    background-position: 0 20%; /* BLACK button for pressed */
+}
+
+.program-select {
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    cursor: pointer;
+    outline: none;
+    text-align: center;
+    min-width: 200px;
+}
+
+.program-select option {
+    background: var(--bg-darker);
+    color: var(--text-primary);
+}
+
+.transport-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(180px); /* Position with proper margin from right preset chevron */
+}
+
+.tap-tempo-btn {
+    width: 60px;
+    height: 36px;
+    background-image: url('Images/Button080.png');
+    background-size: 100% 600%;
+    background-position: 0 0%;
+    background-repeat: no-repeat;
+    border: none;
+    color: var(--text-primary);
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.tap-tempo-btn:hover {
+    background-position: 0 40%; /* WHITE button for hover */
+}
+
+.tap-tempo-btn:active {
+    background-position: 0 20%; /* BLACK button for pressed */
+}
+
+.tempo-display {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--text-primary);
+    min-width: 90px;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 2px 8px;
+    outline: none;
+    cursor: text;
+    transition: all 0.2s ease;
+}
+
+.tempo-display:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.tempo-display:focus {
+    border-color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.version-info {
+    position: absolute;
+    right: 20px;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--text-muted);
+}
+
+/* Row 2: Player Tabs (15% height) - 8 Player Selection */
+.player-tabs-section {
+    height: 15%;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-tabs {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.player-tab {
+    padding: 16px 32px;
+    background: var(--bg-primary);
+    border: none;
+    border-right: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+    position: relative;
+}
+
+.player-tab:first-child {
+    border-left: 1px solid var(--border-color);
+}
+
+.player-tab:hover {
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.player-tab.active {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    font-weight: 600;
+    border-top: 2px solid var(--text-primary);
+}
+
+/* Row 3: Drum Kit Section (12% height) - Kit Selection & Controls */
+.drum-kit-section {
+    height: 12%;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 30px;
+}
+
+.player-number-display {
+    min-width: 60px;
+}
+
+.player-number {
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.kit-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    justify-content: center;
+}
+
+.edit-btn {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.edit-btn:hover {
+    opacity: 1;
+}
+
+.edit-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: invert(0.8);
+}
+
+.kit-nav-btn {
+    width: 36px;
+    height: 36px;
+    background-image: url('Images/Button080.png');
+    background-size: 100% 600%;
+    background-position: 0 0%;
+    background-repeat: no-repeat;
+    border: none;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.kit-nav-btn:hover {
+    background-position: 0 40%; /* WHITE button for hover */
+}
+
+.kit-nav-btn:active {
+    background-position: 0 20%; /* BLACK button for pressed */
+}
+
+.kit-select {
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    min-width: 180px;
+    text-align: center;
+}
+
+.kit-select option {
+    background: var(--bg-darker);
+    color: var(--text-primary);
+}
+
+.kit-name-display {
+    min-width: 200px;
+    text-align: center;
+}
+
+.kit-name {
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--text-primary);
+}
+
+.drum-kit-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+}
+
+.kit-mixer-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    opacity: 0.8;
+    padding: 0;
+}
+
+.kit-mixer-btn:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.kit-mixer-btn.active {
+    opacity: 1;
+    filter: brightness(1.2);
+}
+
+.kit-visual {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0.8);
+}
+
+/* Row 4: Pattern Groups (14% height) - Pattern Groups */
+.pattern-groups-section {
+    height: 14%;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.pattern-group-controls {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.group-nav-btn {
+    width: 36px;
+    height: 36px;
+    background-image: url('Images/Button080.png');
+    background-size: 100% 600%;
+    background-position: 0 0%;
+    background-repeat: no-repeat;
+    border: none;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.group-nav-btn:hover {
+    background-position: 0 40%; /* WHITE button for hover */
+}
+
+.group-nav-btn:active {
+    background-position: 0 20%; /* BLACK button for pressed */
+}
+
+.favorites-select {
+    background: transparent;
+    color: var(--text-primary);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    min-width: 180px;
+    text-align: center;
+}
+
+.favorites-select option {
+    background: var(--bg-darker);
+    color: var(--text-primary);
+}
+
+/* Row 5: Pattern Matrix (45% height) - 50/50 Split */
+.pattern-matrix-section {
+    height: 45%;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* Left Half - 4x4 Pattern Grid */
+.left-half {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Right Half - Controls */
+.right-half {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.pattern-btn {
+    background-image: url('Images/Button100.png');
+    background-size: 100% 600%; /* 6 states vertically */
+    background-position: 0 0%; /* Normal state - top segment */
+    background-repeat: no-repeat;
+    color: var(--text-primary);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    text-align: center;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    border-radius: 3px;
+}
+
+.pattern-btn:hover {
+    background-position: 0 40%; /* Third segment - WHITE button for hover */
+}
+
+.pattern-btn:active,
+.pattern-btn.active {
+    background-position: 0 20%; /* Second segment - BLACK button for active/on */
+}
+
+/* Top 20% - Control Labels */
+.control-labels-row {
+    height: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.5px;
+}
+
+.sliders-labels {
+    display: flex;
+    gap: 25px;
+    justify-content: space-around;
+    width: 180px;
+}
+
+.sliders-labels span {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: 'Playfair Display', serif;
+    text-align: center;
+}
+
+/* Bottom 80% - Controls */
+.controls-area {
+    height: 80%;
+    display: flex;
+    gap: 15px;
+    padding: 0 20px;
+}
+
+.toggles-column,
+.fills-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sliders-column {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+}
+
+.toggle-btn {
+    padding: 8px 12px;
+    background-image: url('Images/Button080.png');
+    background-size: 100% 600%; /* 6 states vertically */
+    background-position: 0 0%; /* Normal state */
+    background-repeat: no-repeat;
+    color: var(--text-primary);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    width: 100%;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.toggle-btn:hover {
+    background-position: 0 40%; /* WHITE button for hover */
+}
+
+.toggle-btn.active {
+    background-position: 0 20%; /* BLACK button for active/on */
+}
+
+.fill-btn {
+    padding: 8px 12px;
+    background-image: url('Images/Button080.png');
+    background-size: 100% 600%; /* 6 states vertically */
+    background-position: 0 0%; /* Normal state */
+    background-repeat: no-repeat;
+    color: var(--text-primary);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.05s ease;
+    width: 100%;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.fill-btn:hover {
+    background-position: 0 40%; /* WHITE button for hover */
+}
+
+.fill-btn.active {
+    background-position: 0 20%; /* BLACK button for active/on */
+}
+
+.main-sliders {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    gap: 30px;
+    height: 180px;
+    padding: 0 20px;
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    flex: 1;
+}
+
+.main-slider {
+    writing-mode: bt-lr;
+    -webkit-appearance: slider-vertical;
+    width: 8px;
+    height: 150px;
+    background: var(--bg-secondary);
+    outline: none;
+    cursor: pointer;
+}
+
+.main-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(145deg, var(--button-highlight), var(--button-face));
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 
+        inset 1px 1px 2px rgba(255,255,255,0.2),
+        inset -1px -1px 2px rgba(0,0,0,0.3),
+        1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.link-icon {
+    width: 16px;
+    height: 16px;
+    background-image: url('Images/Link.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    filter: invert(0.8);
+}
+
+.link-icon:hover {
+    opacity: 1;
+}
+
+/* Row 6: Loop Section (12% height) - Timeline Controls */
+.loop-section {
+    height: 12%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 50px;
+    border-top: 1px solid var(--border-color);
+}
+
+.loop-start-label,
+.loop-end-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    font-family: 'Playfair Display', serif;
+    min-width: 80px;
+    text-align: center;
+}
+
+.loop-timeline {
+    flex: 1;
+    margin: 0 50px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.timeline-track {
+    width: 100%;
+    height: 4px;
+    background: var(--bg-darker);
+    border-radius: 2px;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.timeline-handle {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(145deg, var(--button-highlight), var(--button-face));
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 30%;
+    cursor: pointer;
+    box-shadow: 
+        inset 1px 1px 2px rgba(255,255,255,0.2),
+        inset -1px -1px 2px rgba(0,0,0,0.3),
+        2px 2px 4px rgba(0,0,0,0.3);
+    transition: left 0.1s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1400px) {
+    .interface-container {
+        transform: scale(0.9);
+        transform-origin: top center;
+    }
+}
+
+@media (max-width: 1200px) {
+    .interface-container {
+        transform: scale(0.8);
+    }
+    
+    .pattern-grid {
+        gap: 8px;
+    }
+    
+    .player-tab {
+        padding: 12px 25px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .interface-container {
+        transform: scale(0.7);
+    }
+    
+    .player-tabs {
+        overflow-x: auto;
+    }
+    
+    .player-tab {
+        white-space: nowrap;
+    }
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-5px); }
+}
+
+/* Focus States */
+button:focus,
+select:focus,
+input:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+    outline-offset: 2px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--button-face);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --bg-primary: #000000;
+        --bg-secondary: #000000;
+        --text-primary: #ffffff;
+        --text-secondary: #ffffff;
+        --border-color: #ffffff;
+    }
+}

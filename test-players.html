@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTTO - 8 Player Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="interface-container">
+        <!-- Test Interface - Just the main parts -->
+        <div class="main-interface">
+            
+            <!-- Row 1: Top Bar -->
+            <div class="top-bar">
+                <div class="left-controls">
+                    <button class="icon-btn" id="settings-btn">
+                        <img src="Images/Settings.png" alt="Settings">
+                    </button>
+                    <button class="icon-btn" id="link-btn">
+                        <img src="Images/Link.png" alt="Link">
+                    </button>
+                    <button class="icon-btn" id="upload-btn">
+                        <img src="Images/Upload.png" alt="Upload">
+                    </button>
+                </div>
+                
+                <div class="center-program">
+                    <select class="program-select">
+                        <option value="default">Default</option>
+                    </select>
+                </div>
+                
+                <div class="transport-controls">
+                    <button class="transport-btn" id="pause-btn">
+                        <img src="Images/Pause.png" alt="Pause">
+                    </button>
+                    <div class="tempo-display">120</div>
+                </div>
+                
+                <div class="version-info">Otto Ver. 1.0</div>
+            </div>
+
+            <!-- Row 2: Player Tabs - 8 Player Test -->
+            <div class="player-tabs-section">
+                <div class="player-tabs">
+                    <button class="player-tab active" data-player="1">PLAYER 1</button>
+                    <button class="player-tab" data-player="2">PLAYER 2</button>
+                    <button class="player-tab" data-player="3">PLAYER 3</button>
+                    <button class="player-tab" data-player="4">PLAYER 4</button>
+                    <button class="player-tab" data-player="5">PLAYER 5</button>
+                    <button class="player-tab" data-player="6">PLAYER 6</button>
+                    <button class="player-tab" data-player="7">PLAYER 7</button>
+                    <button class="player-tab" data-player="8">PLAYER 8</button>
+                </div>
+                <div id="player-test-results" style="color: white; padding: 10px; font-size: 14px;"></div>
+            </div>
+
+            <!-- Rest of interface (simplified for testing) -->
+            <div style="height: 77%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">
+                <div id="current-player-display">Current Player: 1</div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Test 8-player functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const results = document.getElementById('player-test-results');
+            const currentDisplay = document.getElementById('current-player-display');
+            
+            // Test player switching
+            let testResults = [];
+            
+            // Test each player tab
+            for (let i = 1; i <= 8; i++) {
+                const tab = document.querySelector(`[data-player="${i}"]`);
+                if (tab) {
+                    testResults.push(`✓ Player ${i} tab found`);
+                } else {
+                    testResults.push(`✗ Player ${i} tab missing`);
+                }
+            }
+            
+            // Test OTTO interface initialization
+            if (window.ottoInterface) {
+                testResults.push(`✓ OTTO Interface initialized with ${window.ottoInterface.numberOfPlayers} players`);
+                
+                // Test player states
+                Object.keys(window.ottoInterface.playerStates).forEach(playerId => {
+                    const state = window.ottoInterface.playerStates[playerId];
+                    if (state.kitName && state.toggleStates && state.sliderValues) {
+                        testResults.push(`✓ Player ${playerId} state valid`);
+                    } else {
+                        testResults.push(`✗ Player ${playerId} state invalid`);
+                    }
+                });
+            } else {
+                testResults.push(`✗ OTTO Interface not initialized`);
+            }
+            
+            results.innerHTML = testResults.join('<br>');
+            
+            // Add click handlers to test player switching
+            document.querySelectorAll('.player-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const playerId = tab.dataset.player;
+                    currentDisplay.textContent = `Current Player: ${playerId}`;
+                    results.innerHTML += `<br>→ Switched to Player ${playerId}`;
+                });
+            });
+            
+            console.log('Player test loaded:', testResults);
+        });
+    </script>
+</body>
+</html>
