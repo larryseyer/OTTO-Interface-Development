@@ -73,16 +73,17 @@
                     </button>
                 </div>
 
-                <!-- Area 4: Tap Tempo and Tempo Display -->
+                <!-- Area 4: Tempo Display (Tap & Edit) -->
                 <div class="area-4">
-                    <button class="tap-tempo-btn" id="tap-tempo-btn">TAP</button>
-                    <div class="tempo-display" id="tempo-display" contenteditable="true">120</div>
+                    <div class="tempo-display" id="tempo-display" contenteditable="false">120</div>
                 </div>
 
                 <!-- Area 5: Logo and Version -->
                 <div class="area-5">
-                    <span class="otto-logo">Otto</span>
-                    <span class="version-text">Ver. 1.0</span>
+                    <div class="logo-version-container" id="logo-version">
+                        <span class="otto-logo">Otto</span>
+                        <span class="version-text">Ver. <span id="version-number"></span></span>
+                    </div>
                 </div>
             </div>
 

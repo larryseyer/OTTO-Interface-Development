@@ -9,6 +9,7 @@
 
 class OTTOAccurateInterface {
     constructor() {
+        this.version = '1.0.0';  // Dynamic version number
         this.numberOfPlayers = 8;
         this.currentPlayer = 1;
         this.splashScreenLength = 1000; // 1 second like original
@@ -59,6 +60,7 @@ class OTTOAccurateInterface {
     }
 
     init() {
+        this.setupVersion();
         this.setupSplashScreen();
         this.setupPlayerTabs();
         this.setupPresetControls();
@@ -71,12 +73,45 @@ class OTTOAccurateInterface {
         this.setupTopBarControls();
         this.setupLoopTimeline();
         this.setupKeyboardShortcuts();
+        this.setupLogoClick();
         this.startLoopAnimation();
 
         // Initialize UI for player 1
         this.updateUIForCurrentPlayer();
 
         console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'players');
+    }
+
+    setupVersion() {
+        // Set the version number dynamically
+        const versionNumber = document.getElementById('version-number');
+        if (versionNumber) {
+            versionNumber.textContent = this.version;
+        }
+    }
+
+    setupLogoClick() {
+        // Setup logo/version click to show splash screen
+        const logoVersion = document.getElementById('logo-version');
+        const splashScreen = document.getElementById('splash-screen');
+        
+        if (logoVersion && splashScreen) {
+            logoVersion.addEventListener('click', () => {
+                // Show splash screen
+                splashScreen.style.display = 'flex';
+                splashScreen.classList.remove('hidden');
+                splashScreen.classList.add('show');
+                
+                // Hide it again after a delay
+                setTimeout(() => {
+                    splashScreen.classList.remove('show');
+                    splashScreen.classList.add('hidden');
+                    setTimeout(() => {
+                        splashScreen.style.display = 'none';
+                    }, 500);
+                }, this.splashScreenLength * 2);  // Show for 2 seconds when clicked
+            });
+        }
     }
 
     setupSplashScreen() {
@@ -541,41 +576,95 @@ class OTTOAccurateInterface {
             });
         }
 
-        // Tap Tempo button
-        const tapTempoBtn = document.getElementById('tap-tempo-btn');
-        if (tapTempoBtn) {
-            tapTempoBtn.addEventListener('click', () => {
-                this.handleTapTempo();
-                console.log('Tap tempo clicked');
-            });
-        }
-
-        // Tempo display (editable)
+        // Tempo display - dual function (tap tempo & edit)
         const tempoDisplay = document.getElementById('tempo-display');
         if (tempoDisplay) {
+            let clickTimer = null;
+            let clickCount = 0;
+            let isEditing = false;
+
+            // Single click for tap tempo
+            tempoDisplay.addEventListener('click', (e) => {
+                if (isEditing) return;  // Don't tap while editing
+                
+                clickCount++;
+                
+                if (clickCount === 1) {
+                    clickTimer = setTimeout(() => {
+                        // Single click - tap tempo
+                        this.handleTapTempo();
+                        tempoDisplay.classList.add('tapped');
+                        setTimeout(() => {
+                            tempoDisplay.classList.remove('tapped');
+                        }, 200);
+                        console.log('Tap tempo triggered');
+                        clickCount = 0;
+                    }, 180);  // Reduced to 180ms to allow fast tempo tapping up to 333 BPM
+                } else if (clickCount === 2) {
+                    // Double click - enter edit mode
+                    clearTimeout(clickTimer);
+                    clickCount = 0;
+                    this.enterEditMode(tempoDisplay);
+                }
+            });
+
+            // Handle editing
             tempoDisplay.addEventListener('blur', () => {
+                if (!isEditing) return;
+                
                 const newTempo = parseInt(tempoDisplay.textContent);
-                if (!isNaN(newTempo) && newTempo >= 60 && newTempo <= 200) {
+                if (!isNaN(newTempo) && newTempo >= 40 && newTempo <= 300) {
                     this.setTempo(newTempo);
                 } else {
                     // Reset to current tempo if invalid
                     tempoDisplay.textContent = this.tempo;
                 }
+                this.exitEditMode(tempoDisplay);
             });
 
             tempoDisplay.addEventListener('keydown', (e) => {
+                if (!isEditing) {
+                    e.preventDefault();
+                    return;
+                }
+                
                 if (e.key === 'Enter') {
                     tempoDisplay.blur();
                     e.preventDefault();
-                }
-
-                // Allow only numbers and navigation keys
-                const allowedKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                                   'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
-                if (!allowedKeys.includes(e.key)) {
+                } else if (e.key === 'Escape') {
+                    tempoDisplay.textContent = this.tempo;
+                    tempoDisplay.blur();
                     e.preventDefault();
+                } else {
+                    // Allow only numbers and navigation keys
+                    const allowedKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                       'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+                    if (!allowedKeys.includes(e.key)) {
+                        e.preventDefault();
+                    }
                 }
             });
+
+            // Helper functions for edit mode
+            this.enterEditMode = (element) => {
+                isEditing = true;
+                element.contentEditable = 'true';
+                element.classList.add('editing');
+                element.focus();
+                
+                // Select all text
+                const range = document.createRange();
+                range.selectNodeContents(element);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            };
+
+            this.exitEditMode = (element) => {
+                isEditing = false;
+                element.contentEditable = 'false';
+                element.classList.remove('editing');
+            };
         }
 
         // Program select is now handled by setupPresetControls()

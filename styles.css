@@ -120,6 +120,12 @@ body {
     pointer-events: none;
 }
 
+.splash-screen.show {
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+}
+
 .splash-logo {
     max-width: 1600px;
     max-height: 1200px;
@@ -173,11 +179,10 @@ body {
     flex: 0 0 var(--row1-area3-width);
 }
 
-/* Area 4: Tap Tempo and Tempo Display */
+/* Area 4: Tempo Display (Tap & Edit) */
 .area-4 {
     display: flex;
     align-items: center;
-    gap: 15px;
     flex: 0 0 var(--row1-area4-width);
     justify-content: center;
 }
@@ -186,9 +191,31 @@ body {
 .area-5 {
     display: flex;
     align-items: center;
-    gap: 10px;
     flex: 0 0 var(--row1-area5-width);
     justify-content: flex-end;
+}
+
+.logo-version-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.logo-version-container:hover {
+    transform: scale(1.05);
+}
+
+.logo-version-container:hover .otto-logo,
+.logo-version-container:hover .version-text {
+    color: var(--text-primary);
+}
+
+.logo-version-container:active {
+    transform: scale(0.98);
 }
 
 /* Play/Pause button styling */
@@ -421,27 +448,51 @@ body {
 
 .tempo-display {
     font-family: 'Roboto', sans-serif;
-    font-size: 60px;
+    font-size: 63px;  /* Reduced from 70px by ~10% */
     font-weight: 100; /* ExtraLight */
     color: #777777;
-    min-width: 90px;
+    min-width: 110px;  /* Slightly smaller min-width */
     text-align: center;
-    letter-spacing: -1px;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    padding: 2px 8px;
+    letter-spacing: -2px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 10px 20px;
     outline: none;
-    cursor: text;
+    cursor: pointer;  /* Pointer cursor for tap functionality */
     transition: all 0.2s ease;
+    user-select: none;  /* Prevent text selection during tap */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    background: transparent;
 }
 
 .tempo-display:hover {
-    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+    transform: scale(1.05);
 }
 
-.tempo-display:focus {
+.tempo-display:active {
+    transform: scale(0.98);
+    color: var(--text-primary);
+}
+
+.tempo-display.editing {
     border-color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+}
+
+.tempo-display.tapped {
+    animation: tap-pulse 0.2s ease;
+}
+
+@keyframes tap-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); background-color: rgba(255, 255, 255, 0.1); }
+    100% { transform: scale(1); }
 }
 
 /* Remove absolute positioning from old version-info */
@@ -458,11 +509,19 @@ body {
 .version-text {
     margin: 0;
     padding-top: 35px;
-
     font-size: 16px;
     font-weight: 300;
     color: var(--text-muted);
     font-family: 'Lato', sans-serif;
+    white-space: nowrap;  /* Keep on same line */
+    display: inline-block;
+}
+
+.version-text #version-number {
+    font-size: inherit;  /* Same size as parent */
+    font-weight: inherit;  /* Same weight as parent */
+    font-family: inherit;  /* Same font as parent */
+    color: inherit;  /* Same color as parent */
 }
 
 /* Row 2: Player Tabs  - 8 Player Selection */
