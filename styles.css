@@ -282,7 +282,7 @@ body {
 /* Row 2: Player Tabs (15% height) - 8 Player Selection */
 .player-tabs-section {
     height: 15%;
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -291,32 +291,38 @@ body {
 
 .player-tabs {
     display: flex;
-    gap: 4px; /* Small gap between button graphics */
-    padding: 8px; /* Add padding to give buttons some breathing room */
+    gap: 10px; /* Further increased gap between button graphics */
+    padding: 8px 12px; /* Adjusted padding for better fit */
+    background: transparent; /* Ensure no background */
 }
 
 .player-tab {
-    padding: 16px 32px;
+    padding: 0; /* No padding - text fills button */
     background-image: url('Images/Button100.png');
     background-size: 100% 600%; /* 6 states vertically */
     background-position: 0 0%; /* Normal state - top segment */
     background-repeat: no-repeat;
+    background-color: transparent; /* Ensure no background color */
     border: none;
-    color: var(--text-primary);
+    color: #000000; /* Black text */
     font-family: 'Playfair Display', serif;
-    font-size: 15px;
+    font-size: 20px !important; /* Slightly reduced font size */
     font-weight: 500;
     cursor: pointer;
     transition: all 0.05s ease;
     letter-spacing: 0.5px;
     position: relative;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    text-shadow: none; /* Removed text shadow for black text */
     border-radius: 3px;
-    min-height: 45px;
+    min-height: 65px; /* Reduced height by another ~10% */
+    height: 65px;
+    width: 130px; /* Increased width by another 20% */
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 2px; /* Small gap between buttons */
+    margin: 0;
+    line-height: 1;
+    white-space: nowrap; /* Prevent text from wrapping to new line */
 }
 
 .player-tab:first-child {
@@ -335,7 +341,7 @@ body {
 /* Row 3: Drum Kit Section (12% height) - Kit Selection & Controls */
 .drum-kit-section {
     height: 12%;
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -475,7 +481,7 @@ body {
 /* Row 4: Pattern Groups (14% height) - Pattern Groups */
 .pattern-groups-section {
     height: 14%;
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
@@ -537,7 +543,7 @@ body {
 /* Row 5: Pattern Matrix (45% height) - 50/50 Split */
 .pattern-matrix-section {
     height: 45%;
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
     padding: 20px;
@@ -839,7 +845,7 @@ body {
     
     .player-tab {
         padding: 12px 25px;
-        font-size: 14px;
+        font-size: 24px !important;
     }
 }
 
