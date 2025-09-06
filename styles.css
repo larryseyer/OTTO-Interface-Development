@@ -1,6 +1,6 @@
 /* OTTO - Organic Timing Trigger Orchestrator - ACCURATE Web Interface */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Oxygen:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Oxygen:wght@300;400;700&family=Roboto:wght@100;200;300;400;500;700&display=swap');
 
 :root {
     /* Accurate colors from HISE interface */
@@ -22,6 +22,10 @@
     /* Interface dimensions */
     --interface-width: 1280px;
     --interface-height: 720px;
+    
+    /* Icon sizes */
+    --icon-size-standard: 40px;
+    --icon-size-small: 24px;
 }
 
 * {
@@ -89,7 +93,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 2%;
     position: relative;
 }
 
@@ -100,17 +104,33 @@ body {
 }
 
 .icon-btn {
-    width: 24px;
-    height: 24px;
+    width: var(--icon-size-standard);
+    height: var(--icon-size-standard);
     background: transparent;
     border: none;
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
 .icon-btn:hover {
-    opacity: 1;
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.icon-btn:active {
+    color: var(--text-secondary);
+    transform: scale(0.95);
+}
+
+.icon-btn svg {
+    width: var(--icon-size-standard);
+    height: var(--icon-size-standard);
+    display: block;
 }
 
 .icon-btn img {
@@ -130,43 +150,46 @@ body {
 }
 
 .preset-nav-btn {
-    width: 32px;
-    height: 32px;
-    background-image: url('Images/Button080.png');
-    background-size: 100% 600%;
-    background-position: 0 0%;
-    background-repeat: no-repeat;
+    width: var(--icon-size-standard);
+    height: var(--icon-size-standard);
+    background: transparent;
     border: none;
-    color: var(--text-primary);
-    font-size: 18px;
-    font-weight: bold;
+    color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.05s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    padding: 0;
 }
 
 .preset-nav-btn:hover {
-    background-position: 0 40%; /* WHITE button for hover */
+    color: var(--text-primary);
+    transform: scale(1.1);
 }
 
 .preset-nav-btn:active {
-    background-position: 0 20%; /* BLACK button for pressed */
+    color: var(--text-secondary);
+    transform: scale(0.95);
+}
+
+.preset-nav-btn svg {
+    width: var(--icon-size-standard);
+    height: var(--icon-size-standard);
+    display: block;
 }
 
 .program-select {
     background: transparent;
-    color: var(--text-primary);
+    color: #777777;
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 24px;
+    font-size: 36px;
     font-weight: 400;
     cursor: pointer;
     outline: none;
     text-align: center;
-    min-width: 200px;
+    min-width: 250px;
 }
 
 .program-select option {
@@ -175,12 +198,12 @@ body {
 }
 
 .transport-controls {
+    position: absolute;
+    left: calc(50% + 210px); /* Position to the right of center group with more spacing */
+    transform: translateX(0);
     display: flex;
     align-items: center;
     gap: 15px;
-    position: absolute;
-    left: 50%;
-    transform: translateX(180px); /* Position with proper margin from right preset chevron */
 }
 
 .tap-tempo-btn {
@@ -209,12 +232,13 @@ body {
 }
 
 .tempo-display {
-    font-size: 36px;
-    font-weight: bold;
-    color: var(--text-primary);
+    font-size: 42px;
+    font-weight: 100; /* ExtraLight */
+    color: #777777;
     min-width: 90px;
     text-align: center;
-    font-family: 'Playfair Display', serif;
+    font-family: 'Roboto', sans-serif;
+    letter-spacing: -1px;
     border: 1px solid transparent;
     border-radius: 3px;
     padding: 2px 8px;
@@ -235,9 +259,24 @@ body {
 .version-info {
     position: absolute;
     right: 20px;
-    font-size: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.otto-logo {
+    font-size: 42px;
+    font-weight: 400;
+    color: #777777;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 1px;
+}
+
+.version-text {
+    font-size: 12px;
     font-weight: 300;
     color: var(--text-muted);
+    font-family: 'Lato', sans-serif;
 }
 
 /* Row 2: Player Tabs (15% height) - 8 Player Selection */
