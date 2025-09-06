@@ -232,15 +232,20 @@ body {
     align-items: center;
     justify-content: center;
     padding: 0;
+    outline: none;  /* Remove focus outline */
+}
+
+.icon-btn:focus {
+    outline: none;  /* Remove focus box */
 }
 
 .icon-btn:hover {
-    color: var(--text-primary);
-    transform: scale(1.1);
+    transform: scale(1.1);  /* Only scale on hover, no color change */
 }
 
-.icon-btn:active {
-    color: var(--text-secondary);
+.icon-btn:active,
+.icon-btn.active {
+    color: var(--text-primary);  /* White color when clicked/active */
     transform: scale(0.95);
 }
 
@@ -248,7 +253,7 @@ body {
     font-size: var(--icon-size-standard);
     line-height: 1;
     display: block;
-    color: var(--text-icon);
+    color: inherit;  /* Inherit color from parent button */
 }
 
 .icon-btn img {
@@ -302,8 +307,8 @@ body {
     cursor: pointer;
     outline: none;
     text-align: center;
-    width: auto;
-    max-width: 250px;
+    width: 100%;  /* Expanded to fill available space when chevrons are hidden */
+    max-width: 350px;  /* Increased max-width since chevrons are removed */
 }
 
 .program-select option {
