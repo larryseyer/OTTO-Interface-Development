@@ -1,6 +1,7 @@
 /* OTTO - Organic Timing Trigger Orchestrator - ACCURATE Web Interface */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Oxygen:wght@300;400;700&family=Roboto:wght@100;200;300;400;500;700&display=swap');
+/*Add Roboto here*/
 
 :root {
     /* Accurate colors from HISE interface */
@@ -236,7 +237,7 @@ body {
 
 .tempo-display {
     font-family: 'Roboto', sans-serif;
-    font-size: 42px;
+    font-size: 60px;
     font-weight: 100; /* ExtraLight */
     color: #777777;
     min-width: 90px;
@@ -268,7 +269,7 @@ body {
 }
 
 .otto-logo {
-    font-size: 42px;
+    font-size: 60px;
     font-weight: 400;
     color: #777777;
     font-family: 'Playfair Display', serif;
@@ -276,7 +277,7 @@ body {
 }
 
 .version-text {
-    font-size: 12px;
+    font-size: 18px;
     font-weight: 300;
     color: var(--text-muted);
     font-family: 'Lato', sans-serif;
@@ -579,6 +580,7 @@ body {
 }
 
 .pattern-btn {
+    background: transparent;
     background-image: url('Images/Button100.png');
     background-size: 100% 600%; /* 6 states vertically */
     background-position: 0 0%; /* Normal state - top segment */
@@ -668,6 +670,7 @@ body {
 }
 
 .toggle-btn {
+    background: transparent;
     padding: 8px 12px;
     background-image: url('Images/Button080.png');
     background-size: 100% 600%; /* 6 states vertically */
@@ -693,6 +696,7 @@ body {
 }
 
 .fill-btn {
+    background: transparent;
     padding: 8px 12px;
     background-image: url('Images/Button080.png');
     background-size: 100% 600%; /* 6 states vertically */
