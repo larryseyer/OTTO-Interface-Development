@@ -152,8 +152,8 @@ body {
     position: relative;
 }
 
-/* Area 1: Settings, Link, and Cloud buttons */
-.area-1 {
+/* Row 1 Area 1: Settings, Link, and Cloud buttons */
+.row1-area1 {
     display: flex;
     gap: 15px;
     align-items: center;
@@ -161,8 +161,8 @@ body {
     justify-content: flex-start;
 }
 
-/* Area 2: Chevrons and Presets dropdown */
-.area-2 {
+/* Row 1 Area 2: Chevrons and Presets dropdown */
+.row1-area2 {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -171,24 +171,24 @@ body {
     position: relative;  /* For dropdown arrow positioning */
 }
 
-/* Area 3: Play/Pause Transport (centered) */
-.area-3 {
+/* Row 1 Area 3: Play/Pause Transport (centered) */
+.row1-area3 {
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 var(--row1-area3-width);
 }
 
-/* Area 4: Tempo Display (Tap & Edit) */
-.area-4 {
+/* Row 1 Area 4: Tempo Display (Tap & Edit) */
+.row1-area4 {
     display: flex;
     align-items: center;
     flex: 0 0 var(--row1-area4-width);
     justify-content: center;
 }
 
-/* Area 5: Logo and Version */
-.area-5 {
+/* Row 1 Area 5: Logo and Version */
+.row1-area5 {
     display: flex;
     align-items: center;
     flex: 0 0 var(--row1-area5-width);
@@ -206,12 +206,7 @@ body {
 }
 
 .logo-version-container:hover {
-    transform: scale(1.05);
-}
-
-.logo-version-container:hover .otto-logo,
-.logo-version-container:hover .version-text {
-    color: var(--text-primary);
+    transform: scale(1.05);  /* Only scale, no color change */
 }
 
 .logo-version-container:active {
@@ -238,11 +233,7 @@ body {
 }
 
 .play-pause-btn:hover {
-    transform: scale(1.1);
-}
-
-.play-pause-btn:hover i {
-    color: var(--text-primary);  /* Icon turns white on hover */
+    transform: scale(1.1);  /* Only scale, no color change */
 }
 
 .play-pause-btn:active {
@@ -354,8 +345,8 @@ body {
     transition: all 0.2s ease;
 }
 
-.dropdown-selected:hover .dropdown-arrow {
-    transform: scale(1.1);
+.dropdown-selected:hover {
+    transform: scale(1.05);  /* Scale entire dropdown on hover */
 }
 
 .dropdown-text {
@@ -405,9 +396,7 @@ body {
 }
 
 .dropdown-option:hover {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    font-size: 26px;
+    transform: scale(1.05);  /* Only scale, no color change */
 }
 
 .dropdown-option.selected {
@@ -448,10 +437,10 @@ body {
 
 .tempo-display {
     font-family: 'Roboto', sans-serif;
-    font-size: 63px;  /* Reduced from 70px by ~10% */
+    font-size: 55px;  /* Perfect size */
     font-weight: 100; /* ExtraLight */
     color: #777777;
-    min-width: 110px;  /* Slightly smaller min-width */
+    min-width: 95px;  /* Adjusted min-width */
     text-align: center;
     letter-spacing: -2px;
     border: 2px solid transparent;
@@ -467,13 +456,11 @@ body {
 }
 
 .tempo-display:hover {
-    color: var(--text-primary);
-    transform: scale(1.05);
+    transform: scale(1.05);  /* Only scale, no color change */
 }
 
 .tempo-display:active {
-    transform: scale(0.98);
-    color: var(--text-primary);
+    transform: scale(0.98);  /* Only scale, no color change */
 }
 
 .tempo-display.editing {
