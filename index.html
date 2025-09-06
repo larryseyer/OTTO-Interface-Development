@@ -93,16 +93,24 @@
                 </div>
             </div>
 
-            <!-- Row 3: Drum Kit Section  - Kit Selection & Controls -->
+            <!-- Row 3: Drum Kit Section - 5 Areas -->
             <div class="drum-kit-section">
-                <div class="player-number-display">
-                    <span class="player-number" id="current-player-number">1</span>
+                <!-- Area 1: Player number display -->
+                <div class="row3-area-1">
+                    <div class="player-number-display">
+                        <span class="player-number" id="current-player-number">1</span>
+                    </div>
                 </div>
 
-                <div class="kit-controls">
+                <!-- Area 2: Edit kit icon (to be implemented) -->
+                <div class="row3-area-2">
                     <button class="edit-btn">
                         <img src="Images/KitEditIcon.png" alt="Edit Kit">
                     </button>
+                </div>
+
+                <!-- Area 3: Drum kit dropdown and chevrons -->
+                <div class="row3-area-3">
                     <button class="kit-nav-btn kit-prev">‹</button>
                     <select class="kit-select">
                         <option value="acoustic">Acoustic</option>
@@ -117,33 +125,82 @@
                     <button class="kit-nav-btn kit-next">›</button>
                 </div>
 
-                <div class="drum-kit-icon">
+                <!-- Area 4: Mixer icon (to be implemented) -->
+                <div class="row3-area-4">
                     <button class="kit-mixer-btn" id="kit-mixer-btn">
                         <img src="Images/RhythmKitMixerIcon50x300.png" alt="Drum Kit Mixer" class="kit-visual">
                     </button>
                 </div>
-            </div>
 
-            <!-- Row 4: Pattern Groups  - Pattern Groups -->
-            <div class="pattern-groups-section">
-                <div class="pattern-group-controls">
-                    <button class="edit-btn">
-                        <img src="Images/KitEditIcon.png" alt="Edit">
+                <!-- Area 5: Mute/Unmute drummer icon -->
+                <div class="row3-area-5">
+                    <button class="mute-drummer-btn" id="mute-drummer-btn">
+                        <i class="ph-thin ph-speaker-high"></i>
                     </button>
-                    <button class="group-nav-btn group-prev">‹</button>
-                    <select class="favorites-select">
-                        <option value="favorites">Favorites</option>
-                        <option value="all">All Patterns</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                    <button class="group-nav-btn group-next">›</button>
                 </div>
             </div>
 
-            <!-- Row 5: Pattern Matrix  LR 50/50 Split -->
+            <!-- Row 4: Pattern Groups - 50/50 Split -->
+            <div class="pattern-groups-section">
+                <!-- Left Half (50%) -->
+                <div class="row4-left">
+                    <!-- Left Area 1: Edit pattern icon (25% of left) -->
+                    <div class="row4-left-area1">
+                        <button class="edit-pattern-btn">
+                            <i class="ph-thin ph-pencil"></i>
+                        </button>
+                    </div>
+
+                    <!-- Left Area 2: Pattern group chevron combo (50% of left) -->
+                    <div class="row4-left-area2">
+                        <button class="group-nav-btn group-prev">‹</button>
+                        <select class="favorites-select">
+                            <option value="favorites">Favorites</option>
+                            <option value="all">All Patterns</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                        <button class="group-nav-btn group-next">›</button>
+                    </div>
+
+                    <!-- Left Area 3: Blank space for now (25% of left) -->
+                    <div class="row4-left-area3">
+                        <!-- Reserved for future content -->
+                    </div>
+                </div>
+
+                <!-- Right Half (50%) - Labels -->
+                <div class="row4-right">
+                    <!-- Right Area 1: Toggles label (20% of right) -->
+                    <div class="row4-right-area1">
+                        <div class="section-label">Toggles</div>
+                    </div>
+
+                    <!-- Right Area 2: Fills label (20% of right) -->
+                    <div class="row4-right-area2">
+                        <div class="section-label">Fills</div>
+                    </div>
+
+                    <!-- Right Area 3: Swing label (20% of right) -->
+                    <div class="row4-right-area3">
+                        <div class="section-label">Swing</div>
+                    </div>
+
+                    <!-- Right Area 4: Energy label (20% of right) -->
+                    <div class="row4-right-area4">
+                        <div class="section-label">Energy</div>
+                    </div>
+
+                    <!-- Right Area 5: Volume label (20% of right) -->
+                    <div class="row4-right-area5">
+                        <div class="section-label">Volume</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 5: Pattern Matrix - 50/50 Split -->
             <div class="pattern-matrix-section">
-                <!-- Left Half: 4x4 Pattern Grid -->
-                <div class="left-half">
+                <!-- Left Half (50%): 4x4 Pattern Grid -->
+                <div class="row5-left">
                     <div class="pattern-grid">
                         <button class="pattern-btn" data-pattern="basic">Basic</button>
                         <button class="pattern-btn" data-pattern="bassa">Bassa</button>
@@ -164,21 +221,11 @@
                     </div>
                 </div>
 
-                <!-- Right Half: Controls -->
-                <div class="right-half">
-                    <!-- Top 20%: Control Labels -->
-                    <div class="control-labels-row">
-                        <div class="label toggles-label">Toggles</div>
-                        <div class="label fills-label">Fills</div>
-                        <div class="label-group sliders-labels">
-                            <span>Swing</span>
-                            <span>Energy</span>
-                            <span>Volume</span>
-                        </div>
-                    </div>
-
-                    <!-- Bottom 80%: Controls -->
-                    <div class="controls-area">
+                <!-- Right Half (50%): Controls divided into 5 areas -->
+                <div class="row5-right">
+                    <!-- Right Area 1 (20%): Toggles -->
+                    <div class="row5-right-area1">
+                        <div class="control-label">Toggles</div>
                         <div class="toggles-column">
                             <button class="toggle-btn active" data-toggle="auto">Auto</button>
                             <button class="toggle-btn" data-toggle="manual">Manual</button>
@@ -186,7 +233,11 @@
                             <button class="toggle-btn" data-toggle="ride">Ride</button>
                             <button class="toggle-btn" data-toggle="lock">Lock</button>
                         </div>
+                    </div>
 
+                    <!-- Right Area 2 (20%): Fills -->
+                    <div class="row5-right-area2">
+                        <div class="control-label">Fills</div>
                         <div class="fills-column">
                             <button class="fill-btn" data-fill="4">4</button>
                             <button class="fill-btn" data-fill="8">8</button>
@@ -194,22 +245,32 @@
                             <button class="fill-btn" data-fill="32">32</button>
                             <button class="fill-btn solo" data-fill="solo">Solo</button>
                         </div>
+                    </div>
 
-                        <div class="sliders-column">
-                            <div class="main-sliders">
-                                <div class="slider-container">
-                                    <input type="range" class="main-slider" min="0" max="100" value="25" orient="vertical" data-param="swing">
-                                    <div class="link-icon"></div>
-                                </div>
-                                <div class="slider-container">
-                                    <input type="range" class="main-slider" min="0" max="100" value="50" orient="vertical" data-param="energy">
-                                    <div class="link-icon"></div>
-                                </div>
-                                <div class="slider-container">
-                                    <input type="range" class="main-slider" min="0" max="100" value="75" orient="vertical" data-param="volume">
-                                    <div class="link-icon"></div>
-                                </div>
-                            </div>
+                    <!-- Right Area 3 (20%): Swing Slider -->
+                    <div class="row5-right-area3">
+                        <div class="control-label">Swing</div>
+                        <div class="slider-container">
+                            <input type="range" class="main-slider" min="0" max="100" value="25" orient="vertical" data-param="swing">
+                            <div class="link-icon"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Area 4 (20%): Energy Slider -->
+                    <div class="row5-right-area4">
+                        <div class="control-label">Energy</div>
+                        <div class="slider-container">
+                            <input type="range" class="main-slider" min="0" max="100" value="50" orient="vertical" data-param="energy">
+                            <div class="link-icon"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Area 5 (20%): Volume Slider -->
+                    <div class="row5-right-area5">
+                        <div class="control-label">Volume</div>
+                        <div class="slider-container">
+                            <input type="range" class="main-slider" min="0" max="100" value="75" orient="vertical" data-param="volume">
+                            <div class="link-icon"></div>
                         </div>
                     </div>
                 </div>

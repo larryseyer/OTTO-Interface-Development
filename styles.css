@@ -35,6 +35,46 @@
     --row1-area3-width: 10%;  /* Play/Pause button (centered) */
     --row1-area4-width: 30%;  /* Tap Tempo and Tempo Display */
     --row1-area5-width: 15%;  /* Logo and Version */
+
+    /* Row 2 - Single area for player tabs */
+    --row2-area1-width: 100%;  /* Player tabs full width */
+
+    /* Row 3 Area Percentages - 5 areas */
+    --row3-area1-width: 10%;   /* Player number display */
+    --row3-area2-width: 20%;   /* Kit controls left */
+    --row3-area3-width: 40%;   /* Kit selection center */
+    --row3-area4-width: 20%;   /* Kit controls right */
+    --row3-area5-width: 10%;   /* Kit mixer icon */
+
+    /* Row 4 - Main 50/50 split */
+    --row4-left-width: 50%;     /* Left half */
+    --row4-right-width: 50%;    /* Right half */
+    
+    /* Row 4 Left side - 3 areas */
+    --row4-left-area1-width: 25%;   /* Edit button area */
+    --row4-left-area2-width: 50%;   /* Pattern group selection */
+    --row4-left-area3-width: 25%;   /* Navigation controls */
+    
+    /* Row 4 Right side - 5 areas */
+    --row4-right-area1-width: 20%;  /* Right area 1 */
+    --row4-right-area2-width: 20%;  /* Right area 2 */
+    --row4-right-area3-width: 20%;  /* Right area 3 */
+    --row4-right-area4-width: 20%;  /* Right area 4 */
+    --row4-right-area5-width: 20%;  /* Right area 5 */
+
+    /* Row 5 - Main 50/50 split */
+    --row5-left-width: 50%;     /* Left half - Pattern matrix */
+    --row5-right-width: 50%;    /* Right half - Controls */
+    
+    /* Row 5 Right side - 5 areas (same as Row 4 right) */
+    --row5-right-area1-width: 20%;  /* Toggles area */
+    --row5-right-area2-width: 20%;  /* Fills area */
+    --row5-right-area3-width: 20%;  /* Sliders area 1 */
+    --row5-right-area4-width: 20%;  /* Sliders area 2 */
+    --row5-right-area5-width: 20%;  /* Sliders area 3 */
+
+    /* Row 6 - Single area for loop timeline */
+    --row6-area1-width: 100%;  /* Full width loop timeline */
 }
 
 * {
@@ -1002,4 +1042,183 @@ input:focus {
         --text-secondary: #ffffff;
         --border-color: #ffffff;
     }
+}
+
+
+/* ===== NEW ROW AREA STYLES ===== */
+
+/* Row 3 Areas */
+.row3-area-1 {
+    flex: 0 0 var(--row3-area1-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row3-area-2 {
+    flex: 0 0 var(--row3-area2-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row3-area-3 {
+    flex: 0 0 var(--row3-area3-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.row3-area-4 {
+    flex: 0 0 var(--row3-area4-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row3-area-5 {
+    flex: 0 0 var(--row3-area5-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Row 4 Main Divisions */
+.row4-left {
+    flex: 0 0 var(--row4-left-width);
+    display: flex;
+    align-items: center;
+}
+
+.row4-right {
+    flex: 0 0 var(--row4-right-width);
+    display: flex;
+    align-items: center;
+}
+
+/* Row 4 Left Areas */
+.row4-left-area1 {
+    flex: 0 0 var(--row4-left-area1-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row4-left-area2 {
+    flex: 0 0 var(--row4-left-area2-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.row4-left-area3 {
+    flex: 0 0 var(--row4-left-area3-width);
+}
+
+/* Row 4 Right Areas - Labels */
+.row4-right-area1,
+.row4-right-area2,
+.row4-right-area3,
+.row4-right-area4,
+.row4-right-area5 {
+    flex: 0 0 var(--row4-right-area1-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.section-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+/* Row 5 Main Divisions */
+.row5-left {
+    flex: 0 0 var(--row5-left-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row5-right {
+    flex: 0 0 var(--row5-right-width);
+    display: flex;
+    align-items: stretch;
+}
+
+/* Row 5 Right Areas */
+.row5-right-area1,
+.row5-right-area2,
+.row5-right-area3,
+.row5-right-area4,
+.row5-right-area5 {
+    flex: 0 0 var(--row5-right-area1-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+}
+
+.control-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Mute drummer button */
+.mute-drummer-btn {
+    width: 50px;
+    height: 50px;
+    background: transparent;
+    border: 1px solid var(--text-icon);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.mute-drummer-btn i {
+    font-size: 30px;
+    color: var(--text-icon);
+}
+
+.mute-drummer-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: scale(1.05);
+}
+
+/* Edit pattern button */
+.edit-pattern-btn {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 1px solid var(--text-icon);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.edit-pattern-btn i {
+    font-size: 24px;
+    color: var(--text-icon);
+}
+
+.edit-pattern-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: scale(1.05);
 }
