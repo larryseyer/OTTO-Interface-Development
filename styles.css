@@ -252,40 +252,45 @@ body {
 
 .player-tabs {
     display: flex;
-    gap: 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
+    gap: 4px; /* Small gap between button graphics */
+    padding: 8px; /* Add padding to give buttons some breathing room */
 }
 
 .player-tab {
     padding: 16px 32px;
-    background: var(--bg-primary);
+    background-image: url('Images/Button100.png');
+    background-size: 100% 600%; /* 6 states vertically */
+    background-position: 0 0%; /* Normal state - top segment */
+    background-repeat: no-repeat;
     border: none;
-    border-right: 1px solid var(--border-color);
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-family: 'Playfair Display', serif;
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.05s ease;
     letter-spacing: 0.5px;
     position: relative;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    border-radius: 3px;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2px; /* Small gap between buttons */
 }
 
 .player-tab:first-child {
-    border-left: 1px solid var(--border-color);
+    margin-left: 0;
 }
 
 .player-tab:hover {
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.02);
+    background-position: 0 40%; /* WHITE button for hover */
 }
 
 .player-tab.active {
-    color: var(--text-primary);
-    background: var(--bg-secondary);
+    background-position: 0 20%; /* BLACK button for active/on */
     font-weight: 600;
-    border-top: 2px solid var(--text-primary);
 }
 
 /* Row 3: Drum Kit Section (12% height) - Kit Selection & Controls */
