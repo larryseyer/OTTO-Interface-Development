@@ -688,9 +688,9 @@ class OTTOAccurateInterface {
             
             if (this.isPlaying) {
                 playIcon.style.display = 'none';
-                pauseIcon.style.display = 'block';
+                pauseIcon.style.display = 'inline-block';
             } else {
-                playIcon.style.display = 'block';
+                playIcon.style.display = 'inline-block';
                 pauseIcon.style.display = 'none';
             }
         }

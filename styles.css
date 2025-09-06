@@ -11,6 +11,7 @@
     --text-primary: #ffffff;
     --text-secondary: #cccccc;
     --text-muted: #999999;
+    --text-icon: #777777;  /* Icon color */
     --border-color: #555555;
 
     /* Button colors - 3D metallic style */
@@ -144,7 +145,7 @@ body {
     width: 60px;
     height: 60px;
     background: transparent;
-    border: 2px solid var(--text-muted);
+    border: 2px solid var(--text-icon);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -163,10 +164,10 @@ body {
     transform: scale(0.95);
 }
 
-.play-pause-btn svg {
-    width: 40px;
-    height: 40px;
-    color: var(--text-primary);
+.play-pause-btn i {
+    font-size: 40px;
+    line-height: 1;
+    color: var(--text-icon);
 }
 
 .icon-btn {
@@ -175,7 +176,7 @@ body {
     background: transparent;
     border: none;
     cursor: pointer;
-    color: var(--text-muted);
+    color: var(--text-icon);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -193,10 +194,11 @@ body {
     transform: scale(0.95);
 }
 
-.icon-btn svg {
-    width: var(--icon-size-standard);
-    height: var(--icon-size-standard);
+.icon-btn i {
+    font-size: var(--icon-size-standard);
+    line-height: 1;
     display: block;
+    color: var(--text-icon);
 }
 
 .icon-btn img {
@@ -214,7 +216,7 @@ body {
     height: var(--icon-size-standard);
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--text-icon);
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
@@ -233,10 +235,11 @@ body {
     transform: scale(0.95);
 }
 
-.preset-nav-btn svg {
-    width: var(--icon-size-standard);
-    height: var(--icon-size-standard);
+.preset-nav-btn i {
+    font-size: var(--icon-size-standard);
+    line-height: 1;
     display: block;
+    color: var(--text-icon);
 }
 
 .program-select {
