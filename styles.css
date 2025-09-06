@@ -28,6 +28,13 @@
     /* Icon sizes */
     --icon-size-standard: 60px;
     --icon-size-small: 20px;
+
+    /* Row 1 Area Percentages - Easily adjustable */
+    --row1-area1-width: 15%;  /* Settings, Link, Cloud buttons */
+    --row1-area2-width: 30%;  /* Chevrons and Presets dropdown */
+    --row1-area3-width: 10%;  /* Play/Pause button (centered) */
+    --row1-area4-width: 30%;  /* Tap Tempo and Tempo Display */
+    --row1-area5-width: 15%;  /* Logo and Version */
 }
 
 * {
@@ -94,10 +101,9 @@ body {
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: 0 2%;
     position: relative;
-    gap: 20px;
 }
 
 /* Area 1: Settings, Link, and Cloud buttons */
@@ -105,7 +111,8 @@ body {
     display: flex;
     gap: 15px;
     align-items: center;
-    flex: 0 0 auto;
+    flex: 0 0 var(--row1-area1-width);
+    justify-content: flex-start;
 }
 
 /* Area 2: Chevrons and Presets dropdown */
@@ -113,7 +120,8 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 0 0 auto;
+    flex: 0 0 var(--row1-area2-width);
+    justify-content: center;
 }
 
 /* Area 3: Play/Pause Transport (centered) */
@@ -121,7 +129,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 1 1 auto;
+    flex: 0 0 var(--row1-area3-width);
 }
 
 /* Area 4: Tap Tempo and Tempo Display */
@@ -129,7 +137,8 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    flex: 0 0 auto;
+    flex: 0 0 var(--row1-area4-width);
+    justify-content: center;
 }
 
 /* Area 5: Logo and Version */
@@ -137,7 +146,8 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 0 0 auto;
+    flex: 0 0 var(--row1-area5-width);
+    justify-content: flex-end;
 }
 
 /* Play/Pause button styling */
@@ -247,12 +257,13 @@ body {
     color: #777777;
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 50px;
+    font-size: 40px;
     font-weight: 400;
     cursor: pointer;
     outline: none;
     text-align: center;
-    min-width: 200px;
+    width: auto;
+    max-width: 250px;
 }
 
 .program-select option {
@@ -328,7 +339,10 @@ body {
 }
 
 .version-text {
-    font-size: 18px;
+    margin: 0;
+    padding-top: 35px;
+
+    font-size: 16px;
     font-weight: 300;
     color: var(--text-muted);
     font-family: 'Lato', sans-serif;
