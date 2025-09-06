@@ -17,6 +17,7 @@ class OTTOAccurateInterface {
         this.animationFrame = null;
         this.tapTimes = [];
         this.maxTapTimes = 4;
+        this.isPlaying = false;
 
         // Player state tracking for all 8 players
         this.playerStates = {};
@@ -488,6 +489,14 @@ class OTTOAccurateInterface {
             });
         }
 
+        // Play/Pause button
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', () => {
+                this.togglePlayPause();
+            });
+        }
+
         // Tap Tempo button
         const tapTempoBtn = document.getElementById('tap-tempo-btn');
         if (tapTempoBtn) {
@@ -577,10 +586,10 @@ class OTTOAccurateInterface {
                 this.switchToPlayer(newPlayer);
             }
 
-            // Spacebar for global pause
+            // Spacebar for play/pause
             if (e.key === ' ' && !e.target.matches('input, select, textarea')) {
                 e.preventDefault();
-                document.getElementById('pause-btn')?.click();
+                this.togglePlayPause();
             }
 
             // Kit navigation
@@ -595,10 +604,10 @@ class OTTOAccurateInterface {
 
     startLoopAnimation() {
         const animate = () => {
-            // Check if any player has active patterns
+            // Check if any player has active patterns and playback is active
             const hasActivePatterns = Object.values(this.playerStates).some(state => state.selectedPattern);
 
-            if (hasActivePatterns) {
+            if (hasActivePatterns && this.isPlaying) {
                 this.loopPosition += 0.003; // Adjust speed as needed
                 if (this.loopPosition > 1) {
                     this.loopPosition = 0;
@@ -666,6 +675,32 @@ class OTTOAccurateInterface {
         }
 
         console.log(`Tap registered (${this.tapTimes.length} taps)`);
+    }
+
+    togglePlayPause() {
+        this.isPlaying = !this.isPlaying;
+        
+        // Update button visual state
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        if (playPauseBtn) {
+            const playIcon = playPauseBtn.querySelector('.play-icon');
+            const pauseIcon = playPauseBtn.querySelector('.pause-icon');
+            
+            if (this.isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+            } else {
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+            }
+        }
+        
+        // Notify JUCE backend if available
+        if (window.juce?.onPlayPauseChanged) {
+            window.juce.onPlayPauseChanged(this.isPlaying);
+        }
+        
+        console.log(`Playback ${this.isPlaying ? 'started' : 'paused'}`);
     }
 
     // JUCE Integration Callbacks
