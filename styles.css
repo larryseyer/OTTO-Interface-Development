@@ -81,6 +81,36 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    cursor: default;  /* Default cursor for everything */
+}
+
+/* Ensure interactive elements keep pointer cursor */
+button, 
+.icon-btn, 
+.play-pause-btn,
+.tempo-display,
+.logo-version-container,
+.custom-dropdown,
+.dropdown-selected,
+.dropdown-option,
+select {
+    cursor: pointer !important;
+}
+
+/* Text cursor only when actually editing */
+.tempo-display.editing {
+    cursor: text !important;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+[contenteditable="true"] {
+    cursor: text !important;
+}
+
+/* Force pointer cursor when not editing */
+.tempo-display:not(.editing) {
+    cursor: pointer !important;
 }
 
 body {
@@ -219,7 +249,7 @@ body {
     height: 60px;
     background: transparent;
     border: none;  /* Remove border */
-    cursor: pointer;
+    cursor: pointer !important;  /* Ensure pointer cursor */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -455,6 +485,12 @@ body {
     background: transparent;
 }
 
+.tempo-display:focus {
+    outline: none !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+}
+
 .tempo-display:hover {
     transform: scale(1.05);  /* Only scale, no color change */
 }
@@ -464,12 +500,15 @@ body {
 }
 
 .tempo-display.editing {
-    border-color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.05);
+    border-color: transparent !important;  /* No visible border when editing */
+    background-color: transparent !important;  /* Force transparent background */
+    color: var(--text-primary) !important;  /* White text when editing */
+    transform: scale(1.05);  /* Slightly larger when editing */
     cursor: text;
     user-select: text;
     -webkit-user-select: text;
     -moz-user-select: text;
+    outline: none !important;  /* Remove any outline */
 }
 
 .tempo-display.tapped {

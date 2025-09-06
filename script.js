@@ -664,6 +664,10 @@ class OTTOAccurateInterface {
                 isEditing = false;
                 element.contentEditable = 'false';
                 element.classList.remove('editing');
+                element.blur();  // Remove focus to hide cursor
+                // Force cursor style reset
+                element.style.cursor = 'pointer';
+                window.getSelection().removeAllRanges();  // Clear any text selection
             };
         }
 
@@ -700,6 +704,16 @@ class OTTOAccurateInterface {
 
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
+            // Check if we're editing any text field
+            const isEditingText = e.target.matches('input, select, textarea, [contenteditable="true"]') || 
+                                 e.target.classList.contains('editing') ||
+                                 document.querySelector('.tempo-display.editing');
+            
+            // Don't process shortcuts if editing text
+            if (isEditingText) {
+                return;
+            }
+
             // Player selection (1-8)
             if (e.key >= '1' && e.key <= '8') {
                 const playerNumber = parseInt(e.key);
@@ -708,19 +722,10 @@ class OTTOAccurateInterface {
                 }
             }
 
-            // Arrow keys to switch players
-            if (e.key === 'ArrowLeft') {
-                const newPlayer = this.currentPlayer > 1 ? this.currentPlayer - 1 : this.numberOfPlayers;
-                this.switchToPlayer(newPlayer);
-            }
-
-            if (e.key === 'ArrowRight') {
-                const newPlayer = this.currentPlayer < this.numberOfPlayers ? this.currentPlayer + 1 : 1;
-                this.switchToPlayer(newPlayer);
-            }
+            // Arrow keys removed - we don't use them for player navigation
 
             // Spacebar for play/pause
-            if (e.key === ' ' && !e.target.matches('input, select, textarea')) {
+            if (e.key === ' ') {
                 e.preventDefault();
                 this.togglePlayPause();
             }
