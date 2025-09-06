@@ -42,18 +42,24 @@
                     <!-- <button class="preset-nav-btn preset-prev">
                         <i class="ph-thin ph-caret-left"></i>
                     </button> -->
-                    <select class="program-select">
-                        <option value="default">Default</option>
-                        <option value="rock-ballad">Rock Ballad</option>
-                        <option value="jazz-combo">Jazz Combo</option>
-                        <option value="funk-groove">Funk Groove</option>
-                        <option value="latin-rhythm">Latin Rhythm</option>
-                        <option value="electronic-pulse">Electronic Pulse</option>
-                        <option value="acoustic-folk">Acoustic Folk</option>
-                        <option value="blues-shuffle">Blues Shuffle</option>
-                        <option value="pop-modern">Pop Modern</option>
-                        <option value="world-fusion">World Fusion</option>
-                    </select>
+                    <div class="custom-dropdown" id="preset-dropdown">
+                        <div class="dropdown-selected" id="preset-selected">
+                            <span class="dropdown-text">Default</span>
+                            <i class="ph-thin ph-caret-down dropdown-arrow"></i>
+                        </div>
+                        <div class="dropdown-options" id="preset-options">
+                            <div class="dropdown-option" data-value="default">Default</div>
+                            <div class="dropdown-option" data-value="rock-ballad">Rock Ballad</div>
+                            <div class="dropdown-option" data-value="jazz-combo">Jazz Combo</div>
+                            <div class="dropdown-option" data-value="funk-groove">Funk Groove</div>
+                            <div class="dropdown-option" data-value="latin-rhythm">Latin Rhythm</div>
+                            <div class="dropdown-option" data-value="electronic-pulse">Electronic Pulse</div>
+                            <div class="dropdown-option" data-value="acoustic-folk">Acoustic Folk</div>
+                            <div class="dropdown-option" data-value="blues-shuffle">Blues Shuffle</div>
+                            <div class="dropdown-option" data-value="pop-modern">Pop Modern</div>
+                            <div class="dropdown-option" data-value="world-fusion">World Fusion</div>
+                        </div>
+                    </div>
                     <!-- <button class="preset-nav-btn preset-next">
                         <i class="ph-thin ph-caret-right"></i>
                     </button> -->
@@ -62,8 +68,8 @@
                 <!-- Area 3: Play/Pause Transport (centered) -->
                 <div class="area-3">
                     <button class="play-pause-btn" id="play-pause-btn">
-                        <i class="ph-thin ph-play play-icon"></i>
-                        <i class="ph-thin ph-pause pause-icon" style="display:none;"></i>
+                        <i class="ph-thin ph-play play-icon" style="display:none;"></i>
+                        <i class="ph-thin ph-pause pause-icon"></i>
                     </button>
                 </div>
 

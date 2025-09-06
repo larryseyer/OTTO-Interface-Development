@@ -162,6 +162,7 @@ body {
     gap: 10px;
     flex: 0 0 var(--row1-area2-width);
     justify-content: center;
+    position: relative;  /* For dropdown arrow positioning */
 }
 
 /* Area 3: Play/Pause Transport (centered) */
@@ -195,19 +196,26 @@ body {
     width: 60px;
     height: 60px;
     background: transparent;
-    border: 2px solid var(--text-icon);
-    border-radius: 50%;
+    border: none;  /* Remove border */
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
     padding: 0;
+    outline: none;
+}
+
+.play-pause-btn:focus {
+    outline: none;  /* Remove focus outline */
 }
 
 .play-pause-btn:hover {
-    border-color: var(--text-primary);
     transform: scale(1.1);
+}
+
+.play-pause-btn:hover i {
+    color: var(--text-primary);  /* Icon turns white on hover */
 }
 
 .play-pause-btn:active {
@@ -215,9 +223,10 @@ body {
 }
 
 .play-pause-btn i {
-    font-size: 40px;
+    font-size: 50px;  /* Slightly larger since no border */
     line-height: 1;
     color: var(--text-icon);
+    transition: color 0.2s ease;
 }
 
 .icon-btn {
@@ -297,23 +306,86 @@ body {
     color: var(--text-icon);
 }
 
-.program-select {
-    background: transparent;
-    color: #777777;
-    border: none;
+/* Custom Dropdown Styles */
+.custom-dropdown {
+    position: relative;
+    width: 100%;
+    max-width: 350px;
     font-family: 'Playfair Display', serif;
-    font-size: 40px;
-    font-weight: 400;
-    cursor: pointer;
-    outline: none;
-    text-align: center;
-    width: 100%;  /* Expanded to fill available space when chevrons are hidden */
-    max-width: 350px;  /* Increased max-width since chevrons are removed */
 }
 
-.program-select option {
+.dropdown-selected {
+    background: transparent;
+    color: #777777;
+    font-size: 40px;
+    font-weight: 400;
+    padding: 5px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.dropdown-selected:hover .dropdown-arrow {
+    transform: scale(1.1);
+}
+
+.dropdown-text {
+    flex: 1;
+    text-align: center;
+}
+
+.dropdown-arrow {
+    font-size: 24px;
+    color: #777777;
+    transition: transform 0.3s ease;
+}
+
+.custom-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     background: var(--bg-darker);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.custom-dropdown.open .dropdown-options {
+    display: block;
+}
+
+.dropdown-option {
+    padding: 12px 20px;
+    color: var(--text-icon);
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.dropdown-option:hover {
+    background: var(--bg-secondary);
     color: var(--text-primary);
+    font-size: 26px;
+}
+
+.dropdown-option.selected {
+    color: var(--text-primary);
+    background: var(--bg-secondary);
 }
 
 /* Remove absolute positioning from old transport-controls */

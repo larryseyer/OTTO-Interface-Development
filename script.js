@@ -17,7 +17,8 @@ class OTTOAccurateInterface {
         this.animationFrame = null;
         this.tapTimes = [];
         this.maxTapTimes = 4;
-        this.isPlaying = false;
+        this.isPlaying = true;  // Start in playing state to show pause icon
+        this.currentPreset = 'default';  // Track current preset
 
         // Player state tracking for all 8 players
         this.playerStates = {};
@@ -102,7 +103,53 @@ class OTTOAccurateInterface {
     }
 
     setupPresetControls() {
-        // Preset navigation buttons
+        // Custom dropdown functionality
+        const dropdown = document.getElementById('preset-dropdown');
+        const dropdownSelected = document.getElementById('preset-selected');
+        const dropdownOptions = document.getElementById('preset-options');
+        const dropdownText = dropdown.querySelector('.dropdown-text');
+        
+        // Toggle dropdown on click
+        if (dropdownSelected) {
+            dropdownSelected.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('open');
+            });
+        }
+        
+        // Handle option selection
+        const options = dropdown.querySelectorAll('.dropdown-option');
+        options.forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // Update selected text
+                const selectedText = option.textContent;
+                dropdownText.textContent = selectedText;
+                
+                // Update selected state
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                // Close dropdown
+                dropdown.classList.remove('open');
+                
+                // Update player state
+                this.playerStates[this.currentPlayer].presetName = selectedText;
+                this.currentPreset = option.dataset.value;
+                this.onPresetChanged(this.currentPlayer, selectedText);
+                console.log(`Player ${this.currentPlayer} preset changed to: ${selectedText}`);
+            });
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+        
+        // Preset navigation buttons (if they're re-enabled)
         const presetPrev = document.querySelector('.preset-prev');
         const presetNext = document.querySelector('.preset-next');
 
@@ -115,17 +162,6 @@ class OTTOAccurateInterface {
         if (presetNext) {
             presetNext.addEventListener('click', () => {
                 this.navigatePreset(1);
-            });
-        }
-
-        // Preset select dropdown
-        const programSelect = document.querySelector('.program-select');
-        if (programSelect) {
-            programSelect.addEventListener('change', (e) => {
-                const presetName = e.target.options[e.target.selectedIndex].text;
-                this.playerStates[this.currentPlayer].presetName = presetName;
-                this.onPresetChanged(this.currentPlayer, presetName);
-                console.log(`Player ${this.currentPlayer} preset changed to: ${presetName}`);
             });
         }
     }
@@ -142,13 +178,21 @@ class OTTOAccurateInterface {
         state.presetName = presets[newIndex];
         this.updateUIForCurrentPlayer();
 
-        // Update preset select dropdown
-        const programSelect = document.querySelector('.program-select');
-        if (programSelect) {
-            // Convert to value format (lowercase with dashes)
-            const presetValue = state.presetName.toLowerCase().replace(/\s+/g, '-');
-            programSelect.value = presetValue;
+        // Update custom dropdown
+        const dropdownText = document.querySelector('.dropdown-text');
+        if (dropdownText) {
+            dropdownText.textContent = state.presetName;
         }
+        
+        // Update selected state on options
+        const options = document.querySelectorAll('.dropdown-option');
+        const presetValue = state.presetName.toLowerCase().replace(/\s+/g, '-');
+        options.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === presetValue) {
+                option.classList.add('selected');
+            }
+        });
 
         this.onPresetChanged(this.currentPlayer, state.presetName);
         console.log(`Player ${this.currentPlayer} preset: ${state.presetName}`);
