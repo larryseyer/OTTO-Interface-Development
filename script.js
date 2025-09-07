@@ -30,6 +30,7 @@ class OTTOAccurateInterface {
                 kitName: 'Acoustic',
                 selectedPattern: null,
                 kitMixerActive: false,
+                muted: false,  // Track mute state
                 toggleStates: {
                     auto: i === 1, // Only player 1 starts with Auto active
                     manual: false,
@@ -331,6 +332,12 @@ class OTTOAccurateInterface {
             kitMixerBtn.classList.toggle('active', state.kitMixerActive);
         }
 
+        // Update mute drummer button state
+        const muteDrummerBtn = document.getElementById('mute-drummer-btn');
+        if (muteDrummerBtn) {
+            muteDrummerBtn.classList.toggle('muted', state.muted);
+        }
+
         // Update toggle button states
         Object.keys(state.toggleStates).forEach(toggleKey => {
             const button = document.querySelector(`[data-toggle="${toggleKey}"]`);
@@ -418,6 +425,18 @@ class OTTOAccurateInterface {
                 console.log(`Edit kit for Player ${this.currentPlayer}`);
             });
         });
+
+        // Mute drummer button
+        const muteDrummerBtn = document.getElementById('mute-drummer-btn');
+        if (muteDrummerBtn) {
+            muteDrummerBtn.addEventListener('click', () => {
+                const state = this.playerStates[this.currentPlayer];
+                state.muted = !state.muted;
+                muteDrummerBtn.classList.toggle('muted', state.muted);
+                this.onMuteDrummer(this.currentPlayer, state.muted);
+                console.log(`Player ${this.currentPlayer} drummer muted: ${state.muted}`);
+            });
+        }
     }
 
     navigateKit(direction) {
@@ -940,6 +959,12 @@ class OTTOAccurateInterface {
     onKitMixerToggle(playerNumber, isActive) {
         if (window.juce?.onKitMixerToggle) {
             window.juce.onKitMixerToggle(playerNumber, isActive);
+        }
+    }
+
+    onMuteDrummer(playerNumber, isMuted) {
+        if (window.juce?.onMuteDrummer) {
+            window.juce.onMuteDrummer(playerNumber, isMuted);
         }
     }
 

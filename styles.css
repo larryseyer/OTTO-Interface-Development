@@ -793,25 +793,27 @@ body {
     border: none;
     cursor: pointer;
     transition: all 0.05s ease;
-    opacity: 0.8;
     padding: 0;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .kit-mixer-btn:hover {
-    opacity: 1;
-    transform: scale(1.05);
+    transform: scale(1.1);
 }
 
 .kit-mixer-btn.active {
-    opacity: 1;
     filter: brightness(1.2);
 }
 
-.kit-visual {
-    height: 60px;
+.kit-mixer-icon {
+    height: 50px;
     width: auto;
     object-fit: contain;
-    filter: brightness(0.8);
+    filter: invert(0.7);  /* Make icon visible on dark background */
 }
 
 /* Row 4: Pattern Groups - Pattern Groups */
@@ -1279,7 +1281,8 @@ body {
     flex: 0 0 var(--row3-area2-width);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;  /* Right-align edit button to be next to chevron */
+    padding-right: 10px;
 }
 
 .row3-area-3 {
@@ -1301,7 +1304,8 @@ body {
     flex: 0 0 var(--row3-area5-width);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;  /* Right-align mute button */
+    padding-right: 20px;
 }
 
 /* Row 4 Main Divisions */
@@ -1395,28 +1399,35 @@ body {
     letter-spacing: 1px;
 }
 
-/* Mute drummer button */
+/* Mute drummer button - using OTTO_Button_Glyph segmented icon */
 .mute-drummer-btn {
-    width: 50px;
-    height: 50px;
-    background: transparent;
-    border: 1px solid var(--text-icon);
-    border-radius: 4px;
+    width: 60px !important;
+    height: 60px !important;
+    background: url('Images/OTTO_Button_Glyph.png') no-repeat !important;
+    background-size: 100% 600% !important;  /* 6 states vertically */
+    background-position: 0 0% !important;  /* Normal state - shows white drummer */
+    border: none !important;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.mute-drummer-btn i {
-    font-size: 30px;
-    color: var(--text-icon);
+    transition: background-position 0.05s ease;
+    padding: 0 !important;
+    display: block !important;
+    overflow: hidden !important;
 }
 
 .mute-drummer-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: scale(1.05);
+    background-position: 0 40% !important;  /* Hover state */
+}
+
+.mute-drummer-btn.muted {
+    background-position: 0 20% !important;  /* Muted state - shows crossed out */
+}
+
+.mute-drummer-btn.muted:hover {
+    background-position: 0 60% !important;  /* Muted hover state */
+}
+
+.mute-icon {
+    display: none;  /* Hide the img tag - using background image instead */
 }
 
 /* Edit pattern button */
