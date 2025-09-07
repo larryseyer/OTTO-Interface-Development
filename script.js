@@ -321,11 +321,20 @@ class OTTOAccurateInterface {
             kitNameDisplay.textContent = state.kitName;
         }
 
-        // Update kit select dropdown
-        const kitSelect = document.querySelector('.kit-select');
-        if (kitSelect) {
-            kitSelect.value = state.kitName.toLowerCase();
+        // Update kit dropdown
+        const kitDropdownText = document.querySelector('#kit-dropdown .dropdown-text');
+        if (kitDropdownText) {
+            kitDropdownText.textContent = state.kitName;
         }
+        
+        // Update selected state on kit options
+        const kitOptions = document.querySelectorAll('#kit-dropdown .dropdown-option');
+        kitOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === state.kitName.toLowerCase()) {
+                option.classList.add('selected');
+            }
+        });
 
         // Update kit mixer button state
         const kitMixerBtn = document.getElementById('kit-mixer-btn');
@@ -396,16 +405,52 @@ class OTTOAccurateInterface {
             });
         }
 
-        // Kit select dropdown
-        const kitSelect = document.querySelector('.kit-select');
-        if (kitSelect) {
-            kitSelect.addEventListener('change', (e) => {
-                const kitName = e.target.options[e.target.selectedIndex].text;
-                this.playerStates[this.currentPlayer].kitName = kitName;
-                this.onKitChanged(this.currentPlayer, kitName);
-                console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
+        // Kit dropdown functionality
+        const kitDropdown = document.getElementById('kit-dropdown');
+        const kitDropdownSelected = document.getElementById('kit-selected');
+        const kitDropdownOptions = document.getElementById('kit-options');
+        const kitDropdownText = kitDropdown?.querySelector('.dropdown-text');
+
+        // Toggle kit dropdown on click
+        if (kitDropdownSelected) {
+            kitDropdownSelected.addEventListener('click', (e) => {
+                e.stopPropagation();
+                kitDropdown.classList.toggle('open');
             });
         }
+
+        // Handle kit option selection
+        const kitOptions = kitDropdown?.querySelectorAll('.dropdown-option');
+        kitOptions?.forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Update selected text
+                const selectedText = option.textContent;
+                if (kitDropdownText) {
+                    kitDropdownText.textContent = selectedText;
+                }
+
+                // Update selected state
+                kitOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+
+                // Close dropdown
+                kitDropdown.classList.remove('open');
+
+                // Update player state
+                this.playerStates[this.currentPlayer].kitName = selectedText;
+                this.onKitChanged(this.currentPlayer, selectedText);
+                console.log(`Player ${this.currentPlayer} kit changed to: ${selectedText}`);
+            });
+        });
+        
+        // Close kit dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (kitDropdown && !kitDropdown.contains(e.target)) {
+                kitDropdown.classList.remove('open');
+            }
+        });
 
         // Kit mixer button
         const kitMixerBtn = document.getElementById('kit-mixer-btn');
@@ -453,11 +498,20 @@ class OTTOAccurateInterface {
         state.kitName = kits[newIndex];
         this.updateUIForCurrentPlayer();
 
-        // Update kit select dropdown
-        const kitSelect = document.querySelector('.kit-select');
-        if (kitSelect) {
-            kitSelect.value = state.kitName.toLowerCase();
+        // Update kit dropdown
+        const kitDropdownText = document.querySelector('#kit-dropdown .dropdown-text');
+        if (kitDropdownText) {
+            kitDropdownText.textContent = state.kitName;
         }
+        
+        // Update selected state on kit options
+        const kitOptions = document.querySelectorAll('#kit-dropdown .dropdown-option');
+        kitOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === state.kitName.toLowerCase()) {
+                option.classList.add('selected');
+            }
+        });
 
         this.onKitChanged(this.currentPlayer, state.kitName);
         console.log(`Player ${this.currentPlayer} kit: ${state.kitName}`);

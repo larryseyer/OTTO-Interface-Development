@@ -123,19 +123,29 @@
 
                 <!-- Area 3: Drum kit dropdown and chevrons -->
                 <div class="row3-area-3">
-                    <button class="kit-nav-btn kit-prev">‹</button>
-                    <select class="kit-select">
+                    <button class="kit-nav-btn kit-prev">
+                        <i class="ph-thin ph-caret-left"></i>
+                    </button>
+                    <div class="custom-dropdown kit-dropdown" id="kit-dropdown">
+                        <div class="dropdown-selected" id="kit-selected">
+                            <span class="dropdown-text">Acoustic</span>
+                            <i class="ph-thin ph-caret-down dropdown-arrow"></i>
+                        </div>
+                        <div class="dropdown-options" id="kit-options">
     <!-- This list should eventually come from our INI file storage system -->
-                        <option value="acoustic">Acoustic</option>
-                        <option value="electronic">Electronic</option>
-                        <option value="rock">Rock</option>
-                        <option value="jazz">Jazz</option>
-                        <option value="pop">Pop</option>
-                        <option value="funk">Funk</option>
-                        <option value="latin">Latin</option>
-                        <option value="vintage">Vintage</option>
-                    </select>
-                    <button class="kit-nav-btn kit-next">›</button>
+                            <div class="dropdown-option" data-value="acoustic">Acoustic</div>
+                            <div class="dropdown-option" data-value="electronic">Electronic</div>
+                            <div class="dropdown-option" data-value="rock">Rock</div>
+                            <div class="dropdown-option" data-value="jazz">Jazz</div>
+                            <div class="dropdown-option" data-value="pop">Pop</div>
+                            <div class="dropdown-option" data-value="funk">Funk</div>
+                            <div class="dropdown-option" data-value="latin">Latin</div>
+                            <div class="dropdown-option" data-value="vintage">Vintage</div>
+                        </div>
+                    </div>
+                    <button class="kit-nav-btn kit-next">
+                        <i class="ph-thin ph-caret-right"></i>
+                    </button>
                 </div>
 
                 <!-- Area 4: Mixer icon -->
