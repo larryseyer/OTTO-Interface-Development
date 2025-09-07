@@ -742,10 +742,8 @@ class OTTOAccurateInterface {
 
     startLoopAnimation() {
         const animate = () => {
-            // Check if any player has active patterns and playback is active
-            const hasActivePatterns = Object.values(this.playerStates).some(state => state.selectedPattern);
-
-            if (hasActivePatterns && this.isPlaying) {
+            // Animate the loop position when playing
+            if (this.isPlaying) {
                 this.loopPosition += 0.003; // Adjust speed as needed
                 if (this.loopPosition > 1) {
                     this.loopPosition = 0;

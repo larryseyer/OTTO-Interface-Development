@@ -10,7 +10,11 @@
       "mcp__serena__write_memory",
       "Bash(python3:*)",
       "Bash(curl:*)",
-      "mcp__serena__get_symbols_overview"
+      "mcp__serena__get_symbols_overview",
+      "mcp__serena__list_memories",
+      "mcp__serena__read_memory",
+      "mcp__serena__find_symbol",
+      "mcp__serena__think_about_collected_information"
     ],
     "deny": [],
     "ask": []
