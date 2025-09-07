@@ -45,9 +45,9 @@
 
     /* Row 3 Area Percentages - 5 areas */
     --row3-area1-width: 10%;   /* Player number display */
-    --row3-area2-width: 10%;   /* Kit edit icon */
-    --row3-area3-width: 40%;   /* Kit selection center */
-    --row3-area4-width: 10%;   /* Mixer icon */
+    --row3-area2-width: 15%;   /* Kit edit icon */
+    --row3-area3-width: 50%;   /* Kit selection center */
+    --row3-area4-width: 15%;   /* Mixer icon */
     --row3-area5-width: 10%;   /* Mute drummer icon */
 
     /* Row 4 - Main 50/50 split */
@@ -680,7 +680,7 @@ body {
     display: flex;
     align-items: center;
     padding: 0 20px;
-    gap: 30px;
+    /* gap removed to allow proper percentage-based layout */
 }
 
 .player-number-display {
@@ -704,8 +704,8 @@ body {
 }
 
 .edit-btn {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -718,11 +718,11 @@ body {
 
 .edit-btn:hover {
     opacity: 1;
-    transform: scale(1.1);
+    transform: scale(var(--row1-hover-scale));
 }
 
 .edit-btn i {
-    font-size: 30px;
+    font-size: 50px;
     color: var(--text-icon);
 }
 
@@ -865,8 +865,8 @@ body {
 }
 
 .kit-mixer-btn {
-    width: 60px !important;
-    height: 60px !important;
+    width: 80px !important;
+    height: 80px !important;
     background: transparent !important;
     border: none !important;
     cursor: pointer;
@@ -879,13 +879,13 @@ body {
 }
 
 .kit-mixer-btn i {
-    font-size: 40px;
+    font-size: 70px;
     color: inherit;
 }
 
 .kit-mixer-btn:hover {
     color: var(--text-primary);
-    transform: scale(1.1);
+    transform: scale(var(--row1-hover-scale));
 }
 
 .kit-mixer-btn.active {
