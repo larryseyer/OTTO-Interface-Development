@@ -336,11 +336,11 @@ class OTTOAccurateInterface {
             }
         });
 
-        // Update kit mixer button state
-        const kitMixerBtn = document.getElementById('kit-mixer-btn');
-        if (kitMixerBtn) {
-            kitMixerBtn.classList.toggle('active', state.kitMixerActive);
-        }
+        // Kit mixer button no longer has active state
+        // const kitMixerBtn = document.getElementById('kit-mixer-btn');
+        // if (kitMixerBtn) {
+        //     kitMixerBtn.classList.toggle('active', state.kitMixerActive);
+        // }
 
         // Update mute drummer button state
         const muteDrummerBtn = document.getElementById('mute-drummer-btn');
@@ -456,11 +456,9 @@ class OTTOAccurateInterface {
         const kitMixerBtn = document.getElementById('kit-mixer-btn');
         if (kitMixerBtn) {
             kitMixerBtn.addEventListener('click', () => {
-                const state = this.playerStates[this.currentPlayer];
-                state.kitMixerActive = !state.kitMixerActive;
-                kitMixerBtn.classList.toggle('active', state.kitMixerActive);
-                this.onKitMixerToggle(this.currentPlayer, state.kitMixerActive);
-                console.log(`Player ${this.currentPlayer} kit mixer: ${state.kitMixerActive}`);
+                // No longer toggling state - just call the function
+                this.onKitMixerToggle(this.currentPlayer, true);
+                console.log(`Player ${this.currentPlayer} kit mixer clicked`);
             });
         }
 

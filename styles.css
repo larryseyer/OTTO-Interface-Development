@@ -709,7 +709,7 @@ body {
     background: transparent;
     border: none;
     cursor: pointer;
-    opacity: 0.7;
+    color: var(--text-icon);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -717,13 +717,18 @@ body {
 }
 
 .edit-btn:hover {
-    opacity: 1;
     transform: scale(var(--row1-hover-scale));
+}
+
+.edit-btn:active,
+.edit-btn.active {
+    color: var(--text-primary);  /* White color when clicked/active */
+    transform: scale(0.95);
 }
 
 .edit-btn i {
     font-size: 50px;
-    color: var(--text-icon);
+    color: inherit;
 }
 
 .kit-nav-btn {
@@ -744,7 +749,9 @@ body {
     transform: scale(var(--row1-hover-scale));
 }
 
-.kit-nav-btn:active {
+.kit-nav-btn:active,
+.kit-nav-btn.active {
+    color: var(--text-primary);  /* White color when clicked/active */
     transform: scale(0.95);
 }
 
@@ -752,7 +759,7 @@ body {
     font-size: var(--icon-size-standard);
     line-height: 1;
     display: block;
-    color: var(--text-icon);
+    color: inherit;
 }
 
 /* Kit dropdown - styled like presets dropdown but 20% larger */
@@ -884,12 +891,12 @@ body {
 }
 
 .kit-mixer-btn:hover {
-    color: var(--text-primary);
     transform: scale(var(--row1-hover-scale));
 }
 
-.kit-mixer-btn.active {
-    color: var(--text-primary);
+.kit-mixer-btn:active {
+    color: var(--text-primary);  /* White color while clicking */
+    transform: scale(0.95);
 }
 
 /* Row 4: Pattern Groups - Pattern Groups */
