@@ -10,7 +10,8 @@
 class OTTOAccurateInterface {
     constructor() {
         this.version = '1.0.0';  // Dynamic version number
-        this.numberOfPlayers = 8;
+        this.maxPlayers = 8;  // Maximum possible players
+        this.numberOfPlayers = 4;  // Default active players (configurable 4-8)
         this.currentPlayer = 1;
         this.splashScreenLength = 1000; // 1 second like original
         this.tempo = 120;
@@ -21,9 +22,9 @@ class OTTOAccurateInterface {
         this.isPlaying = true;  // Start in playing state to show pause icon
         this.currentPreset = 'default';  // Track current preset
 
-        // Player state tracking for all 8 players
+        // Player state tracking for all possible players
         this.playerStates = {};
-        for (let i = 1; i <= this.numberOfPlayers; i++) {
+        for (let i = 1; i <= this.maxPlayers; i++) {
             this.playerStates[i] = {
                 presetName: 'Default',
                 kitName: 'Acoustic',
@@ -79,7 +80,24 @@ class OTTOAccurateInterface {
         // Initialize UI for player 1
         this.updateUIForCurrentPlayer();
 
-        console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'players');
+        console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'active players (max:', this.maxPlayers, ')');
+    }
+    
+    // Method to change number of active players
+    setNumberOfPlayers(num) {
+        if (num >= 4 && num <= 8) {
+            this.numberOfPlayers = num;
+            this.setupPlayerTabs();  // Refresh the player tabs and spacing
+            
+            // If current player is beyond the new limit, switch to player 1
+            if (this.currentPlayer > num) {
+                this.switchToPlayer(1);
+            }
+            
+            console.log('Number of active players set to:', num);
+        } else {
+            console.error('Number of players must be between 4 and 8');
+        }
     }
 
     setupVersion() {
@@ -128,12 +146,37 @@ class OTTOAccurateInterface {
     }
 
     setupPlayerTabs() {
+        // Calculate spacing based on number of players
+        // Base gap is 5px for 8 players, increases significantly for fewer players
+        // For 4 players: much more spacing for better distribution
+        const gaps = {
+            8: 5,    // Original perfect spacing for 8 players
+            7: 10,   // Double for 7 players
+            6: 15,   // Triple for 6 players
+            5: 20,   // 4x for 5 players
+            4: 30    // 6x for 4 players - lots of space
+        };
+        const gap = gaps[this.numberOfPlayers] || 5;
+        
+        // Set the CSS variable for dynamic spacing
+        document.documentElement.style.setProperty('--player-tab-gap', `${gap}px`);
+        console.log(`Setting player tab gap to ${gap}px for ${this.numberOfPlayers} players`);
+        
+        // Hide tabs beyond the configured number of players
         document.querySelectorAll('.player-tab').forEach((tab, index) => {
             const playerNumber = index + 1;
-
-            tab.addEventListener('click', () => {
-                this.switchToPlayer(playerNumber);
-            });
+            
+            if (playerNumber <= this.numberOfPlayers) {
+                tab.style.display = 'flex';  // Show active players
+                if (!tab.hasAttribute('data-listener-added')) {
+                    tab.addEventListener('click', () => {
+                        this.switchToPlayer(playerNumber);
+                    });
+                    tab.setAttribute('data-listener-added', 'true');
+                }
+            } else {
+                tab.style.display = 'none';  // Hide inactive players
+            }
         });
     }
 
