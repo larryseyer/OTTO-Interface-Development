@@ -1350,7 +1350,8 @@ body {
     flex: 0 0 var(--row3-area1-width);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;  /* Left-align player number */
+    padding-left: 20px;  /* Match the container padding */
 }
 
 .row3-area-2 {
@@ -1358,7 +1359,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;  /* Right-align edit button */
-    padding-right: 10px;
 }
 
 .row3-area-3 {
@@ -1374,14 +1374,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-start;  /* Left-align mixer icon */
-    padding-left: 10px;
 }
 
 .row3-area-5 {
     flex: 0 0 var(--row3-area5-width);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;  /* Right-align mute button */
+    padding-right: 20px;  /* Match the container padding */
 }
 
 /* Row 4 Main Divisions */
