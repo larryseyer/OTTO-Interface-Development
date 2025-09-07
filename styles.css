@@ -12,7 +12,7 @@
     --text-secondary: #cccccc;
     --text-muted: #999999;
     --text-icon: #777777;  /* Icon color */
-    
+
     /* Global button text states */
     --button-text-normal: #777777;  /* Normal state */
     --button-text-hover: #aaaaaa;   /* Hover state */
@@ -54,12 +54,12 @@
     /* Row 4 - Main 50/50 split */
     --row4-left-width: 50%;     /* Left half */
     --row4-right-width: 50%;    /* Right half */
-    
+
     /* Row 4 Left side - 3 areas */
     --row4-left-area1-width: 25%;   /* Edit button area */
     --row4-left-area2-width: 50%;   /* Pattern group selection */
     --row4-left-area3-width: 25%;   /* Navigation controls */
-    
+
     /* Row 4 Right side - 5 areas */
     --row4-right-area1-width: 20%;  /* Right area 1 */
     --row4-right-area2-width: 20%;  /* Right area 2 */
@@ -70,7 +70,7 @@
     /* Row 5 - Main 50/50 split */
     --row5-left-width: 50%;     /* Left half - Pattern matrix */
     --row5-right-width: 50%;    /* Right half - Controls */
-    
+
     /* Row 5 Right side - 5 areas (same as Row 4 right) */
     --row5-right-area1-width: 20%;  /* Toggles area */
     --row5-right-area2-width: 20%;  /* Fills area */
@@ -80,10 +80,18 @@
 
     /* Row 6 - Single area for loop timeline */
     --row6-area1-width: 100%;  /* Full width loop timeline */
-    
+
+    /* Row Heights - Configurable percentages */
+    --row1-height: 10%;  /* Top bar */
+    --row2-height: 8%;  /* Player tabs */
+    --row3-height: 12%;  /* Drum kit section */
+    --row4-height: 10%;  /* Pattern groups */
+    --row5-height: 55%;  /* Pattern matrix - largest section */
+    --row6-height: 5%;   /* Loop section */
+
     /* Global hover zoom for row1 elements */
     --row1-hover-scale: 1.2;  /* 20% increase (was 1.05-1.1, now 1.2) */
-    
+
     /* Dynamic player tab spacing */
     --player-tab-gap: 5px;  /* Default for 8 players */
 }
@@ -107,8 +115,8 @@
 }
 
 /* Ensure interactive elements keep pointer cursor */
-button, 
-.icon-btn, 
+button,
+.icon-btn,
 .play-pause-btn,
 .tempo-display,
 .logo-version-container,
@@ -202,7 +210,7 @@ body {
 
 /* Row 1: Top Bar - 5 Main Areas */
 .top-bar {
-    height: 10%;
+    height: var(--row1-height);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -604,7 +612,7 @@ body {
 
 /* Row 2: Player Tabs  - 8 Player Selection */
 .player-tabs-section {
-    height: 10%;
+    height: var(--row2-height);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -667,7 +675,7 @@ body {
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */
 .drum-kit-section {
-    height: 10%;
+    height: var(--row3-height);
     background: var(--bg-secondary);
     /* border-bottom: 1px solid var(--border-color); */  /* Commented out - no border between row3 and row4 */
     display: flex;
@@ -808,7 +816,7 @@ body {
 
 /* Row 4: Pattern Groups - Pattern Groups */
 .pattern-groups-section {
-    height: 10%;
+    height: var(--row4-height);
     background: var(--bg-secondary);
     /* border-bottom: 1px solid var(--border-color); */  /* Commented out - no border between row4 and row5 */
     display: flex;
@@ -870,7 +878,7 @@ body {
 
 /* Row 5: Pattern Matrix  - 50/50 Split */
 .pattern-matrix-section {
-    height: 55%;
+    height: var(--row5-height);
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -1105,7 +1113,7 @@ body {
 
 /* Row 6: Loop Section  - Timeline Controls */
 .loop-section {
-    height: 5%;
+    height: var(--row6-height);
     background: var(--bg-secondary);
     display: flex;
     align-items: center;
