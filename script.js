@@ -83,18 +83,18 @@ class OTTOAccurateInterface {
 
         console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'active players (max:', this.maxPlayers, ')');
     }
-    
+
     // Method to change number of active players
     setNumberOfPlayers(num) {
         if (num >= 4 && num <= 8) {
             this.numberOfPlayers = num;
             this.setupPlayerTabs();  // Refresh the player tabs and spacing
-            
+
             // If current player is beyond the new limit, switch to player 1
             if (this.currentPlayer > num) {
                 this.switchToPlayer(1);
             }
-            
+
             console.log('Number of active players set to:', num);
         } else {
             console.error('Number of players must be between 4 and 8');
@@ -113,14 +113,14 @@ class OTTOAccurateInterface {
         // Setup logo/version click to show splash screen
         const logoVersion = document.getElementById('logo-version');
         const splashScreen = document.getElementById('splash-screen');
-        
+
         if (logoVersion && splashScreen) {
             logoVersion.addEventListener('click', () => {
                 // Show splash screen
                 splashScreen.style.display = 'flex';
                 splashScreen.classList.remove('hidden');
                 splashScreen.classList.add('show');
-                
+
                 // Hide it again after a delay
                 setTimeout(() => {
                     splashScreen.classList.remove('show');
@@ -158,15 +158,15 @@ class OTTOAccurateInterface {
             4: 30    // 6x for 4 players - lots of space
         };
         const gap = gaps[this.numberOfPlayers] || 5;
-        
+
         // Set the CSS variable for dynamic spacing
         document.documentElement.style.setProperty('--player-tab-gap', `${gap}px`);
         console.log(`Setting player tab gap to ${gap}px for ${this.numberOfPlayers} players`);
-        
+
         // Hide tabs beyond the configured number of players
         document.querySelectorAll('.player-tab').forEach((tab, index) => {
             const playerNumber = index + 1;
-            
+
             if (playerNumber <= this.numberOfPlayers) {
                 tab.style.display = 'flex';  // Show active players
                 if (!tab.hasAttribute('data-listener-added')) {
@@ -187,7 +187,7 @@ class OTTOAccurateInterface {
         const dropdownSelected = document.getElementById('preset-selected');
         const dropdownOptions = document.getElementById('preset-options');
         const dropdownText = dropdown.querySelector('.dropdown-text');
-        
+
         // Toggle dropdown on click
         if (dropdownSelected) {
             dropdownSelected.addEventListener('click', (e) => {
@@ -195,24 +195,24 @@ class OTTOAccurateInterface {
                 dropdown.classList.toggle('open');
             });
         }
-        
+
         // Handle option selection
         const options = dropdown.querySelectorAll('.dropdown-option');
         options.forEach(option => {
             option.addEventListener('click', (e) => {
                 e.stopPropagation();
-                
+
                 // Update selected text
                 const selectedText = option.textContent;
                 dropdownText.textContent = selectedText;
-                
+
                 // Update selected state
                 options.forEach(opt => opt.classList.remove('selected'));
                 option.classList.add('selected');
-                
+
                 // Close dropdown
                 dropdown.classList.remove('open');
-                
+
                 // Update player state
                 this.playerStates[this.currentPlayer].presetName = selectedText;
                 this.currentPreset = option.dataset.value;
@@ -220,14 +220,14 @@ class OTTOAccurateInterface {
                 console.log(`Player ${this.currentPlayer} preset changed to: ${selectedText}`);
             });
         });
-        
+
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!dropdown.contains(e.target)) {
                 dropdown.classList.remove('open');
             }
         });
-        
+
         // Preset navigation buttons (if they're re-enabled)
         const presetPrev = document.querySelector('.preset-prev');
         const presetNext = document.querySelector('.preset-next');
@@ -246,6 +246,7 @@ class OTTOAccurateInterface {
     }
 
     navigatePreset(direction) {
+        // these should eventually come from our INI storage system.
         const presets = ['Default', 'Rock Ballad', 'Jazz Combo', 'Funk Groove', 'Latin Rhythm', 'Electronic Pulse', 'Acoustic Folk', 'Blues Shuffle', 'Pop Modern', 'World Fusion'];
         const state = this.playerStates[this.currentPlayer];
         const currentIndex = presets.indexOf(state.presetName);
@@ -262,7 +263,7 @@ class OTTOAccurateInterface {
         if (dropdownText) {
             dropdownText.textContent = state.presetName;
         }
-        
+
         // Update selected state on options
         const options = document.querySelectorAll('.dropdown-option');
         const presetValue = state.presetName.toLowerCase().replace(/\s+/g, '-');
@@ -440,6 +441,7 @@ class OTTOAccurateInterface {
     }
 
     navigateKit(direction) {
+        // these should eventually come from our INI storage system.
         const kits = ['Acoustic', 'Electronic', 'Rock', 'Jazz', 'Pop', 'Funk', 'Latin', 'Vintage'];
         const state = this.playerStates[this.currentPlayer];
         const currentIndex = kits.indexOf(state.kitName);
@@ -487,6 +489,7 @@ class OTTOAccurateInterface {
     }
 
     navigatePatternGroup(direction) {
+        // these should eventually come from our INI storage system.
         const groups = ['Favorites', 'All Patterns', 'Custom', 'Recent', 'Rock', 'Jazz', 'Latin'];
         const select = document.querySelector('.favorites-select');
         if (!select) return;
@@ -648,9 +651,9 @@ class OTTOAccurateInterface {
             // Single click for tap tempo
             tempoDisplay.addEventListener('click', (e) => {
                 if (isEditing) return;  // Don't tap while editing
-                
+
                 clickCount++;
-                
+
                 if (clickCount === 1) {
                     clickTimer = setTimeout(() => {
                         // Single click - tap tempo
@@ -673,7 +676,7 @@ class OTTOAccurateInterface {
             // Handle editing
             tempoDisplay.addEventListener('blur', () => {
                 if (!isEditing) return;
-                
+
                 const newTempo = parseInt(tempoDisplay.textContent);
                 if (!isNaN(newTempo) && newTempo >= 40 && newTempo <= 300) {
                     this.setTempo(newTempo);
@@ -689,7 +692,7 @@ class OTTOAccurateInterface {
                     e.preventDefault();
                     return;
                 }
-                
+
                 if (e.key === 'Enter') {
                     tempoDisplay.blur();
                     e.preventDefault();
@@ -713,7 +716,7 @@ class OTTOAccurateInterface {
                 element.contentEditable = 'true';
                 element.classList.add('editing');
                 element.focus();
-                
+
                 // Select all text
                 const range = document.createRange();
                 range.selectNodeContents(element);
@@ -767,10 +770,10 @@ class OTTOAccurateInterface {
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
             // Check if we're editing any text field
-            const isEditingText = e.target.matches('input, select, textarea, [contenteditable="true"]') || 
+            const isEditingText = e.target.matches('input, select, textarea, [contenteditable="true"]') ||
                                  e.target.classList.contains('editing') ||
                                  document.querySelector('.tempo-display.editing');
-            
+
             // Don't process shortcuts if editing text
             if (isEditingText) {
                 return;
@@ -877,13 +880,13 @@ class OTTOAccurateInterface {
 
     togglePlayPause() {
         this.isPlaying = !this.isPlaying;
-        
+
         // Update button visual state
         const playPauseBtn = document.getElementById('play-pause-btn');
         if (playPauseBtn) {
             const playIcon = playPauseBtn.querySelector('.play-icon');
             const pauseIcon = playPauseBtn.querySelector('.pause-icon');
-            
+
             if (this.isPlaying) {
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'inline-block';
@@ -892,12 +895,12 @@ class OTTOAccurateInterface {
                 pauseIcon.style.display = 'none';
             }
         }
-        
+
         // Notify JUCE backend if available
         if (window.juce?.onPlayPauseChanged) {
             window.juce.onPlayPauseChanged(this.isPlaying);
         }
-        
+
         console.log(`Playback ${this.isPlaying ? 'started' : 'paused'}`);
     }
 
