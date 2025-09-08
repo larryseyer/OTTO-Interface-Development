@@ -72,6 +72,7 @@ class OTTOAccurateInterface {
         this.setupToggleButtons();
         this.setupFillButtons();
         this.setupSliders();
+        this.setupLinkIcons();  // Initialize link icons after sliders
         this.setupTopBarControls();
         this.setupLoopTimeline();
         this.setupKeyboardShortcuts();
@@ -419,6 +420,11 @@ class OTTOAccurateInterface {
             const sliderIndex = index + 1;
             slider.value = state.miniSliders[sliderIndex] || 50;
         });
+
+        // Update link icon states for current player
+        if (this.linkStates) {
+            this.updateLinkIconStates();
+        }
     }
 
     setupKitControls() {
@@ -725,6 +731,14 @@ class OTTOAccurateInterface {
                 this.playerStates[this.currentPlayer].sliderValues[sliderType] = value;
                 this.onSliderChanged(this.currentPlayer, sliderType, value);
 
+                // Check if this player is a master and propagate value
+                if (this.linkStates && this.linkStates[sliderType]) {
+                    const linkState = this.linkStates[sliderType];
+                    if (linkState.master === this.currentPlayer) {
+                        this.propagateSliderValue(sliderType, value, this.currentPlayer);
+                    }
+                }
+
                 console.log(`Player ${this.currentPlayer} ${sliderType} slider: ${value}`);
             });
         });
@@ -740,6 +754,119 @@ class OTTOAccurateInterface {
 
                 console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
             });
+        });
+    }
+
+    setupLinkIcons() {
+        // Track link states for each parameter
+        this.linkStates = {
+            swing: { master: null, slaves: new Set() },
+            energy: { master: null, slaves: new Set() },
+            volume: { master: null, slaves: new Set() }
+        };
+
+        // Setup link icon click handlers
+        document.querySelectorAll('.link-icon').forEach(linkIcon => {
+            const param = linkIcon.dataset.param;
+            
+            linkIcon.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleLinkToggle(param, linkIcon);
+            });
+        });
+    }
+
+    handleLinkToggle(param, linkIcon) {
+        const currentPlayer = this.currentPlayer;
+        const linkState = this.linkStates[param];
+        
+        // Determine current state of this link icon
+        const isMaster = linkState.master === currentPlayer;
+        const isSlave = linkState.slaves.has(currentPlayer);
+        
+        if (!isMaster && !isSlave) {
+            // Currently unlinked - make it master
+            // Clear any existing master
+            if (linkState.master !== null) {
+                // Convert existing master to slave
+                linkState.slaves.add(linkState.master);
+            }
+            
+            linkState.master = currentPlayer;
+            linkIcon.classList.add('master');
+            linkIcon.classList.remove('linked');
+            
+            // Propagate this player's value to all other players
+            const masterValue = this.playerStates[currentPlayer].sliderValues[param];
+            this.propagateSliderValue(param, masterValue, currentPlayer);
+            
+            // Update all other players to be slaves
+            for (let i = 1; i <= this.numberOfPlayers; i++) {
+                if (i !== currentPlayer) {
+                    linkState.slaves.add(i);
+                }
+            }
+            
+            console.log(`Player ${currentPlayer} is now master for ${param}, value: ${masterValue}`);
+            
+        } else if (isMaster) {
+            // Currently master - unlink all
+            linkState.master = null;
+            linkState.slaves.clear();
+            linkIcon.classList.remove('master');
+            
+            console.log(`Player ${currentPlayer} unlinked ${param} (was master)`);
+            
+        } else if (isSlave) {
+            // Currently slave - unlink just this player
+            linkState.slaves.delete(currentPlayer);
+            linkIcon.classList.remove('linked');
+            
+            // If no more slaves and no master, clear everything
+            if (linkState.slaves.size === 0 && linkState.master === null) {
+                // Already cleared
+            }
+            
+            console.log(`Player ${currentPlayer} unlinked from ${param} (was slave)`);
+        }
+        
+        // Update link icon states for all players when switching
+        this.updateLinkIconStates();
+    }
+
+    propagateSliderValue(param, value, fromPlayer) {
+        const linkState = this.linkStates[param];
+        
+        // Update all slave players
+        linkState.slaves.forEach(playerNum => {
+            if (playerNum !== fromPlayer) {
+                this.playerStates[playerNum].sliderValues[param] = value;
+                console.log(`Propagated ${param} value ${value} to Player ${playerNum}`);
+            }
+        });
+        
+        // If we're currently viewing a slave player, update the UI
+        if (linkState.slaves.has(this.currentPlayer)) {
+            const slider = document.querySelector(`.main-slider[data-param="${param}"]`);
+            if (slider) {
+                slider.value = value;
+            }
+        }
+    }
+
+    updateLinkIconStates() {
+        // Update link icon visual states based on current player
+        document.querySelectorAll('.link-icon').forEach(linkIcon => {
+            const param = linkIcon.dataset.param;
+            const linkState = this.linkStates[param];
+            
+            linkIcon.classList.remove('master', 'linked');
+            
+            if (linkState.master === this.currentPlayer) {
+                linkIcon.classList.add('master');
+            } else if (linkState.slaves.has(this.currentPlayer)) {
+                linkIcon.classList.add('linked');
+            }
         });
     }
 

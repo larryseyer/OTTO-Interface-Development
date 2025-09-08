@@ -1338,20 +1338,55 @@ body {
 }
 
 .link-icon {
-    width: 16px;
-    height: 16px;
-    background-image: url('Images/Link.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.6;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border: none;
     cursor: pointer;
-    transition: opacity 0.2s ease;
-    filter: invert(0.8);
+    transition: all 0.2s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.link-icon:hover {
-    opacity: 1;
+.link-icon i {
+    font-size: 16px;  /* Smaller than row1 icons */
+    color: var(--text-icon);  /* Default grey state - unlinked */
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* Unlinked state (default) */
+.link-icon:not(.linked):not(.master) i {
+    color: var(--text-icon);  /* Grey */
+}
+
+/* Linked slave state */
+.link-icon.linked:not(.master) i {
+    color: var(--text-black);  /* Black for slaves */
+}
+
+/* Master state */
+.link-icon.master i {
+    color: var(--text-primary);  /* White for master */
+}
+
+/* Hover effects */
+.link-icon:hover i {
+    transform: scale(1.1);
+}
+
+.link-icon:hover:not(.linked):not(.master) i {
+    color: var(--text-secondary);  /* Lighter grey on hover when unlinked */
+}
+
+.link-icon.linked:hover:not(.master) i {
+    color: var(--text-muted);  /* Darker on hover when slave */
+}
+
+.link-icon.master:hover i {
+    color: var(--text-primary);  /* Stay white on hover when master */
+    filter: drop-shadow(0 0 3px rgba(255,255,255,0.5));  /* Glow effect */
 }
 
 /* Row 6: Loop Section  - Timeline Controls */
