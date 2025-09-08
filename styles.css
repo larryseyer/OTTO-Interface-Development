@@ -55,27 +55,27 @@
     --row4-right-width: 50%;    /* Right half */
 
     /* Row 4 Left side - 3 areas */
-    --row4-left-area1-width: 25%;   /* Edit button area */
-    --row4-left-area2-width: 50%;   /* Pattern group selection */
-    --row4-left-area3-width: 25%;   /* Navigation controls */
+    --row4-left-area1-width: 15%;   /* Edit button area */
+    --row4-left-area2-width: 70%;   /* Pattern group selection */
+    --row4-left-area3-width: 15%;   /* Navigation controls */
 
     /* Row 4 Right side - 5 areas */
-    --row4-right-area1-width: 20%;  /* Right area 1 */
-    --row4-right-area2-width: 20%;  /* Right area 2 */
-    --row4-right-area3-width: 20%;  /* Right area 3 */
-    --row4-right-area4-width: 20%;  /* Right area 4 */
-    --row4-right-area5-width: 20%;  /* Right area 5 */
+    --row4-right-area1-width: 35%;  /* Right area 1 */
+    --row4-right-area2-width: 35%;  /* Right area 2 */
+    --row4-right-area3-width: 10%;  /* Right area 3 */
+    --row4-right-area4-width: 10%;  /* Right area 4 */
+    --row4-right-area5-width: 10%;  /* Right area 5 */
 
     /* Row 5 - Main 50/50 split */
     --row5-left-width: 50%;     /* Left half - Pattern matrix */
     --row5-right-width: 50%;    /* Right half - Controls */
 
     /* Row 5 Right side - 5 areas (same as Row 4 right) */
-    --row5-right-area1-width: 20%;  /* Toggles area */
-    --row5-right-area2-width: 20%;  /* Fills area */
-    --row5-right-area3-width: 20%;  /* Sliders area 1 */
-    --row5-right-area4-width: 20%;  /* Sliders area 2 */
-    --row5-right-area5-width: 20%;  /* Sliders area 3 */
+    --row5-right-area1-width: 35%;  /* Toggles area */
+    --row5-right-area2-width: 35%;  /* Fills area */
+    --row5-right-area3-width: 10%;  /* Sliders area 1 */
+    --row5-right-area4-width: 10%;  /* Sliders area 2 */
+    --row5-right-area5-width: 10%;  /* Sliders area 3 */
 
     /* Row 6 - Single area for loop timeline */
     --row6-area1-width: 100%;  /* Full width loop timeline */
@@ -906,7 +906,6 @@ body {
     /* border-bottom: 1px solid var(--border-color); */  /* Commented out - no border between row4 and row5 */
     display: flex;
     align-items: center;
-    justify-content: center;
     padding: 0 20px;
 }
 
@@ -971,13 +970,7 @@ body {
     gap: 20px;
 }
 
-/* Left Half - 4x4 Pattern Grid */
-.left-half {
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+/* Old left-half and right-half styles - removed as they're not used */
 
 .pattern-grid {
     display: grid;
@@ -986,13 +979,6 @@ body {
     gap: 12px;
     width: 100%;
     max-width: 600px;
-}
-
-/* Right Half - Controls */
-.right-half {
-    width: 50%;
-    display: flex;
-    flex-direction: column;
 }
 
 .pattern-btn {
@@ -1072,10 +1058,12 @@ body {
 
 .toggles-column,
 .fills-column {
-    flex: 1;
+    width: 100%;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    box-sizing: border-box;
 }
 
 .sliders-column {
@@ -1152,7 +1140,9 @@ body {
     align-items: center;
     gap: 6px;
     position: relative;
-    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .main-slider {
@@ -1425,12 +1415,40 @@ body {
 }
 
 /* Row 4 Right Areas - Labels */
-.row4-right-area1,
-.row4-right-area2,
-.row4-right-area3,
-.row4-right-area4,
-.row4-right-area5 {
+.row4-right-area1 {
     flex: 0 0 var(--row4-right-area1-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.row4-right-area2 {
+    flex: 0 0 var(--row4-right-area2-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.row4-right-area3 {
+    flex: 0 0 var(--row4-right-area3-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.row4-right-area4 {
+    flex: 0 0 var(--row4-right-area4-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.row4-right-area5 {
+    flex: 0 0 var(--row4-right-area5-width);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1460,16 +1478,54 @@ body {
 }
 
 /* Row 5 Right Areas */
-.row5-right-area1,
-.row5-right-area2,
-.row5-right-area3,
-.row5-right-area4,
-.row5-right-area5 {
+.row5-right-area1 {
     flex: 0 0 var(--row5-right-area1-width);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.row5-right-area2 {
+    flex: 0 0 var(--row5-right-area2-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.row5-right-area3 {
+    flex: 0 0 var(--row5-right-area3-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.row5-right-area4 {
+    flex: 0 0 var(--row5-right-area4-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.row5-right-area5 {
+    flex: 0 0 var(--row5-right-area5-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .control-label {
