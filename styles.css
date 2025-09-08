@@ -1076,7 +1076,7 @@ body {
     border: none;
     font-family: 'Playfair Display', serif;
     font-size: 28.6px;  /* 10% larger than 26px */
-    font-weight: 500;
+    font-weight: 300;
     cursor: pointer;
     transition: all 0.02s ease;  /* Near instantaneous transition */
     text-align: center;
@@ -1178,7 +1178,7 @@ body {
     border: none;
     font-family: 'Playfair Display', serif;
     font-size: 25px;  /* Matching size for toggles and fills */
-    font-weight: 600;  /* Match fill button font-weight exactly */
+    font-weight: 300;  /* Lighter weight for better readability */
     cursor: pointer;
     transition: all 0.02s ease;  /* Near instantaneous transition */
     width: 100%;
@@ -1217,7 +1217,7 @@ body {
     border: none;
     font-family: 'Playfair Display', serif;
     font-size: 25px;  /* Matching size for toggles and fills */
-    font-weight: 600;
+    font-weight: 300;
     cursor: pointer;
     transition: all 0.02s ease;  /* Near instantaneous transition */
     width: 100%;
@@ -1248,6 +1248,7 @@ body {
 /* Solo button keeps Playfair Display */
 .fill-btn.solo {
     font-family: 'Playfair Display', serif;
+    font-weight: 300;  /* Match other Playfair buttons */
     padding-bottom: 15px;  /* Add 3px to bottom to push text up */
 }
 
