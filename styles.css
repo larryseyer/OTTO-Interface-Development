@@ -1244,7 +1244,7 @@ body {
 .main-slider {
     writing-mode: bt-lr;
     -webkit-appearance: slider-vertical;  /* Keep vertical slider for functionality */
-    width: 8px;
+    width: 4px;  /* Thinner track - was 8px */
     height: calc(100vh * 0.55 * 0.6 - 40px);  /* 55% of viewport * 0.6 for content - padding */
     min-height: 200px;  /* Minimum height */
     max-height: 400px;  /* Maximum height */
@@ -1293,7 +1293,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 50px;
+    padding: 0 25px;  /* Reduced from 50px to 25px */
     border-top: 1px solid var(--border-color);
 }
 
@@ -1310,7 +1310,7 @@ body {
 
 .loop-timeline {
     flex: 1;
-    margin: 0 50px;
+    margin: 0 25px;  /* Reduced from 50px to 25px */
     height: 24px;
     display: flex;
     align-items: center;
@@ -1318,18 +1318,19 @@ body {
 
 .timeline-track {
     width: 100%;
-    height: 4px;
+    height: 4px;  /* Same thickness as vertical sliders */
     background: var(--bg-darker);
     border-radius: 2px;
     position: relative;
-    border: 1px solid var(--border-color);
+    border: none;  /* Remove border for cleaner look */
+    filter: grayscale(100%) brightness(0.7);  /* Match vertical slider color */
 }
 
 .timeline-handle {
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(145deg, var(--button-highlight), var(--button-face));
-    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    background: var(--text-icon);  /* Match vertical slider thumb color */
+    border-radius: 4px;  /* Square like vertical sliders */
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -1338,7 +1339,7 @@ body {
     box-shadow:
         inset 1px 1px 2px rgba(255,255,255,0.2),
         inset -1px -1px 2px rgba(0,0,0,0.3),
-        2px 2px 4px rgba(0,0,0,0.3);
+        1px 1px 3px rgba(0,0,0,0.2);
     transition: left 0.1s ease;
 }
 
