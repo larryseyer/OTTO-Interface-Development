@@ -622,17 +622,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 20px;  /* Add horizontal padding for chevrons */
-    gap: 15px;  /* Space between chevrons and tabs */
+    padding: 0 20px;  /* Add horizontal padding */
 }
 
 .player-tabs {
     display: flex;
     gap: var(--player-tab-gap);  /* Dynamic gap based on player count */
-    padding: 8px 12px;
+    padding: 8px 0;  /* Reduced horizontal padding since chevrons are closer */
     background: transparent;
-    flex: 1;  /* Take available space between chevrons */
-    justify-content: center;  /* Center the tabs */
+    margin: 0 15px;  /* Space between tabs and chevrons */
 }
 
 /* Player navigation chevrons - sized for row2 */
@@ -671,7 +669,7 @@ body {
 }
 
 .player-tab {
-    padding: 15px 20px;
+    padding: 15px 15px;  /* Reduced horizontal padding to save space */
     background: transparent;
     border: none;
     color: var(--button-text-normal);
@@ -686,7 +684,7 @@ body {
     min-height: 60px;
     height: 60px;
     width: auto;
-    min-width: 140px;  /* Slightly reduced width */
+    min-width: 120px;  /* Reduced from 140px to save space */
     display: flex;
     align-items: center;
     justify-content: center;

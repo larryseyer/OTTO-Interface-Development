@@ -148,16 +148,17 @@ class OTTOAccurateInterface {
 
     setupPlayerTabs() {
         // Calculate spacing based on number of players
-        // Base gap is 5px for 8 players, increases significantly for fewer players
-        // For 4 players: much more spacing for better distribution
+        // Reduced gaps to accommodate chevrons within interface bounds
         const gaps = {
-            8: 5,    // Original perfect spacing for 8 players
-            7: 10,   // Double for 7 players
-            6: 15,   // Triple for 6 players
-            5: 20,   // 4x for 5 players
-            4: 30    // 6x for 4 players - lots of space
+            8: 2,    // Minimal gap for 8 players to fit with chevrons
+            7: 4,    // Slightly more for 7 players
+            6: 8,    // More spacing for 6 players
+            5: 12,   // Even more for 5 players
+            4: 20,   // Generous spacing for 4 players
+            3: 30,   // Extra spacing for 3 players
+            2: 40    // Maximum spacing for 2 players
         };
-        const gap = gaps[this.numberOfPlayers] || 5;
+        const gap = gaps[this.numberOfPlayers] || 2;
 
         // Set the CSS variable for dynamic spacing
         document.documentElement.style.setProperty('--player-tab-gap', `${gap}px`);
