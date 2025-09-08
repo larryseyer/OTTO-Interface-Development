@@ -1615,6 +1615,7 @@ body {
     padding: 5px 10px 20px 10px;  /* Reduced top padding */
     box-sizing: border-box;
     overflow: hidden;
+    max-height: 100%;  /* Limit height to match fills */
 }
 
 .row5-right-area2 {
