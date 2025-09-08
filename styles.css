@@ -1068,6 +1068,7 @@ body {
 
 .pattern-btn:hover {
     background-position: 0 40%; /* Third segment - WHITE button for hover */
+    color: var(--text-primary);  /* White text on hover */
 }
 
 .pattern-btn:active,
@@ -1140,19 +1141,20 @@ body {
     background-size: 100% 600%; /* 6 states vertically */
     background-position: 0 0%; /* Normal state */
     background-repeat: no-repeat;
-    color: var(--text-primary);
+    color: #000000;  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 12px;
+    font-size: 15px;  /* 25% larger than 12px */
     font-weight: 500;
     cursor: pointer;
     transition: all 0.05s ease;
     width: 100%;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    /* Removed text-shadow for better readability */
 }
 
 .toggle-btn:hover {
     background-position: 0 40%; /* WHITE button for hover */
+    color: var(--text-primary);  /* White text on hover */
 }
 
 .toggle-btn.active {
@@ -1166,19 +1168,20 @@ body {
     background-size: 100% 600%; /* 6 states vertically */
     background-position: 0 0%; /* Normal state */
     background-repeat: no-repeat;
-    color: var(--text-primary);
+    color: #000000;  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 14px;
+    font-size: 17.5px;  /* 25% larger than 14px */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.05s ease;
     width: 100%;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    /* Removed text-shadow for better readability */
 }
 
 .fill-btn:hover {
     background-position: 0 40%; /* WHITE button for hover */
+    color: var(--text-primary);  /* White text on hover */
 }
 
 .fill-btn.active {
