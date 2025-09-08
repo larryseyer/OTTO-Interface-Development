@@ -50,9 +50,9 @@
     --row3-area4-width: 15%;   /* Mixer icon */
     --row3-area5-width: 10%;   /* Mute drummer icon */
 
-    /* Row 4 - Main 55/45 split */
-    --row4-left-width: 55%;     /* Left half */
-    --row4-right-width: 45%;    /* Right half */
+    /* Row 4 - Main 50/50 split */
+    --row4-left-width: 50%;     /* Left half */
+    --row4-right-width: 50%;    /* Right half */
 
     /* Row 4 Left side - 3 areas */
     --row4-left-area1-width: 20%;   /* Edit button area */
@@ -66,9 +66,9 @@
     --row4-right-area4-width: 15%;    /* Right area 4 */
     --row4-right-area5-width: 15%;    /* Right area 5 */
 
-    /* Row 5 - Main 55/45 split */
-    --row5-left-width: 55%;     /* Left half - Pattern matrix */
-    --row5-right-width: 45%;    /* Right half - Controls */
+    /* Row 5 - Main 50/50 split */
+    --row5-left-width: 50%;     /* Left half - Pattern matrix */
+    --row5-right-width: 50%;    /* Right half - Controls */
 
     /* Row 5 Right side - 5 areas (same as Row 4 right) */
     --row5-right-area1-width: 27.5%;  /* Toggles area */
@@ -408,7 +408,7 @@ body {
 .dropdown-selected {
     background: transparent;
     color: #777777;
-    font-size: 40px;
+    font-size: 44px;
     font-weight: 400;
     padding: 5px 15px;
     cursor: pointer !important;
@@ -689,10 +689,13 @@ body {
 
 .player-number {
     font-family: 'Roboto', sans-serif;
-    font-size: 60px;
+    font-size: 75px; /* 25% larger than 60px */
     font-weight: 100; /* ExtraLight */
     color: var(--text-muted);
     opacity: 0.6;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 
 .kit-controls {
@@ -704,8 +707,8 @@ body {
 }
 
 .edit-btn {
-    width: 60px;
-    height: 60px;
+    width: 75px; /* 25% larger than 60px */
+    height: 75px; /* 25% larger than 60px */
     background: transparent;
     border: none;
     cursor: pointer;
@@ -714,6 +717,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
+    margin: 0;
 }
 
 .edit-btn:hover {
@@ -727,13 +732,16 @@ body {
 }
 
 .edit-btn i {
-    font-size: 50px;
+    font-size: 63px; /* 25% larger than 50px, rounded */
     color: inherit;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 
 .kit-nav-btn {
-    width: var(--icon-size-standard);
-    height: var(--icon-size-standard);
+    width: 75px; /* 25% larger than 60px */
+    height: 75px; /* 25% larger than 60px */
     background: transparent;
     border: none;
     color: var(--text-icon);
@@ -756,10 +764,12 @@ body {
 }
 
 .kit-nav-btn i {
-    font-size: var(--icon-size-standard);
+    font-size: 75px; /* 25% larger than 60px */
     line-height: 1;
     display: block;
     color: inherit;
+    margin: 0;
+    padding: 0;
 }
 
 /* Kit dropdown - styled like presets dropdown but 20% larger */
@@ -777,9 +787,9 @@ body {
 .kit-dropdown .dropdown-selected {
     background: transparent;
     color: #777777;
-    font-size: 48px; /* 20% larger than presets (40px) */
+    font-size: 58px; /* 20% larger than 48px */
     font-weight: 400;
-    padding: 5px 15px;
+    padding: 0 15px;
     cursor: pointer !important;
     display: flex;
     align-items: center;
@@ -872,13 +882,14 @@ body {
 }
 
 .kit-mixer-btn {
-    width: 80px !important;
-    height: 80px !important;
+    width: 75px !important; /* Standardized to 75px */
+    height: 75px !important; /* Standardized to 75px */
     background: transparent !important;
     border: none !important;
     cursor: pointer;
     transition: all 0.2s ease;
     padding: 0 !important;
+    margin: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -886,8 +897,11 @@ body {
 }
 
 .kit-mixer-btn i {
-    font-size: 70px;
+    font-size: 63px; /* Adjusted to fit 75px button */
     color: inherit;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
 }
 
 .kit-mixer-btn:hover {
@@ -1649,8 +1663,8 @@ body {
 
 /* Mute drummer button - using OTTO_Button_Glyph segmented icon */
 .mute-drummer-btn {
-    width: 60px !important;
-    height: 60px !important;
+    width: 75px !important; /* 25% larger than 60px */
+    height: 75px !important; /* 25% larger than 60px */
     background-image: url('Images/OTTO_Button_Glyph.png');
     background-size: 100% 600% !important;  /* 6 states vertically */
     background-position: 0 20% !important;  /* Normal state - shows unmuted drummer */
@@ -1659,6 +1673,7 @@ body {
     cursor: pointer;
     transition: background-position 0.05s ease;
     padding: 0 !important;
+    margin: 0 !important;
     display: block !important;
     overflow: hidden !important;
 }
