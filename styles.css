@@ -50,9 +50,9 @@
     --row3-area4-width: 15%;   /* Mixer icon */
     --row3-area5-width: 10%;   /* Mute drummer icon */
 
-    /* Row 4 - Main 50/50 split */
-    --row4-left-width: 50%;     /* Left half */
-    --row4-right-width: 50%;    /* Right half */
+    /* Row 4 - Main 55/45 split */
+    --row4-left-width: 55%;     /* Left half */
+    --row4-right-width: 45%;    /* Right half */
 
     /* Row 4 Left side - 3 areas */
     --row4-left-area1-width: 20%;   /* Edit button area */
@@ -66,9 +66,9 @@
     --row4-right-area4-width: 15%;    /* Right area 4 */
     --row4-right-area5-width: 15%;    /* Right area 5 */
 
-    /* Row 5 - Main 50/50 split */
-    --row5-left-width: 50%;     /* Left half - Pattern matrix */
-    --row5-right-width: 50%;    /* Right half - Controls */
+    /* Row 5 - Main 55/45 split */
+    --row5-left-width: 55%;     /* Left half - Pattern matrix */
+    --row5-right-width: 45%;    /* Right half - Controls */
 
     /* Row 5 Right side - 5 areas (same as Row 4 right) */
     --row5-right-area1-width: 27.5%;  /* Toggles area */
@@ -83,8 +83,8 @@
     /* Row Heights - Configurable percentages */
     --row1-height: 10%;  /* Top bar */
     --row2-height: 8%;  /* Player tabs */
-    --row3-height: 12%;  /* Drum kit section */
-    --row4-height: 10%;  /* Pattern groups */
+    --row3-height: 15%;  /* Drum kit section */
+    --row4-height: 7%;  /* Pattern groups */
     --row5-height: 55%;  /* Pattern matrix - largest section */
     --row6-height: 5%;   /* Loop section */
 
