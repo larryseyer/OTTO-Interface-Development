@@ -512,7 +512,7 @@ body {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.05s ease;
+    transition: all 0.02s ease;  /* Near instantaneous transition */
     /*text-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
 }
 
@@ -1051,10 +1051,10 @@ body {
     color: #000000;
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 26px;
+    font-size: 28.6px;  /* 10% larger than 26px */
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.05s ease;
+    transition: all 0.02s ease;  /* Near instantaneous transition */
     text-align: center;
     min-height: 60px;
     display: flex;
@@ -1075,6 +1075,11 @@ body {
 .pattern-btn:active,
 .pattern-btn.active {
     background-position: 0 20%; /* Second segment - BLACK button for active/on */
+}
+
+.pattern-btn.active:hover {
+    background-position: 0 60%; /* Fourth segment - hover while active */
+    color: var(--text-primary);  /* White text on hover */
 }
 
 /* Top 20% - Control Labels */
@@ -1147,10 +1152,10 @@ body {
     color: #000000;  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 15px;  /* 25% larger than 12px */
+    font-size: 22.5px;  /* 50% larger than 15px */
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.05s ease;
+    transition: all 0.02s ease;  /* Near instantaneous transition */
     width: 100%;
     flex: 1;  /* Grow to fill available space */
     /* Removed text-shadow for better readability */
@@ -1165,6 +1170,11 @@ body {
     background-position: 0 20%; /* BLACK button for active/on */
 }
 
+.toggle-btn.active:hover {
+    background-position: 0 60%; /* Fourth segment - hover while active */
+    color: var(--text-primary);  /* White text on hover */
+}
+
 .fill-btn {
     background: transparent;
     padding: 12px 12px;  /* Increased vertical padding */
@@ -1175,10 +1185,10 @@ body {
     color: #000000;  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 17.5px;  /* 25% larger than 14px */
+    font-size: 26.25px;  /* 50% larger than 17.5px */
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.05s ease;
+    transition: all 0.02s ease;  /* Near instantaneous transition */
     width: 100%;
     flex: 1;  /* Grow to fill available space */
     /* Removed text-shadow for better readability */
@@ -1191,6 +1201,11 @@ body {
 
 .fill-btn.active {
     background-position: 0 20%; /* BLACK button for active/on */
+}
+
+.fill-btn.active:hover {
+    background-position: 0 60%; /* Fourth segment - hover while active */
+    color: var(--text-primary);  /* White text on hover */
 }
 
 .main-sliders {
