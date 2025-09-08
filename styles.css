@@ -1404,7 +1404,7 @@ body {
 .loop-end-label {
     font-size: 18px;
     color: var(--text-muted);
-    font-weight: 600;
+    font-weight: 300;  /* Match pattern button weight */
     letter-spacing: 1.2px;
     font-family: 'Playfair Display', serif;
     min-width: 80px;
