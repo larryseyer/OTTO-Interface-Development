@@ -1026,8 +1026,8 @@ body {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
     display: flex;
-    padding: 20px;
-    gap: 20px;
+    padding: 0 20px;  /* Match row4's horizontal padding */
+    gap: 0;  /* Remove gap to maintain alignment */
 }
 
 /* Old left-half and right-half styles - removed as they're not used */
