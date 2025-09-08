@@ -55,27 +55,27 @@
     --row4-right-width: 50%;    /* Right half */
 
     /* Row 4 Left side - 3 areas */
-    --row4-left-area1-width: 15%;   /* Edit button area */
-    --row4-left-area2-width: 70%;   /* Pattern group selection */
-    --row4-left-area3-width: 15%;   /* Navigation controls */
+    --row4-left-area1-width: 20%;   /* Edit button area */
+    --row4-left-area2-width: 60%;   /* Pattern group selection */
+    --row4-left-area3-width: 20%;   /* Navigation controls */
 
     /* Row 4 Right side - 5 areas */
-    --row4-right-area1-width: 35%;  /* Right area 1 */
-    --row4-right-area2-width: 35%;  /* Right area 2 */
-    --row4-right-area3-width: 10%;  /* Right area 3 */
-    --row4-right-area4-width: 10%;  /* Right area 4 */
-    --row4-right-area5-width: 10%;  /* Right area 5 */
+    --row4-right-area1-width: 27.5%;  /* Right area 1 */
+    --row4-right-area2-width: 27.5%;  /* Right area 2 */
+    --row4-right-area3-width: 15%;    /* Right area 3 */
+    --row4-right-area4-width: 15%;    /* Right area 4 */
+    --row4-right-area5-width: 15%;    /* Right area 5 */
 
     /* Row 5 - Main 50/50 split */
     --row5-left-width: 50%;     /* Left half - Pattern matrix */
     --row5-right-width: 50%;    /* Right half - Controls */
 
     /* Row 5 Right side - 5 areas (same as Row 4 right) */
-    --row5-right-area1-width: 35%;  /* Toggles area */
-    --row5-right-area2-width: 35%;  /* Fills area */
-    --row5-right-area3-width: 10%;  /* Sliders area 1 */
-    --row5-right-area4-width: 10%;  /* Sliders area 2 */
-    --row5-right-area5-width: 10%;  /* Sliders area 3 */
+    --row5-right-area1-width: 27.5%;  /* Toggles area */
+    --row5-right-area2-width: 27.5%;  /* Fills area */
+    --row5-right-area3-width: 15%;    /* Sliders area 1 */
+    --row5-right-area4-width: 15%;    /* Sliders area 2 */
+    --row5-right-area5-width: 15%;    /* Sliders area 3 */
 
     /* Row 6 - Single area for loop timeline */
     --row6-area1-width: 100%;  /* Full width loop timeline */
@@ -1519,9 +1519,9 @@ body {
     font-family: 'Playfair Display', serif !important;
     font-size: 24px;  /* 50% larger than 16px */
     color: var(--text-muted);
-    text-transform: none;  /* Remove uppercase to match Playfair Display style */
+    text-transform: none;
     letter-spacing: 0.5px;
-    font-weight: 500;  /* Medium weight for Playfair */
+    font-weight: 300;
 }
 
 /* Row 5 Main Divisions */
