@@ -930,7 +930,7 @@ body {
 }
 
 .group-nav-btn i {
-    font-size: 30px;  /* 50% larger than 20px */
+    font-size: 48.75px;  /* 30% larger than 37.5px */
     color: var(--text-icon);
 }
 
@@ -971,7 +971,7 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 21px;  /* 50% larger than 14px */
+    font-size: 26px;  /* 25% larger (was 21px) */
     color: var(--text-icon);
     transition: transform 0.3s ease;
     pointer-events: none;
@@ -1017,7 +1017,7 @@ body {
 
 .group-dropdown:hover .dropdown-selected {
     transform: scale(var(--row1-hover-scale));
-    color: var(--text-primary);  /* Brighten on hover */
+    /* Removed color change - only scale on hover */
 }
 
 /* Row 5: Pattern Matrix  - 50/50 Split */
@@ -1459,7 +1459,8 @@ body {
     flex: 0 0 var(--row4-left-area1-width);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;  /* Right-align gear icon */
+    padding-right: 10px;  /* Add some space from the edge */
 }
 
 .row4-left-area2 {
@@ -1467,7 +1468,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 20px;  /* Increased gap from 10px to 20px for better separation */
 }
 
 .row4-left-area3 {
@@ -1648,7 +1649,7 @@ body {
 }
 
 .edit-pattern-btn i {
-    font-size: 29px;  /* 50% larger than 19px */
+    font-size: 36px;  /* 25% larger (was 29px) */
     color: var(--text-icon);
 }
 
