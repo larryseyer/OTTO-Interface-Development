@@ -1152,7 +1152,7 @@ body {
     color: #000000;  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 22.5px;  /* 50% larger than 15px */
+    font-size: 25px;  /* Matching size for toggles and fills */
     font-weight: 500;
     cursor: pointer;
     transition: all 0.02s ease;  /* Near instantaneous transition */
@@ -1185,7 +1185,7 @@ body {
     color: #000000;  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 26.25px;  /* 50% larger than 17.5px */
+    font-size: 25px;  /* Matching size for toggles and fills */
     font-weight: 600;
     cursor: pointer;
     transition: all 0.02s ease;  /* Near instantaneous transition */
@@ -1230,7 +1230,7 @@ body {
 
 .main-slider {
     writing-mode: bt-lr;
-    -webkit-appearance: slider-vertical;  /* Keep vertical slider */
+    -webkit-appearance: slider-vertical;  /* Keep vertical slider for functionality */
     width: 8px;
     height: calc(100vh * 0.55 * 0.6 - 40px);  /* 55% of viewport * 0.6 for content - padding */
     min-height: 200px;  /* Minimum height */
@@ -1238,8 +1238,7 @@ body {
     background: var(--bg-secondary);
     outline: none;
     cursor: pointer;
-    /* Filter to remove blue and make it grayscale */
-    filter: grayscale(100%) brightness(0.7);
+    filter: grayscale(100%) brightness(0.7);  /* Remove blue color */
 }
 
 /* Webkit browsers (Chrome, Safari, Edge) */
@@ -1248,7 +1247,7 @@ body {
     appearance: none;
     width: 24px;
     height: 24px;
-    background: var(--text-icon);  /* Use alt white color #777777 */
+    background: var(--text-icon);  /* Gray color matching our theme */
     cursor: pointer;
     border-radius: 4px;
     box-shadow:
