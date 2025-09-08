@@ -179,6 +179,38 @@ class OTTOAccurateInterface {
                 tab.style.display = 'none';  // Hide inactive players
             }
         });
+
+        // Setup player navigation chevrons
+        const playerPrevBtn = document.querySelector('.player-nav-prev');
+        const playerNextBtn = document.querySelector('.player-nav-next');
+
+        if (playerPrevBtn && !playerPrevBtn.hasAttribute('data-listener-added')) {
+            playerPrevBtn.addEventListener('click', () => {
+                this.navigatePlayer(-1);
+            });
+            playerPrevBtn.setAttribute('data-listener-added', 'true');
+        }
+
+        if (playerNextBtn && !playerNextBtn.hasAttribute('data-listener-added')) {
+            playerNextBtn.addEventListener('click', () => {
+                this.navigatePlayer(1);
+            });
+            playerNextBtn.setAttribute('data-listener-added', 'true');
+        }
+    }
+
+    navigatePlayer(direction) {
+        let newPlayer = this.currentPlayer + direction;
+        
+        // Wrap around navigation
+        if (newPlayer < 1) {
+            newPlayer = this.numberOfPlayers;  // Go to last active player
+        } else if (newPlayer > this.numberOfPlayers) {
+            newPlayer = 1;  // Go to first player
+        }
+        
+        this.switchToPlayer(newPlayer);
+        console.log(`Navigated to Player ${newPlayer} via chevron`);
     }
 
     setupPresetControls() {

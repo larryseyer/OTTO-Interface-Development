@@ -33,7 +33,7 @@
     /* Icon sizes */
     --icon-size-standard: 60px;
     --icon-size-small: 20px;
-    
+
     /* Dropdown menu font size */
     --dropdown-menu-font-size: 24px;  /* Base font size for all dropdown menu items */
 
@@ -64,22 +64,22 @@
     --row4-left-area3-width: 20%;   /* Navigation controls */
 
     /* Row 4 Right side - 5 areas */
-    --row4-right-area1-width: 27.5%;  /* Right area 1 */
-    --row4-right-area2-width: 27.5%;  /* Right area 2 */
-    --row4-right-area3-width: 15%;    /* Right area 3 */
-    --row4-right-area4-width: 15%;    /* Right area 4 */
-    --row4-right-area5-width: 15%;    /* Right area 5 */
+    --row4-right-area1-width: 23%;  /* Right area 1 */
+    --row4-right-area2-width: 23%;  /* Right area 2 */
+    --row4-right-area3-width: 18%;    /* Right area 3 */
+    --row4-right-area4-width: 18%;    /* Right area 4 */
+    --row4-right-area5-width: 18%;    /* Right area 5 */
 
     /* Row 5 - Main 50/50 split */
     --row5-left-width: 50%;     /* Left half - Pattern matrix */
     --row5-right-width: 50%;    /* Right half - Controls */
 
     /* Row 5 Right side - 5 areas (same as Row 4 right) */
-    --row5-right-area1-width: 27.5%;  /* Toggles area */
-    --row5-right-area2-width: 27.5%;  /* Fills area */
-    --row5-right-area3-width: 15%;    /* Sliders area 1 */
-    --row5-right-area4-width: 15%;    /* Sliders area 2 */
-    --row5-right-area5-width: 15%;    /* Sliders area 3 */
+    --row5-right-area1-width: 23%;  /* Toggles area */
+    --row5-right-area2-width: 23%;  /* Fills area */
+    --row5-right-area3-width: 18%;  /* Sliders area 1 */
+    --row5-right-area4-width: 18%;  /* Sliders area 2 */
+    --row5-right-area5-width: 18%;  /* Sliders area 3 */
 
     /* Row 6 - Single area for loop timeline */
     --row6-area1-width: 100%;  /* Full width loop timeline */
@@ -622,6 +622,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 20px;  /* Add horizontal padding for chevrons */
+    gap: 15px;  /* Space between chevrons and tabs */
 }
 
 .player-tabs {
@@ -629,6 +631,43 @@ body {
     gap: var(--player-tab-gap);  /* Dynamic gap based on player count */
     padding: 8px 12px;
     background: transparent;
+    flex: 1;  /* Take available space between chevrons */
+    justify-content: center;  /* Center the tabs */
+}
+
+/* Player navigation chevrons - sized for row2 */
+.player-nav-btn {
+    width: 50px;  /* Smaller than row3's 75px, appropriate for row2 */
+    height: 50px;
+    background: transparent;
+    border: none;
+    color: var(--text-icon);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.player-nav-btn:hover {
+    transform: scale(var(--row1-hover-scale));
+}
+
+.player-nav-btn:active,
+.player-nav-btn.active {
+    color: var(--text-primary);  /* White color when clicked/active */
+    transform: scale(0.95);
+}
+
+.player-nav-btn i {
+    font-size: 50px;  /* Sized appropriately for row2 */
+    line-height: 1;
+    display: block;
+    color: inherit;
+    margin: 0;
+    padding: 0;
 }
 
 .player-tab {
