@@ -1256,13 +1256,13 @@ body {
 
 /* Webkit browsers (Chrome, Safari, Edge) */
 .main-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 32px;  /* Wider to make square shape more visible */
     height: 24px;
     background: var(--text-icon);  /* Gray color matching our theme */
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 3px !important;  /* Force square with minimal rounding */
     box-shadow:
         inset 1px 1px 2px rgba(255,255,255,0.2),
         inset -1px -1px 2px rgba(0,0,0,0.3),
@@ -1328,9 +1328,9 @@ body {
 
 .timeline-handle {
     width: 24px;
-    height: 24px;
+    height: 32px;  /* Taller to match vertical slider proportions */
     background: var(--text-icon);  /* Match vertical slider thumb color */
-    border-radius: 4px;  /* Square like vertical sliders */
+    border-radius: 3px;  /* Square with minimal rounding like vertical sliders */
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
