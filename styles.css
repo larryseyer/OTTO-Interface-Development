@@ -1659,3 +1659,8 @@ body {
 .edit-pattern-btn:hover {
     transform: scale(var(--row1-hover-scale));
 }
+
+.edit-pattern-btn:active i,
+.edit-pattern-btn.active i {
+    color: var(--text-primary);  /* White icon when clicked/active */
+}
