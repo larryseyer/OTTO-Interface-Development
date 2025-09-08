@@ -1532,8 +1532,9 @@ body {
 .row5-left {
     flex: 0 0 var(--row5-left-width);
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* Align to top like right side */
     justify-content: center;
+    padding-top: 20px;  /* Add padding to match right side controls */
 }
 
 .row5-right {
