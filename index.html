@@ -171,19 +171,29 @@
                     <!-- Left Area 1: Edit pattern icon (25% of left) -->
                     <div class="row4-left-area1">
                         <button class="edit-pattern-btn">
-                            <i class="ph-thin ph-pencil"></i>
+                            <i class="ph-thin ph-gear"></i>
                         </button>
                     </div>
 
                     <!-- Left Area 2: Pattern group chevron combo (50% of left) -->
                     <div class="row4-left-area2">
-                        <button class="group-nav-btn group-prev">‹</button>
-                        <select class="favorites-select">
-                            <option value="favorites">Favorites</option>
-                            <option value="all">All Patterns</option>
-                            <option value="custom">Custom</option>
-                        </select>
-                        <button class="group-nav-btn group-next">›</button>
+                        <button class="group-nav-btn group-prev">
+                            <i class="ph-thin ph-caret-left"></i>
+                        </button>
+                        <div class="custom-dropdown group-dropdown" id="group-dropdown">
+                            <div class="dropdown-selected" id="group-selected">
+                                <span class="dropdown-text">Favorites</span>
+                                <i class="ph-thin ph-caret-down dropdown-arrow"></i>
+                            </div>
+                            <div class="dropdown-options" id="group-options">
+                                <div class="dropdown-option" data-value="favorites">Favorites</div>
+                                <div class="dropdown-option" data-value="all">All Patterns</div>
+                                <div class="dropdown-option" data-value="custom">Custom</div>
+                            </div>
+                        </div>
+                        <button class="group-nav-btn group-next">
+                            <i class="ph-thin ph-caret-right"></i>
+                        </button>
                     </div>
 
                     <!-- Left Area 3: Blank space for now (25% of left) -->

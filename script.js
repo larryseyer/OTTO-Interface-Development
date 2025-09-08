@@ -531,29 +531,82 @@ class OTTOAccurateInterface {
             });
         }
 
-        const favoritesSelect = document.querySelector('.favorites-select');
-        if (favoritesSelect) {
-            favoritesSelect.addEventListener('change', (e) => {
-                this.onPatternGroupChanged(this.currentPlayer, e.target.value);
-                console.log(`Player ${this.currentPlayer} pattern group: ${e.target.value}`);
+        // Setup group dropdown
+        const groupDropdown = document.getElementById('group-dropdown');
+        const groupSelected = document.getElementById('group-selected');
+        const groupOptions = document.getElementById('group-options');
+
+        if (groupDropdown && groupSelected) {
+            // Toggle dropdown on click
+            groupSelected.addEventListener('click', (e) => {
+                e.stopPropagation();
+                groupDropdown.classList.toggle('active');
+            });
+
+            // Handle option selection
+            if (groupOptions) {
+                groupOptions.querySelectorAll('.dropdown-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const value = option.dataset.value;
+                        const text = option.textContent;
+                        
+                        // Update selected text
+                        groupSelected.querySelector('.dropdown-text').textContent = text;
+                        
+                        // Close dropdown
+                        groupDropdown.classList.remove('active');
+                        
+                        // Trigger callback
+                        this.onPatternGroupChanged(this.currentPlayer, value);
+                        console.log(`Player ${this.currentPlayer} pattern group: ${value}`);
+                    });
+                });
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!groupDropdown.contains(e.target)) {
+                    groupDropdown.classList.remove('active');
+                }
             });
         }
     }
 
     navigatePatternGroup(direction) {
         // these should eventually come from our INI storage system.
-        const groups = ['Favorites', 'All Patterns', 'Custom', 'Recent', 'Rock', 'Jazz', 'Latin'];
-        const select = document.querySelector('.favorites-select');
-        if (!select) return;
+        const groups = ['favorites', 'all', 'custom'];
+        const groupDropdown = document.getElementById('group-dropdown');
+        const groupSelected = document.getElementById('group-selected');
+        const groupOptions = document.getElementById('group-options');
+        
+        if (!groupDropdown || !groupSelected) return;
 
-        const currentIndex = Array.from(select.options).findIndex(opt => opt.selected);
+        // Get current selection
+        const currentText = groupSelected.querySelector('.dropdown-text').textContent.toLowerCase();
+        const currentIndex = groups.findIndex(g => 
+            g === currentText || 
+            (g === 'all' && currentText === 'all patterns') ||
+            (g === 'favorites' && currentText === 'favorites') ||
+            (g === 'custom' && currentText === 'custom')
+        );
+        
         let newIndex = currentIndex + direction;
-
-        if (newIndex < 0) newIndex = select.options.length - 1;
-        if (newIndex >= select.options.length) newIndex = 0;
-
-        select.selectedIndex = newIndex;
-        select.dispatchEvent(new Event('change'));
+        
+        // Wrap around
+        if (newIndex < 0) newIndex = groups.length - 1;
+        if (newIndex >= groups.length) newIndex = 0;
+        
+        // Get the option element and trigger click
+        const newValue = groups[newIndex];
+        const optionToSelect = groupOptions.querySelector(`[data-value="${newValue}"]`);
+        
+        if (optionToSelect) {
+            const text = optionToSelect.textContent;
+            groupSelected.querySelector('.dropdown-text').textContent = text;
+            this.onPatternGroupChanged(this.currentPlayer, newValue);
+            console.log(`Player ${this.currentPlayer} pattern group: ${newValue}`);
+        }
     }
 
     setupPatternGrid() {
