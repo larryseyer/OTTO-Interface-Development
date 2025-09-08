@@ -171,6 +171,24 @@ body {
     border: 1px solid var(--border-color);
 }
 
+/* Mute Overlay - covers rows 3-5 */
+.mute-overlay {
+    position: absolute;
+    top: calc(var(--row1-height) + var(--row2-height));  /* Start after row 1 and 2 */
+    left: 0;
+    width: 100%;
+    height: calc(var(--row3-height) + var(--row4-height) + var(--row5-height));  /* Cover rows 3-5 */
+    background: rgba(0, 0, 0, 0.5);  /* Semi-transparent black overlay */
+    pointer-events: none;  /* Allow interaction with elements below */
+    z-index: 100;  /* Above content but below modals */
+    display: none;  /* Hidden by default */
+    transition: opacity 0.3s ease;
+}
+
+.mute-overlay.active {
+    display: block;
+}
+
 /* Splash Screen */
 .splash-screen {
     position: absolute;
@@ -712,6 +730,16 @@ body {
 .player-tab.active {
     color: var(--button-text-active);
     font-weight: 400;  /* Keep regular weight even when active */
+}
+
+/* Muted player tab styling */
+.player-tab.muted {
+    color: var(--text-black);  /* Black color for muted players */
+    opacity: 0.7;  /* Slightly dimmed */
+}
+
+.player-tab.muted.active {
+    color: var(--text-black);  /* Stay black even when active and muted */
 }
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */

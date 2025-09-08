@@ -425,6 +425,17 @@ class OTTOAccurateInterface {
         if (this.linkStates) {
             this.updateLinkIconStates();
         }
+
+        // Update mute overlay based on current player's mute state
+        this.updateMuteOverlay();
+        
+        // Update all player tabs' muted visual state
+        for (let i = 1; i <= this.maxPlayers; i++) {
+            const tab = document.querySelector(`.player-tab[data-player="${i}"]`);
+            if (tab && this.playerStates[i]) {
+                tab.classList.toggle('muted', this.playerStates[i].muted);
+            }
+        }
     }
 
     setupKitControls() {
@@ -516,6 +527,16 @@ class OTTOAccurateInterface {
                 const state = this.playerStates[this.currentPlayer];
                 state.muted = !state.muted;
                 muteDrummerBtn.classList.toggle('muted', state.muted);
+                
+                // Update player tab muted state
+                const playerTab = document.querySelector(`.player-tab[data-player="${this.currentPlayer}"]`);
+                if (playerTab) {
+                    playerTab.classList.toggle('muted', state.muted);
+                }
+                
+                // Update overlay visibility
+                this.updateMuteOverlay();
+                
                 this.onMuteDrummer(this.currentPlayer, state.muted);
                 console.log(`Player ${this.currentPlayer} drummer muted: ${state.muted}`);
             });
@@ -868,6 +889,16 @@ class OTTOAccurateInterface {
                 linkIcon.classList.add('linked');
             }
         });
+    }
+
+    updateMuteOverlay() {
+        const overlay = document.querySelector('.mute-overlay');
+        const state = this.playerStates[this.currentPlayer];
+        
+        if (overlay) {
+            // Show overlay if current player is muted
+            overlay.classList.toggle('active', state.muted);
+        }
     }
 
     setupTopBarControls() {
