@@ -83,9 +83,9 @@
     /* Row Heights - Configurable percentages */
     --row1-height: 10%;  /* Top bar */
     --row2-height: 8%;  /* Player tabs */
-    --row3-height: 15%;  /* Drum kit section */
-    --row4-height: 7%;  /* Pattern groups */
-    --row5-height: 55%;  /* Pattern matrix - largest section */
+    --row3-height: 18%;  /* Drum kit section */
+    --row4-height: 12%;  /* Pattern groups */
+    --row5-height: 47%;  /* Pattern matrix - largest section */
     --row6-height: 5%;   /* Loop section */
 
     /* Global hover zoom for row1 elements */
@@ -407,7 +407,7 @@ body {
 
 .dropdown-selected {
     background: transparent;
-    color: #777777;
+    color: var(--text-icon);
     font-size: 44px;
     font-weight: 400;
     padding: 5px 15px;
@@ -437,7 +437,7 @@ body {
 
 .dropdown-arrow {
     font-size: 24px;
-    color: #777777;
+    color: var(--text-icon);
     transition: transform 0.3s ease;
     user-select: none !important;  /* Prevent text selection */
     -webkit-user-select: none !important;
@@ -528,7 +528,7 @@ body {
     font-family: 'Roboto', sans-serif;
     font-size: 55px;  /* Perfect size */
     font-weight: 100; /* ExtraLight */
-    color: #777777;
+    color: var(--text-icon);
     min-width: 95px;  /* Adjusted min-width */
     text-align: center;
     letter-spacing: -2px;
@@ -586,7 +586,7 @@ body {
 .otto-logo {
     font-size: 60px;
     font-weight: 400;
-    color: #777777;
+    color: var(--text-icon);
     font-family: 'Playfair Display', serif;
     letter-spacing: 1px;
 }
@@ -678,8 +678,8 @@ body {
     background: var(--bg-secondary);
     /* border-bottom: 1px solid var(--border-color); */  /* Commented out - no border between row3 and row4 */
     display: flex;
-    align-items: center;
-    padding: 0 20px;
+    align-items: flex-start;  /* Align items to top instead of center */
+    padding: 10px 20px 0 20px;  /* Add small top padding for alignment */
     /* gap removed to allow proper percentage-based layout */
 }
 
@@ -786,7 +786,7 @@ body {
 
 .kit-dropdown .dropdown-selected {
     background: transparent;
-    color: #777777;
+    color: var(--text-icon);
     font-size: 58px; /* 20% larger than 48px */
     font-weight: 400;
     padding: 0 15px;
@@ -807,7 +807,7 @@ body {
 
 .kit-dropdown .dropdown-arrow {
     font-size: 29px; /* 20% larger than presets (24px) */
-    color: #777777;
+    color: var(--text-icon);
     transition: transform 0.3s ease;
     user-select: none !important;
     -webkit-user-select: none !important;
@@ -919,8 +919,8 @@ body {
     background: var(--bg-secondary);
     /* border-bottom: 1px solid var(--border-color); */  /* Commented out - no border between row4 and row5 */
     display: flex;
-    align-items: center;
-    padding: 0 20px;
+    align-items: flex-end;  /* Align items to bottom */
+    padding: 0 20px 10px 20px;  /* Add bottom padding */
 }
 
 .pattern-group-controls {
@@ -930,8 +930,8 @@ body {
 }
 
 .group-nav-btn {
-    width: 44px;  /* 50% larger than 29px */
-    height: 44px;  /* 50% larger than 29px */
+    width: 62px;  /* 40% larger than 44px */
+    height: 62px;  /* 40% larger than 44px */
     background: transparent;
     border: none;
     color: var(--text-icon);
@@ -941,10 +941,11 @@ body {
     align-items: center;
     justify-content: center;
     padding: 0;
+    margin: 0;
 }
 
 .group-nav-btn i {
-    font-size: 48.75px;  /* 30% larger than 37.5px */
+    font-size: 68px;  /* 40% larger than 48.75px */
     color: var(--text-icon);
 }
 
@@ -960,10 +961,12 @@ body {
 .group-dropdown {
     position: relative;
     min-width: 216px;  /* 50% larger than 144px */
+    margin: 0;
+    padding: 0;
 }
 
 .group-dropdown .dropdown-selected {
-    padding: 9px 48px 9px 18px;  /* 50% larger padding */
+    padding: 0 48px 12px 18px;  /* Add 12px bottom padding to center with chevrons */
     background: transparent;
     border: none;
     border-radius: 4px;
@@ -974,10 +977,12 @@ body {
     transition: all 0.2s ease;
     position: relative;
     font-family: 'Playfair Display', serif;
-    font-size: 27px;  /* 50% larger than 18px */
+    font-size: 38px;  /* 40% larger than 27px */
     font-weight: 500;
-    color: var(--text-muted);  /* Use muted color like other dropdowns */
+    color: var(--text-icon);  /* Match preset and drumkit menu color */
     white-space: nowrap;
+    margin: 0;
+    line-height: 1;
 }
 
 .group-dropdown .dropdown-arrow {
@@ -985,8 +990,8 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 26px;  /* 25% larger (was 21px) */
-    color: var(--text-icon);
+    font-size: 36px;  /* 40% larger than 26px */
+    color: var(--text-icon);  /* Match preset and drumkit menu color */
     transition: transform 0.3s ease;
     pointer-events: none;
 }
@@ -1019,8 +1024,8 @@ body {
     cursor: pointer;
     transition: background 0.2s ease;
     font-family: 'Playfair Display', serif;
-    font-size: 24px;  /* 50% larger than 16px */
-    color: var(--text-muted);  /* Use muted color */
+    font-size: 34px;  /* 40% larger than 24px */
+    color: var(--text-icon);  /* Match preset and drumkit menu color */
     white-space: nowrap;
 }
 
@@ -1461,59 +1466,64 @@ body {
 .row3-area-1 {
     flex: 0 0 var(--row3-area1-width);
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* Top-align player number */
     justify-content: flex-start;  /* Left-align player number */
     padding-left: 20px;  /* Match the container padding */
+    padding-top: 5px;  /* Small top padding */
 }
 
 .row3-area-2 {
     flex: 0 0 var(--row3-area2-width);
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* Top-align edit button */
     justify-content: flex-end;  /* Right-align edit button */
+    padding-top: 5px;  /* Small top padding */
 }
 
 .row3-area-3 {
     flex: 0 0 var(--row3-area3-width);
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* Top-align dropdown and chevrons */
     justify-content: center;
     gap: 10px;
+    padding-top: 5px;  /* Small top padding */
 }
 
 .row3-area-4 {
     flex: 0 0 var(--row3-area4-width);
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* Top-align mixer icon */
     justify-content: flex-start;  /* Left-align mixer icon */
+    padding-top: 5px;  /* Small top padding */
 }
 
 .row3-area-5 {
     flex: 0 0 var(--row3-area5-width);
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* Top-align mute button */
     justify-content: flex-end;  /* Right-align mute button */
     padding-right: 20px;  /* Match the container padding */
+    padding-top: 5px;  /* Small top padding */
 }
 
 /* Row 4 Main Divisions */
 .row4-left {
     flex: 0 0 var(--row4-left-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
 }
 
 .row4-right {
     flex: 0 0 var(--row4-right-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
 }
 
 /* Row 4 Left Areas */
 .row4-left-area1 {
     flex: 0 0 var(--row4-left-area1-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
     justify-content: flex-end;  /* Right-align gear icon */
     padding-right: 10px;  /* Add some space from the edge */
 }
@@ -1521,7 +1531,7 @@ body {
 .row4-left-area2 {
     flex: 0 0 var(--row4-left-area2-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
     justify-content: center;
     gap: 20px;  /* Increased gap from 10px to 20px for better separation */
 }
@@ -1534,7 +1544,7 @@ body {
 .row4-right-area1 {
     flex: 0 0 var(--row4-right-area1-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
     justify-content: center;
     height: 100%;
 }
@@ -1542,7 +1552,7 @@ body {
 .row4-right-area2 {
     flex: 0 0 var(--row4-right-area2-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
     justify-content: center;
     height: 100%;
 }
@@ -1550,7 +1560,7 @@ body {
 .row4-right-area3 {
     flex: 0 0 var(--row4-right-area3-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
     justify-content: center;
     height: 100%;
 }
@@ -1558,7 +1568,7 @@ body {
 .row4-right-area4 {
     flex: 0 0 var(--row4-right-area4-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
     justify-content: center;
     height: 100%;
 }
@@ -1566,15 +1576,15 @@ body {
 .row4-right-area5 {
     flex: 0 0 var(--row4-right-area5-width);
     display: flex;
-    align-items: center;
+    align-items: flex-end;  /* Align to bottom */
     justify-content: center;
     height: 100%;
 }
 
 .section-label {
     font-family: 'Playfair Display', serif !important;
-    font-size: 24px;  /* 50% larger than 16px */
-    color: var(--text-muted);
+    font-size: 31px;  /* Reduced by 10% from 34px */
+    color: var(--text-icon);  /* Match preset and drumkit menu color */
     text-transform: none;
     letter-spacing: 0.5px;
     font-weight: 300;
@@ -1699,8 +1709,8 @@ body {
 
 /* Edit pattern button - increased by 50% from previous */
 .edit-pattern-btn {
-    width: 48px;  /* 50% larger than 32px */
-    height: 48px;  /* 50% larger than 32px */
+    width: 67px;  /* 40% larger than 48px */
+    height: 67px;  /* 40% larger than 48px */
     background: transparent;
     border: none;
     cursor: pointer;
@@ -1708,10 +1718,12 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    margin: 0;
+    padding: 0;
 }
 
 .edit-pattern-btn i {
-    font-size: 36px;  /* 25% larger (was 29px) */
+    font-size: 50px;  /* 40% larger than 36px */
     color: var(--text-icon);
 }
 
