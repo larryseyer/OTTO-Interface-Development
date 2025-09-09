@@ -486,12 +486,13 @@ body {
     align-items: center;
     flex: 0 0 var(--row1-area1-width);
     justify-content: flex-start;
-    min-width: 0;  /* Allow shrinking if needed */
+    min-width: 150px;  /* Minimum width to prevent crushing */
     overflow: visible;  /* Allow buttons to be fully clickable */
     padding-right: 10px;  /* Add space between area1 and area2 */
     box-sizing: border-box;  /* Include padding in width calculation */
     position: relative;
     z-index: 20;  /* Higher z-index to ensure buttons are above dropdown */
+    flex-shrink: 0;  /* Prevent shrinking */
 }
 
 .row1-area1 .icon-btn {
@@ -504,19 +505,27 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex: 0 0 var(--row1-area2-width);
+    flex: 1 1 var(--row1-area2-width);  /* Allow shrinking and growing */
     justify-content: center;
     position: relative;  /* For dropdown arrow positioning */
     overflow: visible;  /* Allow dropdown menu to show */
     padding: 0 10px;  /* Add padding to keep content away from edges */
     box-sizing: border-box;  /* Include padding in width calculation */
     z-index: 5;  /* Lower than area1 buttons */
+    min-width: 0;  /* Allow shrinking below content size */
 }
 
 /* Specific constraint for preset dropdown */
 #preset-dropdown {
-    max-width: calc(100% - 20px);  /* Account for padding */
+    width: 100%;  /* Use full width of container */
+    max-width: 100%;  /* Don't exceed container */
     margin: 0 auto;
+    min-width: 0;  /* Allow shrinking */
+}
+
+/* Increase height for preset dropdown options to extend to bottom of row 5 */
+#preset-dropdown .dropdown-options {
+    max-height: calc(85vh);  /* Can extend through row 5 (10% + 8% + 18% + 12% + 47% = 95% - 10% for row1 = 85%) */
 }
 
 /* Row 1 Area 3: Play/Pause Transport (centered) */
@@ -542,8 +551,9 @@ body {
     flex: 0 0 var(--row1-area5-width);
     justify-content: flex-end;
     gap: 15px;  /* Match other icon spacing */
-    min-width: 0;  /* Allow shrinking if needed */
+    min-width: 200px;  /* Minimum width to prevent crushing */
     position: relative;  /* Create stacking context */
+    flex-shrink: 0;  /* Prevent shrinking */
 }
 
 .row1-area5 .icon-btn {
@@ -710,6 +720,7 @@ body {
     -webkit-user-select: none !important;
     -moz-user-select: none !important;
     -ms-user-select: none !important;
+    min-width: 0;  /* Allow shrinking */
 }
 
 .dropdown-selected:hover {
@@ -723,6 +734,9 @@ body {
     -webkit-user-select: none !important;
     -moz-user-select: none !important;
     -ms-user-select: none !important;
+    white-space: nowrap;  /* Prevent text wrapping */
+    overflow: hidden;  /* Hide overflow */
+    text-overflow: ellipsis;  /* Add ellipsis for long text */
 }
 
 .dropdown-arrow {

@@ -130,6 +130,11 @@ class OTTOAccurateInterface {
     isPresetLocked(presetKey) {
         return this.presetLocks[presetKey] === true;
     }
+    
+    presetExists(name) {
+        const key = name.toLowerCase().replace(/\s+/g, '-');
+        return this.presets.hasOwnProperty(key);
+    }
 
     togglePresetLock(presetKey) {
         this.presetLocks[presetKey] = !this.presetLocks[presetKey];
@@ -173,9 +178,12 @@ class OTTOAccurateInterface {
         const presetEditBtn = document.getElementById('preset-edit-btn');
         const presetModal = document.getElementById('preset-modal');
         const presetModalClose = document.getElementById('preset-modal-close');
-        const presetSaveBtn = document.getElementById('preset-save-btn');
-        const presetSaveAsBtn = document.getElementById('preset-save-as-btn');
+        const presetUndoBtn = document.getElementById('preset-undo-btn');
         const presetNameInput = document.getElementById('preset-name-input');
+        
+        // Track preset history for undo functionality
+        this.presetHistory = [];
+        this.maxHistorySize = 20;
         
         // Open preset modal
         if (presetEditBtn) {
@@ -201,20 +209,22 @@ class OTTOAccurateInterface {
             });
         }
         
-        // Save preset (overwrite current)
-        if (presetSaveBtn) {
-            presetSaveBtn.addEventListener('click', () => {
-                this.saveCurrentPreset();
+        // Undo button
+        if (presetUndoBtn) {
+            presetUndoBtn.addEventListener('click', () => {
+                this.undoPresetChange();
             });
         }
         
-        // Save As new preset
-        if (presetSaveAsBtn) {
-            presetSaveAsBtn.addEventListener('click', () => {
-                const name = presetNameInput.value.trim();
-                if (name) {
-                    this.savePresetAs(name);
-                    presetNameInput.value = '';
+        // Add preset creation on Enter key or when input loses focus with new value
+        if (presetNameInput) {
+            presetNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const name = presetNameInput.value.trim();
+                    if (name && !this.presetExists(name)) {
+                        this.savePresetAs(name);
+                        presetNameInput.value = '';
+                    }
                 }
             });
         }
@@ -247,6 +257,9 @@ class OTTOAccurateInterface {
         
         presetList.innerHTML = '';
         
+        // Also update the dropdown whenever we render the preset list
+        this.updatePresetDropdown();
+        
         for (const [key, preset] of Object.entries(this.presets)) {
             const presetItem = document.createElement('div');
             presetItem.className = 'preset-item';
@@ -264,15 +277,26 @@ class OTTOAccurateInterface {
                 presetName.appendChild(lockIcon);
             }
             
+            // Auto-load preset when clicking on name
             presetName.addEventListener('click', () => {
+                this.saveToHistory(); // Save current state before loading
                 this.loadPreset(key);
-                this.closePresetModal();
+                this.closePresetModal(); // Close modal after loading
             });
             
             const presetActions = document.createElement('div');
             presetActions.className = 'preset-item-actions';
             
-            // Lock/Unlock button
+            // Duplicate button
+            const duplicateBtn = document.createElement('button');
+            duplicateBtn.className = 'preset-item-btn';
+            duplicateBtn.innerHTML = '<i class="ph-thin ph-copy"></i>';
+            duplicateBtn.title = 'Duplicate Preset';
+            duplicateBtn.addEventListener('click', () => {
+                this.duplicatePreset(key);
+            });
+            
+            // Lock/Unlock button - instant toggle
             const lockBtn = document.createElement('button');
             const isLocked = this.isPresetLocked(key);
             lockBtn.className = isLocked ? 'preset-item-btn locked' : 'preset-item-btn unlocked';
@@ -282,34 +306,35 @@ class OTTOAccurateInterface {
             lockBtn.title = isLocked ? 'Unlock Preset' : 'Lock Preset';
             lockBtn.addEventListener('click', () => {
                 this.togglePresetLock(key);
+                // Instant toggle - no confirmation needed
             });
             
-            // Load button
-            const loadBtn = document.createElement('button');
-            loadBtn.className = 'preset-item-btn';
-            loadBtn.innerHTML = '<i class="ph-thin ph-download-simple"></i>';
-            loadBtn.title = 'Load Preset';
-            loadBtn.addEventListener('click', () => {
-                this.loadPreset(key);
-                this.closePresetModal();
+            // Export button (formerly Load button)
+            const exportBtn = document.createElement('button');
+            exportBtn.className = 'preset-item-btn';
+            exportBtn.innerHTML = '<i class="ph-thin ph-download-simple"></i>';
+            exportBtn.title = 'Export Preset';
+            exportBtn.addEventListener('click', () => {
+                this.exportPreset(key);
             });
             
-            // Delete button (not for default)
+            // Delete button (not for default) - instant delete
             if (key !== 'default') {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'preset-item-btn delete';
                 deleteBtn.innerHTML = '<i class="ph-thin ph-trash"></i>';
                 deleteBtn.title = 'Delete Preset';
                 deleteBtn.addEventListener('click', () => {
-                    if (confirm(`Delete preset "${preset.name}"?`)) {
-                        this.deletePreset(key);
-                    }
+                    // Instant delete - no confirmation
+                    this.saveToHistory(); // Save state before delete
+                    this.deletePreset(key);
                 });
                 presetActions.appendChild(deleteBtn);
             }
             
+            presetActions.appendChild(duplicateBtn);
             presetActions.appendChild(lockBtn);
-            presetActions.appendChild(loadBtn);
+            presetActions.appendChild(exportBtn);
             presetItem.appendChild(presetName);
             presetItem.appendChild(presetActions);
             presetList.appendChild(presetItem);
@@ -335,12 +360,15 @@ class OTTOAccurateInterface {
         this.presets[key] = preset;
         this.currentPreset = key;
         
-        // Update dropdown
-        this.updatePresetDropdown();
-        
         this.savePresetsToStorage();
         this.showNotification(`Preset "${name}" created`);
-        this.renderPresetList();
+        this.renderPresetList(); // This will also update the dropdown
+        
+        // Update the dropdown selected text to show the new preset
+        const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
+        if (dropdownText) {
+            dropdownText.textContent = name;
+        }
     }
 
     loadPreset(key) {
@@ -376,10 +404,22 @@ class OTTOAccurateInterface {
         this.setTempo(this.tempo);
         this.setLoopPosition(this.loopPosition);
         
-        // Update preset dropdown
+        // Update preset dropdown display text
         const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
         if (dropdownText) {
             dropdownText.textContent = preset.name;
+        }
+        
+        // Update the selected state in the dropdown options
+        const dropdownOptions = document.getElementById('preset-options');
+        if (dropdownOptions) {
+            dropdownOptions.querySelectorAll('.dropdown-option').forEach(opt => {
+                if (opt.dataset.value === key) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
         }
         
         // Update lock display
@@ -403,6 +443,112 @@ class OTTOAccurateInterface {
         this.savePresetsToStorage();
         this.showNotification(`Deleted preset "${name}"`);
         this.renderPresetList();
+    }
+    
+    duplicatePreset(key) {
+        const originalPreset = this.presets[key];
+        if (!originalPreset) return;
+        
+        // Create a new name for the duplicate
+        let copyNumber = 1;
+        let newName = `${originalPreset.name} Copy`;
+        let newKey = newName.toLowerCase().replace(/\s+/g, '-');
+        
+        // Find a unique name
+        while (this.presets[newKey]) {
+            copyNumber++;
+            newName = `${originalPreset.name} Copy ${copyNumber}`;
+            newKey = newName.toLowerCase().replace(/\s+/g, '-');
+        }
+        
+        // Create the duplicate
+        const duplicatedPreset = JSON.parse(JSON.stringify(originalPreset));
+        duplicatedPreset.name = newName;
+        duplicatedPreset.timestamp = Date.now();
+        
+        // Rebuild presets object to maintain order (insert after original)
+        const newPresets = {};
+        for (const [k, v] of Object.entries(this.presets)) {
+            newPresets[k] = v;
+            if (k === key) {
+                // Insert the duplicate right after the original
+                newPresets[newKey] = duplicatedPreset;
+            }
+        }
+        
+        this.presets = newPresets;
+        this.savePresetsToStorage();
+        this.updatePresetDropdown();
+        this.renderPresetList();
+        this.showNotification(`Created duplicate: "${newName}"`);
+    }
+    
+    exportPreset(key) {
+        const preset = this.presets[key];
+        if (!preset) return;
+        
+        // Create a blob with the preset data
+        const dataStr = JSON.stringify(preset, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `otto-preset-${preset.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.showNotification(`Exported preset: "${preset.name}"`);
+    }
+    
+    saveToHistory() {
+        // Save current state to history
+        const historyEntry = {
+            presets: JSON.parse(JSON.stringify(this.presets)),
+            currentPreset: this.currentPreset,
+            presetLocks: JSON.parse(JSON.stringify(this.presetLocks)),
+            timestamp: Date.now()
+        };
+        
+        this.presetHistory.push(historyEntry);
+        
+        // Limit history size
+        if (this.presetHistory.length > this.maxHistorySize) {
+            this.presetHistory.shift();
+        }
+    }
+    
+    undoPresetChange() {
+        if (this.presetHistory.length === 0) {
+            this.showNotification('No changes to undo');
+            return;
+        }
+        
+        // Get the last history entry
+        const lastState = this.presetHistory.pop();
+        
+        // Restore the state
+        this.presets = lastState.presets;
+        this.currentPreset = lastState.currentPreset;
+        this.presetLocks = lastState.presetLocks;
+        
+        // Update storage and UI
+        this.savePresetsToStorage();
+        this.savePresetLocksToStorage();
+        this.updatePresetDropdown();
+        this.renderPresetList();
+        this.updatePresetLockDisplay();
+        
+        // Update dropdown text
+        const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
+        if (dropdownText && this.presets[this.currentPreset]) {
+            dropdownText.textContent = this.presets[this.currentPreset].name;
+        }
+        
+        this.showNotification('Undo successful');
     }
 
     updatePresetDropdown() {
@@ -636,6 +782,11 @@ class OTTOAccurateInterface {
                 option.className = 'dropdown-option';
                 option.dataset.value = key;
                 option.textContent = preset.name;
+                
+                // Mark as selected if it's the current preset
+                if (key === this.currentPreset) {
+                    option.classList.add('selected');
+                }
                 
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
