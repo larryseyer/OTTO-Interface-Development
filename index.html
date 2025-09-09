@@ -22,6 +22,38 @@
             <img src="Images/OTTO_Splash_Screen.png" alt="OTTO" class="splash-logo">
         </div>
 
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="settings-modal" style="display: none;">
+            <div class="settings-modal-content">
+                <div class="settings-modal-header">
+                    <h2>Settings</h2>
+                    <button class="settings-modal-close" id="settings-modal-close">
+                        <i class="ph-thin ph-x"></i>
+                    </button>
+                </div>
+                <div class="settings-modal-body">
+                    <div class="settings-section">
+                        <h3>Application Settings</h3>
+                        <div class="settings-item">
+                            <button class="settings-btn danger-btn" id="settings-factory-reset-btn">
+                                <i class="ph-thin ph-arrow-clockwise"></i>
+                                <span>Reset Default Preset to Factory Settings</span>
+                            </button>
+                            <p class="settings-description">Restores the Default preset to original factory values. Use this if your Default preset has become corrupted.</p>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h3>MIDI Settings</h3>
+                        <p class="settings-placeholder">MIDI configuration will be available in a future update.</p>
+                    </div>
+                    <div class="settings-section">
+                        <h3>Audio Settings</h3>
+                        <p class="settings-placeholder">Audio configuration will be available in a future update.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Preset Management Modal -->
         <div id="preset-modal" class="preset-modal">
             <div class="preset-modal-content">
@@ -34,9 +66,17 @@
                 <div class="preset-modal-body">
                     <div class="preset-modal-controls">
                         <input type="text" id="preset-name-input" class="preset-name-input" placeholder="Enter preset name...">
+                        <button class="preset-action-btn" id="preset-new-btn">
+                            <i class="ph-thin ph-plus"></i>
+                            <span>New</span>
+                        </button>
                         <button class="preset-action-btn" id="preset-undo-btn">
                             <i class="ph-thin ph-arrow-counter-clockwise"></i>
                             <span>Undo</span>
+                        </button>
+                        <button class="preset-action-btn" id="preset-factory-reset-btn" style="background-color: #8b0000;">
+                            <i class="ph-thin ph-arrow-clockwise"></i>
+                            <span>Reset Default</span>
                         </button>
                     </div>
                     <div class="preset-list-container">

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Factory Reset Feature</title>
+</head>
+<body>
+    <h1>OTTO Factory Reset Test</h1>
+    <p>Test the factory reset functionality to restore Default preset to original values:</p>
+    
+    <h2>Method 1: Settings Window (Recommended)</h2>
+    <ol>
+        <li>Click the Settings button (gear icon in row 1, area 1)</li>
+        <li>The Settings window should open</li>
+        <li>Find "Reset Default Preset to Factory Settings" button (red)</li>
+        <li>Click it and confirm the dialog</li>
+        <li>Default preset should be restored to factory values</li>
+        <li>Settings window closes automatically after reset</li>
+    </ol>
+    
+    <h2>Method 2: Preset Management Window (Temporary)</h2>
+    <ol>
+        <li>Click the Preset Edit button (pencil icon in row 1)</li>
+        <li>The Preset Management modal should open</li>
+        <li>Find "Reset Default" button (red, on the right)</li>
+        <li>Click it and confirm the dialog</li>
+        <li>Default preset should be restored</li>
+    </ol>
+    
+    <h2>Before Testing - Corrupt the Default Preset:</h2>
+    <ol>
+        <li>Load the Default preset</li>
+        <li>Mute some players</li>
+        <li>Change kits, patterns, sliders</li>
+        <li>Change toggles and fills</li>
+        <li>These changes auto-save to Default</li>
+    </ol>
+    
+    <h2>Expected Results After Factory Reset:</h2>
+    <ul>
+        <li>✅ All players unmuted</li>
+        <li>✅ Kit: Acoustic</li>
+        <li>✅ Pattern Group: Favorites</li>
+        <li>✅ Pattern: Basic selected</li>
+        <li>✅ All players have Auto toggle active</li>
+        <li>✅ Fill 16 selected</li>
+        <li>✅ Swing: 10</li>
+        <li>✅ Energy: 50</li>
+        <li>✅ Volume: 75</li>
+        <li>✅ Tempo: 120</li>
+        <li>✅ Loop position: 0</li>
+        <li>✅ Any locks on Default preset removed</li>
+    </ul>
+    
+    <h2>Console Commands for Verification:</h2>
+    <pre>
+// Check Default preset before reset
+otto.presets['default']
+
+// Manually trigger factory reset
+otto.resetToFactoryDefaults()
+
+// Check Default preset after reset
+otto.presets['default']
+
+// Check a specific player's mute state
+otto.presets['default'].playerStates[1].muted  // Should be false
+otto.presets['default'].playerStates[2].muted  // Should be false
+    </pre>
+    
+    <h2>Visual Confirmation:</h2>
+    <p>After factory reset:</p>
+    <ul>
+        <li>No mute overlays visible</li>
+        <li>No player tabs showing muted state</li>
+        <li>Basic pattern highlighted</li>
+        <li>Auto toggle active on all players</li>
+        <li>Notification: "Default preset reset to factory settings"</li>
+    </ul>
+    
+    <h2>Important Notes:</h2>
+    <ul>
+        <li>Factory reset ONLY affects the Default preset</li>
+        <li>Other presets (Preset 1, Preset 2, etc.) are not affected</li>
+        <li>This is a destructive operation - current Default settings are lost</li>
+        <li>Confirmation dialog prevents accidental resets</li>
+        <li>Reset Default button in preset modal is temporary (will move to Settings later)</li>
+    </ul>
+</body>
+</html>

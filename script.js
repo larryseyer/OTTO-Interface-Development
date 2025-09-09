@@ -28,12 +28,12 @@ class OTTOAccurateInterface {
             this.playerStates[i] = {
                 presetName: 'Default',
                 kitName: 'Acoustic',
-                patternGroup: 'favorites',  // Add pattern group tracking
-                selectedPattern: null,
+                patternGroup: 'favorites',  // Default pattern group
+                selectedPattern: 'basic',  // Pattern 1 is "Basic"
                 kitMixerActive: false,
                 muted: false,  // Track mute state
                 toggleStates: {
-                    auto: i === 1, // Only player 1 starts with Auto active
+                    auto: true,  // All players now start with Auto active
                     manual: false,
                     stick: false,
                     ride: false,
@@ -42,15 +42,17 @@ class OTTOAccurateInterface {
                 fillStates: {
                     4: false,
                     8: false,
-                    16: false,
+                    16: true,  // Fill 16 selected by default
                     32: false,
                     solo: false
                 },
                 sliderValues: {
-                    swing: 25,
+                    swing: 10,  // Changed from 25 to 10
                     energy: 50,
                     volume: 75
                 },
+                // Note: These appear to be mini sliders in row 3 that haven't been implemented yet
+                // Keeping them for now but they should be clarified/removed if not needed
                 miniSliders: {
                     1: 50,
                     2: 30,
@@ -256,6 +258,7 @@ class OTTOAccurateInterface {
         const presetModal = document.getElementById('preset-modal');
         const presetModalClose = document.getElementById('preset-modal-close');
         const presetUndoBtn = document.getElementById('preset-undo-btn');
+        const presetNewBtn = document.getElementById('preset-new-btn');
         const presetNameInput = document.getElementById('preset-name-input');
         
         // Track preset history for undo functionality
@@ -293,6 +296,21 @@ class OTTOAccurateInterface {
             });
         }
         
+        // New preset button
+        if (presetNewBtn) {
+            presetNewBtn.addEventListener('click', () => {
+                this.createNewDefaultPreset();
+            });
+        }
+        
+        // Factory reset button
+        const factoryResetBtn = document.getElementById('preset-factory-reset-btn');
+        if (factoryResetBtn) {
+            factoryResetBtn.addEventListener('click', () => {
+                this.resetToFactoryDefaults();
+            });
+        }
+        
         // Add preset creation on Enter key or when input loses focus with new value
         if (presetNameInput) {
             presetNameInput.addEventListener('keypress', (e) => {
@@ -302,6 +320,41 @@ class OTTOAccurateInterface {
                         this.savePresetAs(name);
                         presetNameInput.value = '';
                     }
+                }
+            });
+        }
+    }
+
+    setupSettingsWindow() {
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsModalClose = document.getElementById('settings-modal-close');
+        const settingsFactoryResetBtn = document.getElementById('settings-factory-reset-btn');
+        
+        // Close settings modal
+        if (settingsModalClose) {
+            settingsModalClose.addEventListener('click', () => {
+                if (settingsModal) {
+                    settingsModal.classList.remove('active');
+                }
+            });
+        }
+        
+        // Close modal when clicking outside
+        if (settingsModal) {
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal) {
+                    settingsModal.classList.remove('active');
+                }
+            });
+        }
+        
+        // Factory reset button in settings
+        if (settingsFactoryResetBtn) {
+            settingsFactoryResetBtn.addEventListener('click', () => {
+                this.resetToFactoryDefaults();
+                // Close settings modal after reset
+                if (settingsModal) {
+                    settingsModal.classList.remove('active');
                 }
             });
         }
@@ -706,6 +759,176 @@ class OTTOAccurateInterface {
         this.showNotification('Undo successful');
     }
 
+    createNewDefaultPreset() {
+        // Find the next available preset number
+        let nextNum = 1;
+        const presetKeys = Object.keys(this.presets);
+        
+        // Find existing numbered presets to determine next number
+        presetKeys.forEach(key => {
+            const preset = this.presets[key];
+            const match = preset.name.match(/^Preset (\d+)$/);
+            if (match) {
+                const num = parseInt(match[1]);
+                nextNum = Math.max(nextNum, num + 1);
+            }
+        });
+        
+        // Create new preset name and key
+        const newPresetName = `Preset ${nextNum}`;
+        const newPresetKey = `preset-${nextNum}`;
+        
+        // Create fresh preset with all default values
+        const freshPreset = {
+            name: newPresetName,
+            timestamp: Date.now(),
+            playerStates: {},
+            linkStates: null,
+            tempo: 120,
+            numberOfPlayers: 4,
+            loopPosition: 0
+        };
+        
+        // Initialize default player states with updated defaults
+        for (let i = 1; i <= this.maxPlayers; i++) {
+            freshPreset.playerStates[i] = {
+                presetName: 'Default',
+                kitName: 'Acoustic',
+                patternGroup: 'favorites',  // Default pattern group
+                selectedPattern: 'basic',    // "Basic" pattern selected
+                kitMixerActive: false,
+                muted: false,
+                toggleStates: {
+                    auto: true,     // All players have Auto active
+                    manual: false,
+                    stick: false,
+                    ride: false,
+                    lock: false
+                },
+                fillStates: {
+                    4: false,
+                    8: false,
+                    16: true,       // Fill 16 selected
+                    32: false,
+                    solo: false
+                },
+                sliderValues: {
+                    swing: 10,      // Swing at 10
+                    energy: 50,
+                    volume: 75
+                },
+                // Note: These mini sliders may be for future kit mixer implementation
+                miniSliders: {
+                    1: 50,
+                    2: 30,
+                    3: 80
+                }
+            };
+        }
+        
+        // Save the new preset
+        this.presets[newPresetKey] = freshPreset;
+        
+        // Load the new preset
+        this.loadPreset(newPresetKey);
+        
+        // Update the preset dropdown
+        this.updatePresetDropdown();
+        
+        // Render the preset list in the modal
+        this.renderPresetList();
+        
+        // Save to storage
+        this.savePresetsToStorage();
+        
+        // Clear the input field if it has text
+        const presetNameInput = document.getElementById('preset-name-input');
+        if (presetNameInput) {
+            presetNameInput.value = '';
+        }
+        
+        this.showNotification(`Created "${newPresetName}"`);
+    }
+
+    resetToFactoryDefaults() {
+        // Confirm with user before resetting
+        const confirmReset = confirm('This will reset the Default preset to factory settings. Any changes will be lost. Continue?');
+        if (!confirmReset) return;
+        
+        // Create factory default preset
+        const factoryDefault = {
+            name: 'Default',
+            timestamp: Date.now(),
+            playerStates: {},
+            linkStates: null,
+            tempo: 120,
+            numberOfPlayers: 4,
+            loopPosition: 0
+        };
+        
+        // Initialize all player states with factory defaults
+        for (let i = 1; i <= this.maxPlayers; i++) {
+            factoryDefault.playerStates[i] = {
+                presetName: 'Default',
+                kitName: 'Acoustic',
+                patternGroup: 'favorites',
+                selectedPattern: 'basic',
+                kitMixerActive: false,
+                muted: false,  // Ensure no players are muted
+                toggleStates: {
+                    auto: true,     // All players have Auto active
+                    manual: false,
+                    stick: false,
+                    ride: false,
+                    lock: false
+                },
+                fillStates: {
+                    4: false,
+                    8: false,
+                    16: true,       // Fill 16 selected
+                    32: false,
+                    solo: false
+                },
+                sliderValues: {
+                    swing: 10,
+                    energy: 50,
+                    volume: 75
+                },
+                miniSliders: {
+                    1: 50,
+                    2: 30,
+                    3: 80
+                }
+            };
+        }
+        
+        // Replace the default preset
+        this.presets['default'] = factoryDefault;
+        
+        // If currently on default preset, reload it
+        if (this.currentPreset === 'default') {
+            this.loadPreset('default');
+        }
+        
+        // Update the preset dropdown
+        this.updatePresetDropdown();
+        
+        // Render the preset list in the modal
+        this.renderPresetList();
+        
+        // Save to storage
+        this.savePresetsToStorage();
+        
+        // Clear any locks on default preset
+        if (this.presetLocks && this.presetLocks['default']) {
+            delete this.presetLocks['default'];
+            this.savePresetLocksToStorage();
+            this.updatePresetLockDisplay();
+        }
+        
+        this.showNotification('Default preset reset to factory settings');
+    }
+
     updatePresetDropdown() {
         const presetOptions = document.getElementById('preset-options');
         const dropdown = document.getElementById('preset-dropdown');
@@ -789,6 +1012,7 @@ class OTTOAccurateInterface {
         this.setupSplashScreen();
         this.setupPlayerTabs();
         this.setupPresetControls();
+        this.setupSettingsWindow();  // Setup settings window
         this.setupKitControls();
         this.setupPatternGroupControls();
         this.setupPatternGrid();
@@ -2192,6 +2416,13 @@ class OTTOAccurateInterface {
     }
 
     onSettingsClicked() {
+        // Open the settings modal
+        const settingsModal = document.getElementById('settings-modal');
+        if (settingsModal) {
+            settingsModal.classList.add('active');
+        }
+        
+        // Also call JUCE if available
         if (window.juce?.onSettingsClicked) {
             window.juce.onSettingsClicked();
         }
