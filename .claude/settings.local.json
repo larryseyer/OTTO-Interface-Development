@@ -19,7 +19,8 @@
       "mcp__serena__find_file",
       "mcp__serena__check_onboarding_performed",
       "Read(//Users/larryseyer/Desktop/**)",
-      "mcp__serena__insert_after_symbol"
+      "mcp__serena__insert_after_symbol",
+      "mcp__serena__find_referencing_symbols"
     ],
     "deny": [],
     "ask": []

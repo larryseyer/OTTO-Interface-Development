@@ -28,6 +28,7 @@ class OTTOAccurateInterface {
             this.playerStates[i] = {
                 presetName: 'Default',
                 kitName: 'Acoustic',
+                patternGroup: 'favorites',  // Add pattern group tracking
                 selectedPattern: null,
                 kitMixerActive: false,
                 muted: false,  // Track mute state
@@ -1124,11 +1125,32 @@ class OTTOAccurateInterface {
             }
         });
 
-        // Kit mixer button no longer has active state
-        // const kitMixerBtn = document.getElementById('kit-mixer-btn');
-        // if (kitMixerBtn) {
-        //     kitMixerBtn.classList.toggle('active', state.kitMixerActive);
-        // }
+        // Update pattern group dropdown
+        const groupDropdownText = document.querySelector('#group-dropdown .dropdown-text');
+        if (groupDropdownText && state.patternGroup) {
+            // Convert patternGroup value to display text
+            const groupDisplayNames = {
+                'favorites': 'Favorites',
+                'all': 'All Patterns',
+                'custom': 'Custom'
+            };
+            groupDropdownText.textContent = groupDisplayNames[state.patternGroup] || 'Favorites';
+        }
+        
+        // Update selected state on group options
+        const groupOptions = document.querySelectorAll('#group-dropdown .dropdown-option');
+        groupOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === state.patternGroup) {
+                option.classList.add('selected');
+            }
+        });
+
+        // Update kit mixer button state
+        const kitMixerBtn = document.getElementById('kit-mixer-btn');
+        if (kitMixerBtn) {
+            kitMixerBtn.classList.toggle('active', state.kitMixerActive);
+        }
 
         // Update mute drummer button state
         const muteDrummerBtn = document.getElementById('mute-drummer-btn');
@@ -1262,9 +1284,17 @@ class OTTOAccurateInterface {
         const kitMixerBtn = document.getElementById('kit-mixer-btn');
         if (kitMixerBtn) {
             kitMixerBtn.addEventListener('click', () => {
-                // No longer toggling state - just call the function
-                this.onKitMixerToggle(this.currentPlayer, true);
-                console.log(`Player ${this.currentPlayer} kit mixer clicked`);
+                // Toggle kit mixer state
+                const state = this.playerStates[this.currentPlayer];
+                state.kitMixerActive = !state.kitMixerActive;
+                
+                // Update visual state if needed
+                kitMixerBtn.classList.toggle('active', state.kitMixerActive);
+                
+                // Call the function and save
+                this.onKitMixerToggle(this.currentPlayer, state.kitMixerActive);
+                this.triggerAutoSave();
+                console.log(`Player ${this.currentPlayer} kit mixer: ${state.kitMixerActive}`);
             });
         }
 
@@ -1280,8 +1310,13 @@ class OTTOAccurateInterface {
         const muteDrummerBtn = document.getElementById('mute-drummer-btn');
         if (muteDrummerBtn) {
             muteDrummerBtn.addEventListener('click', () => {
+                // Get current player state
                 const state = this.playerStates[this.currentPlayer];
+                
+                // Toggle muted state
                 state.muted = !state.muted;
+                
+                // Update button visual state
                 muteDrummerBtn.classList.toggle('muted', state.muted);
                 
                 // Update player tab muted state
@@ -1293,8 +1328,11 @@ class OTTOAccurateInterface {
                 // Update overlay visibility
                 this.updateMuteOverlay();
                 
+                // Trigger callbacks
                 this.onMuteDrummer(this.currentPlayer, state.muted);
                 this.triggerAutoSave();
+                this.triggerAppStateSave();
+                
                 console.log(`Player ${this.currentPlayer} drummer muted: ${state.muted}`);
             });
         }
@@ -1376,6 +1414,7 @@ class OTTOAccurateInterface {
                         
                         // Trigger callback
                         this.onPatternGroupChanged(this.currentPlayer, value);
+                        this.triggerAutoSave();
                         console.log(`Player ${this.currentPlayer} pattern group: ${value}`);
                     });
                 });
@@ -1422,6 +1461,7 @@ class OTTOAccurateInterface {
             const text = optionToSelect.textContent;
             groupSelected.querySelector('.dropdown-text').textContent = text;
             this.onPatternGroupChanged(this.currentPlayer, newValue);
+            this.triggerAutoSave();
             console.log(`Player ${this.currentPlayer} pattern group: ${newValue}`);
         }
     }
@@ -2087,6 +2127,11 @@ class OTTOAccurateInterface {
     }
 
     onPatternGroupChanged(playerNumber, groupName) {
+        // Save pattern group to player state
+        if (this.playerStates[playerNumber]) {
+            this.playerStates[playerNumber].patternGroup = groupName;
+        }
+        
         if (window.juce?.onPatternGroupChanged) {
             window.juce.onPatternGroupChanged(playerNumber, groupName);
         }

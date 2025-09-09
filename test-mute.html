@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mute Functionality</title>
+</head>
+<body>
+    <h1>OTTO Mute Test</h1>
+    <p>Open index.html in another tab and test the following:</p>
+    
+    <h2>Test Steps:</h2>
+    <ol>
+        <li>Click on Player 1 tab</li>
+        <li>Click the mute drummer button (row 3, area 5 - right side)</li>
+        <li>Check: Button should show muted state</li>
+        <li>Check: Overlay should appear over rows 3-5</li>
+        <li>Check: Player 1 tab should show muted visual</li>
+        <li>Switch to Player 2</li>
+        <li>Check: Mute button should show unmuted (Player 2's state)</li>
+        <li>Check: No overlay should be visible</li>
+        <li>Switch back to Player 1</li>
+        <li>Check: Mute button should still show muted</li>
+        <li>Check: Overlay should be visible again</li>
+    </ol>
+    
+    <h2>Console Commands for Debugging:</h2>
+    <pre>
+// Check all player mute states
+otto.playerStates
+
+// Check current player
+otto.currentPlayer
+
+// Check specific player mute state
+otto.playerStates[1].muted
+otto.playerStates[2].muted
+
+// Manually toggle mute for current player
+otto.playerStates[otto.currentPlayer].muted = !otto.playerStates[otto.currentPlayer].muted
+otto.updateUIForCurrentPlayer()
+    </pre>
+    
+    <h2>Expected Behaviors:</h2>
+    <ul>
+        <li>Each player has independent mute state</li>
+        <li>Mute state persists when switching players</li>
+        <li>Mute state saves with presets</li>
+        <li>Visual feedback: button image changes, overlay appears, tab shows muted state</li>
+    </ul>
+</body>
+</html>
