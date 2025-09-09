@@ -1456,7 +1456,7 @@ body {
 
 .toggle-btn {
     background: transparent;
-    padding: 12px 12px;  /* Match fill button padding exactly */
+    padding: 10px 12px;  /* Reduced vertical padding for 6 buttons */
     background-image: url('Images/Button080.png');
     background-size: 100% 600%; /* 6 states vertically */
     background-position: 0 0%; /* Normal state */
@@ -1464,7 +1464,7 @@ body {
     color: var(--text-black);  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 25px;  /* Matching size for toggles and fills */
+    font-size: 23px;  /* Reduced for 6 buttons */
     font-weight: 300;  /* Lighter weight for better readability */
     cursor: pointer;
     transition: all 0.02s ease;  /* Near instantaneous transition */
@@ -1490,12 +1490,12 @@ body {
 
 /* Lock button (last toggle) matches Solo button padding */
 .toggle-btn[data-toggle="lock"] {
-    padding-bottom: 15px;  /* Match Solo button extra padding exactly */
+    padding-bottom: 12px;  /* Reduced for 6 buttons */
 }
 
 .fill-btn {
     background: transparent;
-    padding: 12px 12px;  /* Increased vertical padding */
+    padding: 10px 12px;  /* Reduced vertical padding for 6 buttons */
     background-image: url('Images/Button080.png');
     background-size: 100% 600%; /* 6 states vertically */
     background-position: 0 0%; /* Normal state */
@@ -1503,12 +1503,13 @@ body {
     color: var(--text-black);  /* Black text like matrix buttons */
     border: none;
     font-family: 'Playfair Display', serif;
-    font-size: 25px;  /* Matching size for toggles and fills */
+    font-size: 23px;  /* Reduced for 6 buttons */
     font-weight: 300;
     cursor: pointer;
     transition: all 0.02s ease;  /* Near instantaneous transition */
     width: 100%;
     flex: 1;  /* Grow to fill available space */
+    line-height: 0.9;  /* Compensate for Playfair Display vs Roboto height - same as toggle buttons */
     /* Removed text-shadow for better readability */
 }
 
@@ -1527,16 +1528,25 @@ body {
 }
 
 /* Numbered fills buttons (1-4) use Roboto */
-.fill-btn:not(.solo) {
+.fill-btn[data-fill="4"],
+.fill-btn[data-fill="8"],
+.fill-btn[data-fill="16"],
+.fill-btn[data-fill="32"] {
     font-family: 'Roboto', sans-serif;
     font-weight: 400;  /* Regular weight */
+}
+
+/* Now button and Solo button use Playfair Display */
+.fill-btn[data-fill="now"] {
+    font-family: 'Playfair Display', serif;
+    font-weight: 300;  /* Match other Playfair buttons */
 }
 
 /* Solo button keeps Playfair Display */
 .fill-btn.solo {
     font-family: 'Playfair Display', serif;
     font-weight: 300;  /* Match other Playfair buttons */
-    padding-bottom: 15px;  /* Add 3px to bottom to push text up */
+    padding-bottom: 12px;  /* Reduced for 6 buttons */
 }
 
 .main-sliders {

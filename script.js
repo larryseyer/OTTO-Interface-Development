@@ -33,6 +33,7 @@ class OTTOAccurateInterface {
                 kitMixerActive: false,
                 muted: false,  // Track mute state
                 toggleStates: {
+                    none: false,
                     auto: true,  // All players now start with Auto active
                     manual: false,
                     stick: false,
@@ -40,6 +41,7 @@ class OTTOAccurateInterface {
                     lock: false
                 },
                 fillStates: {
+                    now: false,
                     4: false,
                     8: false,
                     16: true,  // Fill 16 selected by default
@@ -878,6 +880,7 @@ class OTTOAccurateInterface {
                 kitMixerActive: false,
                 muted: false,
                 toggleStates: {
+                    none: false,
                     auto: true,     // All players have Auto active
                     manual: false,
                     stick: false,
@@ -885,6 +888,7 @@ class OTTOAccurateInterface {
                     lock: false
                 },
                 fillStates: {
+                    now: false,
                     4: false,
                     8: false,
                     16: true,       // Fill 16 selected
@@ -955,6 +959,7 @@ class OTTOAccurateInterface {
                 kitMixerActive: false,
                 muted: false,  // Ensure no players are muted
                 toggleStates: {
+                    none: false,
                     auto: true,     // All players have Auto active
                     manual: false,
                     stick: false,
@@ -962,6 +967,7 @@ class OTTOAccurateInterface {
                     lock: false
                 },
                 fillStates: {
+                    now: false,
                     4: false,
                     8: false,
                     16: true,       // Fill 16 selected
@@ -1806,9 +1812,31 @@ class OTTOAccurateInterface {
                 const toggleType = toggleBtn.dataset.toggle;
                 const state = this.playerStates[this.currentPlayer];
 
+                // Handle 'None' button - turns off all other toggles
+                if (toggleType === 'none') {
+                    // Turn off all toggles
+                    Object.keys(state.toggleStates).forEach(key => {
+                        state.toggleStates[key] = false;
+                    });
+                    
+                    // Turn on 'none'
+                    state.toggleStates.none = true;
+                    
+                    // Update UI - remove active from all, add to none
+                    document.querySelectorAll('.toggle-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    toggleBtn.classList.add('active');
+                }
                 // Handle radio group behavior for Auto/Manual
-                if (toggleType === 'auto' || toggleType === 'manual') {
-                    // Clear both
+                else if (toggleType === 'auto' || toggleType === 'manual') {
+                    // Turn off 'none' if it's active
+                    if (state.toggleStates.none) {
+                        state.toggleStates.none = false;
+                        document.querySelector('[data-toggle="none"]').classList.remove('active');
+                    }
+                    
+                    // Clear both auto/manual
                     state.toggleStates.auto = false;
                     state.toggleStates.manual = false;
 
@@ -1823,6 +1851,12 @@ class OTTOAccurateInterface {
                         }
                     });
                 } else {
+                    // Turn off 'none' if it's active
+                    if (state.toggleStates.none) {
+                        state.toggleStates.none = false;
+                        document.querySelector('[data-toggle="none"]').classList.remove('active');
+                    }
+                    
                     // Toggle individual buttons
                     const isActive = toggleBtn.classList.contains('active');
                     toggleBtn.classList.toggle('active');
