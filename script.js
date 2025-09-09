@@ -287,6 +287,15 @@ class OTTOAccurateInterface {
             const presetActions = document.createElement('div');
             presetActions.className = 'preset-item-actions';
             
+            // Rename button
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'preset-item-btn';
+            renameBtn.innerHTML = '<i class="ph-thin ph-pencil-simple"></i>';
+            renameBtn.title = 'Rename Preset';
+            renameBtn.addEventListener('click', () => {
+                this.renamePreset(key);
+            });
+            
             // Duplicate button
             const duplicateBtn = document.createElement('button');
             duplicateBtn.className = 'preset-item-btn';
@@ -332,6 +341,7 @@ class OTTOAccurateInterface {
                 presetActions.appendChild(deleteBtn);
             }
             
+            presetActions.appendChild(renameBtn);
             presetActions.appendChild(duplicateBtn);
             presetActions.appendChild(lockBtn);
             presetActions.appendChild(exportBtn);
@@ -481,6 +491,73 @@ class OTTOAccurateInterface {
         this.updatePresetDropdown();
         this.renderPresetList();
         this.showNotification(`Created duplicate: "${newName}"`);
+    }
+    
+    renamePreset(key) {
+        const preset = this.presets[key];
+        if (!preset) return;
+        
+        // Create a prompt for the new name
+        const newName = prompt(`Rename preset "${preset.name}" to:`, preset.name);
+        
+        if (newName && newName.trim() && newName !== preset.name) {
+            const trimmedName = newName.trim();
+            const newKey = trimmedName.toLowerCase().replace(/\s+/g, '-');
+            
+            // Check if the new key already exists
+            if (this.presets[newKey] && newKey !== key) {
+                this.showNotification(`A preset named "${trimmedName}" already exists`);
+                return;
+            }
+            
+            // Save to history before renaming
+            this.saveToHistory();
+            
+            // If the key is changing, we need to recreate the presets object
+            if (newKey !== key) {
+                const newPresets = {};
+                for (const [k, v] of Object.entries(this.presets)) {
+                    if (k === key) {
+                        // Replace the old key with the new key
+                        v.name = trimmedName;
+                        newPresets[newKey] = v;
+                    } else {
+                        newPresets[k] = v;
+                    }
+                }
+                
+                this.presets = newPresets;
+                
+                // Update current preset if it was the renamed one
+                if (this.currentPreset === key) {
+                    this.currentPreset = newKey;
+                }
+                
+                // Update locks if the preset was locked
+                if (this.presetLocks[key]) {
+                    this.presetLocks[newKey] = this.presetLocks[key];
+                    delete this.presetLocks[key];
+                    this.savePresetLocksToStorage();
+                }
+            } else {
+                // Just update the name
+                preset.name = trimmedName;
+            }
+            
+            this.savePresetsToStorage();
+            this.updatePresetDropdown();
+            this.renderPresetList();
+            
+            // Update dropdown text if this is the current preset
+            if (this.currentPreset === newKey || this.currentPreset === key) {
+                const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
+                if (dropdownText) {
+                    dropdownText.textContent = trimmedName;
+                }
+            }
+            
+            this.showNotification(`Renamed to "${trimmedName}"`);
+        }
     }
     
     exportPreset(key) {
