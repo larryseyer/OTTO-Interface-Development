@@ -58,7 +58,7 @@
 
             <!-- Row 1: Top Bar (8% height) - 5 Main Areas -->
             <div class="top-bar">
-                <!-- Area 1: Settings, Link, and Cloud buttons -->
+                <!-- Area 1: Settings, Link, and Preset Edit buttons -->
                 <div class="row1-area1">
                     <button class="icon-btn" id="settings-btn">
                         <i class="ph-thin ph-gear"></i>
@@ -66,16 +66,13 @@
                     <button class="icon-btn" id="link-btn">
                         <i class="ph-thin ph-link"></i>
                     </button>
-                    <button class="icon-btn" id="upload-btn">
-                        <i class="ph-thin ph-cloud-arrow-up"></i>
+                    <button class="icon-btn" id="preset-edit-btn" title="Manage Presets">
+                        <i class="ph-thin ph-pencil-simple"></i>
                     </button>
                 </div>
 
-                <!-- Area 2: Chevrons and Presets dropdown -->
+                <!-- Area 2: Presets dropdown -->
                 <div class="row1-area2">
-                    <button class="preset-edit-btn" id="preset-edit-btn" title="Manage Presets">
-                        <i class="ph-thin ph-pencil-simple"></i>
-                    </button>
                     <div class="custom-dropdown" id="preset-dropdown">
                         <div class="dropdown-selected" id="preset-selected">
                             <span class="dropdown-text">Default</span>
@@ -108,8 +105,11 @@
                     <div class="tempo-display" id="tempo-display" contenteditable="false">120</div>
                 </div>
 
-                <!-- Area 5: Logo and Version -->
+                <!-- Area 5: Cloud Upload, Logo and Version -->
                 <div class="row1-area5">
+                    <button class="icon-btn" id="upload-btn">
+                        <i class="ph-thin ph-cloud-arrow-up"></i>
+                    </button>
                     <div class="logo-version-container" id="logo-version">
                         <span class="otto-logo">Otto</span>
                         <span class="version-text">Ver. <span id="version-number"></span></span>

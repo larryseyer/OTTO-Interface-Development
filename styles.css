@@ -37,12 +37,13 @@
     /* Dropdown menu font size */
     --dropdown-menu-font-size: 24px;  /* Base font size for all dropdown menu items */
 
-    /* Row 1 Area Percentages - Easily adjustable */
-    --row1-area1-width: 15%;  /* Settings, Link, Cloud buttons */
-    --row1-area2-width: 30%;  /* Chevrons and Presets dropdown */
-    --row1-area3-width: 10%;  /* Play/Pause button (centered) */
-    --row1-area4-width: 30%;  /* Tap Tempo and Tempo Display */
-    --row1-area5-width: 15%;  /* Logo and Version */
+    /* Row 1 Area Percentages - Must total 100% */
+    --row1-area1-width: 18%;  /* Settings, Link, Preset Edit buttons - increased for 3 icons */
+    --row1-area2-width: 28%;  /* Presets dropdown - needs space for text */
+    --row1-area3-width: 8%;   /* Play/Pause button (centered) */
+    --row1-area4-width: 23%;  /* Tempo Display */
+    --row1-area5-width: 23%;  /* Cloud, Logo and Version - increased for icon + text */
+    /* Total: 18% + 28% + 8% + 23% + 23% = 100% */
 
     /* Row 2 - Single area for player tabs */
     --row2-area1-width: 100%;  /* Player tabs full width */
@@ -213,32 +214,6 @@ body {
     display: flex !important;
     opacity: 1 !important;
     pointer-events: all !important;
-}
-
-/* Preset Edit Button */
-.preset-edit-btn {
-    width: var(--icon-size-standard);  /* Match gear, link, cloud icons */
-    height: var(--icon-size-standard);
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    /* margin-right removed - gap in flex container handles spacing */
-}
-
-.preset-edit-btn:hover {
-    transform: scale(var(--row1-hover-scale));
-    color: var(--text-primary);
-}
-
-.preset-edit-btn i {
-    font-size: var(--icon-size-standard);  /* Match other row1 icons */
-    line-height: 1;
 }
 
 /* Preset Management Modal */
@@ -465,25 +440,28 @@ body {
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 0 2%;
+    justify-content: center;  /* Center all areas */
+    padding: 0 20px;  /* Fixed padding to match other rows */
     position: relative;
+    box-sizing: border-box;  /* Include padding in width calculation */
 }
 
-/* Row 1 Area 1: Settings, Link, and Cloud buttons */
+/* Row 1 Area 1: Settings, Link, and Preset Edit buttons */
 .row1-area1 {
     display: flex;
     gap: 15px;
     align-items: center;
     flex: 0 0 var(--row1-area1-width);
     justify-content: flex-start;
+    min-width: 0;  /* Allow shrinking if needed */
+    overflow: hidden;  /* Prevent overflow */
 }
 
 /* Row 1 Area 2: Chevrons and Presets dropdown */
 .row1-area2 {
     display: flex;
     align-items: center;
-    gap: 15px;  /* Match area1 icon spacing */
+    gap: 10px;
     flex: 0 0 var(--row1-area2-width);
     justify-content: center;
     position: relative;  /* For dropdown arrow positioning */
@@ -505,12 +483,15 @@ body {
     justify-content: center;
 }
 
-/* Row 1 Area 5: Logo and Version */
+/* Row 1 Area 5: Cloud Upload, Logo and Version */
 .row1-area5 {
     display: flex;
     align-items: center;
     flex: 0 0 var(--row1-area5-width);
     justify-content: flex-end;
+    gap: 15px;  /* Match other icon spacing */
+    min-width: 0;  /* Allow shrinking if needed */
+    overflow: hidden;  /* Prevent overflow */
 }
 
 .logo-version-container {
