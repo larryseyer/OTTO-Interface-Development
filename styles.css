@@ -26,6 +26,10 @@
     --button-active-face: #999999;
     --button-active-highlight: #bbbbbb;
 
+    /* Modal overlay settings */
+    --modal-overlay-opacity: 0.8;  /* Global overlay darkness - adjust as needed */
+    --modal-animation-speed: 0.3s;  /* Animation duration for modal transitions */
+
     /* Interface dimensions */
     --interface-width: 1280px;
     --interface-height: 720px;
@@ -216,78 +220,9 @@ body {
     pointer-events: all !important;
 }
 
-/* Preset Management Modal */
-.preset-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
-.preset-modal.active {
-    display: flex;
-}
-
+/* Preset Management Modal - Specific overrides only */
 .preset-modal-content {
-    background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.preset-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.preset-modal-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 32px;
-    font-weight: 400;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.preset-modal-close {
-    width: 40px;
-    height: 40px;
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-}
-
-.preset-modal-close:hover {
-    color: var(--text-primary);
-    transform: scale(1.1);
-}
-
-.preset-modal-close i {
-    font-size: 30px;
-}
-
-.preset-modal-body {
-    padding: 20px;
-    overflow-y: auto;
-    flex: 1;
+    max-width: 700px;  /* Slightly wider for preset list */
 }
 
 .preset-modal-controls {
@@ -2176,25 +2111,29 @@ body {
     color: var(--text-primary);  /* White icon when clicked/active */
 }
 
-/* Settings Modal */
-.settings-modal {
+/* Generic Modal Window Styles */
+.modal-window {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
+    background: rgba(0, 0, 0, var(--modal-overlay-opacity));
+    display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--modal-animation-speed) ease;
 }
 
-.settings-modal.active {
-    display: flex !important;
+.modal-window.active {
+    opacity: 1;
+    pointer-events: all;
 }
 
-.settings-modal-content {
+.modal-content {
     background: var(--bg-main);
     border-radius: 8px;
     width: 90%;
@@ -2202,9 +2141,16 @@ body {
     max-height: 80vh;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transform: scale(0.95);
+    transition: transform var(--modal-animation-speed) ease;
 }
 
-.settings-modal-header {
+.modal-window.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
     padding: 20px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -2212,26 +2158,40 @@ body {
     align-items: center;
 }
 
-.settings-modal-header h2 {
+.modal-header h2 {
     margin: 0;
     color: var(--text-primary);
     font-size: 1.5rem;
 }
 
-.settings-modal-close {
+.modal-close {
     background: none;
     border: none;
     color: var(--text-icon);
     font-size: 1.5rem;
     cursor: pointer;
     padding: 5px;
+    transition: color 0.2s;
 }
 
-.settings-modal-body {
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
     padding: 20px;
     overflow-y: auto;
     flex-grow: 1;
 }
+
+.modal-placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+/* Settings Modal Specific Styles */
 
 .settings-section {
     margin-bottom: 30px;

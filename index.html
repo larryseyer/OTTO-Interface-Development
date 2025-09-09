@@ -22,16 +22,76 @@
             <img src="Images/OTTO_Splash_Screen.png" alt="OTTO" class="splash-logo">
         </div>
 
-        <!-- Settings Modal -->
-        <div id="settings-modal" class="settings-modal" style="display: none;">
-            <div class="settings-modal-content">
-                <div class="settings-modal-header">
-                    <h2>Settings</h2>
-                    <button class="settings-modal-close" id="settings-modal-close">
+        <!-- Link Modal -->
+        <div id="link-modal" class="modal-window">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Link Settings</h2>
+                    <button class="modal-close" id="link-modal-close">
                         <i class="ph-thin ph-x"></i>
                     </button>
                 </div>
-                <div class="settings-modal-body">
+                <div class="modal-body">
+                    <p class="modal-placeholder">Link configuration will be available here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mixer Modal -->
+        <div id="mixer-modal" class="modal-window">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Kit Mixer: <span id="mixer-kit-name">Acoustic</span></h2>
+                    <button class="modal-close" id="mixer-modal-close">
+                        <i class="ph-thin ph-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-placeholder">Mixer controls will be available here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drum Kit Edit Modal -->
+        <div id="kit-edit-modal" class="modal-window">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Edit Drum Kit</h2>
+                    <button class="modal-close" id="kit-edit-modal-close">
+                        <i class="ph-thin ph-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-placeholder">Drum kit editor will be available here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Favorites Edit Modal (Pattern Group Edit) -->
+        <div id="favorites-modal" class="modal-window">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Edit Pattern Group - <span id="pattern-group-name">Favorites</span></h2>
+                    <button class="modal-close" id="favorites-modal-close">
+                        <i class="ph-thin ph-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-placeholder">Pattern group editor will be available here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal-window">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="modal-close" id="settings-modal-close">
+                        <i class="ph-thin ph-x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
                     <div class="settings-section">
                         <h3>Application Settings</h3>
                         <div class="settings-item">
@@ -55,15 +115,15 @@
         </div>
 
         <!-- Preset Management Modal -->
-        <div id="preset-modal" class="preset-modal">
-            <div class="preset-modal-content">
-                <div class="preset-modal-header">
+        <div id="preset-modal" class="modal-window preset-modal">
+            <div class="modal-content preset-modal-content">
+                <div class="modal-header preset-modal-header">
                     <h2>Preset Management</h2>
-                    <button class="preset-modal-close" id="preset-modal-close">
+                    <button class="modal-close preset-modal-close" id="preset-modal-close">
                         <i class="ph-thin ph-x"></i>
                     </button>
                 </div>
-                <div class="preset-modal-body">
+                <div class="modal-body preset-modal-body">
                     <div class="preset-modal-controls">
                         <input type="text" id="preset-name-input" class="preset-name-input" placeholder="Enter preset name...">
                         <button class="preset-action-btn" id="preset-new-btn">

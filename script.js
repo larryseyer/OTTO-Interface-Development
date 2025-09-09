@@ -360,6 +360,85 @@ class OTTOAccurateInterface {
         }
     }
 
+    setupAllModals() {
+        // Setup Link Modal
+        this.setupModalWindow('link-modal', 'link-modal-close');
+        
+        // Setup Mixer Modal
+        this.setupModalWindow('mixer-modal', 'mixer-modal-close');
+        
+        // Setup Kit Edit Modal
+        this.setupModalWindow('kit-edit-modal', 'kit-edit-modal-close');
+        
+        // Setup Favorites Modal
+        this.setupModalWindow('favorites-modal', 'favorites-modal-close');
+    }
+    
+    setupModalWindow(modalId, closeButtonId) {
+        const modal = document.getElementById(modalId);
+        const closeBtn = document.getElementById(closeButtonId);
+        
+        if (closeBtn && modal) {
+            // Close button click
+            closeBtn.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+            
+            // Click outside to close
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        }
+    }
+    
+    openLinkModal() {
+        const modal = document.getElementById('link-modal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+    }
+    
+    openMixerModal() {
+        const modal = document.getElementById('mixer-modal');
+        const kitName = document.getElementById('mixer-kit-name');
+        if (modal) {
+            modal.classList.add('active');
+            // Update kit name in title - mixer belongs to the kit, not the player
+            if (kitName) {
+                const currentKitName = this.playerStates[this.currentPlayer].kitName;
+                kitName.textContent = currentKitName;
+            }
+        }
+    }
+    
+    openKitEditModal() {
+        const modal = document.getElementById('kit-edit-modal');
+        if (modal) {
+            modal.classList.add('active');
+            // Note: Kit editing is global - editing a kit affects all players using it
+        }
+    }
+    
+    openFavoritesModal() {
+        const modal = document.getElementById('favorites-modal');
+        const groupName = document.getElementById('pattern-group-name');
+        if (modal) {
+            modal.classList.add('active');
+            // Update group name in title
+            if (groupName) {
+                const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+                const displayNames = {
+                    'favorites': 'Favorites',
+                    'all': 'All Patterns',
+                    'custom': 'Custom'
+                };
+                groupName.textContent = displayNames[currentGroup] || 'Pattern Group';
+            }
+        }
+    }
+
     openPresetModal() {
         const modal = document.getElementById('preset-modal');
         if (modal) {
@@ -1013,6 +1092,7 @@ class OTTOAccurateInterface {
         this.setupPlayerTabs();
         this.setupPresetControls();
         this.setupSettingsWindow();  // Setup settings window
+        this.setupAllModals();  // Setup all modal windows
         this.setupKitControls();
         this.setupPatternGroupControls();
         this.setupPatternGrid();
@@ -1597,6 +1677,7 @@ class OTTOAccurateInterface {
     setupPatternGroupControls() {
         const groupPrev = document.querySelector('.group-prev');
         const groupNext = document.querySelector('.group-next');
+        const editPatternBtn = document.querySelector('.edit-pattern-btn');
 
         if (groupPrev) {
             groupPrev.addEventListener('click', () => {
@@ -1607,6 +1688,13 @@ class OTTOAccurateInterface {
         if (groupNext) {
             groupNext.addEventListener('click', () => {
                 this.navigatePatternGroup(1);
+            });
+        }
+        
+        // Setup edit pattern button to open favorites modal
+        if (editPatternBtn) {
+            editPatternBtn.addEventListener('click', () => {
+                this.openFavoritesModal();
             });
         }
 
@@ -2386,12 +2474,20 @@ class OTTOAccurateInterface {
     }
 
     onEditKit(playerNumber) {
+        // Open the Kit Edit modal
+        this.openKitEditModal();
+        
+        // Also call JUCE if available
         if (window.juce?.onEditKit) {
             window.juce.onEditKit(playerNumber);
         }
     }
 
     onKitMixerToggle(playerNumber, isActive) {
+        // Open the Mixer modal
+        this.openMixerModal();
+        
+        // Also call JUCE if available
         if (window.juce?.onKitMixerToggle) {
             window.juce.onKitMixerToggle(playerNumber, isActive);
         }
@@ -2429,6 +2525,10 @@ class OTTOAccurateInterface {
     }
 
     onLinkClicked() {
+        // Open the Link modal
+        this.openLinkModal();
+        
+        // Also call JUCE if available
         if (window.juce?.onLinkClicked) {
             window.juce.onLinkClicked();
         }
