@@ -374,6 +374,9 @@ class OTTOAccurateInterface {
         
         // Setup Favorites Modal
         this.setupModalWindow('favorites-modal', 'favorites-modal-close');
+        
+        // Setup Cloud Modal
+        this.setupModalWindow('cloud-modal', 'cloud-modal-close');
     }
     
     setupModalWindow(modalId, closeButtonId) {
@@ -397,6 +400,13 @@ class OTTOAccurateInterface {
     
     openLinkModal() {
         const modal = document.getElementById('link-modal');
+        if (modal) {
+            modal.classList.add('active');
+        }
+    }
+
+    openCloudModal() {
+        const modal = document.getElementById('cloud-modal');
         if (modal) {
             modal.classList.add('active');
         }
@@ -2569,6 +2579,10 @@ class OTTOAccurateInterface {
     }
 
     onUploadClicked() {
+        // Open the cloud modal
+        this.openCloudModal();
+        
+        // Also call JUCE backend if available
         if (window.juce?.onUploadClicked) {
             window.juce.onUploadClicked();
         }
