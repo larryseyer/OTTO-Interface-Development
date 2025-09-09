@@ -75,6 +75,12 @@ class OTTOAccurateInterface {
             'world-fusion': this.createPresetFromCurrentState('World Fusion')
         };
         
+        // Initialize preset lock states (default all unlocked)
+        this.presetLocks = this.loadPresetLocksFromStorage() || {};
+        
+        // Setup auto-save functionality
+        this.setupAutoSave();
+        
         // Setup preset management UI
         this.setupPresetManagement();
     }
@@ -94,6 +100,75 @@ class OTTOAccurateInterface {
         };
     }
 
+    setupAutoSave() {
+        // Debounce timer for auto-save
+        this.autoSaveTimer = null;
+        this.autoSaveDelay = 500; // 500ms delay
+        
+        // Track if we should auto-save
+        this.enableAutoSave = true;
+    }
+
+    triggerAutoSave() {
+        // Don't auto-save if current preset is locked or auto-save is disabled
+        if (!this.enableAutoSave || this.isPresetLocked(this.currentPreset)) {
+            return;
+        }
+        
+        // Clear existing timer
+        if (this.autoSaveTimer) {
+            clearTimeout(this.autoSaveTimer);
+        }
+        
+        // Set new timer
+        this.autoSaveTimer = setTimeout(() => {
+            this.savePreset();
+            console.log(`Auto-saved preset: ${this.currentPreset}`);
+        }, this.autoSaveDelay);
+    }
+
+    isPresetLocked(presetKey) {
+        return this.presetLocks[presetKey] === true;
+    }
+
+    togglePresetLock(presetKey) {
+        this.presetLocks[presetKey] = !this.presetLocks[presetKey];
+        this.savePresetLocksToStorage();
+        this.updatePresetLockDisplay();
+        this.refreshPresetList();
+        
+        const isLocked = this.presetLocks[presetKey];
+        const presetName = this.presets[presetKey]?.name || presetKey;
+        this.showNotification(`Preset "${presetName}" ${isLocked ? 'locked' : 'unlocked'}`);
+    }
+
+    savePresetLocksToStorage() {
+        try {
+            localStorage.setItem('otto_preset_locks', JSON.stringify(this.presetLocks));
+        } catch (e) {
+            console.error('Failed to save preset locks:', e);
+        }
+    }
+
+    loadPresetLocksFromStorage() {
+        try {
+            const stored = localStorage.getItem('otto_preset_locks');
+            return stored ? JSON.parse(stored) : {};
+        } catch (e) {
+            console.error('Failed to load preset locks:', e);
+            return {};
+        }
+    }
+
+    updatePresetLockDisplay() {
+        // Update main dropdown lock icon
+        const lockIndicator = document.getElementById('preset-lock-indicator');
+        if (lockIndicator) {
+            const isLocked = this.isPresetLocked(this.currentPreset);
+            lockIndicator.style.display = isLocked ? 'flex' : 'none';
+        }
+    }
+
     setupPresetManagement() {
         const presetEditBtn = document.getElementById('preset-edit-btn');
         const presetModal = document.getElementById('preset-modal');
@@ -104,7 +179,8 @@ class OTTOAccurateInterface {
         
         // Open preset modal
         if (presetEditBtn) {
-            presetEditBtn.addEventListener('click', () => {
+            presetEditBtn.addEventListener('click', (e) => {
+                e.stopPropagation();  // Prevent dropdown from triggering
                 this.openPresetModal();
             });
         }
@@ -178,6 +254,16 @@ class OTTOAccurateInterface {
             const presetName = document.createElement('div');
             presetName.className = 'preset-item-name';
             presetName.textContent = preset.name;
+            
+            // Add lock icon next to name if locked
+            if (this.isPresetLocked(key)) {
+                const lockIcon = document.createElement('i');
+                lockIcon.className = 'ph-thin ph-lock preset-lock-icon';
+                lockIcon.style.marginLeft = '8px';
+                lockIcon.style.color = 'var(--text-primary)';  // White for locked
+                presetName.appendChild(lockIcon);
+            }
+            
             presetName.addEventListener('click', () => {
                 this.loadPreset(key);
                 this.closePresetModal();
@@ -185,6 +271,18 @@ class OTTOAccurateInterface {
             
             const presetActions = document.createElement('div');
             presetActions.className = 'preset-item-actions';
+            
+            // Lock/Unlock button
+            const lockBtn = document.createElement('button');
+            const isLocked = this.isPresetLocked(key);
+            lockBtn.className = isLocked ? 'preset-item-btn locked' : 'preset-item-btn unlocked';
+            lockBtn.innerHTML = isLocked ? 
+                '<i class="ph-thin ph-lock"></i>' :   // Show lock icon when locked
+                '<i class="ph-thin ph-lock-open"></i>'; // Show lock-open when unlocked
+            lockBtn.title = isLocked ? 'Unlock Preset' : 'Lock Preset';
+            lockBtn.addEventListener('click', () => {
+                this.togglePresetLock(key);
+            });
             
             // Load button
             const loadBtn = document.createElement('button');
@@ -210,6 +308,7 @@ class OTTOAccurateInterface {
                 presetActions.appendChild(deleteBtn);
             }
             
+            presetActions.appendChild(lockBtn);
             presetActions.appendChild(loadBtn);
             presetItem.appendChild(presetName);
             presetItem.appendChild(presetActions);
@@ -217,10 +316,15 @@ class OTTOAccurateInterface {
         }
     }
 
-    saveCurrentPreset() {
+    savePreset() {
         const preset = this.createPresetFromCurrentState(this.presets[this.currentPreset]?.name || 'Untitled');
         this.presets[this.currentPreset] = preset;
         this.savePresetsToStorage();
+        return preset;
+    }
+
+    saveCurrentPreset() {
+        const preset = this.savePreset();
         this.showNotification(`Preset "${preset.name}" saved`);
         this.renderPresetList();
     }
@@ -277,6 +381,9 @@ class OTTOAccurateInterface {
         if (dropdownText) {
             dropdownText.textContent = preset.name;
         }
+        
+        // Update lock display
+        this.updatePresetLockDisplay();
         
         this.showNotification(`Loaded preset "${preset.name}"`);
     }
@@ -776,6 +883,7 @@ class OTTOAccurateInterface {
                 // Update player state
                 this.playerStates[this.currentPlayer].kitName = selectedText;
                 this.onKitChanged(this.currentPlayer, selectedText);
+                this.triggerAutoSave();
                 console.log(`Player ${this.currentPlayer} kit changed to: ${selectedText}`);
             });
         });
@@ -823,6 +931,7 @@ class OTTOAccurateInterface {
                 this.updateMuteOverlay();
                 
                 this.onMuteDrummer(this.currentPlayer, state.muted);
+                this.triggerAutoSave();
                 console.log(`Player ${this.currentPlayer} drummer muted: ${state.muted}`);
             });
         }
@@ -969,6 +1078,7 @@ class OTTOAccurateInterface {
 
                 this.playerStates[this.currentPlayer].selectedPattern = patternName;
                 this.onPatternSelected(this.currentPlayer, patternName);
+                this.triggerAutoSave();
 
                 console.log(`Player ${this.currentPlayer} selected pattern: ${patternName}`);
             });
@@ -1005,6 +1115,7 @@ class OTTOAccurateInterface {
                 }
 
                 this.onToggleChanged(this.currentPlayer, toggleType, state.toggleStates[toggleType]);
+                this.triggerAutoSave();
                 console.log(`Player ${this.currentPlayer} toggle ${toggleType}: ${state.toggleStates[toggleType]}`);
             });
         });
@@ -1021,6 +1132,7 @@ class OTTOAccurateInterface {
 
                 state.fillStates[fillType] = !isActive;
                 this.onFillChanged(this.currentPlayer, fillType, !isActive);
+                this.triggerAutoSave();
 
                 console.log(`Player ${this.currentPlayer} fill ${fillType}: ${!isActive}`);
             });
@@ -1036,6 +1148,7 @@ class OTTOAccurateInterface {
 
                 this.playerStates[this.currentPlayer].sliderValues[sliderType] = value;
                 this.onSliderChanged(this.currentPlayer, sliderType, value);
+                this.triggerAutoSave();
 
                 // Check if this player is a master and propagate value
                 if (this.linkStates && this.linkStates[sliderType]) {
@@ -1057,6 +1170,7 @@ class OTTOAccurateInterface {
 
                 this.playerStates[this.currentPlayer].miniSliders[sliderIndex] = value;
                 this.onMiniSliderChanged(this.currentPlayer, sliderIndex, value);
+                this.triggerAutoSave();
 
                 console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
             });
@@ -1340,6 +1454,7 @@ class OTTOAccurateInterface {
 
                 this.setLoopPosition(percentage);
                 this.onLoopPositionChanged(percentage);
+                this.triggerAutoSave();
             });
 
             document.addEventListener('mouseup', () => {
@@ -1422,6 +1537,7 @@ class OTTOAccurateInterface {
             tempoDisplay.textContent = Math.round(bpm);
         }
         this.onTempoChanged(bpm);
+        this.triggerAutoSave();
     }
 
     handleTapTempo() {

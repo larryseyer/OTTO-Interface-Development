@@ -410,12 +410,45 @@ body {
     border-color: var(--text-icon);
 }
 
+/* Lock button specific states */
+.preset-item-btn.locked {
+    color: var(--text-primary);  /* White when locked */
+    border-color: var(--text-primary);
+}
+
+.preset-item-btn.unlocked {
+    color: var(--text-icon);  /* Grey when unlocked */
+}
+
 .preset-item-btn.delete:hover {
     color: #ff4444;
     border-color: #ff4444;
 }
 
 .preset-item-btn i {
+    font-size: 18px;
+}
+
+/* Preset lock icon that appears next to preset names */
+.preset-lock-icon {
+    display: inline-block;
+    margin-left: 8px;
+    color: var(--text-icon);
+    font-size: 16px;
+    vertical-align: middle;
+}
+
+.preset-item-name .preset-lock-icon {
+    color: var(--text-icon);
+    opacity: 0.8;
+}
+
+/* Lock indicator in main dropdown */
+.preset-lock-indicator {
+    display: none;
+    align-items: center;
+    margin-left: 8px;
+    color: var(--text-icon);
     font-size: 18px;
 }
 
@@ -454,7 +487,16 @@ body {
     flex: 0 0 var(--row1-area1-width);
     justify-content: flex-start;
     min-width: 0;  /* Allow shrinking if needed */
-    overflow: hidden;  /* Prevent overflow */
+    overflow: visible;  /* Allow buttons to be fully clickable */
+    padding-right: 10px;  /* Add space between area1 and area2 */
+    box-sizing: border-box;  /* Include padding in width calculation */
+    position: relative;
+    z-index: 20;  /* Higher z-index to ensure buttons are above dropdown */
+}
+
+.row1-area1 .icon-btn {
+    position: relative;
+    z-index: 25;  /* Ensure edit button is above dropdown */
 }
 
 /* Row 1 Area 2: Chevrons and Presets dropdown */
@@ -465,6 +507,16 @@ body {
     flex: 0 0 var(--row1-area2-width);
     justify-content: center;
     position: relative;  /* For dropdown arrow positioning */
+    overflow: visible;  /* Allow dropdown menu to show */
+    padding: 0 10px;  /* Add padding to keep content away from edges */
+    box-sizing: border-box;  /* Include padding in width calculation */
+    z-index: 5;  /* Lower than area1 buttons */
+}
+
+/* Specific constraint for preset dropdown */
+#preset-dropdown {
+    max-width: calc(100% - 20px);  /* Account for padding */
+    margin: 0 auto;
 }
 
 /* Row 1 Area 3: Play/Pause Transport (centered) */
@@ -635,7 +687,7 @@ body {
 .custom-dropdown {
     position: relative;
     width: 100%;
-    max-width: 350px;
+    max-width: 100%;  /* Changed from 350px to prevent overflow */
     font-family: 'Playfair Display', serif;
     user-select: none;  /* Prevent text selection */
     -webkit-user-select: none;
