@@ -1285,6 +1285,10 @@ body {
 .group-nav-btn i {
     font-size: 68px;  /* 40% larger than 48.75px */
     color: var(--text-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .group-nav-btn:hover {
@@ -1304,7 +1308,7 @@ body {
 }
 
 .group-dropdown .dropdown-selected {
-    padding: 0 48px 12px 18px;  /* Add 12px bottom padding to center with chevrons */
+    padding: 0 18px 0 18px;  /* Equal padding for true centering */
     background: transparent;
     border: none;
     border-radius: 4px;
@@ -1365,6 +1369,7 @@ body {
     font-size: var(--dropdown-menu-font-size);  /* Using global dropdown menu font size */
     color: var(--text-icon);  /* Match preset and drumkit menu color */
     white-space: nowrap;
+    text-align: center;  /* Center the dropdown option text */
 }
 
 .group-dropdown .dropdown-option:hover {
@@ -1911,9 +1916,9 @@ body {
 .row4-left-area2 {
     flex: 0 0 var(--row4-left-area2-width);
     display: flex;
-    align-items: flex-end;  /* Align to bottom */
+    align-items: center;  /* Center vertically */
     justify-content: center;
-    gap: 20px;  /* Increased gap from 10px to 20px for better separation */
+    gap: 10px;  /* Reduced gap for tighter grouping */
 }
 
 .row4-left-area3 {
@@ -1963,7 +1968,7 @@ body {
 
 .section-label {
     font-family: 'Playfair Display', serif !important;
-    font-size: 31px;  /* Reduced by 10% from 34px */
+    font-size: 29px;  /* Reduced by 5% more from 31px */
     color: var(--text-icon);  /* Match preset and drumkit menu color */
     text-transform: none;
     letter-spacing: 0.5px;
