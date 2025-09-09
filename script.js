@@ -1160,11 +1160,12 @@ class OTTOAccurateInterface {
             }
         });
 
-        // Update main sliders
+        // Update custom sliders
         Object.keys(state.sliderValues).forEach(sliderKey => {
-            const slider = document.querySelector(`[data-param="${sliderKey}"]`);
+            const slider = document.querySelector(`.custom-slider[data-param="${sliderKey}"]`);
             if (slider) {
-                slider.value = state.sliderValues[sliderKey];
+                const value = state.sliderValues[sliderKey];
+                this.updateCustomSlider(slider, value);
             }
         });
 
@@ -1502,29 +1503,110 @@ class OTTOAccurateInterface {
     }
 
     setupSliders() {
-        // Main vertical sliders
-        document.querySelectorAll('.main-slider').forEach(slider => {
-            slider.addEventListener('input', (e) => {
-                const sliderType = slider.dataset.param;
-                const value = parseInt(e.target.value);
-
-                this.playerStates[this.currentPlayer].sliderValues[sliderType] = value;
-                this.onSliderChanged(this.currentPlayer, sliderType, value);
+        // Custom vertical sliders
+        document.querySelectorAll('.custom-slider').forEach(slider => {
+            const track = slider.querySelector('.slider-track');
+            const fill = slider.querySelector('.slider-fill');
+            const thumb = slider.querySelector('.slider-thumb');
+            
+            // Get initial values from data attributes
+            let min = parseInt(slider.dataset.min) || 0;
+            let max = parseInt(slider.dataset.max) || 100;
+            let value = parseInt(slider.dataset.value) || 50;
+            const param = slider.dataset.param;
+            
+            // Initialize visual state
+            this.updateCustomSlider(slider, value);
+            
+            // Handle mouse down on thumb
+            let isDragging = false;
+            let startY = 0;
+            let startValue = 0;
+            
+            const startDrag = (e) => {
+                isDragging = true;
+                slider.classList.add('dragging');
+                startY = e.clientY;
+                startValue = value;
+                e.preventDefault();
+            };
+            
+            const doDrag = (e) => {
+                if (!isDragging) return;
+                
+                const deltaY = startY - e.clientY;  // Inverted for vertical slider
+                const trackHeight = track.offsetHeight;
+                const range = max - min;
+                const deltaValue = (deltaY / trackHeight) * range;
+                
+                value = Math.max(min, Math.min(max, startValue + deltaValue));
+                value = Math.round(value);  // Round to integer
+                
+                // Update visual state
+                this.updateCustomSlider(slider, value);
+                
+                // Update player state
+                this.playerStates[this.currentPlayer].sliderValues[param] = value;
+                this.onSliderChanged(this.currentPlayer, param, value);
                 this.triggerAutoSave();
-
+                
                 // Check if this player is a master and propagate value
-                if (this.linkStates && this.linkStates[sliderType]) {
-                    const linkState = this.linkStates[sliderType];
+                if (this.linkStates && this.linkStates[param]) {
+                    const linkState = this.linkStates[param];
                     if (linkState.master === this.currentPlayer) {
-                        this.propagateSliderValue(sliderType, value, this.currentPlayer);
+                        this.propagateSliderValue(param, value, this.currentPlayer);
                     }
                 }
-
-                console.log(`Player ${this.currentPlayer} ${sliderType} slider: ${value}`);
+                
+                console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
+            };
+            
+            const endDrag = () => {
+                if (isDragging) {
+                    isDragging = false;
+                    slider.classList.remove('dragging');
+                }
+            };
+            
+            // Handle click on track
+            track.addEventListener('click', (e) => {
+                if (e.target === thumb) return;  // Don't handle if clicking thumb
+                
+                const rect = track.getBoundingClientRect();
+                const clickY = e.clientY - rect.top;
+                const percentage = 1 - (clickY / rect.height);  // Inverted for vertical
+                
+                value = Math.round(min + (percentage * (max - min)));
+                
+                // Update visual state
+                this.updateCustomSlider(slider, value);
+                
+                // Update player state
+                this.playerStates[this.currentPlayer].sliderValues[param] = value;
+                this.onSliderChanged(this.currentPlayer, param, value);
+                this.triggerAutoSave();
+                
+                // Handle link propagation
+                if (this.linkStates && this.linkStates[param]) {
+                    const linkState = this.linkStates[param];
+                    if (linkState.master === this.currentPlayer) {
+                        this.propagateSliderValue(param, value, this.currentPlayer);
+                    }
+                }
+                
+                console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
             });
+            
+            // Attach drag event listeners
+            thumb.addEventListener('mousedown', startDrag);
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', endDrag);
+            
+            // Store value for updates
+            slider.currentValue = value;
         });
 
-        // Mini sliders in kit section
+        // Mini sliders in kit section (keeping original for now)
         document.querySelectorAll('.mini-slider').forEach((slider, index) => {
             slider.addEventListener('input', (e) => {
                 const sliderIndex = index + 1;
@@ -1537,6 +1619,25 @@ class OTTOAccurateInterface {
                 console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
             });
         });
+    }
+    
+    updateCustomSlider(slider, value) {
+        const fill = slider.querySelector('.slider-fill');
+        const thumb = slider.querySelector('.slider-thumb');
+        
+        const min = parseInt(slider.dataset.min) || 0;
+        const max = parseInt(slider.dataset.max) || 100;
+        const percentage = ((value - min) / (max - min)) * 100;
+        
+        // Update fill height (light grey below thumb)
+        fill.style.height = `${percentage}%`;
+        
+        // Update thumb position
+        thumb.style.bottom = `${percentage}%`;
+        
+        // Store current value
+        slider.currentValue = value;
+        slider.dataset.value = value;
     }
 
     setupLinkIcons() {
@@ -1629,9 +1730,9 @@ class OTTOAccurateInterface {
         
         // If we're currently viewing a slave player, update the UI
         if (linkState.slaves.has(this.currentPlayer)) {
-            const slider = document.querySelector(`.main-slider[data-param="${param}"]`);
+            const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
             if (slider) {
-                slider.value = value;
+                this.updateCustomSlider(slider, value);
             }
         }
     }

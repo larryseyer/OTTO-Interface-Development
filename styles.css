@@ -1624,32 +1624,71 @@ body {
     box-sizing: border-box;
 }
 
-.main-slider {
-    writing-mode: bt-lr;
-    -webkit-appearance: slider-vertical;  /* Keep vertical slider for functionality */
-    width: 4px;  /* Thinner track - was 8px */
-    height: calc(100vh * 0.55 * 0.6 - 40px);  /* 55% of viewport * 0.6 for content - padding */
-    min-height: 200px;  /* Minimum height */
-    max-height: 400px;  /* Maximum height */
-    background: var(--bg-secondary);
-    outline: none;
+/* Custom Vertical Sliders */
+.custom-slider {
+    position: relative;
+    width: 32px;  /* Width for click area */
+    height: calc(100vh * 0.55 * 0.6 - 40px);  /* Same height as before */
+    min-height: 200px;
+    max-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    filter: grayscale(100%) brightness(0.7);  /* Remove blue color */
 }
 
-/* Webkit browsers (Chrome, Safari, Edge) */
-.main-slider::-webkit-slider-thumb {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    width: 32px;  /* Wider to make square shape more visible */
+.slider-track {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;  /* Slightly wider for visibility */
+    height: 100%;
+    background: #3a3a3a;  /* Slightly lighter to ensure visibility */
+    border-radius: 2px;
+    z-index: 1;  /* Base layer */
+    box-shadow: inset 0 0 2px rgba(0,0,0,0.3);  /* Inner shadow for depth */
+}
+
+.slider-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;  /* Will be updated dynamically */
+    background: #777777;  /* Light grey - filled portion (below thumb) */
+    border-radius: 0 0 2px 2px;  /* Only round bottom corners */
+    transition: none;  /* No transition for immediate response */
+}
+
+.slider-thumb {
+    position: absolute;
+    left: 50%;
+    bottom: 50%;  /* Will be updated dynamically */
+    transform: translateX(-50%) translateY(50%);
+    width: 32px;
     height: 24px;
-    background: var(--text-icon);  /* Gray color matching our theme */
-    cursor: pointer;
-    border-radius: 3px !important;  /* Force square with minimal rounding */
+    background: #999999;  /* Medium-light grey for thumb */
+    border-radius: 3px;
     box-shadow:
         inset 1px 1px 2px rgba(255,255,255,0.2),
         inset -1px -1px 2px rgba(0,0,0,0.3),
         1px 1px 3px rgba(0,0,0,0.2);
+    cursor: grab;
+    z-index: 10;  /* Higher z-index to ensure it's above track */
+    pointer-events: all;  /* Ensure it receives mouse events */
+}
+
+.slider-thumb:active {
+    cursor: grabbing;
+}
+
+/* Hover effects */
+.custom-slider:hover .slider-thumb {
+    background: #aaaaaa;
+}
+
+.custom-slider.dragging .slider-thumb {
+    background: #bbbbbb;
 }
 
 .link-icon {
