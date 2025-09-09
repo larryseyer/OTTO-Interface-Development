@@ -85,6 +85,82 @@ class OTTOAccurateInterface {
         this.setupPresetManagement();
     }
 
+    initAppState() {
+        // Load saved app state or create default
+        const savedState = this.loadAppStateFromStorage();
+        
+        if (savedState) {
+            // Restore saved application state
+            this.currentPreset = savedState.currentPreset || 'default';
+            this.isPlaying = savedState.isPlaying !== undefined ? savedState.isPlaying : true;
+            this.tempo = savedState.tempo || 120;
+            this.currentPlayer = savedState.currentPlayer || 1;
+            this.numberOfPlayers = savedState.numberOfPlayers || 4;
+            this.loopPosition = savedState.loopPosition || 0;
+            
+            console.log('Restored app state:', {
+                preset: this.currentPreset,
+                playing: this.isPlaying,
+                tempo: this.tempo,
+                player: this.currentPlayer,
+                numPlayers: this.numberOfPlayers
+            });
+        }
+        
+        // Setup auto-save for app state
+        this.setupAppStateAutoSave();
+    }
+
+    setupAppStateAutoSave() {
+        // Save app state on key changes
+        this.appStateAutoSaveTimer = null;
+        this.appStateAutoSaveDelay = 1000; // 1 second delay
+    }
+
+    triggerAppStateSave() {
+        // Clear existing timer
+        if (this.appStateAutoSaveTimer) {
+            clearTimeout(this.appStateAutoSaveTimer);
+        }
+        
+        // Set new timer
+        this.appStateAutoSaveTimer = setTimeout(() => {
+            this.saveAppStateToStorage();
+            console.log('Auto-saved app state');
+        }, this.appStateAutoSaveDelay);
+    }
+
+    saveAppStateToStorage() {
+        const appState = {
+            currentPreset: this.currentPreset,
+            isPlaying: this.isPlaying,
+            tempo: this.tempo,
+            currentPlayer: this.currentPlayer,
+            numberOfPlayers: this.numberOfPlayers,
+            loopPosition: this.loopPosition,
+            timestamp: Date.now(),
+            version: this.version
+        };
+        
+        try {
+            localStorage.setItem('otto_app_state', JSON.stringify(appState));
+        } catch (e) {
+            console.error('Failed to save app state:', e);
+        }
+    }
+
+    loadAppStateFromStorage() {
+        try {
+            const stored = localStorage.getItem('otto_app_state');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Failed to load app state:', e);
+        }
+        return null;
+    }
+
     createPresetFromCurrentState(name) {
         return {
             name: name,
@@ -435,6 +511,7 @@ class OTTOAccurateInterface {
         // Update lock display
         this.updatePresetLockDisplay();
         
+        this.triggerAppStateSave();  // Save app state with new preset selection
         this.showNotification(`Loaded preset "${preset.name}"`);
     }
 
@@ -630,6 +707,9 @@ class OTTOAccurateInterface {
 
     updatePresetDropdown() {
         const presetOptions = document.getElementById('preset-options');
+        const dropdown = document.getElementById('preset-dropdown');
+        const dropdownText = dropdown?.querySelector('.dropdown-text');
+        
         if (!presetOptions) return;
         
         presetOptions.innerHTML = '';
@@ -639,11 +719,37 @@ class OTTOAccurateInterface {
             option.className = 'dropdown-option';
             option.dataset.value = key;
             option.textContent = preset.name;
+            
+            // Mark as selected if it's the current preset
+            if (key === this.currentPreset) {
+                option.classList.add('selected');
+            }
+            
+            // Add click handler directly to each option
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Update selected text
+                if (dropdownText) {
+                    dropdownText.textContent = preset.name;
+                }
+
+                // Update selected state
+                presetOptions.querySelectorAll('.dropdown-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+
+                // Close dropdown
+                dropdown.classList.remove('open');
+
+                // Load the preset
+                this.loadPreset(key);
+            });
+            
             presetOptions.appendChild(option);
         }
         
-        // Re-setup dropdown handlers
-        this.setupPresetControls();
+        // Don't call setupPresetControls here as it rebuilds the dropdown structure
+        // The dropdown toggle handler should already be set up once during initialization
     }
 
     savePresetsToStorage() {
@@ -676,7 +782,8 @@ class OTTOAccurateInterface {
     }
 
     init() {
-        this.initPresetSystem();  // Initialize preset system first
+        this.initAppState();      // Initialize app state FIRST to restore saved values
+        this.initPresetSystem();  // Initialize preset system second
         this.setupVersion();
         this.setupSplashScreen();
         this.setupPlayerTabs();
@@ -694,13 +801,38 @@ class OTTOAccurateInterface {
         this.setupLogoClick();
         this.startLoopAnimation();
 
-        // Initialize UI for player 1
+        // Initialize UI for saved or default player
         this.updateUIForCurrentPlayer();
+        
+        // Load the saved preset if it exists
+        if (this.currentPreset && this.presets[this.currentPreset]) {
+            this.loadPreset(this.currentPreset);
+        }
+        
+        // Update play/pause button to match saved state
+        this.updatePlayPauseButton();
 
         console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'active players (max:', this.maxPlayers, ')');
     }
 
     // Method to change number of active players
+    updatePlayPauseButton() {
+        // Update play/pause button visual state based on saved state
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        if (playPauseBtn) {
+            const playIcon = playPauseBtn.querySelector('.play-icon');
+            const pauseIcon = playPauseBtn.querySelector('.pause-icon');
+            
+            if (this.isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'inline-block';
+            } else {
+                playIcon.style.display = 'inline-block';
+                pauseIcon.style.display = 'none';
+            }
+        }
+    }
+
     setNumberOfPlayers(num) {
         if (num >= 4 && num <= 8) {
             this.numberOfPlayers = num;
@@ -711,6 +843,7 @@ class OTTOAccurateInterface {
                 this.switchToPlayer(1);
             }
 
+            this.triggerAppStateSave();  // Save app state
             console.log('Number of active players set to:', num);
         } else {
             console.error('Number of players must be between 4 and 8');
@@ -948,7 +1081,8 @@ class OTTOAccurateInterface {
 
         // Update UI to reflect current player state
         this.updateUIForCurrentPlayer();
-
+        
+        this.triggerAppStateSave();  // Save app state
         console.log(`Switched to Player ${playerNumber}`);
         this.onPlayerChanged(playerNumber);
     }
@@ -1756,6 +1890,7 @@ class OTTOAccurateInterface {
     setLoopPosition(position) {
         this.loopPosition = Math.max(0, Math.min(1, position));
         this.updateLoopTimelineDisplay();
+        // Don't save app state here as it's called frequently during animation
     }
 
     setTempo(bpm) {
@@ -1766,6 +1901,7 @@ class OTTOAccurateInterface {
         }
         this.onTempoChanged(bpm);
         this.triggerAutoSave();
+        this.triggerAppStateSave();  // Save app state
     }
 
     handleTapTempo() {
@@ -1825,7 +1961,8 @@ class OTTOAccurateInterface {
         if (window.juce?.onPlayPauseChanged) {
             window.juce.onPlayPauseChanged(this.isPlaying);
         }
-
+        
+        this.triggerAppStateSave();  // Save app state
         console.log(`Playback ${this.isPlaying ? 'started' : 'paused'}`);
     }
 
