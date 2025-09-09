@@ -41,9 +41,9 @@
     --row1-area1-width: 18%;  /* Settings, Link, Preset Edit buttons - increased for 3 icons */
     --row1-area2-width: 28%;  /* Presets dropdown - needs space for text */
     --row1-area3-width: 8%;   /* Play/Pause button (centered) */
-    --row1-area4-width: 23%;  /* Tempo Display */
-    --row1-area5-width: 23%;  /* Cloud, Logo and Version - increased for icon + text */
-    /* Total: 18% + 28% + 8% + 23% + 23% = 100% */
+    --row1-area4-width: 18%;  /* Tempo Display - reduced to give area5 more space */
+    --row1-area5-width: 28%;  /* Cloud, Logo and Version - increased for hover space */
+    /* Total: 18% + 28% + 8% + 18% + 28% = 100% */
 
     /* Row 2 - Single area for player tabs */
     --row2-area1-width: 100%;  /* Player tabs full width */
@@ -491,7 +491,12 @@ body {
     justify-content: flex-end;
     gap: 15px;  /* Match other icon spacing */
     min-width: 0;  /* Allow shrinking if needed */
-    overflow: hidden;  /* Prevent overflow */
+    position: relative;  /* Create stacking context */
+}
+
+.row1-area5 .icon-btn {
+    position: relative;
+    z-index: 100;  /* Much higher z-index to ensure it stays on top */
 }
 
 .logo-version-container {
@@ -502,11 +507,12 @@ body {
     transition: all 0.2s ease;
     padding: 5px 10px;
     border-radius: 5px;
-    transform-origin: right center;  /* Scale from right edge to prevent overflow */
+    transform-origin: 100% center;  /* Scale from far right edge only */
 }
 
 .logo-version-container:hover {
-    transform: scale(var(--row1-hover-scale));  /* Use global hover scale */
+    transform: scale(1.1);  /* Smaller scale to prevent overlap */
+    position: relative;
 }
 
 .logo-version-container:active {
