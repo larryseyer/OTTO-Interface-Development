@@ -215,6 +215,235 @@ body {
     pointer-events: all !important;
 }
 
+/* Preset Edit Button */
+.preset-edit-btn {
+    width: var(--icon-size-standard);  /* Match gear, link, cloud icons */
+    height: var(--icon-size-standard);
+    background: transparent;
+    border: none;
+    color: var(--text-icon);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    /* margin-right removed - gap in flex container handles spacing */
+}
+
+.preset-edit-btn:hover {
+    transform: scale(var(--row1-hover-scale));
+    color: var(--text-primary);
+}
+
+.preset-edit-btn i {
+    font-size: var(--icon-size-standard);  /* Match other row1 icons */
+    line-height: 1;
+}
+
+/* Preset Management Modal */
+.preset-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.preset-modal.active {
+    display: flex;
+}
+
+.preset-modal-content {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.preset-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.preset-modal-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.preset-modal-close {
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: var(--text-icon);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.preset-modal-close:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.preset-modal-close i {
+    font-size: 30px;
+}
+
+.preset-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.preset-modal-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.preset-name-input {
+    flex: 1;
+    padding: 10px 15px;
+    background: var(--bg-darker);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 300;
+}
+
+.preset-name-input::placeholder {
+    color: var(--text-muted);
+}
+
+.preset-name-input:focus {
+    outline: none;
+    border-color: var(--text-icon);
+}
+
+.preset-action-btn {
+    padding: 10px 20px;
+    background: var(--bg-darker);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-icon);
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.preset-action-btn:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.preset-action-btn i {
+    font-size: 20px;
+}
+
+.preset-list-container h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin: 0 0 15px 0;
+}
+
+.preset-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.preset-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: var(--bg-darker);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.preset-item:hover {
+    background: var(--bg-primary);
+    border-color: var(--text-icon);
+}
+
+.preset-item-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--text-primary);
+    cursor: pointer;
+    flex: 1;
+}
+
+.preset-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.preset-item-btn {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-icon);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.preset-item-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--text-icon);
+}
+
+.preset-item-btn.delete:hover {
+    color: #ff4444;
+    border-color: #ff4444;
+}
+
+.preset-item-btn i {
+    font-size: 18px;
+}
+
 .splash-logo {
     max-width: 1600px;
     max-height: 1200px;
@@ -254,7 +483,7 @@ body {
 .row1-area2 {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;  /* Match area1 icon spacing */
     flex: 0 0 var(--row1-area2-width);
     justify-content: center;
     position: relative;  /* For dropdown arrow positioning */

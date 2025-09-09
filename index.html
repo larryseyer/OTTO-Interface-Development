@@ -22,6 +22,37 @@
             <img src="Images/OTTO_Splash_Screen.png" alt="OTTO" class="splash-logo">
         </div>
 
+        <!-- Preset Management Modal -->
+        <div id="preset-modal" class="preset-modal">
+            <div class="preset-modal-content">
+                <div class="preset-modal-header">
+                    <h2>Preset Management</h2>
+                    <button class="preset-modal-close" id="preset-modal-close">
+                        <i class="ph-thin ph-x"></i>
+                    </button>
+                </div>
+                <div class="preset-modal-body">
+                    <div class="preset-modal-controls">
+                        <input type="text" id="preset-name-input" class="preset-name-input" placeholder="Enter preset name...">
+                        <button class="preset-action-btn" id="preset-save-btn">
+                            <i class="ph-thin ph-floppy-disk"></i>
+                            <span>Save</span>
+                        </button>
+                        <button class="preset-action-btn" id="preset-save-as-btn">
+                            <i class="ph-thin ph-floppy-disk"></i>
+                            <span>Save As</span>
+                        </button>
+                    </div>
+                    <div class="preset-list-container">
+                        <h3>Saved Presets</h3>
+                        <div class="preset-list" id="preset-list">
+                            <!-- Preset items will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Interface - 6 Rows -->
         <div class="main-interface">
 
@@ -42,10 +73,9 @@
 
                 <!-- Area 2: Chevrons and Presets dropdown -->
                 <div class="row1-area2">
-        <!-- Chevron buttons temporarily commented out - keeping for potential future use -->
-                    <!-- <button class="preset-nav-btn preset-prev">
-                        <i class="ph-thin ph-caret-left"></i>
-                    </button> -->
+                    <button class="preset-edit-btn" id="preset-edit-btn" title="Manage Presets">
+                        <i class="ph-thin ph-pencil-simple"></i>
+                    </button>
                     <div class="custom-dropdown" id="preset-dropdown">
                         <div class="dropdown-selected" id="preset-selected">
                             <span class="dropdown-text">Default</span>
@@ -63,9 +93,6 @@
                             <div class="dropdown-option" data-value="world-fusion">World Fusion</div>
                         </div>
                     </div>
-                    <!-- <button class="preset-nav-btn preset-next">
-                        <i class="ph-thin ph-caret-right"></i>
-                    </button> -->
                 </div>
 
                 <!-- Area 3: Play/Pause Transport (centered) -->

@@ -60,8 +60,293 @@ class OTTOAccurateInterface {
 
         this.init();
     }
+    initPresetSystem() {
+        // Initialize preset storage
+        this.presets = this.loadPresetsFromStorage() || {
+            'default': this.createPresetFromCurrentState('Default'),
+            'rock-ballad': this.createPresetFromCurrentState('Rock Ballad'),
+            'jazz-combo': this.createPresetFromCurrentState('Jazz Combo'),
+            'funk-groove': this.createPresetFromCurrentState('Funk Groove'),
+            'latin-rhythm': this.createPresetFromCurrentState('Latin Rhythm'),
+            'electronic-pulse': this.createPresetFromCurrentState('Electronic Pulse'),
+            'acoustic-folk': this.createPresetFromCurrentState('Acoustic Folk'),
+            'blues-shuffle': this.createPresetFromCurrentState('Blues Shuffle'),
+            'pop-modern': this.createPresetFromCurrentState('Pop Modern'),
+            'world-fusion': this.createPresetFromCurrentState('World Fusion')
+        };
+        
+        // Setup preset management UI
+        this.setupPresetManagement();
+    }
+
+    createPresetFromCurrentState(name) {
+        return {
+            name: name,
+            timestamp: Date.now(),
+            // Store complete state of all players
+            playerStates: JSON.parse(JSON.stringify(this.playerStates)),
+            // Store link states
+            linkStates: this.linkStates ? JSON.parse(JSON.stringify(this.linkStates)) : null,
+            // Store global settings
+            tempo: this.tempo,
+            numberOfPlayers: this.numberOfPlayers,
+            loopPosition: this.loopPosition
+        };
+    }
+
+    setupPresetManagement() {
+        const presetEditBtn = document.getElementById('preset-edit-btn');
+        const presetModal = document.getElementById('preset-modal');
+        const presetModalClose = document.getElementById('preset-modal-close');
+        const presetSaveBtn = document.getElementById('preset-save-btn');
+        const presetSaveAsBtn = document.getElementById('preset-save-as-btn');
+        const presetNameInput = document.getElementById('preset-name-input');
+        
+        // Open preset modal
+        if (presetEditBtn) {
+            presetEditBtn.addEventListener('click', () => {
+                this.openPresetModal();
+            });
+        }
+        
+        // Close preset modal
+        if (presetModalClose) {
+            presetModalClose.addEventListener('click', () => {
+                this.closePresetModal();
+            });
+        }
+        
+        // Close modal when clicking outside
+        if (presetModal) {
+            presetModal.addEventListener('click', (e) => {
+                if (e.target === presetModal) {
+                    this.closePresetModal();
+                }
+            });
+        }
+        
+        // Save preset (overwrite current)
+        if (presetSaveBtn) {
+            presetSaveBtn.addEventListener('click', () => {
+                this.saveCurrentPreset();
+            });
+        }
+        
+        // Save As new preset
+        if (presetSaveAsBtn) {
+            presetSaveAsBtn.addEventListener('click', () => {
+                const name = presetNameInput.value.trim();
+                if (name) {
+                    this.savePresetAs(name);
+                    presetNameInput.value = '';
+                }
+            });
+        }
+    }
+
+    openPresetModal() {
+        const modal = document.getElementById('preset-modal');
+        if (modal) {
+            modal.classList.add('active');
+            this.renderPresetList();
+            
+            // Set input to current preset name
+            const presetNameInput = document.getElementById('preset-name-input');
+            if (presetNameInput) {
+                presetNameInput.value = this.currentPreset.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+        }
+    }
+
+    closePresetModal() {
+        const modal = document.getElementById('preset-modal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    }
+
+    renderPresetList() {
+        const presetList = document.getElementById('preset-list');
+        if (!presetList) return;
+        
+        presetList.innerHTML = '';
+        
+        for (const [key, preset] of Object.entries(this.presets)) {
+            const presetItem = document.createElement('div');
+            presetItem.className = 'preset-item';
+            
+            const presetName = document.createElement('div');
+            presetName.className = 'preset-item-name';
+            presetName.textContent = preset.name;
+            presetName.addEventListener('click', () => {
+                this.loadPreset(key);
+                this.closePresetModal();
+            });
+            
+            const presetActions = document.createElement('div');
+            presetActions.className = 'preset-item-actions';
+            
+            // Load button
+            const loadBtn = document.createElement('button');
+            loadBtn.className = 'preset-item-btn';
+            loadBtn.innerHTML = '<i class="ph-thin ph-download-simple"></i>';
+            loadBtn.title = 'Load Preset';
+            loadBtn.addEventListener('click', () => {
+                this.loadPreset(key);
+                this.closePresetModal();
+            });
+            
+            // Delete button (not for default)
+            if (key !== 'default') {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'preset-item-btn delete';
+                deleteBtn.innerHTML = '<i class="ph-thin ph-trash"></i>';
+                deleteBtn.title = 'Delete Preset';
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm(`Delete preset "${preset.name}"?`)) {
+                        this.deletePreset(key);
+                    }
+                });
+                presetActions.appendChild(deleteBtn);
+            }
+            
+            presetActions.appendChild(loadBtn);
+            presetItem.appendChild(presetName);
+            presetItem.appendChild(presetActions);
+            presetList.appendChild(presetItem);
+        }
+    }
+
+    saveCurrentPreset() {
+        const preset = this.createPresetFromCurrentState(this.presets[this.currentPreset]?.name || 'Untitled');
+        this.presets[this.currentPreset] = preset;
+        this.savePresetsToStorage();
+        this.showNotification(`Preset "${preset.name}" saved`);
+        this.renderPresetList();
+    }
+
+    savePresetAs(name) {
+        const key = name.toLowerCase().replace(/\s+/g, '-');
+        const preset = this.createPresetFromCurrentState(name);
+        this.presets[key] = preset;
+        this.currentPreset = key;
+        
+        // Update dropdown
+        this.updatePresetDropdown();
+        
+        this.savePresetsToStorage();
+        this.showNotification(`Preset "${name}" created`);
+        this.renderPresetList();
+    }
+
+    loadPreset(key) {
+        const preset = this.presets[key];
+        if (!preset) return;
+        
+        // Restore all player states
+        this.playerStates = JSON.parse(JSON.stringify(preset.playerStates));
+        
+        // Restore link states
+        if (preset.linkStates) {
+            this.linkStates = JSON.parse(JSON.stringify(preset.linkStates));
+            // Convert Sets back from arrays
+            if (this.linkStates) {
+                for (const param of ['swing', 'energy', 'volume']) {
+                    if (this.linkStates[param] && Array.isArray(this.linkStates[param].slaves)) {
+                        this.linkStates[param].slaves = new Set(this.linkStates[param].slaves);
+                    }
+                }
+            }
+        }
+        
+        // Restore global settings
+        this.tempo = preset.tempo || 120;
+        this.numberOfPlayers = preset.numberOfPlayers || 4;
+        this.loopPosition = preset.loopPosition || 0;
+        
+        // Update current preset reference
+        this.currentPreset = key;
+        
+        // Update UI
+        this.updateUIForCurrentPlayer();
+        this.setTempo(this.tempo);
+        this.setLoopPosition(this.loopPosition);
+        
+        // Update preset dropdown
+        const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
+        if (dropdownText) {
+            dropdownText.textContent = preset.name;
+        }
+        
+        this.showNotification(`Loaded preset "${preset.name}"`);
+    }
+
+    deletePreset(key) {
+        if (key === 'default') return; // Can't delete default
+        
+        const name = this.presets[key]?.name;
+        delete this.presets[key];
+        
+        // If we deleted the current preset, switch to default
+        if (this.currentPreset === key) {
+            this.loadPreset('default');
+        }
+        
+        this.updatePresetDropdown();
+        this.savePresetsToStorage();
+        this.showNotification(`Deleted preset "${name}"`);
+        this.renderPresetList();
+    }
+
+    updatePresetDropdown() {
+        const presetOptions = document.getElementById('preset-options');
+        if (!presetOptions) return;
+        
+        presetOptions.innerHTML = '';
+        
+        for (const [key, preset] of Object.entries(this.presets)) {
+            const option = document.createElement('div');
+            option.className = 'dropdown-option';
+            option.dataset.value = key;
+            option.textContent = preset.name;
+            presetOptions.appendChild(option);
+        }
+        
+        // Re-setup dropdown handlers
+        this.setupPresetControls();
+    }
+
+    savePresetsToStorage() {
+        // Convert Sets to arrays for storage
+        const presetsToStore = {};
+        for (const [key, preset] of Object.entries(this.presets)) {
+            const presetCopy = JSON.parse(JSON.stringify(preset));
+            if (presetCopy.linkStates) {
+                for (const param of ['swing', 'energy', 'volume']) {
+                    if (presetCopy.linkStates[param] && presetCopy.linkStates[param].slaves) {
+                        presetCopy.linkStates[param].slaves = Array.from(presetCopy.linkStates[param].slaves);
+                    }
+                }
+            }
+            presetsToStore[key] = presetCopy;
+        }
+        localStorage.setItem('otto_presets', JSON.stringify(presetsToStore));
+    }
+
+    loadPresetsFromStorage() {
+        try {
+            const stored = localStorage.getItem('otto_presets');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+        } catch (e) {
+            console.error('Failed to load presets from storage:', e);
+        }
+        return null;
+    }
 
     init() {
+        this.initPresetSystem();  // Initialize preset system first
         this.setupVersion();
         this.setupSplashScreen();
         this.setupPlayerTabs();
@@ -220,62 +505,62 @@ class OTTOAccurateInterface {
         const dropdown = document.getElementById('preset-dropdown');
         const dropdownSelected = document.getElementById('preset-selected');
         const dropdownOptions = document.getElementById('preset-options');
-        const dropdownText = dropdown.querySelector('.dropdown-text');
+        const dropdownText = dropdown?.querySelector('.dropdown-text');
 
-        // Toggle dropdown on click
+        // Remove old event listeners by cloning
         if (dropdownSelected) {
-            dropdownSelected.addEventListener('click', (e) => {
+            const newDropdownSelected = dropdownSelected.cloneNode(true);
+            dropdownSelected.parentNode.replaceChild(newDropdownSelected, dropdownSelected);
+            
+            // Toggle dropdown on click
+            newDropdownSelected.addEventListener('click', (e) => {
                 e.stopPropagation();
                 dropdown.classList.toggle('open');
             });
         }
 
-        // Handle option selection
-        const options = dropdown.querySelectorAll('.dropdown-option');
-        options.forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.stopPropagation();
+        // Re-add option selection handlers
+        if (dropdownOptions) {
+            dropdownOptions.innerHTML = '';
+            
+            // Add options from presets
+            for (const [key, preset] of Object.entries(this.presets)) {
+                const option = document.createElement('div');
+                option.className = 'dropdown-option';
+                option.dataset.value = key;
+                option.textContent = preset.name;
+                
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
 
-                // Update selected text
-                const selectedText = option.textContent;
-                dropdownText.textContent = selectedText;
+                    // Update selected text
+                    if (dropdownText) {
+                        dropdownText.textContent = preset.name;
+                    }
 
-                // Update selected state
-                options.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
+                    // Update selected state
+                    dropdownOptions.querySelectorAll('.dropdown-option').forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
 
-                // Close dropdown
-                dropdown.classList.remove('open');
+                    // Close dropdown
+                    dropdown.classList.remove('open');
 
-                // Update player state
-                this.playerStates[this.currentPlayer].presetName = selectedText;
-                this.currentPreset = option.dataset.value;
-                this.onPresetChanged(this.currentPlayer, selectedText);
-                console.log(`Player ${this.currentPlayer} preset changed to: ${selectedText}`);
-            });
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove('open');
+                    // Load the preset
+                    this.loadPreset(key);
+                });
+                
+                dropdownOptions.appendChild(option);
             }
-        });
-
-        // Preset navigation buttons (if they're re-enabled)
-        const presetPrev = document.querySelector('.preset-prev');
-        const presetNext = document.querySelector('.preset-next');
-
-        if (presetPrev) {
-            presetPrev.addEventListener('click', () => {
-                this.navigatePreset(-1);
-            });
         }
 
-        if (presetNext) {
-            presetNext.addEventListener('click', () => {
-                this.navigatePreset(1);
-            });
+        // Close dropdown when clicking outside (only add once)
+        if (!this.presetDropdownCloseHandler) {
+            this.presetDropdownCloseHandler = (e) => {
+                if (dropdown && !dropdown.contains(e.target)) {
+                    dropdown.classList.remove('open');
+                }
+            };
+            document.addEventListener('click', this.presetDropdownCloseHandler);
         }
     }
 
