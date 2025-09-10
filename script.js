@@ -979,6 +979,11 @@ class OTTOAccurateInterface {
             settingsPanelClose.addEventListener('click', () => {
                 if (settingsPanel) {
                     settingsPanel.classList.remove('active');
+                    // Remove button active state
+                    const btn = document.getElementById('settings-btn');
+                    if (btn) {
+                        btn.classList.remove('panel-active');
+                    }
                 }
             });
         }
@@ -1031,36 +1036,66 @@ class OTTOAccurateInterface {
 
     openLinkModal() {
         const panel = document.getElementById('link-panel');
+        const btn = document.getElementById('link-btn');
+        
         if (panel) {
-            panel.classList.add('active');
+            panel.classList.toggle('active');
+            
+            // Toggle button active state
+            if (btn) {
+                btn.classList.toggle('panel-active', panel.classList.contains('active'));
+            }
         }
     }
 
     openCloudModal() {
         const panel = document.getElementById('cloud-panel');
+        const btn = document.getElementById('upload-btn');
+        
         if (panel) {
-            panel.classList.add('active');
+            panel.classList.toggle('active');
+            
+            // Toggle button active state
+            if (btn) {
+                btn.classList.toggle('panel-active', panel.classList.contains('active'));
+            }
         }
     }
 
     openMixerModal() {
         const panel = document.getElementById('mixer-panel');
+        const btn = document.getElementById('kit-mixer-btn');
+        
         if (panel) {
-            panel.classList.add('active');
-            // Update the kit name in the header
-            const kitNameSpan = panel.querySelector('#mixer-kit-name');
-            if (kitNameSpan) {
-                const currentPlayer = this.currentPlayer;
-                const kitName = this.playerStates[currentPlayer]?.kitName || 'Acoustic';
-                kitNameSpan.textContent = kitName;
+            // If opening, update the kit name
+            if (!panel.classList.contains('active')) {
+                const kitNameSpan = panel.querySelector('#mixer-kit-name');
+                if (kitNameSpan) {
+                    const currentPlayer = this.currentPlayer;
+                    const kitName = this.playerStates[currentPlayer]?.kitName || 'Acoustic';
+                    kitNameSpan.textContent = kitName;
+                }
+            }
+            panel.classList.toggle('active');
+            
+            // Toggle button active state
+            if (btn) {
+                btn.classList.toggle('panel-active', panel.classList.contains('active'));
             }
         }
     }
 
     openKitEditModal() {
         const panel = document.getElementById('kit-edit-panel');
+        const btn = document.querySelector('.kit-edit-btn');
+        
         if (panel) {
-            panel.classList.add('active');
+            panel.classList.toggle('active');
+            
+            // Toggle button active state
+            if (btn) {
+                btn.classList.toggle('panel-active', panel.classList.contains('active'));
+            }
         }
     }
 
@@ -2015,23 +2050,42 @@ class OTTOAccurateInterface {
 
     openPresetModal() {
         const panel = document.getElementById('preset-panel');
+        const btn = document.getElementById('preset-edit-btn');
+        
         if (panel) {
-            panel.classList.add('active');
-            this.renderPresetList();
+            // Toggle the panel
+            panel.classList.toggle('active');
             
-            // Clear and focus the input field
-            const nameInput = document.getElementById('preset-name-input');
-            if (nameInput) {
-                nameInput.value = '';
-                setTimeout(() => nameInput.focus(), 100);
+            // Toggle button active state
+            if (btn) {
+                btn.classList.toggle('panel-active', panel.classList.contains('active'));
+            }
+            
+            // If opening, render list and focus input
+            if (panel.classList.contains('active')) {
+                this.renderPresetList();
+                
+                // Clear and focus the input field
+                const nameInput = document.getElementById('preset-name-input');
+                if (nameInput) {
+                    nameInput.value = '';
+                    setTimeout(() => nameInput.focus(), 100);
+                }
             }
         }
     }
 
     closePresetModal() {
         const panel = document.getElementById('preset-panel');
+        const btn = document.getElementById('preset-edit-btn');
+        
         if (panel) {
             panel.classList.remove('active');
+        }
+        
+        // Remove button active state
+        if (btn) {
+            btn.classList.remove('panel-active');
         }
     }
 
@@ -4723,10 +4777,17 @@ class OTTOAccurateInterface {
     }
 
     onSettingsClicked() {
-        // Open the settings panel
+        // Toggle the settings panel
         const settingsPanel = document.getElementById('settings-panel');
+        const btn = document.getElementById('settings-btn');
+        
         if (settingsPanel) {
-            settingsPanel.classList.add('active');
+            settingsPanel.classList.toggle('active');
+            
+            // Toggle button active state
+            if (btn) {
+                btn.classList.toggle('panel-active', settingsPanel.classList.contains('active'));
+            }
         }
 
         // Also call JUCE if available

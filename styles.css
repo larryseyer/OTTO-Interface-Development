@@ -174,6 +174,7 @@ body {
     background: var(--bg-primary);
     position: relative;
     border: 1px solid var(--border-color);
+    overflow: hidden; /* Clip panels when they're below the interface */
 }
 
 /* Mute Overlay - covers rows 3-5 */
@@ -2909,7 +2910,7 @@ body {
    ======================================== */
 
 .slide-up-panel {
-    position: fixed;
+    position: absolute; /* Changed from fixed to absolute to be relative to interface-container */
     left: 0;
     width: 100%;
     background: var(--bg-primary);
@@ -2923,27 +2924,27 @@ body {
 
 /* Full height panels (Settings, Presets, Link, Cloud) - from row 2 to row 6 */
 .slide-up-panel.full-height-panel {
-    top: 100%; /* Start hidden below viewport */
+    top: calc(var(--row1-height)); /* Position at row 2 */
     height: calc(100% - var(--row1-height)); /* Cover rows 2-6 */
-    transform: translateY(0);
+    transform: translateY(100%); /* Start completely off-screen below */
     transition: transform 0.3s ease;
 }
 
 /* Partial height panels (Drumkit, Mixer) - from row 4 to row 6 */
 .slide-up-panel.partial-height-panel {
-    top: 100%; /* Start hidden below viewport */
+    top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height)); /* Position at row 4 */
     height: calc(100% - var(--row1-height) - var(--row2-height) - var(--row3-height)); /* Cover rows 4-6 */
-    transform: translateY(0);
+    transform: translateY(100%); /* Start completely off-screen below */
     transition: transform 0.3s ease;
 }
 
 /* Active state - slide up into view */
 .slide-up-panel.full-height-panel.active {
-    transform: translateY(calc(-100% + var(--row1-height)));
+    transform: translateY(0); /* Slide up to normal position */
 }
 
 .slide-up-panel.partial-height-panel.active {
-    transform: translateY(calc(-100% + var(--row1-height) + var(--row2-height) + var(--row3-height)));
+    transform: translateY(0); /* Slide up to normal position */
 }
 
 /* Panel header styling */
@@ -3145,4 +3146,13 @@ body {
 .slide-up-panel .panel-body::-webkit-scrollbar-thumb {
     background: var(--border-color);
     border-radius: 4px;
+}
+
+/* Active state for buttons when panels are open */
+.icon-btn.panel-active,
+.edit-btn.panel-active,
+.kit-mixer-btn.panel-active,
+.kit-edit-btn.panel-active {
+    background: var(--button-highlight);
+    color: var(--text-primary);
 }
