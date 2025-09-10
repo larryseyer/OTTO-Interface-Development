@@ -3403,10 +3403,13 @@ class OTTOAccurateInterface {
         });
 
         if (state.selectedPattern) {
-            const patternBtn = document.querySelector(`[data-pattern="${state.selectedPattern}"]`);
-            if (patternBtn) {
-                patternBtn.classList.add('active');
-            }
+            // Find the pattern button by its text content (first 8 characters)
+            document.querySelectorAll('.pattern-btn').forEach(btn => {
+                if (btn.textContent === state.selectedPattern || 
+                    btn.textContent === state.selectedPattern.substring(0, 8)) {
+                    btn.classList.add('active');
+                }
+            });
         }
 
         // Update all sliders
@@ -3765,7 +3768,18 @@ class OTTOAccurateInterface {
     setupPatternGrid() {
         document.querySelectorAll('.pattern-btn').forEach(patternBtn => {
             patternBtn.addEventListener('click', (e) => {
-                const patternName = patternBtn.textContent; // Use the display text, not dataset
+                // Get the button index to find the full pattern name
+                const patternButtons = Array.from(document.querySelectorAll('.pattern-btn'));
+                const buttonIndex = patternButtons.indexOf(patternBtn);
+                
+                // Get the full pattern name from the pattern group
+                const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+                let fullPatternName = patternBtn.textContent; // Default to button text
+                
+                if (this.patternGroups && this.patternGroups[currentGroup] && 
+                    this.patternGroups[currentGroup].patterns[buttonIndex]) {
+                    fullPatternName = this.patternGroups[currentGroup].patterns[buttonIndex];
+                }
 
                 // Clear other pattern selections
                 document.querySelectorAll('.pattern-btn').forEach(btn => {
@@ -3775,21 +3789,20 @@ class OTTOAccurateInterface {
                 // Activate clicked pattern
                 patternBtn.classList.add('active');
 
-                // Update player state
-                this.playerStates[this.currentPlayer].selectedPattern = patternName;
+                // Update player state with full pattern name
+                this.playerStates[this.currentPlayer].selectedPattern = fullPatternName;
                 
                 // Save selected pattern to the current pattern group
-                const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
                 if (this.patternGroups && this.patternGroups[currentGroup]) {
-                    this.patternGroups[currentGroup].selectedPattern = patternName;
+                    this.patternGroups[currentGroup].selectedPattern = fullPatternName;
                     this.setDirty('patternGroup', true);
                     // Don't auto-save, wait for user to click save button
                 }
                 
-                this.onPatternSelected(this.currentPlayer, patternName);
+                this.onPatternSelected(this.currentPlayer, fullPatternName);
                 this.setDirty('preset', true);  // Mark preset as dirty when pattern changes
 
-                console.log(`Player ${this.currentPlayer} selected pattern: ${patternName}`);
+                console.log(`Player ${this.currentPlayer} selected pattern: ${fullPatternName}`);
             });
         });
     }
@@ -4639,7 +4652,9 @@ class OTTOAccurateInterface {
                     const patternButtons = document.querySelectorAll('.pattern-grid .pattern-btn');
                     patternButtons.forEach(btn => {
                         btn.classList.remove('active');
-                        if (btn.textContent === selectedPattern) {
+                        // Check both full name and first 8 characters
+                        if (btn.textContent === selectedPattern || 
+                            btn.textContent === selectedPattern.substring(0, 8)) {
                             btn.classList.add('active');
                             this.playerStates[playerNumber].selectedPattern = selectedPattern;
                         }
