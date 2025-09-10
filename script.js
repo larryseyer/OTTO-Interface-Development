@@ -572,8 +572,8 @@ class OTTOAccurateInterface {
             'default': true  // Lock the Default preset to prevent auto-save modifications
         };
 
-        // Setup auto-save functionality
-        this.setupAutoSave();
+        // Enable auto-save for presets
+        this.enableAutoSave = true;
 
         // Setup preset management UI
         this.setupPresetManagement();
@@ -601,19 +601,9 @@ class OTTOAccurateInterface {
             });
         }
 
-        // Setup auto-save for app state
-        this.setupAppStateAutoSave();
+        // App state auto-save is handled by centralized system
     }
 
-    setupAppStateAutoSave() {
-        // App state auto-save is now handled by the centralized save system
-        // This method is kept for compatibility
-    }
-
-    triggerAppStateSave() {
-        // Delegate to the new centralized save system
-        this.scheduleSave('appState');
-    }
 
     saveAppStateToStorage() {
         const appState = {
@@ -651,16 +641,6 @@ class OTTOAccurateInterface {
         };
     }
 
-    setupAutoSave() {
-        // Auto-save is now handled by the centralized save system
-        // This method is kept for compatibility but delegates to the new system
-        this.enableAutoSave = true;
-    }
-
-    triggerAutoSave() {
-        // Delegate to the new centralized save system
-        this.scheduleSave('preset');
-    }
 
     isPresetLocked(presetKey) {
         return this.presetLocks[presetKey] === true;
@@ -1004,7 +984,7 @@ class OTTOAccurateInterface {
             this.updateMainPatternGrid(this.patternGroups[groupKey].patterns);
 
             // Save the state
-            this.triggerAutoSave();
+            this.scheduleSave('preset');
 
             // Show notification
             this.showNotification(`Group "${trimmedName}" created successfully`);
@@ -1078,7 +1058,7 @@ class OTTOAccurateInterface {
             this.updatePatternGroupDropdown();
 
             // Save the state
-            this.triggerAutoSave();
+            this.scheduleSave('preset');
 
             // Show notification
             this.showNotification(`Group renamed to "${trimmedName}"`);
@@ -1684,7 +1664,7 @@ class OTTOAccurateInterface {
                 }
 
                 this.onPatternGroupChanged(this.currentPlayer, key);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
             });
 
             groupOptions.appendChild(option);
@@ -1946,7 +1926,7 @@ class OTTOAccurateInterface {
         this.updateMuteOverlay();
 
         // Save app state with new preset selection
-        this.triggerAppStateSave();
+        this.scheduleSave('appState');
 
         console.log(`Successfully loaded preset "${preset.name}"`);
         this.showNotification(`Loaded preset "${preset.name}"`);
@@ -2494,7 +2474,7 @@ class OTTOAccurateInterface {
                 this.switchToPlayer(1);
             }
 
-            this.triggerAppStateSave();  // Save app state
+            this.scheduleSave('appState');  // Save app state
             console.log('Number of active players set to:', num);
         } else {
             console.error('Number of players must be between 4 and 8');
@@ -2742,7 +2722,7 @@ class OTTOAccurateInterface {
         // Use the comprehensive UI update
         this.updateCompleteUIState();
 
-        this.triggerAppStateSave();  // Save app state
+        this.scheduleSave('appState');  // Save app state
         console.log(`Switched to Player ${playerNumber}, muted: ${this.playerStates[playerNumber]?.muted || false}`);
         this.onPlayerChanged(playerNumber);
     }
@@ -3130,7 +3110,7 @@ class OTTOAccurateInterface {
                 // Update player state and trigger callback
                 this.playerStates[this.currentPlayer].kitName = kitName;
                 this.onKitChanged(this.currentPlayer, kitName);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
 
                 console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
             };
@@ -3165,7 +3145,7 @@ class OTTOAccurateInterface {
                 // Trigger callback
                 this.onKitMixerToggle(this.currentPlayer,
                     this.playerStates[this.currentPlayer].kitMixerActive);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
 
                 console.log(`Player ${this.currentPlayer} kit mixer: ${this.playerStates[this.currentPlayer].kitMixerActive}`);
             };
@@ -3195,7 +3175,7 @@ class OTTOAccurateInterface {
 
                 // Trigger mute callback
                 this.onMuteDrummer(this.currentPlayer, currentState.muted);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
 
                 // Update mute overlay
                 this.updateMuteOverlay();
@@ -3314,7 +3294,7 @@ class OTTOAccurateInterface {
 
                         // Trigger callback
                         this.onPatternGroupChanged(this.currentPlayer, value);
-                        this.triggerAutoSave();
+                        this.scheduleSave('preset');
                         console.log(`Player ${this.currentPlayer} pattern group: ${value}`);
                     });
                 });
@@ -3361,7 +3341,7 @@ class OTTOAccurateInterface {
             const text = optionToSelect.textContent;
             groupSelected.querySelector('.dropdown-text').textContent = text;
             this.onPatternGroupChanged(this.currentPlayer, newValue);
-            this.triggerAutoSave();
+            this.scheduleSave('preset');
             console.log(`Player ${this.currentPlayer} pattern group: ${newValue}`);
         }
     }
@@ -3381,7 +3361,7 @@ class OTTOAccurateInterface {
 
                 this.playerStates[this.currentPlayer].selectedPattern = patternName;
                 this.onPatternSelected(this.currentPlayer, patternName);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
 
                 console.log(`Player ${this.currentPlayer} selected pattern: ${patternName}`);
             });
@@ -3446,7 +3426,7 @@ class OTTOAccurateInterface {
                 }
 
                 this.onToggleChanged(this.currentPlayer, toggleType, state.toggleStates[toggleType]);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
                 console.log(`Player ${this.currentPlayer} toggle ${toggleType}: ${state.toggleStates[toggleType]}`);
             });
         });
@@ -3456,16 +3436,17 @@ class OTTOAccurateInterface {
         document.querySelectorAll('.fill-btn').forEach(fillBtn => {
             fillBtn.addEventListener('click', (e) => {
                 const fillType = fillBtn.dataset.fill;
-                const state = this.playerStates[this.currentPlayer];
-
                 const isActive = fillBtn.classList.contains('active');
-                fillBtn.classList.toggle('active');
-
-                state.fillStates[fillType] = !isActive;
-                this.onFillChanged(this.currentPlayer, fillType, !isActive);
-                this.triggerAutoSave();
-
-                console.log(`Player ${this.currentPlayer} fill ${fillType}: ${!isActive}`);
+                
+                // Update state through centralized system
+                this.updatePlayerState(this.currentPlayer, {
+                    fillStates: { [fillType]: !isActive }
+                }, () => {
+                    // Update UI and trigger callback after state is updated
+                    fillBtn.classList.toggle('active');
+                    this.onFillChanged(this.currentPlayer, fillType, !isActive);
+                    console.log(`Player ${this.currentPlayer} fill ${fillType}: ${!isActive}`);
+                });
             });
         });
     }
@@ -3517,7 +3498,7 @@ class OTTOAccurateInterface {
                     // Update player state
                     this.playerStates[this.currentPlayer].sliderValues[param] = newValue;
                     this.onSliderChanged(this.currentPlayer, param, newValue);
-                    this.triggerAutoSave();
+                    this.scheduleSave('preset');
 
                     // Check if this player is a master and propagate value
                     if (this.linkStates && this.linkStates[param]) {
@@ -3567,7 +3548,7 @@ class OTTOAccurateInterface {
                     // Final update without debounce
                     this.playerStates[this.currentPlayer].sliderValues[param] = value;
                     this.onSliderChanged(this.currentPlayer, param, value);
-                    this.triggerAutoSave();
+                    this.scheduleSave('preset');
 
                     // Handle link propagation
                     if (this.linkStates && this.linkStates[param]) {
@@ -3595,7 +3576,7 @@ class OTTOAccurateInterface {
                 // Update player state (no debounce for click)
                 this.playerStates[this.currentPlayer].sliderValues[param] = value;
                 this.onSliderChanged(this.currentPlayer, param, value);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
 
                 // Handle link propagation
                 if (this.linkStates && this.linkStates[param]) {
@@ -3641,7 +3622,7 @@ class OTTOAccurateInterface {
                 miniSliderDebounceTimer = setTimeout(() => {
                     this.playerStates[this.currentPlayer].miniSliders[sliderIndex] = value;
                     this.onMiniSliderChanged(this.currentPlayer, sliderIndex, value);
-                    this.triggerAutoSave();
+                    this.scheduleSave('preset');
 
                     console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
                 }, 100); // 100ms debounce delay
@@ -3963,7 +3944,7 @@ class OTTOAccurateInterface {
 
                 this.setLoopPosition(percentage);
                 this.onLoopPositionChanged(percentage);
-                this.triggerAutoSave();
+                this.scheduleSave('preset');
             });
 
             document.addEventListener('mouseup', () => {
@@ -4131,7 +4112,7 @@ class OTTOAccurateInterface {
             window.juce.onPlayPauseChanged(this.isPlaying);
         }
 
-        this.triggerAppStateSave();  // Save app state
+        this.scheduleSave('appState');  // Save app state
         console.log(`Playback ${this.isPlaying ? 'started' : 'paused'}`);
     }
 
