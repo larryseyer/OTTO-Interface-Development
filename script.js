@@ -21,6 +21,13 @@ class OTTOAccurateInterface {
         this.maxTapTimes = 4;
         this.isPlaying = true;  // Start in playing state to show pause icon
         this.currentPreset = 'default';  // Track current preset
+        
+        // Track all event listeners for cleanup
+        this.eventListeners = [];
+        this.sliderListeners = [];
+        this.dropdownListeners = [];
+        this.modalListeners = [];
+        this.documentListeners = [];
 
         // Player state tracking for all possible players
         this.playerStates = {};
@@ -258,75 +265,92 @@ class OTTOAccurateInterface {
     }
 
     setupPresetManagement() {
+        // Preset modal controls
         const presetEditBtn = document.getElementById('preset-edit-btn');
         const presetModal = document.getElementById('preset-modal');
         const presetModalClose = document.getElementById('preset-modal-close');
+        const presetList = document.getElementById('preset-list');
         const presetUndoBtn = document.getElementById('preset-undo-btn');
         const presetNewBtn = document.getElementById('preset-new-btn');
+        const factoryResetBtn = document.getElementById('factory-reset-btn');
         const presetNameInput = document.getElementById('preset-name-input');
         
-        // Track preset history for undo functionality
-        this.presetHistory = [];
-        this.maxHistorySize = 20;
+        // Clean up existing preset management listeners
+        this.modalListeners = this.modalListeners.filter(({ element }) => {
+            return element !== presetEditBtn && 
+                   element !== presetModalClose &&
+                   element !== presetModal &&
+                   element !== presetUndoBtn &&
+                   element !== presetNewBtn &&
+                   element !== factoryResetBtn &&
+                   element !== presetNameInput;
+        });
         
         // Open preset modal
         if (presetEditBtn) {
-            presetEditBtn.addEventListener('click', (e) => {
+            const editHandler = (e) => {
                 e.stopPropagation();  // Prevent dropdown from triggering
                 this.openPresetModal();
-            });
+            };
+            this.addEventListener(presetEditBtn, 'click', editHandler, this.modalListeners);
         }
         
         // Close preset modal
         if (presetModalClose) {
-            presetModalClose.addEventListener('click', () => {
+            const closeHandler = () => {
                 this.closePresetModal();
-            });
+            };
+            this.addEventListener(presetModalClose, 'click', closeHandler, this.modalListeners);
         }
         
-        // Close modal when clicking outside
+        // Click outside to close
         if (presetModal) {
-            presetModal.addEventListener('click', (e) => {
+            const outsideClickHandler = (e) => {
                 if (e.target === presetModal) {
                     this.closePresetModal();
                 }
-            });
+            };
+            this.addEventListener(presetModal, 'click', outsideClickHandler, this.modalListeners);
         }
         
         // Undo button
         if (presetUndoBtn) {
-            presetUndoBtn.addEventListener('click', () => {
+            const undoHandler = () => {
                 this.undoPresetChange();
-            });
+            };
+            this.addEventListener(presetUndoBtn, 'click', undoHandler, this.modalListeners);
         }
         
         // New preset button
         if (presetNewBtn) {
-            presetNewBtn.addEventListener('click', () => {
+            const newHandler = () => {
                 this.createNewDefaultPreset();
-            });
+            };
+            this.addEventListener(presetNewBtn, 'click', newHandler, this.modalListeners);
         }
         
         // Factory reset button
-        const factoryResetBtn = document.getElementById('preset-factory-reset-btn');
         if (factoryResetBtn) {
-            factoryResetBtn.addEventListener('click', () => {
+            const resetHandler = () => {
                 this.resetToFactoryDefaults();
-            });
+            };
+            this.addEventListener(factoryResetBtn, 'click', resetHandler, this.modalListeners);
         }
         
-        // Add preset creation on Enter key or when input loses focus with new value
+        // Handle enter key in preset name input
         if (presetNameInput) {
-            presetNameInput.addEventListener('keypress', (e) => {
+            const keypressHandler = (e) => {
                 if (e.key === 'Enter') {
-                    const name = presetNameInput.value.trim();
-                    if (name && !this.presetExists(name)) {
-                        this.savePresetAs(name);
-                        presetNameInput.value = '';
-                    }
+                    e.preventDefault();
+                    this.savePresetAs(presetNameInput.value);
+                    presetNameInput.value = '';
                 }
-            });
+            };
+            this.addEventListener(presetNameInput, 'keypress', keypressHandler, this.modalListeners);
         }
+        
+        // Initial render of preset list
+        this.renderPresetList();
     }
 
     setupSettingsWindow() {
@@ -381,22 +405,24 @@ class OTTOAccurateInterface {
         this.setupModalWindow('cloud-modal', 'cloud-modal-close');
     }
     
-    setupModalWindow(modalId, closeButtonId) {
+    setupModalWindow(modalId) {
         const modal = document.getElementById(modalId);
-        const closeBtn = document.getElementById(closeButtonId);
+        const closeBtn = modal?.querySelector('.modal-close');
         
-        if (closeBtn && modal) {
+        if (modal && closeBtn) {
             // Close button click
-            closeBtn.addEventListener('click', () => {
+            const closeHandler = () => {
                 modal.classList.remove('active');
-            });
+            };
+            this.addEventListener(closeBtn, 'click', closeHandler, this.modalListeners);
             
             // Click outside to close
-            modal.addEventListener('click', (e) => {
+            const outsideClickHandler = (e) => {
                 if (e.target === modal) {
                     modal.classList.remove('active');
                 }
-            });
+            };
+            this.addEventListener(modal, 'click', outsideClickHandler, this.modalListeners);
         }
     }
     
@@ -810,72 +836,97 @@ class OTTOAccurateInterface {
     setupPatternDragDrop() {
         const patternItems = document.querySelectorAll('.pattern-item');
         const dropZones = document.querySelectorAll('.pattern-drop-zone');
-
-        // Setup drag start for pattern items
-        patternItems.forEach(item => {
-            item.addEventListener('dragstart', (e) => {
-                e.dataTransfer.effectAllowed = 'copy';
-                e.dataTransfer.setData('shortName', item.dataset.shortName); // 8-char version
-                e.dataTransfer.setData('fullName', item.dataset.fullName); // Full name
-                item.classList.add('dragging');
-            });
-
-            item.addEventListener('dragend', () => {
-                item.classList.remove('dragging');
-            });
+        
+        // Clean up existing drag-drop listeners
+        this.eventListeners = this.eventListeners.filter(({ element }) => {
+            const isPatternItem = element && element.classList && element.classList.contains('pattern-item');
+            const isDropZone = element && element.classList && element.classList.contains('pattern-drop-zone');
+            return !isPatternItem && !isDropZone;
         });
-
-        // Setup drop zones
+        
+        // Make pattern items draggable
+        patternItems.forEach(item => {
+            const dragStartHandler = (e) => {
+                e.dataTransfer.effectAllowed = 'copy';
+                e.dataTransfer.setData('text/plain', item.dataset.pattern);
+                item.classList.add('dragging');
+            };
+            
+            const dragEndHandler = () => {
+                item.classList.remove('dragging');
+            };
+            
+            this.addEventListener(item, 'dragstart', dragStartHandler);
+            this.addEventListener(item, 'dragend', dragEndHandler);
+        });
+        
+        // Set up drop zones
         dropZones.forEach((zone, index) => {
-            zone.addEventListener('dragover', (e) => {
+            const dragOverHandler = (e) => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'copy';
                 zone.classList.add('drag-over');
-            });
-
-            zone.addEventListener('dragleave', () => {
+            };
+            
+            const dragLeaveHandler = () => {
                 zone.classList.remove('drag-over');
-            });
-
-            zone.addEventListener('drop', (e) => {
+            };
+            
+            const dropHandler = (e) => {
                 e.preventDefault();
                 zone.classList.remove('drag-over');
                 
-                const shortName = e.dataTransfer.getData('shortName'); // 8-char version for button
-                const fullName = e.dataTransfer.getData('fullName'); // Full name for reference
-                
-                // Update the drop zone with short name
-                zone.textContent = shortName;
-                zone.classList.add('has-pattern');
-                zone.dataset.pattern = shortName;
-                zone.dataset.fullName = fullName;
-                
-                // Add remove button
-                const removeBtn = document.createElement('span');
-                removeBtn.className = 'remove-pattern';
-                removeBtn.innerHTML = '×';
-                removeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    zone.textContent = '';
-                    zone.classList.remove('has-pattern');
-                    delete zone.dataset.pattern;
-                    delete zone.dataset.fullName;
-                });
-                zone.appendChild(removeBtn);
-                
-                // Save current state
-                this.saveCurrentGroupState();
-            });
-
+                const patternName = e.dataTransfer.getData('text/plain');
+                if (patternName) {
+                    // Add pattern to this slot
+                    zone.classList.add('has-pattern');
+                    zone.dataset.pattern = patternName;
+                    zone.querySelector('.pattern-name').textContent = patternName;
+                    
+                    // Add remove button if not present
+                    if (!zone.querySelector('.pattern-remove')) {
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'pattern-remove';
+                        removeBtn.innerHTML = '×';
+                        
+                        const removeBtnHandler = (e) => {
+                            e.stopPropagation();
+                            zone.classList.remove('has-pattern');
+                            zone.dataset.pattern = '';
+                            zone.querySelector('.pattern-name').textContent = `Pattern ${index + 1}`;
+                            removeBtn.remove();
+                            
+                            // Update the pattern group
+                            this.savePatternToGroup(index, '');
+                        };
+                        
+                        this.addEventListener(removeBtn, 'click', removeBtnHandler);
+                        zone.appendChild(removeBtn);
+                    }
+                    
+                    // Save to current pattern group
+                    this.savePatternToGroup(index, patternName);
+                }
+            };
+            
             // Click to clear
-            zone.addEventListener('click', () => {
+            const clickHandler = () => {
                 if (!zone.classList.contains('has-pattern')) return;
                 
-                const removeBtn = zone.querySelector('.remove-pattern');
-                if (removeBtn) {
-                    removeBtn.click();
-                }
-            });
+                zone.classList.remove('has-pattern');
+                zone.dataset.pattern = '';
+                zone.querySelector('.pattern-name').textContent = `Pattern ${index + 1}`;
+                const removeBtn = zone.querySelector('.pattern-remove');
+                if (removeBtn) removeBtn.remove();
+                
+                // Update the pattern group
+                this.savePatternToGroup(index, '');
+            };
+            
+            this.addEventListener(zone, 'dragover', dragOverHandler);
+            this.addEventListener(zone, 'dragleave', dragLeaveHandler);
+            this.addEventListener(zone, 'drop', dropHandler);
+            this.addEventListener(zone, 'click', clickHandler);
         });
     }
 
@@ -2047,56 +2098,56 @@ class OTTOAccurateInterface {
     }
 
     setupPlayerTabs() {
-        // Calculate spacing based on number of players
-        // Reduced gaps to accommodate chevrons within interface bounds
-        const gaps = {
-            8: 2,    // Minimal gap for 8 players to fit with chevrons
-            7: 4,    // Slightly more for 7 players
-            6: 8,    // More spacing for 6 players
-            5: 12,   // Even more for 5 players
-            4: 20,   // Generous spacing for 4 players
-            3: 30,   // Extra spacing for 3 players
-            2: 40    // Maximum spacing for 2 players
-        };
-        const gap = gaps[this.numberOfPlayers] || 2;
-
-        // Set the CSS variable for dynamic spacing
-        document.documentElement.style.setProperty('--player-tab-gap', `${gap}px`);
-        console.log(`Setting player tab gap to ${gap}px for ${this.numberOfPlayers} players`);
-
-        // Hide tabs beyond the configured number of players
-        document.querySelectorAll('.player-tab').forEach((tab, index) => {
-            const playerNumber = index + 1;
-
-            if (playerNumber <= this.numberOfPlayers) {
-                tab.style.display = 'flex';  // Show active players
-                if (!tab.hasAttribute('data-listener-added')) {
-                    tab.addEventListener('click', () => {
-                        this.switchToPlayer(playerNumber);
-                    });
-                    tab.setAttribute('data-listener-added', 'true');
-                }
-            } else {
-                tab.style.display = 'none';  // Hide inactive players
-            }
+        const playerTabs = document.querySelectorAll('.player-tab');
+        const playerPrevBtn = document.getElementById('player-prev-btn');
+        const playerNextBtn = document.getElementById('player-next-btn');
+        
+        // Clean up existing player tab listeners
+        this.eventListeners = this.eventListeners.filter(({ element }) => {
+            return !element || !element.classList || !element.classList.contains('player-tab');
         });
 
-        // Setup player navigation chevrons
-        const playerPrevBtn = document.querySelector('.player-nav-prev');
-        const playerNextBtn = document.querySelector('.player-nav-next');
-
-        if (playerPrevBtn && !playerPrevBtn.hasAttribute('data-listener-added')) {
-            playerPrevBtn.addEventListener('click', () => {
+        // Set up initial visibility based on numberOfPlayers
+        playerTabs.forEach((tab, index) => {
+            const playerNumber = index + 1;
+            
+            // Show/hide tabs based on numberOfPlayers
+            if (playerNumber <= this.numberOfPlayers) {
+                tab.style.display = 'block';
+                tab.classList.remove('disabled');
+            } else {
+                tab.style.display = 'none';
+                tab.classList.add('disabled');
+            }
+            
+            // Set active state for current player
+            if (playerNumber === this.currentPlayer) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+            
+            // Add click handler using tracked event listener
+            const clickHandler = () => {
+                this.switchToPlayer(playerNumber);
+            };
+            
+            this.addEventListener(tab, 'click', clickHandler);
+        });
+        
+        // Navigation buttons with tracked event listeners
+        if (playerPrevBtn) {
+            const prevHandler = () => {
                 this.navigatePlayer(-1);
-            });
-            playerPrevBtn.setAttribute('data-listener-added', 'true');
+            };
+            this.addEventListener(playerPrevBtn, 'click', prevHandler);
         }
-
-        if (playerNextBtn && !playerNextBtn.hasAttribute('data-listener-added')) {
-            playerNextBtn.addEventListener('click', () => {
+        
+        if (playerNextBtn) {
+            const nextHandler = () => {
                 this.navigatePlayer(1);
-            });
-            playerNextBtn.setAttribute('data-listener-added', 'true');
+            };
+            this.addEventListener(playerNextBtn, 'click', nextHandler);
         }
     }
 
@@ -2121,16 +2172,19 @@ class OTTOAccurateInterface {
         const dropdownOptions = document.getElementById('preset-options');
         const dropdownText = dropdown?.querySelector('.dropdown-text');
 
-        // Remove old event listeners by cloning
+        // Clean up existing dropdown listeners for this dropdown
+        this.dropdownListeners = this.dropdownListeners.filter(({ element }) => {
+            return element !== dropdownSelected && 
+                   (!element || !element.parentElement || element.parentElement !== dropdownOptions);
+        });
+
         if (dropdownSelected) {
-            const newDropdownSelected = dropdownSelected.cloneNode(true);
-            dropdownSelected.parentNode.replaceChild(newDropdownSelected, dropdownSelected);
-            
             // Toggle dropdown on click
-            newDropdownSelected.addEventListener('click', (e) => {
+            const toggleHandler = (e) => {
                 e.stopPropagation();
                 dropdown.classList.toggle('open');
-            });
+            };
+            this.addEventListener(dropdownSelected, 'click', toggleHandler, this.dropdownListeners);
         }
 
         // Re-add option selection handlers
@@ -2149,7 +2203,7 @@ class OTTOAccurateInterface {
                     option.classList.add('selected');
                 }
                 
-                option.addEventListener('click', (e) => {
+                const optionHandler = (e) => {
                     e.stopPropagation();
 
                     // Update selected text
@@ -2166,7 +2220,9 @@ class OTTOAccurateInterface {
 
                     // Load the preset
                     this.loadPreset(key);
-                });
+                };
+                
+                this.addEventListener(option, 'click', optionHandler, this.dropdownListeners);
                 
                 dropdownOptions.appendChild(option);
             }
@@ -2180,6 +2236,10 @@ class OTTOAccurateInterface {
                 }
             };
             document.addEventListener('click', this.presetDropdownCloseHandler);
+            this.documentListeners.push({ 
+                event: 'click', 
+                handler: this.presetDropdownCloseHandler 
+            });
         }
     }
 
@@ -2553,125 +2613,147 @@ class OTTOAccurateInterface {
     }
 
     setupKitControls() {
-        // Kit navigation buttons
-        const kitPrev = document.querySelector('.kit-prev');
-        const kitNext = document.querySelector('.kit-next');
-
-        if (kitPrev) {
-            kitPrev.addEventListener('click', () => {
-                this.navigateKit(-1);
-            });
-        }
-
-        if (kitNext) {
-            kitNext.addEventListener('click', () => {
-                this.navigateKit(1);
-            });
-        }
-
-        // Kit dropdown functionality
         const kitDropdown = document.getElementById('kit-dropdown');
         const kitDropdownSelected = document.getElementById('kit-selected');
         const kitDropdownOptions = document.getElementById('kit-options');
-        const kitDropdownText = kitDropdown?.querySelector('.dropdown-text');
+        const kitOptions = document.querySelectorAll('#kit-options .dropdown-option');
+        const kitPrev = document.getElementById('kit-prev-btn');
+        const kitNext = document.getElementById('kit-next-btn');
+        const kitMixerBtn = document.getElementById('kit-mixer-btn');
+        const muteDrummerBtn = document.getElementById('mute-drummer-btn');
+        
+        // Clean up existing kit dropdown listeners
+        this.dropdownListeners = this.dropdownListeners.filter(({ element }) => {
+            const parent = element && element.parentElement;
+            return element !== kitDropdownSelected && 
+                   element !== kitPrev && 
+                   element !== kitNext &&
+                   element !== kitMixerBtn &&
+                   element !== muteDrummerBtn &&
+                   (!parent || parent.id !== 'kit-options');
+        });
 
-        // Toggle kit dropdown on click
+        // Navigation buttons
+        if (kitPrev) {
+            const prevHandler = () => {
+                this.navigateKit(-1);
+            };
+            this.addEventListener(kitPrev, 'click', prevHandler, this.dropdownListeners);
+        }
+        
+        if (kitNext) {
+            const nextHandler = () => {
+                this.navigateKit(1);
+            };
+            this.addEventListener(kitNext, 'click', nextHandler, this.dropdownListeners);
+        }
+        
+        // Custom dropdown functionality
+        const dropdownText = kitDropdown?.querySelector('.dropdown-text');
+        
+        // Toggle dropdown
         if (kitDropdownSelected) {
-            kitDropdownSelected.addEventListener('click', (e) => {
+            const toggleHandler = (e) => {
                 e.stopPropagation();
                 kitDropdown.classList.toggle('open');
-            });
+            };
+            this.addEventListener(kitDropdownSelected, 'click', toggleHandler, this.dropdownListeners);
         }
-
-        // Handle kit option selection
-        const kitOptions = kitDropdown?.querySelectorAll('.dropdown-option');
+        
+        // Kit selection from dropdown
         kitOptions?.forEach(option => {
-            option.addEventListener('click', (e) => {
+            const optionHandler = (e) => {
                 e.stopPropagation();
-
+                const kitName = option.dataset.value;
+                
                 // Update selected text
-                const selectedText = option.textContent;
-                if (kitDropdownText) {
-                    kitDropdownText.textContent = selectedText;
+                if (dropdownText) {
+                    dropdownText.textContent = kitName;
                 }
-
+                
                 // Update selected state
                 kitOptions.forEach(opt => opt.classList.remove('selected'));
                 option.classList.add('selected');
-
+                
                 // Close dropdown
                 kitDropdown.classList.remove('open');
-
-                // Update player state
-                this.playerStates[this.currentPlayer].kitName = selectedText;
-                this.onKitChanged(this.currentPlayer, selectedText);
+                
+                // Update player state and trigger callback
+                this.playerStates[this.currentPlayer].kitName = kitName;
+                this.onKitChanged(this.currentPlayer, kitName);
                 this.triggerAutoSave();
-                console.log(`Player ${this.currentPlayer} kit changed to: ${selectedText}`);
-            });
+                
+                console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
+            };
+            this.addEventListener(option, 'click', optionHandler, this.dropdownListeners);
         });
         
         // Close kit dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (kitDropdown && !kitDropdown.contains(e.target)) {
-                kitDropdown.classList.remove('open');
-            }
-        });
-
-        // Kit mixer button
-        const kitMixerBtn = document.getElementById('kit-mixer-btn');
-        if (kitMixerBtn) {
-            kitMixerBtn.addEventListener('click', () => {
-                // Toggle kit mixer state
-                const state = this.playerStates[this.currentPlayer];
-                state.kitMixerActive = !state.kitMixerActive;
-                
-                // Update visual state if needed
-                kitMixerBtn.classList.toggle('active', state.kitMixerActive);
-                
-                // Call the function and save
-                this.onKitMixerToggle(this.currentPlayer, state.kitMixerActive);
-                this.triggerAutoSave();
-                console.log(`Player ${this.currentPlayer} kit mixer: ${state.kitMixerActive}`);
+        if (!this.kitDropdownCloseHandler) {
+            this.kitDropdownCloseHandler = (e) => {
+                if (kitDropdown && !kitDropdown.contains(e.target)) {
+                    kitDropdown.classList.remove('open');
+                }
+            };
+            document.addEventListener('click', this.kitDropdownCloseHandler);
+            this.documentListeners.push({ 
+                event: 'click', 
+                handler: this.kitDropdownCloseHandler 
             });
         }
-
-        // Edit button
-        document.querySelectorAll('.edit-btn').forEach(editBtn => {
-            editBtn.addEventListener('click', () => {
-                this.onEditKit(this.currentPlayer);
-                console.log(`Edit kit for Player ${this.currentPlayer}`);
-            });
-        });
-
-        // Mute drummer button
-        const muteDrummerBtn = document.getElementById('mute-drummer-btn');
-        if (muteDrummerBtn) {
-            muteDrummerBtn.addEventListener('click', () => {
-                // Get current player state
-                const state = this.playerStates[this.currentPlayer];
-                
-                // Toggle muted state
-                state.muted = !state.muted;
+        
+        // Kit mixer button
+        if (kitMixerBtn) {
+            const mixerHandler = () => {
+                // Toggle kit mixer state
+                this.playerStates[this.currentPlayer].kitMixerActive = 
+                    !this.playerStates[this.currentPlayer].kitMixerActive;
                 
                 // Update button visual state
-                muteDrummerBtn.classList.toggle('muted', state.muted);
+                kitMixerBtn.classList.toggle('active', 
+                    this.playerStates[this.currentPlayer].kitMixerActive);
                 
-                // Update player tab muted state
-                const playerTab = document.querySelector(`.player-tab[data-player="${this.currentPlayer}"]`);
-                if (playerTab) {
-                    playerTab.classList.toggle('muted', state.muted);
-                }
+                // Trigger callback
+                this.onKitMixerToggle(this.currentPlayer, 
+                    this.playerStates[this.currentPlayer].kitMixerActive);
+                this.triggerAutoSave();
                 
-                // Update overlay visibility
+                console.log(`Player ${this.currentPlayer} kit mixer: ${this.playerStates[this.currentPlayer].kitMixerActive}`);
+            };
+            this.addEventListener(kitMixerBtn, 'click', mixerHandler, this.dropdownListeners);
+        }
+        
+        // Edit kit buttons
+        document.querySelectorAll('.edit-btn').forEach(editBtn => {
+            const editHandler = () => {
+                this.onEditKit(this.currentPlayer);
+                console.log(`Edit kit for Player ${this.currentPlayer}`);
+            };
+            this.addEventListener(editBtn, 'click', editHandler, this.dropdownListeners);
+        });
+        
+        // Mute Drummer button
+        if (muteDrummerBtn) {
+            const muteHandler = () => {
+                // Get current player state
+                const currentState = this.playerStates[this.currentPlayer];
+                
+                // Toggle mute state
+                currentState.muted = !currentState.muted;
+                
+                // Update button visual state
+                muteDrummerBtn.classList.toggle('active', currentState.muted);
+                
+                // Trigger mute callback
+                this.onMuteDrummer(this.currentPlayer, currentState.muted);
+                this.triggerAutoSave();
+                
+                // Update mute overlay
                 this.updateMuteOverlay();
                 
-                // Trigger callbacks
-                this.onMuteDrummer(this.currentPlayer, state.muted);
-                this.triggerAutoSave();
-                this.triggerAppStateSave();
-                
-                console.log(`Player ${this.currentPlayer} drummer muted: ${state.muted}`);
-            });
+                console.log(`Player ${this.currentPlayer} muted: ${currentState.muted}`);
+            };
+            this.addEventListener(muteDrummerBtn, 'click', muteHandler, this.dropdownListeners);
         }
     }
 
@@ -2940,6 +3022,14 @@ class OTTOAccurateInterface {
     }
 
     setupSliders() {
+        // Clean up existing slider listeners first
+        this.sliderListeners.forEach(({ element, event, handler }) => {
+            if (element) {
+                element.removeEventListener(event, handler);
+            }
+        });
+        this.sliderListeners = [];
+        
         // Custom vertical sliders
         document.querySelectorAll('.custom-slider').forEach(slider => {
             const track = slider.querySelector('.slider-track');
@@ -3006,7 +3096,7 @@ class OTTOAccurateInterface {
             };
             
             // Handle click on track
-            track.addEventListener('click', (e) => {
+            const trackClickHandler = (e) => {
                 if (e.target === thumb) return;  // Don't handle if clicking thumb
                 
                 const rect = track.getBoundingClientRect();
@@ -3032,20 +3122,26 @@ class OTTOAccurateInterface {
                 }
                 
                 console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
-            });
+            };
             
-            // Attach drag event listeners
-            thumb.addEventListener('mousedown', startDrag);
-            document.addEventListener('mousemove', doDrag);
-            document.addEventListener('mouseup', endDrag);
+            // Attach drag event listeners with tracking
+            this.addEventListener(track, 'click', trackClickHandler, this.sliderListeners);
+            this.addEventListener(thumb, 'mousedown', startDrag, this.sliderListeners);
+            
+            // These need to be on document level for dragging
+            if (!slider.dataset.listenersAdded) {
+                this.addEventListener(document, 'mousemove', doDrag, this.sliderListeners);
+                this.addEventListener(document, 'mouseup', endDrag, this.sliderListeners);
+                slider.dataset.listenersAdded = 'true';
+            }
             
             // Store value for updates
             slider.currentValue = value;
         });
 
-        // Mini sliders in kit section (keeping original for now)
+        // Mini sliders in kit section with proper cleanup
         document.querySelectorAll('.mini-slider').forEach((slider, index) => {
-            slider.addEventListener('input', (e) => {
+            const inputHandler = (e) => {
                 const sliderIndex = index + 1;
                 const value = parseInt(e.target.value);
 
@@ -3054,7 +3150,9 @@ class OTTOAccurateInterface {
                 this.triggerAutoSave();
 
                 console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
-            });
+            };
+            
+            this.addEventListener(slider, 'input', inputHandler, this.sliderListeners);
         });
     }
     
@@ -3201,39 +3299,52 @@ class OTTOAccurateInterface {
     }
 
     setupTopBarControls() {
+        // Clean up existing top bar listeners
+        this.eventListeners = this.eventListeners.filter(({ element }) => {
+            return element?.id !== 'settings-btn' && 
+                   element?.id !== 'link-btn' &&
+                   element?.id !== 'upload-btn' &&
+                   element?.id !== 'play-pause-btn' &&
+                   element?.id !== 'tempo-display';
+        });
+        
         // Settings button
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
+            const settingsHandler = () => {
                 this.onSettingsClicked();
                 console.log('Settings clicked');
-            });
+            };
+            this.addEventListener(settingsBtn, 'click', settingsHandler);
         }
 
         // Link button
         const linkBtn = document.getElementById('link-btn');
         if (linkBtn) {
-            linkBtn.addEventListener('click', () => {
+            const linkHandler = () => {
                 this.onLinkClicked();
                 console.log('Link clicked');
-            });
+            };
+            this.addEventListener(linkBtn, 'click', linkHandler);
         }
 
         // Upload button
         const uploadBtn = document.getElementById('upload-btn');
         if (uploadBtn) {
-            uploadBtn.addEventListener('click', () => {
+            const uploadHandler = () => {
                 this.onUploadClicked();
                 console.log('Upload clicked');
-            });
+            };
+            this.addEventListener(uploadBtn, 'click', uploadHandler);
         }
 
         // Play/Pause button
         const playPauseBtn = document.getElementById('play-pause-btn');
         if (playPauseBtn) {
-            playPauseBtn.addEventListener('click', () => {
+            const playPauseHandler = () => {
                 this.togglePlayPause();
-            });
+            };
+            this.addEventListener(playPauseBtn, 'click', playPauseHandler);
         }
 
         // Tempo display - dual function (tap tempo & edit)
@@ -3244,7 +3355,7 @@ class OTTOAccurateInterface {
             let isEditing = false;
 
             // Single click for tap tempo
-            tempoDisplay.addEventListener('click', (e) => {
+            const clickHandler = (e) => {
                 if (isEditing) return;  // Don't tap while editing
 
                 clickCount++;
@@ -3266,10 +3377,11 @@ class OTTOAccurateInterface {
                     clickCount = 0;
                     this.enterEditMode(tempoDisplay);
                 }
-            });
+            };
+            this.addEventListener(tempoDisplay, 'click', clickHandler);
 
             // Handle editing
-            tempoDisplay.addEventListener('blur', () => {
+            const blurHandler = () => {
                 if (!isEditing) return;
 
                 const newTempo = parseInt(tempoDisplay.textContent);
@@ -3280,9 +3392,10 @@ class OTTOAccurateInterface {
                     tempoDisplay.textContent = this.tempo;
                 }
                 this.exitEditMode(tempoDisplay);
-            });
+            };
+            this.addEventListener(tempoDisplay, 'blur', blurHandler);
 
-            tempoDisplay.addEventListener('keydown', (e) => {
+            const keydownHandler = (e) => {
                 if (!isEditing) {
                     e.preventDefault();
                     return;
@@ -3303,7 +3416,8 @@ class OTTOAccurateInterface {
                         e.preventDefault();
                     }
                 }
-            });
+            };
+            this.addEventListener(tempoDisplay, 'keydown', keydownHandler);
 
             // Helper functions for edit mode
             this.enterEditMode = (element) => {
@@ -3364,40 +3478,48 @@ class OTTOAccurateInterface {
     }
 
     setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
+        // Remove existing keyboard shortcut handler if it exists
+        if (this.keyboardShortcutHandler) {
+            document.removeEventListener('keydown', this.keyboardShortcutHandler);
+        }
+        
+        this.keyboardShortcutHandler = (e) => {
             // Check if we're editing any text field
-            const isEditingText = e.target.matches('input, select, textarea, [contenteditable="true"]') ||
-                                 e.target.classList.contains('editing') ||
-                                 document.querySelector('.tempo-display.editing');
-
-            // Don't process shortcuts if editing text
-            if (isEditingText) {
-                return;
-            }
-
-            // Player selection (1-8)
-            if (e.key >= '1' && e.key <= '8') {
-                const playerNumber = parseInt(e.key);
-                if (playerNumber <= this.numberOfPlayers) {
-                    this.switchToPlayer(playerNumber);
-                }
-            }
-
-            // Arrow keys removed - we don't use them for player navigation
-
-            // Spacebar for play/pause
-            if (e.key === ' ') {
+            const activeElement = document.activeElement;
+            const isEditing = activeElement && (
+                activeElement.tagName === 'INPUT' || 
+                activeElement.tagName === 'TEXTAREA' ||
+                activeElement.contentEditable === 'true'
+            );
+            
+            if (isEditing) return;
+            
+            // Space bar to toggle play/pause
+            if (e.code === 'Space') {
                 e.preventDefault();
                 this.togglePlayPause();
             }
-
-            // Kit navigation
-            if (e.key === '[') {
-                this.navigateKit(-1);
+            
+            // Number keys 1-8 to switch players
+            if (e.key >= '1' && e.key <= '8') {
+                const playerNum = parseInt(e.key);
+                if (playerNum <= this.numberOfPlayers) {
+                    this.switchToPlayer(playerNum);
+                }
             }
-            if (e.key === ']') {
-                this.navigateKit(1);
+            
+            // Arrow keys for navigation
+            if (e.key === 'ArrowLeft' && e.shiftKey) {
+                this.navigatePlayer(-1);
+            } else if (e.key === 'ArrowRight' && e.shiftKey) {
+                this.navigatePlayer(1);
             }
+        };
+        
+        document.addEventListener('keydown', this.keyboardShortcutHandler);
+        this.documentListeners.push({
+            event: 'keydown',
+            handler: this.keyboardShortcutHandler
         });
     }
 
@@ -3748,9 +3870,100 @@ class OTTOAccurateInterface {
     }
 
     destroy() {
+        // Cancel animation frame
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
         }
+        
+        // Clean up all event listeners
+        this.cleanupAllEventListeners();
+        
+        // Clear all timers
+        if (this.appStateAutoSaveTimer) {
+            clearTimeout(this.appStateAutoSaveTimer);
+        }
+        if (this.autoSaveTimer) {
+            clearTimeout(this.autoSaveTimer);
+        }
+        
+        // Clear references
+        this.playerStates = null;
+        this.presets = null;
+        this.patternGroups = null;
+        this.linkStates = null;
+    }
+    
+    cleanupAllEventListeners() {
+        // Remove all tracked event listeners
+        this.eventListeners.forEach(({ element, event, handler }) => {
+            if (element) {
+                element.removeEventListener(event, handler);
+            }
+        });
+        this.eventListeners = [];
+        
+        // Remove slider listeners
+        this.sliderListeners.forEach(({ element, event, handler }) => {
+            if (element) {
+                element.removeEventListener(event, handler);
+            }
+        });
+        this.sliderListeners = [];
+        
+        // Remove dropdown listeners
+        this.dropdownListeners.forEach(({ element, event, handler }) => {
+            if (element) {
+                element.removeEventListener(event, handler);
+            }
+        });
+        this.dropdownListeners = [];
+        
+        // Remove modal listeners
+        this.modalListeners.forEach(({ element, event, handler }) => {
+            if (element) {
+                element.removeEventListener(event, handler);
+            }
+        });
+        this.modalListeners = [];
+        
+        // Remove document listeners
+        this.documentListeners.forEach(({ event, handler }) => {
+            document.removeEventListener(event, handler);
+        });
+        this.documentListeners = [];
+        
+        // Clean up specific handlers
+        if (this.presetDropdownCloseHandler) {
+            document.removeEventListener('click', this.presetDropdownCloseHandler);
+            this.presetDropdownCloseHandler = null;
+        }
+        
+        if (this.addGroupHandler) {
+            const addGroupBtn = document.getElementById('add-group-btn');
+            if (addGroupBtn) {
+                addGroupBtn.removeEventListener('click', this.addGroupHandler);
+            }
+            this.addGroupHandler = null;
+        }
+        
+        if (this.renameGroupHandler) {
+            const renameGroupBtn = document.getElementById('rename-group-btn');
+            if (renameGroupBtn) {
+                renameGroupBtn.removeEventListener('click', this.renameGroupHandler);
+            }
+            this.renameGroupHandler = null;
+        }
+    }
+    
+    addEventListener(element, event, handler, trackingArray = null) {
+        // Helper method to add event listeners with tracking
+        if (!element) return;
+        
+        element.addEventListener(event, handler);
+        
+        // Track the listener for cleanup
+        const tracker = trackingArray || this.eventListeners;
+        tracker.push({ element, event, handler });
     }
 }
 
