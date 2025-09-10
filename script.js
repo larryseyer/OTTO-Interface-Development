@@ -2774,9 +2774,18 @@ class OTTOAccurateInterface {
         const playerPrevBtn = document.getElementById('player-prev-btn');
         const playerNextBtn = document.getElementById('player-next-btn');
 
-        // Clean up existing player tab listeners
+        // Clean up existing player tab and navigation button listeners
         this.eventListeners = this.eventListeners.filter(({ element }) => {
-            return !element || !element.classList || !element.classList.contains('player-tab');
+            // Remove player tab listeners
+            if (element && element.classList && element.classList.contains('player-tab')) {
+                return false;
+            }
+            // Remove player navigation button listeners
+            if (element && (element.id === 'player-prev-btn' || element.id === 'player-next-btn')) {
+                element.replaceWith(element.cloneNode(true));
+                return false;
+            }
+            return true;
         });
 
         // Set up initial visibility based on numberOfPlayers
@@ -2808,18 +2817,22 @@ class OTTOAccurateInterface {
         });
 
         // Navigation buttons with tracked event listeners
-        if (playerPrevBtn) {
+        // Re-get the buttons after potential cloning
+        const prevBtn = document.getElementById('player-prev-btn');
+        const nextBtn = document.getElementById('player-next-btn');
+        
+        if (prevBtn) {
             const prevHandler = () => {
                 this.navigatePlayer(-1);
             };
-            this.addEventListener(playerPrevBtn, 'click', prevHandler);
+            this.addEventListener(prevBtn, 'click', prevHandler);
         }
 
-        if (playerNextBtn) {
+        if (nextBtn) {
             const nextHandler = () => {
                 this.navigatePlayer(1);
             };
-            this.addEventListener(playerNextBtn, 'click', nextHandler);
+            this.addEventListener(nextBtn, 'click', nextHandler);
         }
     }
 
