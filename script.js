@@ -435,24 +435,136 @@ class OTTOAccurateInterface {
         }
     }
     
-    openFavoritesModal() {
-        const modal = document.getElementById('favorites-modal');
-        const groupName = document.getElementById('pattern-group-name');
-        if (modal) {
-            modal.classList.add('active');
-            // Update group name in title
-            if (groupName) {
-                const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
-                const displayNames = {
-                    'favorites': 'Favorites',
-                    'all': 'All Patterns',
-                    'custom': 'Custom'
-                };
-                groupName.textContent = displayNames[currentGroup] || 'Pattern Group';
-            }
-            // Initialize the pattern group editor
-            this.initializePatternGroupEditor();
+    togglePatternEditMode() {
+        this.isEditMode = !this.isEditMode;
+        const panel = document.getElementById('pattern-edit-panel');
+        const deleteBtn = document.getElementById('group-delete-btn');
+        const editBtn = document.querySelector('.edit-pattern-btn');
+        
+        if (this.isEditMode) {
+            // Enter edit mode
+            panel.classList.add('active');
+            deleteBtn.style.display = 'flex';
+            editBtn.classList.add('active');
+            
+            // Load available patterns
+            this.loadAvailablePatterns();
+            
+            // Setup drag and drop for existing pattern buttons
+            this.enablePatternEditDragDrop();
+        } else {
+            // Exit edit mode
+            panel.classList.remove('active');
+            deleteBtn.style.display = 'none';
+            editBtn.classList.remove('active');
+            
+            // Disable drag and drop
+            this.disablePatternEditDragDrop();
         }
+    }
+
+    enablePatternEditDragDrop() {
+        // Make existing pattern buttons drop targets
+        const patternButtons = document.querySelectorAll('.pattern-btn');
+        patternButtons.forEach(button => {
+            button.addEventListener('dragover', this.handleDragOver);
+            button.addEventListener('dragleave', this.handleDragLeave);
+            button.addEventListener('drop', this.handlePatternDrop.bind(this));
+            button.classList.add('edit-mode');
+        });
+    }
+    
+    disablePatternEditDragDrop() {
+        // Remove drag-drop from pattern buttons
+        const patternButtons = document.querySelectorAll('.pattern-btn');
+        patternButtons.forEach(button => {
+            button.removeEventListener('dragover', this.handleDragOver);
+            button.removeEventListener('dragleave', this.handleDragLeave);
+            button.removeEventListener('drop', this.handlePatternDrop.bind(this));
+            button.classList.remove('edit-mode');
+        });
+    }
+    
+    handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+        e.currentTarget.classList.add('drag-over');
+    }
+
+    
+    handleDragLeave(e) {
+        e.currentTarget.classList.remove('drag-over');
+    }
+    
+    handlePatternDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        
+        const patternName = e.dataTransfer.getData('text/plain');
+        const buttonIndex = Array.from(e.currentTarget.parentElement.children).indexOf(e.currentTarget) + 1;
+        
+        // Update button text with first 8 characters
+        const shortName = patternName.substring(0, 8);
+        e.currentTarget.textContent = shortName;
+        
+        // Save to current pattern group
+        const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+        this.savePatternToGroup(currentGroup, buttonIndex, patternName);
+        
+        // Update the player's state
+        const patternKey = shortName.toLowerCase().replace(/\s+/g, '-');
+        e.currentTarget.dataset.pattern = patternKey;
+    }
+    
+    filterPatterns(searchTerm) {
+        const patterns = document.querySelectorAll('.pattern-list-item');
+        patterns.forEach(pattern => {
+            const name = pattern.textContent.toLowerCase();
+            if (name.includes(searchTerm.toLowerCase())) {
+                pattern.style.display = 'block';
+            } else {
+                pattern.style.display = 'none';
+            }
+        });
+    }
+    
+    deleteCurrentPatternGroup() {
+        const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+        if (currentGroup === 'favorites') {
+            alert('Cannot delete the Favorites group');
+            return;
+        }
+        
+        if (confirm(`Delete pattern group "${currentGroup}"?`)) {
+            // Remove from storage
+            const groups = JSON.parse(localStorage.getItem('ottoPatternGroups') || '{}');
+            delete groups[currentGroup];
+            localStorage.setItem('ottoPatternGroups', JSON.stringify(groups));
+            
+            // Switch to favorites
+            this.playerStates[this.currentPlayer].patternGroup = 'favorites';
+            this.updatePatternGrid();
+            
+            // Exit edit mode
+            this.togglePatternEditMode();
+        }
+    }
+    
+    savePatternToGroup(groupName, buttonIndex, patternName) {
+        const groups = JSON.parse(localStorage.getItem('ottoPatternGroups') || '{}');
+        
+        if (!groups[groupName]) {
+            groups[groupName] = {
+                name: groupName,
+                patterns: {},
+                selectedPattern: null
+            };
+        }
+        
+        groups[groupName].patterns[buttonIndex] = patternName;
+        localStorage.setItem('ottoPatternGroups', JSON.stringify(groups));
+        
+        console.log(`Saved pattern "${patternName}" to group "${groupName}" at position ${buttonIndex}`);
     }
 
     initializePatternGroupEditor() {
@@ -462,8 +574,10 @@ class OTTOAccurateInterface {
         // Load available MIDI patterns
         this.loadAvailablePatterns();
         
-        // Setup drag and drop
-        this.setupPatternDragDrop();
+        // Setup drag and drop AFTER patterns are loaded
+        setTimeout(() => {
+            this.setupPatternDragDrop();
+        }, 100);
         
         // Setup group management controls
         this.setupGroupManagementControls();
@@ -530,31 +644,30 @@ class OTTOAccurateInterface {
             patternsList.innerHTML = '';
             midiFiles.forEach(file => {
                 const patternItem = document.createElement('div');
-                patternItem.className = 'pattern-item';
+                patternItem.className = 'pattern-list-item';
                 patternItem.textContent = file; // Show full name in the list
                 patternItem.dataset.fullName = file;
                 patternItem.dataset.shortName = file.substring(0, 8); // Store 8-char version
                 patternItem.draggable = true;
+                
+                // Add drag event listeners
+                patternItem.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'copy';
+                    e.dataTransfer.setData('text/plain', file);
+                    patternItem.classList.add('dragging');
+                });
+                
+                patternItem.addEventListener('dragend', () => {
+                    patternItem.classList.remove('dragging');
+                });
+                
                 patternsList.appendChild(patternItem);
             });
         }
 
         // Update the 'all' group with all patterns
-        if (this.patternGroups.all) {
+        if (this.patternGroups && this.patternGroups.all) {
             this.patternGroups.all.patterns = midiFiles.map(f => f.substring(0, 8));
-        }
-
-        // Setup search functionality
-        const searchInput = document.getElementById('pattern-search-input');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                const items = patternsList.querySelectorAll('.pattern-item');
-                items.forEach(item => {
-                    const text = item.dataset.fullName.toLowerCase();
-                    item.style.display = text.includes(searchTerm) ? 'block' : 'none';
-                });
-            });
         }
     }
 
@@ -808,11 +921,14 @@ class OTTOAccurateInterface {
             }
         });
         
-        // Update selector
-        const groupSelector = document.getElementById('pattern-group-selector');
-        if (groupSelector) {
-            groupSelector.value = groupKey;
+        // Update dropdown display
+        const editorSelected = document.getElementById('editor-group-selected');
+        if (editorSelected && this.patternGroups[groupKey]) {
+            editorSelected.querySelector('.dropdown-text').textContent = this.patternGroups[groupKey].name;
         }
+        
+        // Update current editor group
+        this.currentEditorGroup = groupKey;
     }
 
     updateEditorGroupDropdown() {
@@ -902,7 +1018,8 @@ class OTTOAccurateInterface {
         
         patternButtons.forEach((btn, index) => {
             if (index < patterns.length && patterns[index]) {
-                btn.textContent = patterns[index];
+                // Only show first 8 characters on the button
+                btn.textContent = patterns[index].substring(0, 8);
                 btn.dataset.pattern = patterns[index].toLowerCase().replace(/\s+/g, '-');
                 btn.style.display = 'flex';
             } else {
@@ -2468,10 +2585,34 @@ class OTTOAccurateInterface {
             });
         }
         
-        // Setup edit pattern button to open favorites modal
+        // Setup edit pattern button to toggle edit mode
         if (editPatternBtn) {
             editPatternBtn.addEventListener('click', () => {
-                this.openFavoritesModal();
+                this.togglePatternEditMode();
+            });
+        }
+        
+        // Setup panel close button
+        const panelCloseBtn = document.getElementById('pattern-panel-close');
+        if (panelCloseBtn) {
+            panelCloseBtn.addEventListener('click', () => {
+                this.togglePatternEditMode();
+            });
+        }
+        
+        // Setup delete button
+        const deleteBtn = document.getElementById('group-delete-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                this.deleteCurrentPatternGroup();
+            });
+        }
+        
+        // Setup pattern search
+        const searchInput = document.getElementById('pattern-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.filterPatterns(e.target.value);
             });
         }
 

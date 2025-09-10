@@ -1921,6 +1921,10 @@ body {
 
 .row4-left-area3 {
     flex: 0 0 var(--row4-left-area3-width);
+    display: flex;
+    align-items: flex-end;  /* Align to bottom like other row4 areas */
+    justify-content: flex-start;  /* Align to left */
+    padding-left: 10px;  /* Add spacing from area2 */
 }
 
 /* Row 4 Right Areas - Labels */
@@ -2251,42 +2255,140 @@ body {
     font-style: italic;
 }
 
-/* Pattern Group Editor Modal Styles */
+/* Pattern Edit Panel - Simple slide-out panel */
+.pattern-edit-panel {
+    position: fixed;
+    right: -100%; /* Fully hidden off-screen initially */
+    top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height)); /* Start at row 4 */
+    width: 50%;
+    height: calc(var(--row4-height) + var(--row5-height)); /* Cover rows 4 and 5 */
+    background: var(--bg-primary);
+    border-left: 2px solid var(--border-color);
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s ease;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pattern-edit-panel.active {
+    right: 0; /* Slide in when active */
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.panel-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.2s ease;
+}
+
+.panel-close-btn:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.panel-close-btn i {
+    font-size: 24px;
+}
+
+.panel-search {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Delete button in row 4 area 3 */
+.row4-left-area3 .group-delete-btn {
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row4-left-area3 .group-delete-btn:hover {
+    color: #8b0000;
+    transform: scale(1.1);
+}
+
+.row4-left-area3 .group-delete-btn i {
+    font-size: 32px;
+}
+
+/* Edit mode class for main interface */
+.main-interface.edit-mode .pattern-btn {
+    cursor: move;
+}
+
+.main-interface.edit-mode .pattern-btn.drag-over {
+    background-position: 0 40%; /* Highlight on drag over */
+    transform: scale(1.05);
+}
+
+/* Old Pattern Group Editor Modal Styles - REMOVED */
 .pattern-group-modal-content {
-    width: 90%;
-    max-width: 1200px;
-    height: 70vh;
-    max-height: 600px; /* Back to reasonable height */
+    width: 1200px;
+    height: 600px;
+    max-width: 90vw;
+    max-height: 80vh;
     display: flex;
     flex-direction: column;
     position: relative;
+    background: var(--bg-primary); /* Opaque background */
 }
 
 .pattern-group-body {
     height: calc(100% - 60px);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary); /* Match main interface background */
 }
 
 .pattern-group-container {
     display: flex;
-    gap: 30px;
+    flex: 1;
     height: 100%;
-    overflow: hidden;
+    background: var(--bg-secondary); /* Ensure opaque background */
 }
 
+/* Left side matches row5-left exactly */
 .pattern-group-left {
-    flex: 1;
+    flex: 0 0 var(--row5-left-width); /* Use the actual variable! */
     display: flex;
     flex-direction: column;
-    gap: 20px;
 }
 
+/* Right side for available patterns */
 .pattern-group-right {
-    width: 350px;
+    flex: 0 0 var(--row5-right-width); /* Use the actual variable! */
     display: flex;
     flex-direction: column;
     border-left: 1px solid var(--border-color);
-    padding-left: 20px;
+    padding: 20px;
 }
 
 /* Pattern Group Top Controls */
@@ -2294,40 +2396,45 @@ body {
     display: flex;
     gap: 10px;
     align-items: center;
-    padding-bottom: 15px;
+    padding: 10px 20px;
     border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
+    height: 60px;
+    flex-shrink: 0;
 }
 
-/* Pattern Group Selector Row - Matching row 4 */
+/* Pattern Group Selector Row - Using actual row 4 variables */
 .pattern-group-selector-row {
+    height: var(--row4-height); /* Use the actual row 4 height variable! */
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    align-items: flex-end; /* Align to bottom like row 4 */
     justify-content: center;
+    padding: 0 20px 10px 20px;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 /* Group delete button - trash icon */
 .group-delete-btn {
-    padding: 8px;
+    width: 44px;
+    height: 44px;
     background: transparent;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border: none;
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20px;
 }
 
 .group-delete-btn:hover {
-    background: rgba(139, 0, 0, 0.1);
-    border-color: #8b0000;
     color: #8b0000;
+    transform: scale(1.1);
 }
 
 .group-delete-btn i {
-    font-size: 20px;
+    font-size: 32px;
 }
 
 .editor-group-dropdown {
@@ -2440,12 +2547,13 @@ body {
     background: #8b0000;
 }
 
-/* Pattern Grid Editor */
+/* Pattern Grid Editor - Using row 5 variables */
 .pattern-grid-editor {
-    flex: 1;
+    height: var(--row5-height); /* Use the actual row 5 height variable! */
     display: flex;
-    flex-direction: column;
-    align-items: center; /* Center the grid */
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px 20px 10px; /* Same padding as row5-left */
 }
 
 .pattern-edit-grid {
@@ -2453,9 +2561,10 @@ body {
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
     gap: 10px; /* Match main grid gap */
-    flex: 1;
-    max-height: 400px; /* Reasonable height */
-    max-width: 500px; /* Reasonable width */
+    width: 100%;
+    max-width: 600px; /* Same as main pattern grid */
+    height: 100%;
+    aspect-ratio: 1; /* Keep it square */
 }
 
 .pattern-drop-zone {
@@ -2470,19 +2579,18 @@ body {
     align-items: center;
     justify-content: center;
     font-family: 'Playfair Display', serif;
-    font-size: 24px;  /* Back to reasonable size */
+    font-size: 28.6px;  /* Exact same as pattern-btn */
     font-weight: 300;
     color: var(--text-black);
     cursor: pointer;
     transition: all 0.02s ease;
     position: relative;
-    min-height: 60px;  /* Back to normal height */
+    min-height: 60px;
     padding: 6px;
-    padding-bottom: 11px;
+    padding-bottom: 11px;  /* Push text up like main buttons */
     letter-spacing: 0.5px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-align: center;
 }
 
 .pattern-drop-zone.has-pattern {
@@ -2601,4 +2709,108 @@ body {
 .group-action-btn.done-compact:hover {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
+}
+
+
+/* Pattern Edit Mode Styles */
+.pattern-list-item {
+    padding: 10px 12px;
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: move;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+    font-size: 14px;
+    user-select: none;
+    margin-bottom: 8px;
+}
+
+.pattern-list-item:hover {
+    background: var(--button-hover);
+    transform: translateX(-2px);
+}
+
+.pattern-list-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+/* Pattern buttons in edit mode */
+.pattern-btn.edit-mode {
+    /* Only add subtle visual cue, don't break the button styling */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.pattern-btn.drag-over {
+    background-position: 0 40% !important; /* WHITE button for drag over */
+    transform: scale(1.05);
+    color: var(--text-primary) !important;
+}
+
+/* Delete button styling */
+.group-delete-btn {
+    width: 67px;  /* Match edit-pattern-btn size */
+    height: 67px;  /* Match edit-pattern-btn size */
+    background: transparent;
+    border: none;
+    color: var(--text-icon);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.group-delete-btn:hover {
+    transform: scale(var(--row1-hover-scale));
+}
+
+.group-delete-btn i {
+    font-size: 50px;  /* Match edit-pattern-btn icon size */
+    color: var(--text-icon);
+}
+
+.group-delete-btn:hover i {
+    color: #ff4444;  /* Red on hover */
+}
+
+.group-delete-btn:active i {
+    color: var(--text-primary);  /* White when clicked */
+    transform: scale(0.95);
+}
+
+/* Edit button active state */
+.edit-pattern-btn.active {
+    background: var(--accent-purple);
+    border-color: var(--accent-purple);
+}
+
+/* Panel close button */
+.panel-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.panel-close-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Pattern search input */
+.pattern-search-input {
+    width: 100%;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 4px;
+}
+
+.panel-search {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
 }

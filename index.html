@@ -67,89 +67,19 @@
             </div>
         </div>
 
-        <!-- Pattern Group Edit Modal -->
-        <div id="favorites-modal" class="modal-window">
-            <div class="modal-content pattern-group-modal-content">
-                <div class="modal-header">
-                    <h2>Edit Pattern Group - <span id="pattern-group-name">Favorites</span></h2>
-                    <button class="modal-close" id="favorites-modal-close">
-                        <i class="ph-thin ph-x"></i>
-                    </button>
-                </div>
-                <div class="modal-body pattern-group-body">
-                    <div class="pattern-group-container">
-                        <!-- Left side: Mirroring main interface layout -->
-                        <div class="pattern-group-left">
-                            <!-- Top controls for group management -->
-                            <div class="pattern-group-top-controls">
-                                <input type="text" id="new-group-name" class="group-name-input" placeholder="New group name...">
-                                <button class="group-action-btn" id="create-group-btn">
-                                    <i class="ph-thin ph-plus"></i>
-                                    <span>Create</span>
-                                </button>
-                                <button class="group-action-btn done-compact" id="pattern-group-done-btn">
-                                    <i class="ph-thin ph-check"></i>
-                                    <span>Done</span>
-                                </button>
-                            </div>
-                            
-                            <!-- Pattern group selector with chevrons (like row 4) -->
-                            <div class="pattern-group-selector-row">
-                                <button class="group-nav-btn editor-group-prev">
-                                    <i class="ph-thin ph-caret-left"></i>
-                                </button>
-                                <div class="custom-dropdown editor-group-dropdown" id="editor-group-dropdown">
-                                    <div class="dropdown-selected" id="editor-group-selected">
-                                        <span class="dropdown-text">Favorites</span>
-                                    </div>
-                                    <div class="dropdown-options" id="editor-group-options">
-                                        <!-- Options will be populated dynamically -->
-                                    </div>
-                                </div>
-                                <button class="group-nav-btn editor-group-next">
-                                    <i class="ph-thin ph-caret-right"></i>
-                                </button>
-                                <button class="group-delete-btn editor-group-delete" id="editor-group-delete-btn" title="Delete current group">
-                                    <i class="ph-thin ph-trash"></i>
-                                </button>
-                            </div>
-                            
-                            <!-- 4x4 Pattern Grid (matching row 5 left) -->
-                            <div class="pattern-grid-editor">
-                                <div class="pattern-edit-grid" id="pattern-edit-grid">
-                                    <!-- 16 drop zones for 4x4 grid -->
-                                    <div class="pattern-drop-zone" data-position="0"></div>
-                                    <div class="pattern-drop-zone" data-position="1"></div>
-                                    <div class="pattern-drop-zone" data-position="2"></div>
-                                    <div class="pattern-drop-zone" data-position="3"></div>
-                                    <div class="pattern-drop-zone" data-position="4"></div>
-                                    <div class="pattern-drop-zone" data-position="5"></div>
-                                    <div class="pattern-drop-zone" data-position="6"></div>
-                                    <div class="pattern-drop-zone" data-position="7"></div>
-                                    <div class="pattern-drop-zone" data-position="8"></div>
-                                    <div class="pattern-drop-zone" data-position="9"></div>
-                                    <div class="pattern-drop-zone" data-position="10"></div>
-                                    <div class="pattern-drop-zone" data-position="11"></div>
-                                    <div class="pattern-drop-zone" data-position="12"></div>
-                                    <div class="pattern-drop-zone" data-position="13"></div>
-                                    <div class="pattern-drop-zone" data-position="14"></div>
-                                    <div class="pattern-drop-zone" data-position="15"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Right side: Available patterns from MIDI files -->
-                        <div class="pattern-group-right">
-                            <h3>Available Patterns</h3>
-                            <div class="pattern-search">
-                                <input type="text" id="pattern-search-input" class="pattern-search-input" placeholder="Search patterns...">
-                            </div>
-                            <div class="available-patterns-list" id="available-patterns-list">
-                                <!-- Patterns will be dynamically loaded here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Pattern Edit Panel - Simple slide-out panel for editing -->
+        <div id="pattern-edit-panel" class="pattern-edit-panel">
+            <div class="panel-header">
+                <h3>Available Patterns</h3>
+                <button class="panel-close-btn" id="pattern-panel-close">
+                    <i class="ph-thin ph-x"></i>
+                </button>
+            </div>
+            <div class="panel-search">
+                <input type="text" id="pattern-search-input" class="pattern-search-input" placeholder="Search patterns...">
+            </div>
+            <div class="available-patterns-list" id="available-patterns-list">
+                <!-- Patterns will be dynamically loaded here -->
             </div>
         </div>
 
@@ -423,9 +353,11 @@
                         </button>
                     </div>
 
-                    <!-- Left Area 3: Blank space for now (25% of left) -->
+                    <!-- Left Area 3: Delete button (only shows in edit mode) -->
                     <div class="row4-left-area3">
-                        <!-- Reserved for future content -->
+                        <button class="group-delete-btn" id="group-delete-btn" style="display: none;">
+                            <i class="ph-thin ph-trash"></i>
+                        </button>
                     </div>
                 </div>
 
