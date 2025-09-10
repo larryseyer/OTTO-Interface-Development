@@ -531,8 +531,9 @@ class OTTOAccurateInterface {
             midiFiles.forEach(file => {
                 const patternItem = document.createElement('div');
                 patternItem.className = 'pattern-item';
-                patternItem.textContent = file.substring(0, 8); // First 8 letters
+                patternItem.textContent = file; // Show full name in the list
                 patternItem.dataset.fullName = file;
+                patternItem.dataset.shortName = file.substring(0, 8); // Store 8-char version
                 patternItem.draggable = true;
                 patternsList.appendChild(patternItem);
             });
@@ -565,8 +566,8 @@ class OTTOAccurateInterface {
         patternItems.forEach(item => {
             item.addEventListener('dragstart', (e) => {
                 e.dataTransfer.effectAllowed = 'copy';
-                e.dataTransfer.setData('text/plain', item.textContent);
-                e.dataTransfer.setData('fullName', item.dataset.fullName);
+                e.dataTransfer.setData('shortName', item.dataset.shortName); // 8-char version
+                e.dataTransfer.setData('fullName', item.dataset.fullName); // Full name
                 item.classList.add('dragging');
             });
 
@@ -591,13 +592,13 @@ class OTTOAccurateInterface {
                 e.preventDefault();
                 zone.classList.remove('drag-over');
                 
-                const patternName = e.dataTransfer.getData('text/plain');
-                const fullName = e.dataTransfer.getData('fullName');
+                const shortName = e.dataTransfer.getData('shortName'); // 8-char version for button
+                const fullName = e.dataTransfer.getData('fullName'); // Full name for reference
                 
-                // Update the drop zone
-                zone.textContent = patternName;
+                // Update the drop zone with short name
+                zone.textContent = shortName;
                 zone.classList.add('has-pattern');
-                zone.dataset.pattern = patternName;
+                zone.dataset.pattern = shortName;
                 zone.dataset.fullName = fullName;
                 
                 // Add remove button
