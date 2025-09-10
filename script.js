@@ -80,8 +80,10 @@ class OTTOAccurateInterface {
             'world-fusion': this.createPresetFromCurrentState('World Fusion')
         };
         
-        // Initialize preset lock states (default all unlocked)
-        this.presetLocks = this.loadPresetLocksFromStorage() || {};
+        // Initialize preset lock states - lock Default preset by default to protect it
+        this.presetLocks = this.loadPresetLocksFromStorage() || {
+            'default': true  // Lock the Default preset to prevent auto-save modifications
+        };
         
         // Setup auto-save functionality
         this.setupAutoSave();
@@ -604,12 +606,18 @@ class OTTOAccurateInterface {
 
     loadPreset(key) {
         const preset = this.presets[key];
-        if (!preset) return;
+        if (!preset) {
+            console.error(`Preset "${key}" not found`);
+            return;
+        }
         
-        // Restore all player states
+        console.log(`Loading preset: ${preset.name}`);
+        
+        // STEP 1: Complete state restoration
+        // Deep clone all player states to avoid reference issues
         this.playerStates = JSON.parse(JSON.stringify(preset.playerStates));
         
-        // Restore link states
+        // Restore link states if they exist
         if (preset.linkStates) {
             this.linkStates = JSON.parse(JSON.stringify(preset.linkStates));
             // Convert Sets back from arrays
@@ -620,6 +628,9 @@ class OTTOAccurateInterface {
                     }
                 }
             }
+        } else {
+            // Clear link states if not in preset
+            this.linkStates = null;
         }
         
         // Restore global settings
@@ -630,12 +641,49 @@ class OTTOAccurateInterface {
         // Update current preset reference
         this.currentPreset = key;
         
-        // Update UI
-        this.updateUIForCurrentPlayer();
+        // STEP 2: Complete UI refresh for ALL players
+        // First, update all player tab visual states (muted/unmuted)
+        for (let i = 1; i <= this.maxPlayers; i++) {
+            const tab = document.querySelector(`.player-tab[data-player="${i}"]`);
+            if (tab) {
+                // Remove all state classes first
+                tab.classList.remove('muted', 'active');
+                
+                // Add back appropriate states
+                if (this.playerStates[i]) {
+                    if (this.playerStates[i].muted) {
+                        tab.classList.add('muted');
+                    }
+                }
+                
+                // Mark current player as active
+                if (i === this.currentPlayer) {
+                    tab.classList.add('active');
+                }
+            }
+        }
+        
+        // STEP 3: Force complete UI update for current player
+        // This updates all controls for the currently visible player
+        this.updateCompleteUIState();
+        
+        // STEP 4: Update global UI elements
+        // Update number of players display
+        this.setNumberOfPlayers(this.numberOfPlayers);
+        
+        // Update tempo
         this.setTempo(this.tempo);
+        
+        // Update loop position
         this.setLoopPosition(this.loopPosition);
         
-        // Update preset dropdown display text
+        // Update playing state if it's part of the preset
+        if (preset.isPlaying !== undefined) {
+            this.isPlaying = preset.isPlaying;
+            this.updatePlayPauseButton();
+        }
+        
+        // STEP 5: Update preset dropdown
         const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
         if (dropdownText) {
             dropdownText.textContent = preset.name;
@@ -645,18 +693,24 @@ class OTTOAccurateInterface {
         const dropdownOptions = document.getElementById('preset-options');
         if (dropdownOptions) {
             dropdownOptions.querySelectorAll('.dropdown-option').forEach(opt => {
+                opt.classList.remove('selected');
                 if (opt.dataset.value === key) {
                     opt.classList.add('selected');
-                } else {
-                    opt.classList.remove('selected');
                 }
             });
         }
         
-        // Update lock display
+        // STEP 6: Update lock display
         this.updatePresetLockDisplay();
         
-        this.triggerAppStateSave();  // Save app state with new preset selection
+        // STEP 7: Update mute overlay based on CURRENT player's state
+        // This is critical - must check the current player's mute state
+        this.updateMuteOverlay();
+        
+        // Save app state with new preset selection
+        this.triggerAppStateSave();
+        
+        console.log(`Successfully loaded preset "${preset.name}"`);
         this.showNotification(`Loaded preset "${preset.name}"`);
     }
 
@@ -710,9 +764,16 @@ class OTTOAccurateInterface {
         
         this.presets = newPresets;
         this.savePresetsToStorage();
+        
+        // Load the newly duplicated preset
+        this.loadPreset(newKey);
+        
         this.updatePresetDropdown();
         this.renderPresetList();
         this.showNotification(`Created duplicate: "${newName}"`);
+        
+        // Return the new key so it can be used if needed (e.g., for renaming)
+        return newKey;
     }
     
     renamePreset(key) {
@@ -767,6 +828,10 @@ class OTTOAccurateInterface {
             }
             
             this.savePresetsToStorage();
+            
+            // Load the renamed preset to ensure it's the current one
+            this.loadPreset(newKey || key);
+            
             this.updatePresetDropdown();
             this.renderPresetList();
             
@@ -922,8 +987,14 @@ class OTTOAccurateInterface {
         // Save the new preset
         this.presets[newPresetKey] = freshPreset;
         
+        // Reset to Player 1 as the active player
+        this.currentPlayer = 1;
+        
         // Load the new preset
         this.loadPreset(newPresetKey);
+        
+        // Ensure Player 1 is selected
+        this.switchToPlayer(1);
         
         // Update the preset dropdown
         this.updatePresetDropdown();
@@ -1000,10 +1071,19 @@ class OTTOAccurateInterface {
         // Replace the default preset
         this.presets['default'] = factoryDefault;
         
+        // Reset to Player 1 as the active player
+        this.currentPlayer = 1;
+        
         // If currently on default preset, reload it
         if (this.currentPreset === 'default') {
             this.loadPreset('default');
+        } else {
+            // Switch to default preset after reset
+            this.loadPreset('default');
         }
+        
+        // Ensure Player 1 is selected after reset
+        this.switchToPlayer(1);
         
         // Update the preset dropdown
         this.updatePresetDropdown();
@@ -1400,16 +1480,22 @@ class OTTOAccurateInterface {
             }
         });
 
-        // Update UI to reflect current player state
-        this.updateUIForCurrentPlayer();
+        // Use the comprehensive UI update
+        this.updateCompleteUIState();
         
         this.triggerAppStateSave();  // Save app state
-        console.log(`Switched to Player ${playerNumber}`);
+        console.log(`Switched to Player ${playerNumber}, muted: ${this.playerStates[playerNumber]?.muted || false}`);
         this.onPlayerChanged(playerNumber);
     }
 
     updateUIForCurrentPlayer() {
         const state = this.playerStates[this.currentPlayer];
+        
+        // Ensure state exists
+        if (!state) {
+            console.error(`No state found for player ${this.currentPlayer}`);
+            return;
+        }
 
         // Update player number display
         const playerNumberDisplay = document.getElementById('current-player-number');
@@ -1469,30 +1555,40 @@ class OTTOAccurateInterface {
         // Update kit mixer button state
         const kitMixerBtn = document.getElementById('kit-mixer-btn');
         if (kitMixerBtn) {
-            kitMixerBtn.classList.toggle('active', state.kitMixerActive);
+            kitMixerBtn.classList.toggle('active', state.kitMixerActive || false);
         }
 
         // Update mute drummer button state
         const muteDrummerBtn = document.getElementById('mute-drummer-btn');
         if (muteDrummerBtn) {
-            muteDrummerBtn.classList.toggle('muted', state.muted);
+            muteDrummerBtn.classList.toggle('muted', state.muted || false);
         }
 
-        // Update toggle button states
-        Object.keys(state.toggleStates).forEach(toggleKey => {
-            const button = document.querySelector(`[data-toggle="${toggleKey}"]`);
-            if (button) {
-                button.classList.toggle('active', state.toggleStates[toggleKey]);
-            }
+        // Update toggle button states - clear all first, then set active ones
+        document.querySelectorAll('[data-toggle]').forEach(button => {
+            button.classList.remove('active');
         });
+        if (state.toggleStates) {
+            Object.keys(state.toggleStates).forEach(toggleKey => {
+                const button = document.querySelector(`[data-toggle="${toggleKey}"]`);
+                if (button && state.toggleStates[toggleKey]) {
+                    button.classList.add('active');
+                }
+            });
+        }
 
-        // Update fill button states
-        Object.keys(state.fillStates).forEach(fillKey => {
-            const button = document.querySelector(`[data-fill="${fillKey}"]`);
-            if (button) {
-                button.classList.toggle('active', state.fillStates[fillKey]);
-            }
+        // Update fill button states - clear all first, then set active ones
+        document.querySelectorAll('[data-fill]').forEach(button => {
+            button.classList.remove('active');
         });
+        if (state.fillStates) {
+            Object.keys(state.fillStates).forEach(fillKey => {
+                const button = document.querySelector(`[data-fill="${fillKey}"]`);
+                if (button && state.fillStates[fillKey]) {
+                    button.classList.add('active');
+                }
+            });
+        }
 
         // Update pattern selection
         document.querySelectorAll('.pattern-btn').forEach(btn => {
@@ -1503,19 +1599,23 @@ class OTTOAccurateInterface {
         });
 
         // Update custom sliders
-        Object.keys(state.sliderValues).forEach(sliderKey => {
-            const slider = document.querySelector(`.custom-slider[data-param="${sliderKey}"]`);
-            if (slider) {
-                const value = state.sliderValues[sliderKey];
-                this.updateCustomSlider(slider, value);
-            }
-        });
+        if (state.sliderValues) {
+            Object.keys(state.sliderValues).forEach(sliderKey => {
+                const slider = document.querySelector(`.custom-slider[data-param="${sliderKey}"]`);
+                if (slider) {
+                    const value = state.sliderValues[sliderKey];
+                    this.updateCustomSlider(slider, value);
+                }
+            });
+        }
 
         // Update mini sliders
         const miniSliders = document.querySelectorAll('.mini-slider');
         miniSliders.forEach((slider, index) => {
             const sliderIndex = index + 1;
-            slider.value = state.miniSliders[sliderIndex] || 50;
+            if (state.miniSliders) {
+                slider.value = state.miniSliders[sliderIndex] || 50;
+            }
         });
 
         // Update link icon states for current player
@@ -1530,7 +1630,169 @@ class OTTOAccurateInterface {
         for (let i = 1; i <= this.maxPlayers; i++) {
             const tab = document.querySelector(`.player-tab[data-player="${i}"]`);
             if (tab && this.playerStates[i]) {
-                tab.classList.toggle('muted', this.playerStates[i].muted);
+                tab.classList.toggle('muted', this.playerStates[i].muted || false);
+            }
+        }
+    }
+
+    // Complete UI state update - used when loading presets to ensure everything is in sync
+    updateCompleteUIState() {
+        const state = this.playerStates[this.currentPlayer];
+        
+        if (!state) {
+            console.error(`No state found for player ${this.currentPlayer}`);
+            return;
+        }
+        
+        console.log(`Updating complete UI for player ${this.currentPlayer}, muted: ${state.muted}`);
+        
+        // Update player number display
+        const playerNumberDisplay = document.getElementById('current-player-number');
+        if (playerNumberDisplay) {
+            playerNumberDisplay.textContent = this.currentPlayer;
+        }
+        
+        // Update kit dropdown
+        const kitDropdownText = document.querySelector('#kit-dropdown .dropdown-text');
+        if (kitDropdownText) {
+            kitDropdownText.textContent = state.kitName || 'Acoustic';
+        }
+        
+        // Update kit dropdown options
+        const kitOptions = document.querySelectorAll('#kit-dropdown .dropdown-option');
+        kitOptions.forEach(option => {
+            option.classList.remove('selected');
+            const kitValue = (state.kitName || 'Acoustic').toLowerCase();
+            if (option.dataset.value === kitValue) {
+                option.classList.add('selected');
+            }
+        });
+        
+        // Update pattern group dropdown
+        const groupDropdownText = document.querySelector('#group-dropdown .dropdown-text');
+        if (groupDropdownText) {
+            const groupDisplayNames = {
+                'favorites': 'Favorites',
+                'all': 'All Patterns',
+                'custom': 'Custom'
+            };
+            const groupValue = state.patternGroup || 'favorites';
+            groupDropdownText.textContent = groupDisplayNames[groupValue] || 'Favorites';
+        }
+        
+        // Update pattern group options
+        const groupOptions = document.querySelectorAll('#group-dropdown .dropdown-option');
+        groupOptions.forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === (state.patternGroup || 'favorites')) {
+                option.classList.add('selected');
+            }
+        });
+        
+        // Update kit mixer button
+        const kitMixerBtn = document.getElementById('kit-mixer-btn');
+        if (kitMixerBtn) {
+            kitMixerBtn.classList.remove('active');
+            if (state.kitMixerActive) {
+                kitMixerBtn.classList.add('active');
+            }
+        }
+        
+        // Update mute drummer button - CRITICAL for the bug fix
+        const muteDrummerBtn = document.getElementById('mute-drummer-btn');
+        if (muteDrummerBtn) {
+            muteDrummerBtn.classList.remove('muted');
+            if (state.muted) {
+                muteDrummerBtn.classList.add('muted');
+            }
+        }
+        
+        // Clear and update ALL toggle buttons
+        document.querySelectorAll('[data-toggle]').forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        if (state.toggleStates) {
+            Object.entries(state.toggleStates).forEach(([key, value]) => {
+                if (value) {
+                    const button = document.querySelector(`[data-toggle="${key}"]`);
+                    if (button) {
+                        button.classList.add('active');
+                    }
+                }
+            });
+        }
+        
+        // Clear and update ALL fill buttons
+        document.querySelectorAll('[data-fill]').forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        if (state.fillStates) {
+            Object.entries(state.fillStates).forEach(([key, value]) => {
+                if (value) {
+                    const button = document.querySelector(`[data-fill="${key}"]`);
+                    if (button) {
+                        button.classList.add('active');
+                    }
+                }
+            });
+        }
+        
+        // Clear and update pattern selection
+        document.querySelectorAll('.pattern-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        if (state.selectedPattern) {
+            const patternBtn = document.querySelector(`[data-pattern="${state.selectedPattern}"]`);
+            if (patternBtn) {
+                patternBtn.classList.add('active');
+            }
+        }
+        
+        // Update all sliders
+        if (state.sliderValues) {
+            ['swing', 'energy', 'volume'].forEach(param => {
+                const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
+                if (slider) {
+                    const value = state.sliderValues[param] || 0;
+                    this.updateCustomSlider(slider, value);
+                }
+            });
+        }
+        
+        // Update mini sliders if they exist
+        const miniSliders = document.querySelectorAll('.mini-slider');
+        if (miniSliders.length > 0 && state.miniSliders) {
+            miniSliders.forEach((slider, index) => {
+                const sliderIndex = index + 1;
+                slider.value = state.miniSliders[sliderIndex] || 50;
+            });
+        }
+        
+        // Update link states
+        if (this.linkStates) {
+            this.updateLinkIconStates();
+        }
+        
+        // CRITICAL: Update mute overlay for current player
+        const overlay = document.querySelector('.mute-overlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+            if (state.muted) {
+                overlay.classList.add('active');
+            }
+        }
+        
+        // Update ALL player tabs to show their muted states
+        for (let i = 1; i <= this.maxPlayers; i++) {
+            const tab = document.querySelector(`.player-tab[data-player="${i}"]`);
+            if (tab && this.playerStates[i]) {
+                tab.classList.remove('muted');
+                if (this.playerStates[i].muted) {
+                    tab.classList.add('muted');
+                }
             }
         }
     }
@@ -2153,9 +2415,9 @@ class OTTOAccurateInterface {
         const overlay = document.querySelector('.mute-overlay');
         const state = this.playerStates[this.currentPlayer];
         
-        if (overlay) {
+        if (overlay && state) {
             // Show overlay if current player is muted
-            overlay.classList.toggle('active', state.muted);
+            overlay.classList.toggle('active', state.muted === true);
         }
     }
 
