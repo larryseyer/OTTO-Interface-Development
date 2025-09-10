@@ -28,6 +28,10 @@ class OTTOAccurateInterface {
         this.dropdownListeners = [];
         this.modalListeners = [];
         this.documentListeners = [];
+        
+        // Storage error tracking
+        this.storageErrors = [];
+        this.maxStorageErrors = 10;  // Keep last 10 errors for debugging
 
         // Player state tracking for all possible players
         this.playerStates = {};
@@ -72,6 +76,283 @@ class OTTOAccurateInterface {
 
         this.init();
     }
+    
+    // Safe localStorage wrapper methods
+    safeLocalStorageSet(key, value) {
+        try {
+            // Check if localStorage is available
+            if (typeof(Storage) === "undefined") {
+                throw new Error('localStorage not supported');
+            }
+            
+            // Try to serialize the value first
+            const serialized = JSON.stringify(value);
+            
+            // Check approximate size (2 bytes per character for UTF-16)
+            const approxSize = serialized.length * 2;
+            const fiveMB = 5 * 1024 * 1024; // 5MB typical limit
+            
+            if (approxSize > fiveMB) {
+                console.warn(`Data size (${(approxSize / 1024 / 1024).toFixed(2)}MB) may exceed localStorage limit`);
+                // Try to clear old data if needed
+                this.clearOldStorageData();
+            }
+            
+            localStorage.setItem(key, serialized);
+            return true;
+            
+        } catch (e) {
+            // Handle different error types
+            let errorMessage = '';
+            let errorType = 'UNKNOWN';
+            
+            if (e.name === 'QuotaExceededError' || 
+                e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+                (e.code && e.code === 22)) {
+                errorType = 'QUOTA_EXCEEDED';
+                errorMessage = 'Storage quota exceeded';
+                
+                // Try to free up space
+                if (this.handleQuotaExceeded(key, value)) {
+                    return true; // Successfully saved after cleanup
+                }
+                
+            } else if (e.message && e.message.includes('circular')) {
+                errorType = 'CIRCULAR_REFERENCE';
+                errorMessage = 'Data contains circular references';
+                
+            } else if (e.name === 'SecurityError') {
+                errorType = 'SECURITY_ERROR';
+                errorMessage = 'localStorage access denied (private browsing?)';
+                
+            } else {
+                errorMessage = e.message || 'Unknown storage error';
+            }
+            
+            // Log the error
+            this.logStorageError(key, errorType, errorMessage);
+            
+            // Show user notification for critical errors (only if method is available)
+            if ((errorType === 'QUOTA_EXCEEDED' || errorType === 'SECURITY_ERROR') && this.showNotification) {
+                this.showNotification(`Storage error: ${errorMessage}. Some settings may not be saved.`, 'error');
+            }
+            
+            return false;
+        }
+    }
+    
+    safeLocalStorageGet(key, defaultValue = null) {
+        try {
+            // Check if localStorage is available
+            if (typeof(Storage) === "undefined") {
+                console.warn('localStorage not supported');
+                return defaultValue;
+            }
+            
+            const stored = localStorage.getItem(key);
+            if (stored === null) {
+                return defaultValue;
+            }
+            
+            // Try to parse the stored value
+            const parsed = JSON.parse(stored);
+            
+            // Validate the parsed data isn't corrupted
+            if (this.validateStoredData(key, parsed)) {
+                return parsed;
+            } else {
+                console.warn(`Corrupted data detected for key: ${key}`);
+                // Try to recover or return default
+                return this.recoverCorruptedData(key, defaultValue);
+            }
+            
+        } catch (e) {
+            // Handle JSON parse errors
+            if (e instanceof SyntaxError) {
+                console.error(`Failed to parse stored data for key: ${key}`, e);
+                this.logStorageError(key, 'PARSE_ERROR', 'Corrupted data in storage');
+                
+                // Try to clear the corrupted data
+                try {
+                    localStorage.removeItem(key);
+                    console.log(`Removed corrupted data for key: ${key}`);
+                } catch (removeError) {
+                    console.error('Failed to remove corrupted data:', removeError);
+                }
+                
+                // Notify user if this is important data (only if method is available)
+                if ((key.includes('preset') || key.includes('state')) && this.showNotification) {
+                    this.showNotification('Some saved data was corrupted and has been reset.', 'warning');
+                }
+            } else {
+                console.error(`Storage error for key: ${key}`, e);
+                this.logStorageError(key, 'ACCESS_ERROR', e.message);
+            }
+            
+            return defaultValue;
+        }
+    }
+    
+    validateStoredData(key, data) {
+        // Validate based on the key type
+        if (key === 'otto_presets') {
+            return data && typeof data === 'object';
+        } else if (key === 'otto_app_state') {
+            return data && typeof data === 'object' && 
+                   typeof data.currentPreset === 'string' &&
+                   typeof data.tempo === 'number';
+        } else if (key === 'ottoPatternGroups') {
+            return data && typeof data === 'object';
+        } else if (key === 'otto_preset_locks') {
+            return data && typeof data === 'object';
+        }
+        
+        // Default validation - just check it's not null/undefined
+        return data !== null && data !== undefined;
+    }
+    
+    recoverCorruptedData(key, defaultValue) {
+        // Try to recover based on key type
+        console.log(`Attempting to recover data for key: ${key}`);
+        
+        // For presets, try to at least save a default preset
+        if (key === 'otto_presets') {
+            const recovered = {
+                'default': this.createPresetFromCurrentState('Default')
+            };
+            this.safeLocalStorageSet(key, recovered);
+            return recovered;
+        }
+        
+        // For other data, return the default
+        return defaultValue;
+    }
+    
+    handleQuotaExceeded(key, value) {
+        console.log('Attempting to handle quota exceeded error...');
+        
+        // Try different strategies to free up space
+        
+        // Strategy 1: Clear old error logs
+        this.storageErrors = [];
+        
+        // Strategy 2: Remove old backup data if it exists
+        const backupKeys = ['otto_backup', 'otto_history', 'otto_temp'];
+        backupKeys.forEach(backupKey => {
+            try {
+                localStorage.removeItem(backupKey);
+                console.log(`Removed backup data: ${backupKey}`);
+            } catch (e) {
+                // Ignore errors when removing
+            }
+        });
+        
+        // Strategy 3: Compress preset data by removing timestamps
+        if (key === 'otto_presets' && value) {
+            const compressed = {};
+            for (const [presetKey, preset] of Object.entries(value)) {
+                compressed[presetKey] = {
+                    ...preset,
+                    timestamp: undefined  // Remove timestamps to save space
+                };
+            }
+            
+            try {
+                localStorage.setItem(key, JSON.stringify(compressed));
+                console.log('Successfully saved compressed data');
+                return true;
+            } catch (e) {
+                console.error('Still unable to save after compression:', e);
+            }
+        }
+        
+        // Strategy 4: As last resort, clear least important data
+        if (confirm('Storage is full. Clear pattern groups to make space? (Presets will be preserved)')) {
+            try {
+                localStorage.removeItem('ottoPatternGroups');
+                localStorage.setItem(key, JSON.stringify(value));
+                if (this.showNotification) {
+                    this.showNotification('Storage cleared. Pattern groups have been reset.', 'warning');
+                }
+                return true;
+            } catch (e) {
+                console.error('Unable to save even after clearing pattern groups:', e);
+            }
+        }
+        
+        return false;
+    }
+    
+    clearOldStorageData() {
+        // Clear old or temporary data to free up space
+        const tempKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('_temp') || key.includes('_old') || key.includes('_backup'))) {
+                tempKeys.push(key);
+            }
+        }
+        
+        tempKeys.forEach(key => {
+            try {
+                localStorage.removeItem(key);
+                console.log(`Cleared old data: ${key}`);
+            } catch (e) {
+                console.error(`Failed to clear ${key}:`, e);
+            }
+        });
+    }
+    
+    logStorageError(key, errorType, message) {
+        const error = {
+            key,
+            errorType,
+            message,
+            timestamp: Date.now()
+        };
+        
+        this.storageErrors.push(error);
+        
+        // Keep only last N errors
+        if (this.storageErrors.length > this.maxStorageErrors) {
+            this.storageErrors.shift();
+        }
+        
+        console.error(`Storage Error [${errorType}] for key '${key}': ${message}`);
+    }
+    
+    getStorageStatus() {
+        // Get current storage usage estimate
+        if (navigator.storage && navigator.storage.estimate) {
+            return navigator.storage.estimate().then(estimate => {
+                const percentUsed = (estimate.usage / estimate.quota * 100).toFixed(2);
+                console.log(`Storage: ${percentUsed}% used (${estimate.usage} of ${estimate.quota} bytes)`);
+                return {
+                    usage: estimate.usage,
+                    quota: estimate.quota,
+                    percentUsed: parseFloat(percentUsed)
+                };
+            });
+        }
+        
+        // Fallback: estimate based on localStorage content
+        let totalSize = 0;
+        for (let key in localStorage) {
+            if (localStorage.hasOwnProperty(key)) {
+                totalSize += localStorage[key].length + key.length;
+            }
+        }
+        
+        const estimatedQuota = 5 * 1024 * 1024; // 5MB typical limit
+        const percentUsed = (totalSize / estimatedQuota * 100).toFixed(2);
+        
+        return Promise.resolve({
+            usage: totalSize * 2, // Approximate bytes (UTF-16)
+            quota: estimatedQuota,
+            percentUsed: parseFloat(percentUsed)
+        });
+    }
+    
     initPresetSystem() {
         // Initialize preset storage
         this.presets = this.loadPresetsFromStorage() || {
@@ -156,23 +437,13 @@ class OTTOAccurateInterface {
             version: this.version
         };
         
-        try {
-            localStorage.setItem('otto_app_state', JSON.stringify(appState));
-        } catch (e) {
-            console.error('Failed to save app state:', e);
-        }
+        // Use safe wrapper with error handling
+        this.safeLocalStorageSet('otto_app_state', appState);
     }
 
     loadAppStateFromStorage() {
-        try {
-            const stored = localStorage.getItem('otto_app_state');
-            if (stored) {
-                return JSON.parse(stored);
-            }
-        } catch (e) {
-            console.error('Failed to load app state:', e);
-        }
-        return null;
+        // Use safe wrapper with error handling and validation
+        return this.safeLocalStorageGet('otto_app_state', null);
     }
 
     createPresetFromCurrentState(name) {
@@ -238,21 +509,13 @@ class OTTOAccurateInterface {
     }
 
     savePresetLocksToStorage() {
-        try {
-            localStorage.setItem('otto_preset_locks', JSON.stringify(this.presetLocks));
-        } catch (e) {
-            console.error('Failed to save preset locks:', e);
-        }
+        // Use safe wrapper with error handling
+        this.safeLocalStorageSet('otto_preset_locks', this.presetLocks);
     }
 
     loadPresetLocksFromStorage() {
-        try {
-            const stored = localStorage.getItem('otto_preset_locks');
-            return stored ? JSON.parse(stored) : {};
-        } catch (e) {
-            console.error('Failed to load preset locks:', e);
-            return {};
-        }
+        // Use safe wrapper with error handling and validation
+        return this.safeLocalStorageGet('otto_preset_locks', {});
     }
 
     updatePresetLockDisplay() {
@@ -703,10 +966,10 @@ class OTTOAccurateInterface {
         }
         
         if (confirm(`Delete pattern group "${currentGroup}"?`)) {
-            // Remove from storage
-            const groups = JSON.parse(localStorage.getItem('ottoPatternGroups') || '{}');
+            // Remove from storage using safe wrapper
+            const groups = this.safeLocalStorageGet('ottoPatternGroups', {});
             delete groups[currentGroup];
-            localStorage.setItem('ottoPatternGroups', JSON.stringify(groups));
+            this.safeLocalStorageSet('ottoPatternGroups', groups);
             
             // Switch to favorites
             this.playerStates[this.currentPlayer].patternGroup = 'favorites';
@@ -718,7 +981,7 @@ class OTTOAccurateInterface {
     }
     
     savePatternToGroup(groupName, buttonIndex, patternName) {
-        const groups = JSON.parse(localStorage.getItem('ottoPatternGroups') || '{}');
+        const groups = this.safeLocalStorageGet('ottoPatternGroups', {});
         
         if (!groups[groupName]) {
             groups[groupName] = {
@@ -729,7 +992,7 @@ class OTTOAccurateInterface {
         }
         
         groups[groupName].patterns[buttonIndex] = patternName;
-        localStorage.setItem('ottoPatternGroups', JSON.stringify(groups));
+        this.safeLocalStorageSet('ottoPatternGroups', groups);
         
         console.log(`Saved pattern "${patternName}" to group "${groupName}" at position ${buttonIndex}`);
     }
@@ -754,10 +1017,10 @@ class OTTOAccurateInterface {
     }
 
     loadPatternGroups() {
-        // Load saved pattern groups from localStorage
-        const savedGroups = localStorage.getItem('ottoPatternGroups');
+        // Load saved pattern groups from localStorage with error handling
+        const savedGroups = this.safeLocalStorageGet('ottoPatternGroups', null);
         if (savedGroups) {
-            this.patternGroups = JSON.parse(savedGroups);
+            this.patternGroups = savedGroups;
         } else {
             // Initialize with default groups
             this.patternGroups = {
@@ -1197,7 +1460,8 @@ class OTTOAccurateInterface {
     }
 
     savePatternGroups() {
-        localStorage.setItem('ottoPatternGroups', JSON.stringify(this.patternGroups));
+        // Use safe wrapper with error handling
+        this.safeLocalStorageSet('ottoPatternGroups', this.patternGroups);
     }
 
     updateMainPatternGrid(patterns) {
@@ -1965,46 +2229,41 @@ class OTTOAccurateInterface {
             }
             presetsToStore[key] = presetCopy;
         }
-        localStorage.setItem('otto_presets', JSON.stringify(presetsToStore));
+        // Use safe wrapper with error handling
+        this.safeLocalStorageSet('otto_presets', presetsToStore);
     }
 
     loadPresetsFromStorage() {
-        try {
-            const stored = localStorage.getItem('otto_presets');
-            if (stored) {
-                return JSON.parse(stored);
-            }
-        } catch (e) {
-            console.error('Failed to load presets from storage:', e);
-        }
-        return null;
+        // Use safe wrapper with error handling and validation
+        return this.safeLocalStorageGet('otto_presets', null);
     }
 
     init() {
-        this.initAppState();      // Initialize app state FIRST to restore saved values
-        this.initPresetSystem();  // Initialize preset system second
-        this.loadPatternGroups(); // Load pattern groups early
-        this.setupVersion();
-        this.setupSplashScreen();
-        this.setupPlayerTabs();
-        this.setupPresetControls();
-        this.setupSettingsWindow();  // Setup settings window
-        this.setupAllModals();  // Setup all modal windows
-        this.setupKitControls();
-        this.setupPatternGroupControls();
-        this.setupPatternGrid();
-        this.setupToggleButtons();
-        this.setupFillButtons();
-        this.setupSliders();
-        this.setupLinkIcons();  // Initialize link icons after sliders
-        this.setupTopBarControls();
-        this.setupLoopTimeline();
-        this.setupKeyboardShortcuts();
-        this.setupLogoClick();
-        this.startLoopAnimation();
+        try {
+            this.initAppState();      // Initialize app state FIRST to restore saved values
+            this.initPresetSystem();  // Initialize preset system second
+            this.loadPatternGroups(); // Load pattern groups early
+            this.setupVersion();
+            this.setupSplashScreen();
+            this.setupPlayerTabs();
+            this.setupPresetControls();
+            this.setupSettingsWindow();  // Setup settings window
+            this.setupAllModals();  // Setup all modal windows
+            this.setupKitControls();
+            this.setupPatternGroupControls();
+            this.setupPatternGrid();
+            this.setupToggleButtons();
+            this.setupFillButtons();
+            this.setupSliders();
+            this.setupLinkIcons();  // Initialize link icons after sliders
+            this.setupTopBarControls();
+            this.setupLoopTimeline();
+            this.setupKeyboardShortcuts();
+            this.setupLogoClick();
+            this.startLoopAnimation();
 
-        // Initialize UI for saved or default player
-        this.updateUIForCurrentPlayer();
+            // Initialize UI for saved or default player
+            this.updateUIForCurrentPlayer();
         
         // Load the saved preset if it exists
         if (this.currentPreset && this.presets[this.currentPreset]) {
@@ -2015,6 +2274,22 @@ class OTTOAccurateInterface {
         this.updatePlayPauseButton();
 
         console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'active players (max:', this.maxPlayers, ')');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+            console.error('Stack trace:', error.stack);
+            
+            // Always try to hide splash screen even if there's an error
+            const splashScreen = document.getElementById('splash-screen');
+            if (splashScreen) {
+                splashScreen.style.display = 'none';
+                splashScreen.classList.add('hidden');
+            }
+            
+            // Show error message to user
+            setTimeout(() => {
+                alert('There was an error initializing the interface. Check the console for details.\n\nError: ' + error.message);
+            }, 100);
+        }
     }
 
     // Method to change number of active players
