@@ -32,6 +32,25 @@ class OTTOAccurateInterface {
         // Storage error tracking
         this.storageErrors = [];
         this.maxStorageErrors = 10;  // Keep last 10 errors for debugging
+        
+        // Centralized state management
+        this.stateUpdateQueue = [];
+        this.isProcessingStateUpdate = false;
+        this.stateUpdateTimer = null;
+        this.stateUpdateDelay = 50; // 50ms batch delay
+        
+        // Save management - single source of truth
+        this.saveTimers = {
+            preset: null,
+            appState: null,
+            patternGroups: null
+        };
+        this.saveDelays = {
+            preset: 500,      // 500ms for preset changes
+            appState: 1000,   // 1s for app state changes
+            patternGroups: 300 // 300ms for pattern group changes
+        };
+        this.pendingSaves = new Set(); // Track what needs saving
 
         // Player state tracking for all possible players
         this.playerStates = {};
@@ -75,6 +94,186 @@ class OTTOAccurateInterface {
         }
 
         this.init();
+    }
+    
+    // Centralized State Management System
+    updatePlayerState(playerNumber, updates, callback = null) {
+        // Queue the state update
+        this.stateUpdateQueue.push({
+            type: 'player',
+            playerNumber,
+            updates,
+            callback,
+            timestamp: Date.now()
+        });
+        
+        this.processStateUpdateQueue();
+    }
+    
+    updateGlobalState(updates, callback = null) {
+        // Queue global state updates (tempo, isPlaying, etc.)
+        this.stateUpdateQueue.push({
+            type: 'global',
+            updates,
+            callback,
+            timestamp: Date.now()
+        });
+        
+        this.processStateUpdateQueue();
+    }
+    
+    processStateUpdateQueue() {
+        // Prevent concurrent processing
+        if (this.isProcessingStateUpdate) {
+            return;
+        }
+        
+        // Clear existing timer
+        if (this.stateUpdateTimer) {
+            clearTimeout(this.stateUpdateTimer);
+        }
+        
+        // Batch process updates after delay
+        this.stateUpdateTimer = setTimeout(() => {
+            this.isProcessingStateUpdate = true;
+            
+            // Process all queued updates
+            const updates = [...this.stateUpdateQueue];
+            this.stateUpdateQueue = [];
+            
+            // Group updates by type for efficiency
+            const playerUpdates = {};
+            const globalUpdates = {};
+            const callbacks = [];
+            
+            updates.forEach(update => {
+                if (update.type === 'player') {
+                    if (!playerUpdates[update.playerNumber]) {
+                        playerUpdates[update.playerNumber] = {};
+                    }
+                    Object.assign(playerUpdates[update.playerNumber], update.updates);
+                } else if (update.type === 'global') {
+                    Object.assign(globalUpdates, update.updates);
+                }
+                
+                if (update.callback) {
+                    callbacks.push(update.callback);
+                }
+            });
+            
+            // Apply player state updates
+            for (const [playerNum, updates] of Object.entries(playerUpdates)) {
+                this.applyPlayerStateUpdates(parseInt(playerNum), updates);
+            }
+            
+            // Apply global state updates
+            this.applyGlobalStateUpdates(globalUpdates);
+            
+            // Execute callbacks
+            callbacks.forEach(cb => {
+                try {
+                    cb();
+                } catch (e) {
+                    console.error('Error in state update callback:', e);
+                }
+            });
+            
+            // Trigger saves as needed
+            this.processPendingSaves();
+            
+            this.isProcessingStateUpdate = false;
+            
+            // Process any new updates that came in while we were processing
+            if (this.stateUpdateQueue.length > 0) {
+                this.processStateUpdateQueue();
+            }
+        }, this.stateUpdateDelay);
+    }
+    
+    applyPlayerStateUpdates(playerNumber, updates) {
+        if (!this.playerStates[playerNumber]) {
+            console.error(`Player ${playerNumber} does not exist`);
+            return;
+        }
+        
+        // Deep merge updates
+        for (const [key, value] of Object.entries(updates)) {
+            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                // Merge nested objects
+                this.playerStates[playerNumber][key] = {
+                    ...this.playerStates[playerNumber][key],
+                    ...value
+                };
+            } else {
+                // Direct assignment for primitives and arrays
+                this.playerStates[playerNumber][key] = value;
+            }
+        }
+        
+        // Mark preset as needing save
+        this.pendingSaves.add('preset');
+    }
+    
+    applyGlobalStateUpdates(updates) {
+        for (const [key, value] of Object.entries(updates)) {
+            this[key] = value;
+        }
+        
+        // Mark app state as needing save
+        if (Object.keys(updates).length > 0) {
+            this.pendingSaves.add('appState');
+        }
+    }
+    
+    // Unified save system - prevents race conditions
+    scheduleSave(saveType, forceImmediate = false) {
+        // Clear existing timer for this save type
+        if (this.saveTimers[saveType]) {
+            clearTimeout(this.saveTimers[saveType]);
+        }
+        
+        // Add to pending saves
+        this.pendingSaves.add(saveType);
+        
+        const delay = forceImmediate ? 0 : this.saveDelays[saveType];
+        
+        // Schedule the save
+        this.saveTimers[saveType] = setTimeout(() => {
+            this.executeSave(saveType);
+            this.pendingSaves.delete(saveType);
+            this.saveTimers[saveType] = null;
+        }, delay);
+    }
+    
+    executeSave(saveType) {
+        switch (saveType) {
+            case 'preset':
+                if (!this.isPresetLocked(this.currentPreset)) {
+                    this.savePreset();
+                    console.log(`Saved preset: ${this.currentPreset}`);
+                }
+                break;
+                
+            case 'appState':
+                this.saveAppStateToStorage();
+                console.log('Saved app state');
+                break;
+                
+            case 'patternGroups':
+                this.savePatternGroups();
+                console.log('Saved pattern groups');
+                break;
+                
+            default:
+                console.warn(`Unknown save type: ${saveType}`);
+        }
+    }
+    
+    processPendingSaves() {
+        // Schedule all pending saves
+        this.pendingSaves.forEach(saveType => {
+            this.scheduleSave(saveType);
+        });
     }
 
     // Safe localStorage wrapper methods
@@ -407,22 +606,13 @@ class OTTOAccurateInterface {
     }
 
     setupAppStateAutoSave() {
-        // Save app state on key changes
-        this.appStateAutoSaveTimer = null;
-        this.appStateAutoSaveDelay = 1000; // 1 second delay
+        // App state auto-save is now handled by the centralized save system
+        // This method is kept for compatibility
     }
 
     triggerAppStateSave() {
-        // Clear existing timer
-        if (this.appStateAutoSaveTimer) {
-            clearTimeout(this.appStateAutoSaveTimer);
-        }
-
-        // Set new timer
-        this.appStateAutoSaveTimer = setTimeout(() => {
-            this.saveAppStateToStorage();
-            console.log('Auto-saved app state');
-        }, this.appStateAutoSaveDelay);
+        // Delegate to the new centralized save system
+        this.scheduleSave('appState');
     }
 
     saveAppStateToStorage() {
@@ -462,30 +652,14 @@ class OTTOAccurateInterface {
     }
 
     setupAutoSave() {
-        // Debounce timer for auto-save
-        this.autoSaveTimer = null;
-        this.autoSaveDelay = 500; // 500ms delay
-
-        // Track if we should auto-save
+        // Auto-save is now handled by the centralized save system
+        // This method is kept for compatibility but delegates to the new system
         this.enableAutoSave = true;
     }
 
     triggerAutoSave() {
-        // Don't auto-save if current preset is locked or auto-save is disabled
-        if (!this.enableAutoSave || this.isPresetLocked(this.currentPreset)) {
-            return;
-        }
-
-        // Clear existing timer
-        if (this.autoSaveTimer) {
-            clearTimeout(this.autoSaveTimer);
-        }
-
-        // Set new timer
-        this.autoSaveTimer = setTimeout(() => {
-            this.savePreset();
-            console.log(`Auto-saved preset: ${this.currentPreset}`);
-        }, this.autoSaveDelay);
+        // Delegate to the new centralized save system
+        this.scheduleSave('preset');
     }
 
     isPresetLocked(presetKey) {
@@ -3885,14 +4059,15 @@ class OTTOAccurateInterface {
     }
 
     setTempo(bpm) {
-        this.tempo = bpm;
-        const tempoDisplay = document.getElementById('tempo-display');
-        if (tempoDisplay) {
-            tempoDisplay.textContent = Math.round(bpm);
-        }
-        this.onTempoChanged(bpm);
-        this.triggerAutoSave();
-        this.triggerAppStateSave();  // Save app state
+        // Use centralized state management
+        this.updateGlobalState({ tempo: bpm }, () => {
+            // Update UI after state is updated
+            const tempoDisplay = document.getElementById('tempo-display');
+            if (tempoDisplay) {
+                tempoDisplay.textContent = Math.round(bpm);
+            }
+            this.onTempoChanged(bpm);
+        });
     }
 
     handleTapTempo() {
@@ -4212,19 +4387,32 @@ class OTTOAccurateInterface {
         // Clean up all event listeners
         this.cleanupAllEventListeners();
 
-        // Clear all timers
-        if (this.appStateAutoSaveTimer) {
-            clearTimeout(this.appStateAutoSaveTimer);
+        // Clear all save timers
+        Object.values(this.saveTimers).forEach(timer => {
+            if (timer) clearTimeout(timer);
+        });
+        
+        // Clear state update timer
+        if (this.stateUpdateTimer) {
+            clearTimeout(this.stateUpdateTimer);
         }
-        if (this.autoSaveTimer) {
-            clearTimeout(this.autoSaveTimer);
-        }
+        
+        // Process any pending saves immediately before cleanup
+        this.pendingSaves.forEach(saveType => {
+            try {
+                this.executeSave(saveType);
+            } catch (e) {
+                console.error(`Error saving ${saveType} during cleanup:`, e);
+            }
+        });
 
         // Clear references
         this.playerStates = null;
         this.presets = null;
         this.patternGroups = null;
         this.linkStates = null;
+        this.stateUpdateQueue = null;
+        this.pendingSaves = null;
     }
 
     cleanupAllEventListeners() {
