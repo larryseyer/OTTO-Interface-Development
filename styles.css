@@ -1658,7 +1658,7 @@ body {
     width: 32px;
     height: 24px;
     background: #999999;  /* Medium-light grey for thumb */
-    border-radius: 3px;
+    border-radius: 7px;
     box-shadow:
         inset 1px 1px 2px rgba(255,255,255,0.2),
         inset -1px -1px 2px rgba(0,0,0,0.3),
@@ -1721,6 +1721,8 @@ body {
     font-size: 32px;  /* Doubled from 16px */
     color: var(--text-icon);  /* Default grey state - unlinked */
     transition: color 0.2s ease, transform 0.2s ease;
+    line-height: 1;
+    display: block;
 }
 
 /* Unlinked state (default) */
@@ -1800,7 +1802,7 @@ body {
     width: 24px;
     height: 32px;  /* Taller to match vertical slider proportions */
     background: var(--text-icon);  /* Match vertical slider thumb color */
-    border-radius: 3px;  /* Square with minimal rounding like vertical sliders */
+    border-radius: 7px;  /* Updated to match vertical sliders */
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
