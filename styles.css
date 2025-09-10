@@ -629,6 +629,16 @@ body {
     color: var(--text-white);
 }
 
+/* Specific styles for drumkit save button in row 3 */
+.drumkit-save-btn {
+    width: 75px !important;  /* Match kit-mixer-btn size */
+    height: 75px !important;  /* Match kit-mixer-btn size */
+}
+
+.drumkit-save-btn i {
+    font-size: 63px !important;  /* Match kit-mixer-btn icon size */
+}
+
 /* Remove absolute positioning from old center-program */
 /* Area 2 styles are now handled above */
 
@@ -1910,9 +1920,9 @@ body {
 .row3-area-4 {
     flex: 0 0 var(--row3-area4-width);
     display: flex;
-    align-items: flex-start;  /* Top-align mixer icon */
+    align-items: center;  /* Center vertically for both icons */
     justify-content: flex-start;  /* Left-align mixer icon */
-    padding-top: 5px;  /* Small top padding */
+    gap: 10px;  /* Space between mixer and save buttons */
 }
 
 .row3-area-5 {

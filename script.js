@@ -3277,13 +3277,29 @@ class OTTOAccurateInterface {
             });
         }
 
-        // Update pattern selection
+        // Update pattern selection - FIXED: match by data-pattern attribute
         document.querySelectorAll('.pattern-btn').forEach(btn => {
             btn.classList.remove('active');
-            if (btn.dataset.pattern === state.selectedPattern) {
-                btn.classList.add('active');
-            }
         });
+        
+        if (state.selectedPattern) {
+            // Convert selectedPattern to the same format used in data-pattern attribute
+            const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, '-');
+            
+            // Find and activate the matching pattern button
+            const selectedBtn = document.querySelector(`.pattern-btn[data-pattern="${normalizedPattern}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            } else {
+                // Fallback: try to match by text content
+                document.querySelectorAll('.pattern-btn').forEach(btn => {
+                    if (btn.textContent && 
+                        btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase().substring(0, 8)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        }
 
         // Update custom sliders
         if (state.sliderValues) {
@@ -3431,19 +3447,29 @@ class OTTOAccurateInterface {
             this.updateMainPatternGrid(this.patternGroups[state.patternGroup].patterns);
         }
 
-        // Clear and update pattern selection
+        // Clear and update pattern selection - FIXED: match by data-pattern attribute
         document.querySelectorAll('.pattern-btn').forEach(btn => {
             btn.classList.remove('active');
         });
 
         if (state.selectedPattern) {
-            // Find the pattern button by its text content (first 8 characters)
-            document.querySelectorAll('.pattern-btn').forEach(btn => {
-                if (btn.textContent === state.selectedPattern || 
-                    btn.textContent === state.selectedPattern.substring(0, 8)) {
-                    btn.classList.add('active');
-                }
-            });
+            // Convert selectedPattern to the same format used in data-pattern attribute
+            const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, '-');
+            
+            // Find and activate the matching pattern button
+            const selectedBtn = document.querySelector(`.pattern-btn[data-pattern="${normalizedPattern}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            } else {
+                // Fallback: try to match by text content (first 8 chars)
+                document.querySelectorAll('.pattern-btn').forEach(btn => {
+                    if (btn.textContent && 
+                        (btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase().substring(0, 8) ||
+                         btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase())) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
         }
 
         // Update all sliders
