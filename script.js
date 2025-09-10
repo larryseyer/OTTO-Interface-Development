@@ -64,11 +64,14 @@ class OTTOAccurateInterface {
         // Initialize drumkit manager
         this.drumkits = null; // Will be loaded from storage or initialized with defaults
         
-        // Dirty flags for managers
+        // Dirty flags hierarchy:
+        // 1. Pattern -> 2. Pattern Group -> 3. Drumkit -> 4. Player -> 5. Preset
         this.isDirty = {
-            preset: false,
-            drumkit: false,
-            patternGroup: false
+            pattern: false,      // Level 1
+            patternGroup: false, // Level 2
+            drumkit: false,      // Level 3
+            player: false,       // Level 4
+            preset: false        // Level 5
         };
         this.isLoadingPreset = false; // Flag to prevent marking dirty during preset load
 
@@ -298,8 +301,24 @@ class OTTOAccurateInterface {
                 if (!this.isPresetLocked(this.currentPreset)) {
                     this.savePreset();
                     console.log(`Saved preset: ${this.currentPreset}`);
+                    // Clear all dirty flags when saving preset (highest level)
                     this.setDirty('preset', false);
+                    this.setDirty('player', false);
+                    this.setDirty('drumkit', false);
+                    this.setDirty('patternGroup', false);
+                    this.setDirty('pattern', false);
                 }
+                break;
+                
+            case 'player':
+                // Save player state (part of preset)
+                this.saveAppStateToStorage();
+                console.log('Saved player state');
+                // Clear player and lower level dirty flags
+                this.setDirty('player', false);
+                this.setDirty('drumkit', false);
+                this.setDirty('patternGroup', false);
+                this.setDirty('pattern', false);
                 break;
                 
             case 'appState':
@@ -310,13 +329,22 @@ class OTTOAccurateInterface {
             case 'patternGroups':
                 this.savePatternGroups();
                 console.log('Saved pattern groups');
+                // Clear pattern group and pattern dirty flags
                 this.setDirty('patternGroup', false);
+                this.setDirty('pattern', false);
                 break;
                 
             case 'drumkits':
                 this.saveDrumkits();
                 console.log('Saved drumkits');
                 this.setDirty('drumkit', false);
+                break;
+                
+            case 'pattern':
+                // Save pattern (part of pattern group)
+                this.savePatternGroups();
+                console.log('Saved patterns');
+                this.setDirty('pattern', false);
                 break;
                 
             default:
@@ -332,24 +360,48 @@ class OTTOAccurateInterface {
     }
     
     // Dirty flag management
-    setDirty(manager, isDirty = true) {
+    setDirty(level, isDirty = true) {
         // Don't mark dirty during preset loading
         if (this.isLoadingPreset && isDirty) {
             return;
         }
         
-        if (this.isDirty[manager] !== isDirty) {
-            this.isDirty[manager] = isDirty;
-            this.updateSaveButtonVisibility(manager);
+        // Hierarchy levels:
+        // 1. pattern -> 2. patternGroup -> 3. drumkit -> 4. player -> 5. preset
+        const hierarchy = {
+            'pattern': ['patternGroup', 'player', 'preset'],
+            'patternGroup': ['player', 'preset'],
+            'drumkit': ['player', 'preset'],
+            'player': ['preset'],
+            'preset': []
+        };
+        
+        // Set the dirty flag for the specified level
+        if (this.isDirty[level] !== isDirty) {
+            this.isDirty[level] = isDirty;
+            this.updateSaveButtonVisibility(level);
+            
+            // If setting to dirty, cascade up the hierarchy
+            if (isDirty && hierarchy[level]) {
+                hierarchy[level].forEach(higherLevel => {
+                    if (this.isDirty[higherLevel] !== true) {
+                        this.isDirty[higherLevel] = true;
+                        this.updateSaveButtonVisibility(higherLevel);
+                    }
+                });
+            }
         }
     }
     
-    updateSaveButtonVisibility(manager) {
+    updateSaveButtonVisibility(level) {
         let button = null;
         
-        switch (manager) {
+        switch (level) {
             case 'preset':
                 button = document.getElementById('preset-save-btn');
+                break;
+            case 'player':
+                button = document.getElementById('player-save-btn');
                 break;
             case 'drumkit':
                 button = document.getElementById('drumkit-save-btn');
@@ -357,10 +409,13 @@ class OTTOAccurateInterface {
             case 'patternGroup':
                 button = document.getElementById('pattern-group-save-btn');
                 break;
+            case 'pattern':
+                button = document.getElementById('pattern-save-btn');
+                break;
         }
         
         if (button) {
-            if (this.isDirty[manager]) {
+            if (this.isDirty[level]) {
                 button.style.display = 'flex';
             } else {
                 button.style.display = 'none';
@@ -375,7 +430,7 @@ class OTTOAccurateInterface {
     
     // Setup save button handlers
     setupSaveButtons() {
-        // Preset save button
+        // Preset save button (Level 5 - highest)
         const presetSaveBtn = document.getElementById('preset-save-btn');
         if (presetSaveBtn) {
             presetSaveBtn.addEventListener('click', () => {
@@ -385,7 +440,17 @@ class OTTOAccurateInterface {
             presetSaveBtn.style.display = 'none';
         }
         
-        // Drumkit save button
+        // Player save button (Level 4)
+        const playerSaveBtn = document.getElementById('player-save-btn');
+        if (playerSaveBtn) {
+            playerSaveBtn.addEventListener('click', () => {
+                this.scheduleSave('player', true);
+            });
+            // Initially hide
+            playerSaveBtn.style.display = 'none';
+        }
+        
+        // Drumkit save button (Level 3)
         const drumkitSaveBtn = document.getElementById('drumkit-save-btn');
         if (drumkitSaveBtn) {
             drumkitSaveBtn.addEventListener('click', () => {
@@ -395,7 +460,7 @@ class OTTOAccurateInterface {
             drumkitSaveBtn.style.display = 'none';
         }
         
-        // Pattern group save button
+        // Pattern group save button (Level 2)
         const patternGroupSaveBtn = document.getElementById('pattern-group-save-btn');
         if (patternGroupSaveBtn) {
             patternGroupSaveBtn.addEventListener('click', () => {
@@ -403,6 +468,16 @@ class OTTOAccurateInterface {
             });
             // Initially hide
             patternGroupSaveBtn.style.display = 'none';
+        }
+        
+        // Pattern save button (Level 1 - lowest)
+        const patternSaveBtn = document.getElementById('pattern-save-btn');
+        if (patternSaveBtn) {
+            patternSaveBtn.addEventListener('click', () => {
+                this.scheduleSave('pattern', true);
+            });
+            // Initially hide
+            patternSaveBtn.style.display = 'none';
         }
     }
 
@@ -1243,8 +1318,11 @@ class OTTOAccurateInterface {
         this.savePatternToGroup(currentGroup, buttonIndex, patternName);
 
         // Update the player's state
-        const patternKey = shortName.toLowerCase().replace(/\s+/g, '-');
+        const patternKey = shortName.toLowerCase().replace(/\\s+/g, '-');
         e.currentTarget.dataset.pattern = patternKey;
+        
+        // Mark pattern as dirty (will cascade up to patternGroup, player, and preset)
+        this.setDirty('pattern', true);
     }
 
     filterPatterns(searchTerm) {
@@ -2224,8 +2302,10 @@ class OTTOAccurateInterface {
         
         // Clear all dirty flags since we just loaded a preset
         this.setDirty('preset', false);
+        this.setDirty('player', false);
         this.setDirty('drumkit', false);
         this.setDirty('patternGroup', false);
+        this.setDirty('pattern', false);
     }
 
     deletePreset(key) {
@@ -4511,6 +4591,9 @@ class OTTOAccurateInterface {
     }
 
     onKitChanged(playerNumber, kitName) {
+        // Mark drumkit as dirty (will cascade to player and preset)
+        this.setDirty('drumkit', true);
+        
         if (window.juce?.onKitChanged) {
             window.juce.onKitChanged(playerNumber, kitName);
         }
@@ -4527,7 +4610,8 @@ class OTTOAccurateInterface {
             // Save to pattern group if it exists
             if (this.patternGroups && this.patternGroups[currentGroup]) {
                 this.patternGroups[currentGroup].selectedPattern = patternName;
-                this.setDirty('patternGroup', true);
+                // Mark pattern as dirty (will cascade up)
+                this.setDirty('pattern', true);
                 // Don't auto-save, wait for user to click save button
             }
         }
@@ -4541,6 +4625,9 @@ class OTTOAccurateInterface {
         // Save pattern group to player state
         if (this.playerStates[playerNumber]) {
             this.playerStates[playerNumber].patternGroup = groupName;
+            
+            // Mark patternGroup as dirty (will cascade to player and preset)
+            this.setDirty('patternGroup', true);
 
             // Update the pattern grid if this is the current player
             if (playerNumber === this.currentPlayer && this.patternGroups && this.patternGroups[groupName]) {
@@ -4567,24 +4654,36 @@ class OTTOAccurateInterface {
     }
 
     onToggleChanged(playerNumber, toggleType, isActive) {
+        // Mark player as dirty (will cascade to preset)
+        this.setDirty('player', true);
+        
         if (window.juce?.onToggleChanged) {
             window.juce.onToggleChanged(playerNumber, toggleType, isActive);
         }
     }
 
     onFillChanged(playerNumber, fillType, isActive) {
+        // Mark player as dirty (will cascade to preset)
+        this.setDirty('player', true);
+        
         if (window.juce?.onFillChanged) {
             window.juce.onFillChanged(playerNumber, fillType, isActive);
         }
     }
 
     onSliderChanged(playerNumber, sliderType, value) {
+        // Mark player as dirty (will cascade to preset)
+        this.setDirty('player', true);
+        
         if (window.juce?.onSliderChanged) {
             window.juce.onSliderChanged(playerNumber, sliderType, value);
         }
     }
 
     onMiniSliderChanged(playerNumber, sliderIndex, value) {
+        // Mark player as dirty (will cascade to preset)
+        this.setDirty('player', true);
+        
         if (window.juce?.onMiniSliderChanged) {
             window.juce.onMiniSliderChanged(playerNumber, sliderIndex, value);
         }
