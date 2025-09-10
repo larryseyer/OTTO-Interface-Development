@@ -2289,13 +2289,109 @@ body {
     padding-left: 20px;
 }
 
-/* Pattern Group Controls */
-.pattern-group-controls {
+/* Pattern Group Top Controls */
+.pattern-group-top-controls {
     display: flex;
     gap: 10px;
     align-items: center;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+/* Pattern Group Selector Row - Matching row 4 */
+.pattern-group-selector-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+/* Group delete button - trash icon */
+.group-delete-btn {
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.group-delete-btn:hover {
+    background: rgba(139, 0, 0, 0.1);
+    border-color: #8b0000;
+    color: #8b0000;
+}
+
+.group-delete-btn i {
+    font-size: 20px;
+}
+
+.editor-group-dropdown {
+    min-width: 200px;
+}
+
+.editor-group-dropdown .dropdown-selected {
+    padding: 8px 35px 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    color: var(--text-primary);
+    font-size: 16px;
+    text-align: center;
+}
+
+.editor-group-dropdown .dropdown-selected::after {
+    content: '▼';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.editor-group-dropdown.active .dropdown-selected::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.editor-group-dropdown .dropdown-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 4px;
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.editor-group-dropdown.active .dropdown-options {
+    display: block;
+}
+
+.editor-group-dropdown .dropdown-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.editor-group-dropdown .dropdown-option:hover {
+    background: var(--dropdown-hover);
+}
+
+.editor-group-dropdown .dropdown-option.selected {
+    background: var(--accent-color);
+    color: white;
 }
 
 .group-name-input {
@@ -2349,13 +2445,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-}
-
-.pattern-grid-editor h3 {
-    margin: 0 0 15px 0;
-    color: var(--text-primary);
-    font-size: 16px;
-    font-weight: 500;
+    align-items: center; /* Center the grid */
 }
 
 .pattern-edit-grid {

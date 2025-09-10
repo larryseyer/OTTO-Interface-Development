@@ -78,21 +78,14 @@
                 </div>
                 <div class="modal-body pattern-group-body">
                     <div class="pattern-group-container">
-                        <!-- Left side: Group management and 4x4 grid -->
+                        <!-- Left side: Mirroring main interface layout -->
                         <div class="pattern-group-left">
-                            <div class="pattern-group-controls">
+                            <!-- Top controls for group management -->
+                            <div class="pattern-group-top-controls">
                                 <input type="text" id="new-group-name" class="group-name-input" placeholder="New group name...">
                                 <button class="group-action-btn" id="create-group-btn">
                                     <i class="ph-thin ph-plus"></i>
-                                    <span>Create Group</span>
-                                </button>
-                                <select id="pattern-group-selector" class="group-selector">
-                                    <option value="favorites">Favorites</option>
-                                    <option value="all">All Patterns</option>
-                                </select>
-                                <button class="group-action-btn danger" id="delete-group-btn">
-                                    <i class="ph-thin ph-trash"></i>
-                                    <span>Delete</span>
+                                    <span>Create</span>
                                 </button>
                                 <button class="group-action-btn done-compact" id="pattern-group-done-btn">
                                     <i class="ph-thin ph-check"></i>
@@ -100,8 +93,29 @@
                                 </button>
                             </div>
                             
+                            <!-- Pattern group selector with chevrons (like row 4) -->
+                            <div class="pattern-group-selector-row">
+                                <button class="group-nav-btn editor-group-prev">
+                                    <i class="ph-thin ph-caret-left"></i>
+                                </button>
+                                <div class="custom-dropdown editor-group-dropdown" id="editor-group-dropdown">
+                                    <div class="dropdown-selected" id="editor-group-selected">
+                                        <span class="dropdown-text">Favorites</span>
+                                    </div>
+                                    <div class="dropdown-options" id="editor-group-options">
+                                        <!-- Options will be populated dynamically -->
+                                    </div>
+                                </div>
+                                <button class="group-nav-btn editor-group-next">
+                                    <i class="ph-thin ph-caret-right"></i>
+                                </button>
+                                <button class="group-delete-btn editor-group-delete" id="editor-group-delete-btn" title="Delete current group">
+                                    <i class="ph-thin ph-trash"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- 4x4 Pattern Grid (matching row 5 left) -->
                             <div class="pattern-grid-editor">
-                                <h3>Pattern Grid (Drag patterns here)</h3>
                                 <div class="pattern-edit-grid" id="pattern-edit-grid">
                                     <!-- 16 drop zones for 4x4 grid -->
                                     <div class="pattern-drop-zone" data-position="0"></div>

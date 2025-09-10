@@ -633,8 +633,17 @@ class OTTOAccurateInterface {
     setupGroupManagementControls() {
         const createBtn = document.getElementById('create-group-btn');
         const deleteBtn = document.getElementById('delete-group-btn');
-        const groupSelector = document.getElementById('pattern-group-selector');
         const newGroupInput = document.getElementById('new-group-name');
+        
+        // New editor dropdown elements
+        const editorDropdown = document.getElementById('editor-group-dropdown');
+        const editorSelected = document.getElementById('editor-group-selected');
+        const editorOptions = document.getElementById('editor-group-options');
+        const editorPrevBtn = document.querySelector('.editor-group-prev');
+        const editorNextBtn = document.querySelector('.editor-group-next');
+        
+        // Keep track of current group in editor
+        this.currentEditorGroup = this.playerStates[this.currentPlayer].patternGroup || 'favorites';
 
         // Create new group
         if (createBtn && newGroupInput) {
@@ -660,15 +669,8 @@ class OTTOAccurateInterface {
                     selectedPattern: null
                 };
                 
-                // Add to selector
-                const option = document.createElement('option');
-                option.value = groupKey;
-                option.textContent = groupName;
-                groupSelector.appendChild(option);
-                
-                // Select the new group
-                groupSelector.value = groupKey;
-                this.loadGroupIntoEditor(groupKey);
+                // Select the new group in editor
+                this.switchEditorGroup(groupKey);
                 
                 // Clear input
                 newGroupInput.value = '';
@@ -676,15 +678,17 @@ class OTTOAccurateInterface {
                 // Save to storage
                 this.savePatternGroups();
                 
-                // Update the main dropdown
+                // Update both dropdowns
+                this.updateEditorGroupDropdown();
                 this.updatePatternGroupDropdown();
             });
         }
 
-        // Delete group
-        if (deleteBtn && groupSelector) {
-            deleteBtn.addEventListener('click', () => {
-                const currentGroup = groupSelector.value;
+        // Delete group button (now the trash icon)
+        const deleteIconBtn = document.getElementById('editor-group-delete-btn');
+        if (deleteIconBtn) {
+            deleteIconBtn.addEventListener('click', () => {
+                const currentGroup = this.currentEditorGroup;
                 
                 if (currentGroup === 'favorites' || currentGroup === 'all') {
                     alert('Cannot delete default groups');
@@ -694,36 +698,54 @@ class OTTOAccurateInterface {
                 if (confirm(`Delete group "${this.patternGroups[currentGroup].name}"?`)) {
                     delete this.patternGroups[currentGroup];
                     
-                    // Remove from selector
-                    const option = groupSelector.querySelector(`option[value="${currentGroup}"]`);
-                    if (option) option.remove();
-                    
-                    // Select favorites
-                    groupSelector.value = 'favorites';
-                    this.loadGroupIntoEditor('favorites');
+                    // Switch to favorites
+                    this.switchEditorGroup('favorites');
                     
                     // Save to storage
                     this.savePatternGroups();
                     
-                    // Update the main dropdown
+                    // Update both dropdowns
+                    this.updateEditorGroupDropdown();
                     this.updatePatternGroupDropdown();
                 }
             });
         }
 
-        // Group selector change
-        if (groupSelector) {
-            // Populate with existing groups
-            groupSelector.innerHTML = '';
-            Object.keys(this.patternGroups).forEach(key => {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = this.patternGroups[key].name;
-                groupSelector.appendChild(option);
+        // Setup editor dropdown and navigation
+        if (editorDropdown && editorSelected && editorOptions) {
+            // Populate dropdown options
+            this.updateEditorGroupDropdown();
+            
+            // Toggle dropdown on click
+            editorSelected.addEventListener('click', (e) => {
+                e.stopPropagation();
+                editorDropdown.classList.toggle('active');
             });
             
-            groupSelector.addEventListener('change', (e) => {
-                this.loadGroupIntoEditor(e.target.value);
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!editorDropdown.contains(e.target)) {
+                    editorDropdown.classList.remove('active');
+                }
+            });
+        }
+        
+        // Setup chevron navigation
+        if (editorPrevBtn) {
+            editorPrevBtn.addEventListener('click', () => {
+                const groups = Object.keys(this.patternGroups);
+                const currentIndex = groups.indexOf(this.currentEditorGroup);
+                const newIndex = currentIndex > 0 ? currentIndex - 1 : groups.length - 1;
+                this.switchEditorGroup(groups[newIndex]);
+            });
+        }
+        
+        if (editorNextBtn) {
+            editorNextBtn.addEventListener('click', () => {
+                const groups = Object.keys(this.patternGroups);
+                const currentIndex = groups.indexOf(this.currentEditorGroup);
+                const newIndex = currentIndex < groups.length - 1 ? currentIndex + 1 : 0;
+                this.switchEditorGroup(groups[newIndex]);
             });
         }
         
@@ -791,6 +813,55 @@ class OTTOAccurateInterface {
         if (groupSelector) {
             groupSelector.value = groupKey;
         }
+    }
+
+    updateEditorGroupDropdown() {
+        const editorOptions = document.getElementById('editor-group-options');
+        if (!editorOptions) return;
+        
+        // Clear existing options
+        editorOptions.innerHTML = '';
+        
+        // Add all groups
+        Object.keys(this.patternGroups).forEach(key => {
+            const option = document.createElement('div');
+            option.className = 'dropdown-option';
+            option.dataset.value = key;
+            option.textContent = this.patternGroups[key].name;
+            
+            if (key === this.currentEditorGroup) {
+                option.classList.add('selected');
+            }
+            
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.switchEditorGroup(key);
+                
+                // Close dropdown
+                const dropdown = document.getElementById('editor-group-dropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('active');
+                }
+            });
+            
+            editorOptions.appendChild(option);
+        });
+    }
+    
+    switchEditorGroup(groupKey) {
+        this.currentEditorGroup = groupKey;
+        
+        // Update dropdown display
+        const editorSelected = document.getElementById('editor-group-selected');
+        if (editorSelected) {
+            editorSelected.querySelector('.dropdown-text').textContent = this.patternGroups[groupKey].name;
+        }
+        
+        // Load the group
+        this.loadGroupIntoEditor(groupKey);
+        
+        // Update selected state in dropdown
+        this.updateEditorGroupDropdown();
     }
 
     saveCurrentGroupState() {
