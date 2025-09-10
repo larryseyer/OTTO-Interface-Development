@@ -41,7 +41,6 @@ temp/
 # CLAUDE
 .claude/
 
-
 # Prettier
 .prettierrc.json
 
@@ -51,3 +50,10 @@ Working_Example_MIDI_Port/
 
 # image
 HISE_OTTO_Recent_Image.png
+
+# Assets from JUCE builds
+Assets/
+
+# Serena
+.serena/
+
