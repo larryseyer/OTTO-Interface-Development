@@ -2250,3 +2250,265 @@ body {
     color: var(--text-secondary);
     font-style: italic;
 }
+
+/* Pattern Group Editor Modal Styles */
+.pattern-group-modal-content {
+    width: 90%;
+    max-width: 1200px;
+    height: 70vh;
+    max-height: 600px; /* Back to reasonable height */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.pattern-group-body {
+    height: calc(100% - 60px);
+    overflow: hidden;
+}
+
+.pattern-group-container {
+    display: flex;
+    gap: 30px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.pattern-group-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pattern-group-right {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border-color);
+    padding-left: 20px;
+}
+
+/* Pattern Group Controls */
+.pattern-group-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.group-name-input {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.group-selector {
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+    min-width: 150px;
+}
+
+.group-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.group-action-btn:hover {
+    background: var(--button-hover);
+}
+
+.group-action-btn.danger {
+    background: #4a1a1a;
+    border-color: #8b0000;
+}
+
+.group-action-btn.danger:hover {
+    background: #8b0000;
+}
+
+/* Pattern Grid Editor */
+.pattern-grid-editor {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.pattern-grid-editor h3 {
+    margin: 0 0 15px 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.pattern-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px; /* Match main grid gap */
+    flex: 1;
+    max-height: 400px; /* Reasonable height */
+    max-width: 500px; /* Reasonable width */
+}
+
+.pattern-drop-zone {
+    background: transparent;
+    background-image: url('Images/Button100.png');
+    background-size: 100% 600%; /* 6 states vertically */
+    background-position: 0 0%; /* Normal state - top segment */
+    background-repeat: no-repeat;
+    border: none;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;  /* Back to reasonable size */
+    font-weight: 300;
+    color: var(--text-black);
+    cursor: pointer;
+    transition: all 0.02s ease;
+    position: relative;
+    min-height: 60px;  /* Back to normal height */
+    padding: 6px;
+    padding-bottom: 11px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pattern-drop-zone.has-pattern {
+    background-position: 0 20%; /* Second segment - BLACK button for filled */
+    color: var(--text-black);
+}
+
+.pattern-drop-zone.drag-over {
+    background-position: 0 40%; /* Third segment - WHITE button for drag over */
+    color: var(--text-primary);
+    transform: scale(1.02);
+}
+
+.pattern-drop-zone .remove-pattern {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    background: rgba(139, 0, 0, 0.9);
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.pattern-drop-zone.has-pattern:hover .remove-pattern {
+    display: flex;
+}
+
+/* Available Patterns List */
+.pattern-group-right h3 {
+    margin: 0 0 15px 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.pattern-search {
+    margin-bottom: 15px;
+}
+
+.pattern-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.available-patterns-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 10px;
+}
+
+.pattern-item {
+    padding: 10px 12px;
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: move;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+    font-size: 14px;
+    user-select: none;
+}
+
+.pattern-item:hover {
+    background: var(--button-hover);
+    transform: translateX(-2px);
+}
+
+.pattern-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+/* Scrollbar styling for pattern list */
+.available-patterns-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.available-patterns-list::-webkit-scrollbar-track {
+    background: var(--input-bg);
+    border-radius: 4px;
+}
+
+.available-patterns-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.available-patterns-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Done button styled like other group action buttons */
+.group-action-btn.done-compact {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    margin-left: auto; /* Push to the right */
+}
+
+.group-action-btn.done-compact:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}

@@ -450,7 +450,428 @@ class OTTOAccurateInterface {
                 };
                 groupName.textContent = displayNames[currentGroup] || 'Pattern Group';
             }
+            // Initialize the pattern group editor
+            this.initializePatternGroupEditor();
         }
+    }
+
+    initializePatternGroupEditor() {
+        // Load pattern groups from storage
+        this.loadPatternGroups();
+        
+        // Load available MIDI patterns
+        this.loadAvailablePatterns();
+        
+        // Setup drag and drop
+        this.setupPatternDragDrop();
+        
+        // Setup group management controls
+        this.setupGroupManagementControls();
+        
+        // Load current group into editor
+        this.loadGroupIntoEditor(this.playerStates[this.currentPlayer].patternGroup);
+    }
+
+    loadPatternGroups() {
+        // Load saved pattern groups from localStorage
+        const savedGroups = localStorage.getItem('ottoPatternGroups');
+        if (savedGroups) {
+            this.patternGroups = JSON.parse(savedGroups);
+        } else {
+            // Initialize with default groups
+            this.patternGroups = {
+                'favorites': {
+                    name: 'Favorites',
+                    patterns: [
+                        'Basic', 'Bassa', 'BusyBeat', 'Buyoun',
+                        'ChaCha', 'Funk', 'Jazz', 'Just Hat',
+                        'Just Kick', 'Polka', 'Push', 'Shuffle',
+                        'Ska', 'Surf', 'Swing', 'Waltz'
+                    ],
+                    selectedPattern: 'Funk'
+                },
+                'all': {
+                    name: 'All Patterns',
+                    patterns: [], // Will be populated from MIDI files
+                    selectedPattern: null
+                }
+            };
+        }
+    }
+
+    loadAvailablePatterns() {
+        // Simulated list of MIDI files from Assets/MidiFiles/Grooves
+        // In production, this would be fetched from the server
+        const midiFiles = [
+            'Afro Cuban Pop', 'Afro Fusion', 'Ain\'t it Sad Country', 'Alt Country',
+            'Alt Rock', 'Bad News Country', 'Badu Beat', 'Basic House', 'Basic Reggae',
+            'Basic Swing', 'Basic', 'Big Funk', 'Boogie Disco', 'Boogie Woogie',
+            'Bossa Fusion', 'Bossa Straight', 'Brazilian Ballad', 'Brazilian Carnival',
+            'British Ballad', 'Busy Bossa', 'BusyBeat', 'Buyoun', 'ChaCha', 'Chicago Blues',
+            'Classic Country', 'Classic Motown', 'Classic Soul', 'Cool Jazz', 'Country Ballad',
+            'Country Rock', 'Country Shuffle', 'Country Train', 'Crescent City', 'DC Funk',
+            'Deep House', 'Detroit Funk', 'Disco', 'Dixieland', 'Doo Wop', 'Dream Pop',
+            'Dubstep', 'Easy Swing', 'Electro Pop', 'Emo', 'Ethereal', 'Funk', 'Funk Rock',
+            'Garage Rock', 'Gospel', 'Grunge', 'Hard Rock', 'Hip Hop', 'House', 'Indie Pop',
+            'Indie Rock', 'Island Reggae', 'Jazz', 'Jazz Fusion', 'Just Hat', 'Just Kick',
+            'Latin Jazz', 'Latin Pop', 'Light Funk', 'Linear Funk', 'Memphis Soul', 'Metal',
+            'Modern Country', 'Modern Jazz', 'Modern RnB', 'Motown', 'Neo Soul', 'New Wave',
+            'Old School Hip Hop', 'Outlaw Country', 'Polka', 'Pop Ballad', 'Pop Punk',
+            'Pop Rock', 'Power Ballad', 'Progressive Rock', 'Psychedelic Rock', 'Punk',
+            'Push', 'Reggae', 'Reggaeton', 'Retro', 'RnB', 'Rock Ballad', 'Rockabilly',
+            'Salsa', 'Samba', 'Shuffle', 'Ska', 'Slow Blues', 'Slow Jam', 'Smooth Jazz',
+            'Soul', 'Southern Rock', 'Stadium Rock', 'Surf', 'Swing', 'Synth Pop',
+            'Tech House', 'Techno', 'Trap', 'Trip Hop', 'Waltz', 'West Coast Jazz'
+        ];
+
+        // Populate the available patterns list
+        const patternsList = document.getElementById('available-patterns-list');
+        if (patternsList) {
+            patternsList.innerHTML = '';
+            midiFiles.forEach(file => {
+                const patternItem = document.createElement('div');
+                patternItem.className = 'pattern-item';
+                patternItem.textContent = file.substring(0, 8); // First 8 letters
+                patternItem.dataset.fullName = file;
+                patternItem.draggable = true;
+                patternsList.appendChild(patternItem);
+            });
+        }
+
+        // Update the 'all' group with all patterns
+        if (this.patternGroups.all) {
+            this.patternGroups.all.patterns = midiFiles.map(f => f.substring(0, 8));
+        }
+
+        // Setup search functionality
+        const searchInput = document.getElementById('pattern-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const items = patternsList.querySelectorAll('.pattern-item');
+                items.forEach(item => {
+                    const text = item.dataset.fullName.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+                });
+            });
+        }
+    }
+
+    setupPatternDragDrop() {
+        const patternItems = document.querySelectorAll('.pattern-item');
+        const dropZones = document.querySelectorAll('.pattern-drop-zone');
+
+        // Setup drag start for pattern items
+        patternItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.effectAllowed = 'copy';
+                e.dataTransfer.setData('text/plain', item.textContent);
+                e.dataTransfer.setData('fullName', item.dataset.fullName);
+                item.classList.add('dragging');
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+            });
+        });
+
+        // Setup drop zones
+        dropZones.forEach((zone, index) => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                zone.classList.add('drag-over');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('drag-over');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                
+                const patternName = e.dataTransfer.getData('text/plain');
+                const fullName = e.dataTransfer.getData('fullName');
+                
+                // Update the drop zone
+                zone.textContent = patternName;
+                zone.classList.add('has-pattern');
+                zone.dataset.pattern = patternName;
+                zone.dataset.fullName = fullName;
+                
+                // Add remove button
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'remove-pattern';
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    zone.textContent = '';
+                    zone.classList.remove('has-pattern');
+                    delete zone.dataset.pattern;
+                    delete zone.dataset.fullName;
+                });
+                zone.appendChild(removeBtn);
+                
+                // Save current state
+                this.saveCurrentGroupState();
+            });
+
+            // Click to clear
+            zone.addEventListener('click', () => {
+                if (!zone.classList.contains('has-pattern')) return;
+                
+                const removeBtn = zone.querySelector('.remove-pattern');
+                if (removeBtn) {
+                    removeBtn.click();
+                }
+            });
+        });
+    }
+
+    setupGroupManagementControls() {
+        const createBtn = document.getElementById('create-group-btn');
+        const deleteBtn = document.getElementById('delete-group-btn');
+        const groupSelector = document.getElementById('pattern-group-selector');
+        const newGroupInput = document.getElementById('new-group-name');
+
+        // Create new group
+        if (createBtn && newGroupInput) {
+            createBtn.addEventListener('click', () => {
+                const groupName = newGroupInput.value.trim();
+                if (!groupName) {
+                    alert('Please enter a group name');
+                    return;
+                }
+                
+                // Create sanitized key from name
+                const groupKey = groupName.toLowerCase().replace(/\s+/g, '-');
+                
+                if (this.patternGroups[groupKey]) {
+                    alert('A group with this name already exists');
+                    return;
+                }
+                
+                // Create new group
+                this.patternGroups[groupKey] = {
+                    name: groupName,
+                    patterns: [],
+                    selectedPattern: null
+                };
+                
+                // Add to selector
+                const option = document.createElement('option');
+                option.value = groupKey;
+                option.textContent = groupName;
+                groupSelector.appendChild(option);
+                
+                // Select the new group
+                groupSelector.value = groupKey;
+                this.loadGroupIntoEditor(groupKey);
+                
+                // Clear input
+                newGroupInput.value = '';
+                
+                // Save to storage
+                this.savePatternGroups();
+                
+                // Update the main dropdown
+                this.updatePatternGroupDropdown();
+            });
+        }
+
+        // Delete group
+        if (deleteBtn && groupSelector) {
+            deleteBtn.addEventListener('click', () => {
+                const currentGroup = groupSelector.value;
+                
+                if (currentGroup === 'favorites' || currentGroup === 'all') {
+                    alert('Cannot delete default groups');
+                    return;
+                }
+                
+                if (confirm(`Delete group "${this.patternGroups[currentGroup].name}"?`)) {
+                    delete this.patternGroups[currentGroup];
+                    
+                    // Remove from selector
+                    const option = groupSelector.querySelector(`option[value="${currentGroup}"]`);
+                    if (option) option.remove();
+                    
+                    // Select favorites
+                    groupSelector.value = 'favorites';
+                    this.loadGroupIntoEditor('favorites');
+                    
+                    // Save to storage
+                    this.savePatternGroups();
+                    
+                    // Update the main dropdown
+                    this.updatePatternGroupDropdown();
+                }
+            });
+        }
+
+        // Group selector change
+        if (groupSelector) {
+            // Populate with existing groups
+            groupSelector.innerHTML = '';
+            Object.keys(this.patternGroups).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = this.patternGroups[key].name;
+                groupSelector.appendChild(option);
+            });
+            
+            groupSelector.addEventListener('change', (e) => {
+                this.loadGroupIntoEditor(e.target.value);
+            });
+        }
+        
+        // Done button
+        const doneBtn = document.getElementById('pattern-group-done-btn');
+        if (doneBtn) {
+            doneBtn.addEventListener('click', () => {
+                const modal = document.getElementById('favorites-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        }
+        
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('favorites-modal');
+                if (modal && modal.classList.contains('active')) {
+                    modal.classList.remove('active');
+                }
+            }
+        });
+    }
+
+    loadGroupIntoEditor(groupKey) {
+        const group = this.patternGroups[groupKey];
+        if (!group) return;
+        
+        const dropZones = document.querySelectorAll('.pattern-drop-zone');
+        
+        // Clear all zones
+        dropZones.forEach(zone => {
+            zone.textContent = '';
+            zone.classList.remove('has-pattern');
+            delete zone.dataset.pattern;
+            delete zone.dataset.fullName;
+        });
+        
+        // Load patterns into zones
+        group.patterns.forEach((pattern, index) => {
+            if (index < dropZones.length) {
+                const zone = dropZones[index];
+                zone.textContent = pattern;
+                zone.classList.add('has-pattern');
+                zone.dataset.pattern = pattern;
+                
+                // Add remove button
+                const removeBtn = document.createElement('span');
+                removeBtn.className = 'remove-pattern';
+                removeBtn.innerHTML = '×';
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    zone.textContent = '';
+                    zone.classList.remove('has-pattern');
+                    delete zone.dataset.pattern;
+                    this.saveCurrentGroupState();
+                });
+                zone.appendChild(removeBtn);
+            }
+        });
+        
+        // Update selector
+        const groupSelector = document.getElementById('pattern-group-selector');
+        if (groupSelector) {
+            groupSelector.value = groupKey;
+        }
+    }
+
+    saveCurrentGroupState() {
+        const groupSelector = document.getElementById('pattern-group-selector');
+        if (!groupSelector) return;
+        
+        const currentGroup = groupSelector.value;
+        const dropZones = document.querySelectorAll('.pattern-drop-zone');
+        
+        // Collect patterns from drop zones
+        const patterns = [];
+        dropZones.forEach(zone => {
+            if (zone.dataset.pattern) {
+                patterns.push(zone.dataset.pattern);
+            }
+        });
+        
+        // Update the group
+        if (this.patternGroups[currentGroup]) {
+            this.patternGroups[currentGroup].patterns = patterns;
+            
+            // Update the main interface if this is the current player's group
+            if (this.playerStates[this.currentPlayer].patternGroup === currentGroup) {
+                this.updateMainPatternGrid(patterns);
+            }
+            
+            // Save to storage
+            this.savePatternGroups();
+        }
+    }
+
+    savePatternGroups() {
+        localStorage.setItem('ottoPatternGroups', JSON.stringify(this.patternGroups));
+    }
+
+    updateMainPatternGrid(patterns) {
+        const patternButtons = document.querySelectorAll('.pattern-grid .pattern-btn');
+        
+        patternButtons.forEach((btn, index) => {
+            if (index < patterns.length && patterns[index]) {
+                btn.textContent = patterns[index];
+                btn.dataset.pattern = patterns[index].toLowerCase().replace(/\s+/g, '-');
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    }
+
+    updatePatternGroupDropdown() {
+        const groupOptions = document.getElementById('group-options');
+        if (!groupOptions) return;
+        
+        // Clear existing options
+        groupOptions.innerHTML = '';
+        
+        // Add all groups
+        Object.keys(this.patternGroups).forEach(key => {
+            const option = document.createElement('div');
+            option.className = 'dropdown-option';
+            option.dataset.value = key;
+            option.textContent = this.patternGroups[key].name;
+            
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = document.getElementById('group-dropdown');
+                const selected = document.getElementById('group-selected');
+                
+                if (selected) {
+                    selected.querySelector('.dropdown-text').textContent = option.textContent;
+                }
+                
+                if (dropdown) {
+                    dropdown.classList.remove('active');
+                }
+                
+                this.onPatternGroupChanged(this.currentPlayer, key);
+                this.triggerAutoSave();
+            });
+            
+            groupOptions.appendChild(option);
+        });
     }
 
     openPresetModal() {
@@ -1183,6 +1604,7 @@ class OTTOAccurateInterface {
     init() {
         this.initAppState();      // Initialize app state FIRST to restore saved values
         this.initPresetSystem();  // Initialize preset system second
+        this.loadPatternGroups(); // Load pattern groups early
         this.setupVersion();
         this.setupSplashScreen();
         this.setupPlayerTabs();
@@ -1737,6 +2159,11 @@ class OTTOAccurateInterface {
                     }
                 }
             });
+        }
+        
+        // Update pattern grid based on current group
+        if (this.patternGroups && state.patternGroup && this.patternGroups[state.patternGroup]) {
+            this.updateMainPatternGrid(this.patternGroups[state.patternGroup].patterns);
         }
         
         // Clear and update pattern selection
@@ -2739,6 +3166,20 @@ class OTTOAccurateInterface {
     }
 
     onPatternSelected(playerNumber, patternName) {
+        // Save selected pattern to current group
+        if (this.playerStates[playerNumber]) {
+            const currentGroup = this.playerStates[playerNumber].patternGroup;
+            
+            // Save to player state
+            this.playerStates[playerNumber].selectedPattern = patternName;
+            
+            // Save to pattern group if it exists
+            if (this.patternGroups && this.patternGroups[currentGroup]) {
+                this.patternGroups[currentGroup].selectedPattern = patternName;
+                this.savePatternGroups();
+            }
+        }
+        
         if (window.juce?.onPatternSelected) {
             window.juce.onPatternSelected(playerNumber, patternName);
         }
@@ -2748,6 +3189,24 @@ class OTTOAccurateInterface {
         // Save pattern group to player state
         if (this.playerStates[playerNumber]) {
             this.playerStates[playerNumber].patternGroup = groupName;
+            
+            // Update the pattern grid if this is the current player
+            if (playerNumber === this.currentPlayer && this.patternGroups && this.patternGroups[groupName]) {
+                this.updateMainPatternGrid(this.patternGroups[groupName].patterns);
+                
+                // Restore the selected pattern for this group
+                const selectedPattern = this.patternGroups[groupName].selectedPattern;
+                if (selectedPattern) {
+                    const patternButtons = document.querySelectorAll('.pattern-grid .pattern-btn');
+                    patternButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.textContent === selectedPattern) {
+                            btn.classList.add('active');
+                            this.playerStates[playerNumber].selectedPattern = selectedPattern;
+                        }
+                    });
+                }
+            }
         }
         
         if (window.juce?.onPatternGroupChanged) {

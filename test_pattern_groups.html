@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pattern Group Editor Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: #ccc;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #333;
+            background: #222;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #555;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-left: 3px solid #8a4af3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pattern Group Editor - Feature Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Pattern Group Features</h2>
+        <button onclick="openPatternEditor()">Open Pattern Group Editor</button>
+        <button onclick="checkLocalStorage()">Check Saved Groups</button>
+        <button onclick="clearStorage()">Clear All Groups</button>
+        <div id="status" class="status">Ready to test...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Current Pattern Groups</h2>
+        <div id="groups-list"></div>
+    </div>
+
+    <script>
+        function openPatternEditor() {
+            // Navigate to main app and trigger editor
+            window.location.href = 'index.html#open-pattern-editor';
+        }
+
+        function checkLocalStorage() {
+            const groups = localStorage.getItem('ottoPatternGroups');
+            const status = document.getElementById('status');
+            const list = document.getElementById('groups-list');
+            
+            if (groups) {
+                const parsed = JSON.parse(groups);
+                status.innerHTML = `Found ${Object.keys(parsed).length} pattern groups`;
+                
+                list.innerHTML = '<ul>';
+                for (const [key, group] of Object.entries(parsed)) {
+                    list.innerHTML += `
+                        <li>
+                            <strong>${group.name}</strong> (${key})
+                            <ul>
+                                ${group.patterns.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+                            Selected: ${group.selectedPattern || 'None'}
+                        </li>
+                    `;
+                }
+                list.innerHTML += '</ul>';
+            } else {
+                status.innerHTML = 'No pattern groups found in storage';
+                list.innerHTML = 'No groups saved yet';
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('Clear all saved pattern groups?')) {
+                localStorage.removeItem('ottoPatternGroups');
+                document.getElementById('status').innerHTML = 'All groups cleared';
+                document.getElementById('groups-list').innerHTML = '';
+            }
+        }
+
+        // Check on load
+        window.onload = checkLocalStorage;
+    </script>
+</body>
+</html>
