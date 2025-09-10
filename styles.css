@@ -1681,6 +1681,29 @@ body {
     background: #bbbbbb;
 }
 
+/* Slave slider states - visual feedback for linked sliders */
+.custom-slider.slave .slider-fill {
+    background: var(--text-black) !important;  /* Black for slave sliders */
+}
+
+.custom-slider.slave .slider-thumb {
+    background: var(--text-black) !important;  /* Black thumb for slave sliders */
+    cursor: not-allowed !important;
+}
+
+.custom-slider.slave .slider-track {
+    opacity: 0.7;  /* Slightly dimmed track for slave sliders */
+}
+
+/* Master slider states - optional visual enhancement */
+.custom-slider.master .slider-fill {
+    background: #999999;  /* Slightly brighter for master */
+}
+
+.custom-slider.master .slider-thumb {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);  /* Subtle glow for master */
+}
+
 .link-icon {
     width: 40px;  /* Doubled from 20px */
     height: 40px;  /* Doubled from 20px */

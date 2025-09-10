@@ -2247,8 +2247,12 @@ class OTTOAccurateInterface {
                 }
             }
         } else {
-            // Clear link states if not in preset
-            this.linkStates = null;
+            // Initialize empty link states if not in preset
+            this.linkStates = {
+                swing: { master: null, slaves: new Set() },
+                energy: { master: null, slaves: new Set() },
+                volume: { master: null, slaves: new Set() }
+            };
         }
 
         // Restore global settings
@@ -3169,6 +3173,11 @@ class OTTOAccurateInterface {
 
         // Use the comprehensive UI update
         this.updateCompleteUIState();
+        
+        // Update link icon states for the new current player
+        if (this.linkStates) {
+            this.updateLinkIconStates();
+        }
 
         this.scheduleSave('appState');  // Save app state
         console.log(`Switched to Player ${playerNumber}, muted: ${this.playerStates[playerNumber]?.muted || false}`);
@@ -4029,6 +4038,16 @@ class OTTOAccurateInterface {
 
             const startDrag = (e) => {
                 if (this.isDestroyed) return;
+                
+                // Check if this slider is a slave
+                if (this.linkStates && this.linkStates[param]) {
+                    const linkState = this.linkStates[param];
+                    if (linkState.slaves.has(this.currentPlayer)) {
+                        console.log(`Slider ${param} is slave for player ${this.currentPlayer}, ignoring drag`);
+                        return; // Don't allow dragging for slave sliders
+                    }
+                }
+                
                 isDragging = true;
                 slider.classList.add('dragging');
                 startY = e.clientY;
@@ -4082,6 +4101,15 @@ class OTTOAccurateInterface {
             const trackClickHandler = (e) => {
                 if (this.isDestroyed) return;
                 if (e.target === thumb) return;  // Don't handle if clicking thumb
+                
+                // Check if this slider is a slave
+                if (this.linkStates && this.linkStates[param]) {
+                    const linkState = this.linkStates[param];
+                    if (linkState.slaves.has(this.currentPlayer)) {
+                        console.log(`Slider ${param} is slave for player ${this.currentPlayer}, ignoring click`);
+                        return; // Don't allow clicking for slave sliders
+                    }
+                }
 
                 const rect = track.getBoundingClientRect();
                 const clickY = e.clientY - rect.top;
@@ -4173,13 +4201,16 @@ class OTTOAccurateInterface {
     }
 
     setupLinkIcons() {
-        // Track link states for each parameter - using WeakSet to avoid circular references
-        // Note: We'll use a regular Set but clear it properly on destroy
-        this.linkStates = {
-            swing: { master: null, slaves: new Set() },
-            energy: { master: null, slaves: new Set() },
-            volume: { master: null, slaves: new Set() }
-        };
+        // Initialize link states for each parameter if not already initialized
+        if (!this.linkStates) {
+            this.linkStates = {
+                swing: { master: null, slaves: new Set() },
+                energy: { master: null, slaves: new Set() },
+                volume: { master: null, slaves: new Set() }
+            };
+        }
+
+        console.log('Setting up link icons, linkStates:', this.linkStates);
 
         // Setup link icon click handlers
         document.querySelectorAll('.link-icon').forEach(linkIcon => {
@@ -4188,6 +4219,8 @@ class OTTOAccurateInterface {
             const handler = (e) => {
                 if (this.isDestroyed) return;
                 e.preventDefault();
+                e.stopPropagation();
+                console.log(`Link icon clicked for ${param} by player ${this.currentPlayer}`);
                 this.handleLinkToggle(param, linkIcon);
             };
             
@@ -4198,8 +4231,15 @@ class OTTOAccurateInterface {
     }
 
     handleLinkToggle(param, linkIcon) {
+        if (!this.linkStates) {
+            console.error('linkStates not initialized!');
+            return;
+        }
+        
         const currentPlayer = this.currentPlayer;
         const linkState = this.linkStates[param];
+
+        console.log(`handleLinkToggle called for ${param}, player ${currentPlayer}`, linkState);
 
         // Determine current state of this link icon
         const isMaster = linkState.master === currentPlayer;
@@ -4239,16 +4279,9 @@ class OTTOAccurateInterface {
             console.log(`Player ${currentPlayer} unlinked ${param} (was master)`);
 
         } else if (isSlave) {
-            // Currently slave - unlink just this player
-            linkState.slaves.delete(currentPlayer);
-            linkIcon.classList.remove('linked');
-
-            // If no more slaves and no master, clear everything
-            if (linkState.slaves.size === 0 && linkState.master === null) {
-                // Already cleared
-            }
-
-            console.log(`Player ${currentPlayer} unlinked from ${param} (was slave)`);
+            // Currently slave - can't change, do nothing
+            console.log(`Player ${currentPlayer} is slave for ${param}, cannot change`);
+            return;
         }
 
         // Update link icon states for all players when switching
@@ -4280,13 +4313,32 @@ class OTTOAccurateInterface {
         document.querySelectorAll('.link-icon').forEach(linkIcon => {
             const param = linkIcon.dataset.param;
             const linkState = this.linkStates[param];
+            const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
 
             linkIcon.classList.remove('master', 'linked');
+            
+            // Also update slider visual states
+            if (slider) {
+                slider.classList.remove('master', 'slave');
+            }
 
             if (linkState.master === this.currentPlayer) {
                 linkIcon.classList.add('master');
+                if (slider) {
+                    slider.classList.add('master');
+                    slider.style.pointerEvents = 'auto'; // Enable interaction
+                }
             } else if (linkState.slaves.has(this.currentPlayer)) {
                 linkIcon.classList.add('linked');
+                if (slider) {
+                    slider.classList.add('slave');
+                    slider.style.pointerEvents = 'none'; // Disable interaction for slaves
+                }
+            } else {
+                // Unlinked state - ensure slider is interactive
+                if (slider) {
+                    slider.style.pointerEvents = 'auto';
+                }
             }
         });
     }
