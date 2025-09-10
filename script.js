@@ -3442,40 +3442,41 @@ class OTTOAccurateInterface {
     }
 
     navigatePatternGroup(direction) {
-        // these should eventually come from our INI storage system.
-        const groups = ['favorites', 'all', 'custom'];
         const groupDropdown = document.getElementById('group-dropdown');
         const groupSelected = document.getElementById('group-selected');
         const groupOptions = document.getElementById('group-options');
 
-        if (!groupDropdown || !groupSelected) return;
+        if (!groupDropdown || !groupSelected || !this.patternGroups) return;
 
-        // Get current selection
-        const currentText = groupSelected.querySelector('.dropdown-text').textContent.toLowerCase();
-        const currentIndex = groups.findIndex(g =>
-            g === currentText ||
-            (g === 'all' && currentText === 'all patterns') ||
-            (g === 'favorites' && currentText === 'favorites') ||
-            (g === 'custom' && currentText === 'custom')
-        );
+        // Get actual pattern groups dynamically
+        const groups = Object.keys(this.patternGroups);
+        if (groups.length === 0) return;
+
+        // Get current selection - use the player's current pattern group
+        const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+        const currentIndex = groups.indexOf(currentGroup);
 
         let newIndex = currentIndex + direction;
 
-        // Wrap around
-        if (newIndex < 0) newIndex = groups.length - 1;
-        if (newIndex >= groups.length) newIndex = 0;
-
-        // Get the option element and trigger click
-        const newValue = groups[newIndex];
-        const optionToSelect = groupOptions.querySelector(`[data-value="${newValue}"]`);
-
-        if (optionToSelect) {
-            const text = optionToSelect.textContent;
-            groupSelected.querySelector('.dropdown-text').textContent = text;
-            this.onPatternGroupChanged(this.currentPlayer, newValue);
-            this.scheduleSave('preset');
-            console.log(`Player ${this.currentPlayer} pattern group: ${newValue}`);
+        // Wrap around properly
+        if (newIndex < 0) {
+            newIndex = groups.length - 1;
+        } else if (newIndex >= groups.length) {
+            newIndex = 0;
         }
+
+        // Get the new group
+        const newGroupKey = groups[newIndex];
+        const newGroupName = this.patternGroups[newGroupKey].name;
+
+        // Update the UI
+        groupSelected.querySelector('.dropdown-text').textContent = newGroupName;
+        
+        // Update the player state and save
+        this.onPatternGroupChanged(this.currentPlayer, newGroupKey);
+        this.scheduleSave('preset');
+        
+        console.log(`Player ${this.currentPlayer} pattern group: ${newGroupKey}`);
     }
 
     setupPatternGrid() {
