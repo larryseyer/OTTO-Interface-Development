@@ -43,14 +43,19 @@ class OTTOAccurateInterface {
         this.saveTimers = {
             preset: null,
             appState: null,
-            patternGroups: null
+            patternGroups: null,
+            drumkits: null
         };
         this.saveDelays = {
             preset: 500,      // 500ms for preset changes
             appState: 1000,   // 1s for app state changes
-            patternGroups: 300 // 300ms for pattern group changes
+            patternGroups: 300, // 300ms for pattern group changes
+            drumkits: 300     // 300ms for drumkit changes
         };
         this.pendingSaves = new Set(); // Track what needs saving
+        
+        // Initialize drumkit manager
+        this.drumkits = null; // Will be loaded from storage or initialized with defaults
 
         // Player state tracking for all possible players
         this.playerStates = {};
@@ -1189,6 +1194,126 @@ class OTTOAccurateInterface {
                     selectedPattern: 'Funk'
                 }
             };
+        }
+    }
+    
+    // Drumkit Management Methods
+    loadDrumkits() {
+        // Load saved drumkits from localStorage with error handling
+        const savedDrumkits = this.safeLocalStorageGet('ottoDrumkits', null);
+        if (savedDrumkits) {
+            this.drumkits = savedDrumkits;
+        } else {
+            // Initialize with default drumkits and their mixer presets
+            this.drumkits = {
+                'Acoustic': {
+                    name: 'Acoustic',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default',
+                            levels: { kick: 75, snare: 70, hihat: 60, tom: 65, crash: 80, ride: 70 }
+                        },
+                        'punchy': {
+                            name: 'Punchy',
+                            levels: { kick: 85, snare: 80, hihat: 55, tom: 70, crash: 75, ride: 65 }
+                        }
+                    }
+                },
+                'Electronic': {
+                    name: 'Electronic',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default',
+                            levels: { kick: 80, snare: 75, hihat: 70, tom: 60, crash: 85, ride: 75 }
+                        }
+                    }
+                },
+                'Rock': {
+                    name: 'Rock',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default', 
+                            levels: { kick: 90, snare: 85, hihat: 65, tom: 75, crash: 90, ride: 70 }
+                        }
+                    }
+                },
+                'Jazz': {
+                    name: 'Jazz',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default',
+                            levels: { kick: 60, snare: 65, hihat: 75, tom: 55, crash: 70, ride: 80 }
+                        }
+                    }
+                },
+                'Pop': {
+                    name: 'Pop',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default',
+                            levels: { kick: 75, snare: 80, hihat: 70, tom: 60, crash: 75, ride: 65 }
+                        }
+                    }
+                },
+                'Funk': {
+                    name: 'Funk',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default',
+                            levels: { kick: 85, snare: 90, hihat: 80, tom: 70, crash: 75, ride: 75 }
+                        }
+                    }
+                },
+                'Latin': {
+                    name: 'Latin',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default',
+                            levels: { kick: 70, snare: 75, hihat: 85, tom: 80, crash: 70, ride: 75 }
+                        }
+                    }
+                },
+                'Vintage': {
+                    name: 'Vintage',
+                    selectedMixerPreset: 'default',
+                    mixerPresets: {
+                        'default': {
+                            name: 'Default',
+                            levels: { kick: 65, snare: 70, hihat: 60, tom: 65, crash: 75, ride: 70 }
+                        }
+                    }
+                }
+            };
+            // Save default drumkits
+            this.saveDrumkits();
+        }
+    }
+    
+    saveDrumkits() {
+        // Use safe wrapper with error handling
+        this.safeLocalStorageSet('ottoDrumkits', this.drumkits);
+    }
+    
+    getDrumkitMixerPreset(kitName) {
+        if (this.drumkits && this.drumkits[kitName]) {
+            const kit = this.drumkits[kitName];
+            const presetName = kit.selectedMixerPreset || 'default';
+            return kit.mixerPresets[presetName] || kit.mixerPresets['default'];
+        }
+        return null;
+    }
+    
+    setDrumkitMixerPreset(kitName, presetName) {
+        if (this.drumkits && this.drumkits[kitName]) {
+            this.drumkits[kitName].selectedMixerPreset = presetName;
+            this.saveDrumkits();
         }
     }
 
@@ -2397,6 +2522,7 @@ class OTTOAccurateInterface {
             this.initAppState();      // Initialize app state FIRST to restore saved values
             this.initPresetSystem();  // Initialize preset system second
             this.loadPatternGroups(); // Load pattern groups early
+            this.loadDrumkits();      // Load drumkit manager
             this.setupVersion();
             this.setupSplashScreen();
             this.setupPlayerTabs();
@@ -3355,7 +3481,7 @@ class OTTOAccurateInterface {
     setupPatternGrid() {
         document.querySelectorAll('.pattern-btn').forEach(patternBtn => {
             patternBtn.addEventListener('click', (e) => {
-                const patternName = patternBtn.dataset.pattern;
+                const patternName = patternBtn.textContent; // Use the display text, not dataset
 
                 // Clear other pattern selections
                 document.querySelectorAll('.pattern-btn').forEach(btn => {
@@ -3365,7 +3491,16 @@ class OTTOAccurateInterface {
                 // Activate clicked pattern
                 patternBtn.classList.add('active');
 
+                // Update player state
                 this.playerStates[this.currentPlayer].selectedPattern = patternName;
+                
+                // Save selected pattern to the current pattern group
+                const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+                if (this.patternGroups && this.patternGroups[currentGroup]) {
+                    this.patternGroups[currentGroup].selectedPattern = patternName;
+                    this.savePatternGroups(); // Save pattern groups to storage
+                }
+                
                 this.onPatternSelected(this.currentPlayer, patternName);
                 this.scheduleSave('preset');
 
