@@ -3030,6 +3030,9 @@ class OTTOAccurateInterface {
         });
         this.sliderListeners = [];
         
+        // Debounce timer for slider updates
+        let sliderDebounceTimers = {};
+        
         // Custom vertical sliders
         document.querySelectorAll('.custom-slider').forEach(slider => {
             const track = slider.querySelector('.slider-track');
@@ -3050,6 +3053,35 @@ class OTTOAccurateInterface {
             let startY = 0;
             let startValue = 0;
             
+            // Debounced update function
+            const debouncedUpdate = (newValue) => {
+                // Clear existing timer for this slider
+                if (sliderDebounceTimers[param]) {
+                    clearTimeout(sliderDebounceTimers[param]);
+                }
+                
+                // Update visual immediately for responsiveness
+                this.updateCustomSlider(slider, newValue);
+                
+                // Debounce the actual state update and callbacks
+                sliderDebounceTimers[param] = setTimeout(() => {
+                    // Update player state
+                    this.playerStates[this.currentPlayer].sliderValues[param] = newValue;
+                    this.onSliderChanged(this.currentPlayer, param, newValue);
+                    this.triggerAutoSave();
+                    
+                    // Check if this player is a master and propagate value
+                    if (this.linkStates && this.linkStates[param]) {
+                        const linkState = this.linkStates[param];
+                        if (linkState.master === this.currentPlayer) {
+                            this.propagateSliderValue(param, newValue, this.currentPlayer);
+                        }
+                    }
+                    
+                    console.log(`Player ${this.currentPlayer} ${param} slider: ${newValue}`);
+                }, 100); // 100ms debounce delay
+            };
+            
             const startDrag = (e) => {
                 isDragging = true;
                 slider.classList.add('dragging');
@@ -3069,29 +3101,32 @@ class OTTOAccurateInterface {
                 value = Math.max(min, Math.min(max, startValue + deltaValue));
                 value = Math.round(value);  // Round to integer
                 
-                // Update visual state
-                this.updateCustomSlider(slider, value);
-                
-                // Update player state
-                this.playerStates[this.currentPlayer].sliderValues[param] = value;
-                this.onSliderChanged(this.currentPlayer, param, value);
-                this.triggerAutoSave();
-                
-                // Check if this player is a master and propagate value
-                if (this.linkStates && this.linkStates[param]) {
-                    const linkState = this.linkStates[param];
-                    if (linkState.master === this.currentPlayer) {
-                        this.propagateSliderValue(param, value, this.currentPlayer);
-                    }
-                }
-                
-                console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
+                // Use debounced update
+                debouncedUpdate(value);
             };
             
             const endDrag = () => {
                 if (isDragging) {
                     isDragging = false;
                     slider.classList.remove('dragging');
+                    
+                    // Force final update when drag ends
+                    if (sliderDebounceTimers[param]) {
+                        clearTimeout(sliderDebounceTimers[param]);
+                    }
+                    
+                    // Final update without debounce
+                    this.playerStates[this.currentPlayer].sliderValues[param] = value;
+                    this.onSliderChanged(this.currentPlayer, param, value);
+                    this.triggerAutoSave();
+                    
+                    // Handle link propagation
+                    if (this.linkStates && this.linkStates[param]) {
+                        const linkState = this.linkStates[param];
+                        if (linkState.master === this.currentPlayer) {
+                            this.propagateSliderValue(param, value, this.currentPlayer);
+                        }
+                    }
                 }
             };
             
@@ -3105,10 +3140,10 @@ class OTTOAccurateInterface {
                 
                 value = Math.round(min + (percentage * (max - min)));
                 
-                // Update visual state
+                // Update visual state immediately
                 this.updateCustomSlider(slider, value);
                 
-                // Update player state
+                // Update player state (no debounce for click)
                 this.playerStates[this.currentPlayer].sliderValues[param] = value;
                 this.onSliderChanged(this.currentPlayer, param, value);
                 this.triggerAutoSave();
@@ -3139,17 +3174,28 @@ class OTTOAccurateInterface {
             slider.currentValue = value;
         });
 
-        // Mini sliders in kit section with proper cleanup
+        // Mini sliders debounce timer
+        let miniSliderDebounceTimer = null;
+        
+        // Mini sliders in kit section with proper cleanup and debouncing
         document.querySelectorAll('.mini-slider').forEach((slider, index) => {
             const inputHandler = (e) => {
                 const sliderIndex = index + 1;
                 const value = parseInt(e.target.value);
-
-                this.playerStates[this.currentPlayer].miniSliders[sliderIndex] = value;
-                this.onMiniSliderChanged(this.currentPlayer, sliderIndex, value);
-                this.triggerAutoSave();
-
-                console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
+                
+                // Clear existing timer
+                if (miniSliderDebounceTimer) {
+                    clearTimeout(miniSliderDebounceTimer);
+                }
+                
+                // Debounce the update
+                miniSliderDebounceTimer = setTimeout(() => {
+                    this.playerStates[this.currentPlayer].miniSliders[sliderIndex] = value;
+                    this.onMiniSliderChanged(this.currentPlayer, sliderIndex, value);
+                    this.triggerAutoSave();
+                    
+                    console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
+                }, 100); // 100ms debounce delay
             };
             
             this.addEventListener(slider, 'input', inputHandler, this.sliderListeners);
@@ -3524,13 +3570,23 @@ class OTTOAccurateInterface {
     }
 
     startLoopAnimation() {
+        // Don't start a new animation if one is already running
+        if (this.animationFrame) {
+            return;
+        }
+        
         const animate = () => {
+            // Only continue animation if playing
+            if (!this.isPlaying) {
+                // Stop the animation loop when paused
+                this.animationFrame = null;
+                return;
+            }
+            
             // Animate the loop position when playing
-            if (this.isPlaying) {
-                this.loopPosition += 0.003; // Adjust speed as needed
-                if (this.loopPosition > 1) {
-                    this.loopPosition = 0;
-                }
+            this.loopPosition += 0.003; // Adjust speed as needed
+            if (this.loopPosition > 1) {
+                this.loopPosition = 0;
             }
 
             this.updateLoopTimelineDisplay();
@@ -3611,9 +3667,12 @@ class OTTOAccurateInterface {
             if (this.isPlaying) {
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'inline-block';
+                // Restart animation when playing
+                this.startLoopAnimation();
             } else {
                 playIcon.style.display = 'inline-block';
                 pauseIcon.style.display = 'none';
+                // Animation will stop itself when isPlaying is false
             }
         }
 
