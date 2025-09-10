@@ -22,6 +22,11 @@ class OTTOAccurateInterface {
         this.isPlaying = true;  // Start in playing state to show pause icon
         this.currentPreset = 'default';  // Track current preset
 
+        // Online Store URL - easily configurable
+        // Note: Your actual store needs to allow iframe embedding (no X-Frame-Options: DENY)
+        this.storeURL = 'https://my-store-1008202.creator-spring.com/';  // Simple test URL that always works in iframes
+        // this.storeURL = 'https://LarrySeyer.com';  // May not work due to X-Frame-Options
+
         // Add destroyed flag to prevent async operations after cleanup
         this.isDestroyed = false;
 
@@ -1013,6 +1018,9 @@ class OTTOAccurateInterface {
 
         // Setup Cloud Modal
         this.setupModalWindow('cloud-modal', 'cloud-modal-close');
+
+        // Setup Store Modal
+        this.setupModalWindow('store-modal', 'store-modal-close');
     }
 
     setupModalWindow(modalId) {
@@ -1025,7 +1033,7 @@ class OTTOAccurateInterface {
             // Close button click
             const closeHandler = () => {
                 panel.classList.remove('active');
-                
+
                 // Remove panel-active class from corresponding button
                 let btnId = null;
                 switch(panelId) {
@@ -1048,14 +1056,14 @@ class OTTOAccurateInterface {
                         btnId = 'preset-edit-btn';
                         break;
                 }
-                
+
                 if (btnId) {
                     const btn = document.getElementById(btnId);
                     if (btn) {
                         btn.classList.remove('panel-active');
                     }
                 }
-                
+
                 // For kit edit panel, remove active from all edit buttons
                 if (panelId === 'kit-edit-panel') {
                     document.querySelectorAll('.kit-edit-btn').forEach(btn => {
@@ -2947,26 +2955,73 @@ class OTTOAccurateInterface {
     }
 
     setupLogoClick() {
-        // Setup logo/version click to show splash screen
+        // Setup logo/version click to show online store
         const logoVersion = document.getElementById('logo-version');
-        const splashScreen = document.getElementById('splash-screen');
+        const storePanel = document.getElementById('store-panel');
+        const storeIframe = document.getElementById('store-iframe');
+        const loadingMsg = document.getElementById('store-loading');
+        const errorMsg = document.getElementById('store-error');
 
-        if (logoVersion && splashScreen) {
+        if (logoVersion && storePanel) {
             logoVersion.addEventListener('click', () => {
-                // Show splash screen
-                splashScreen.style.display = 'flex';
-                splashScreen.classList.remove('hidden');
-                splashScreen.classList.add('show');
+                console.log('Logo clicked - toggling store panel');
 
-                // Hide it again after a delay
-                setTimeout(() => {
-                    splashScreen.classList.remove('show');
-                    splashScreen.classList.add('hidden');
-                    setTimeout(() => {
-                        splashScreen.style.display = 'none';
-                    }, 500);
-                }, this.splashScreenLength * 2);  // Show for 2 seconds when clicked
+                // Toggle store panel
+                storePanel.classList.toggle('active');
+
+                // Load store URL into iframe when opening
+                if (storePanel.classList.contains('active') && storeIframe) {
+                    console.log('Store panel is active, checking iframe...');
+                    console.log('Current iframe src:', storeIframe.src);
+                    console.log('Store URL to load:', this.storeURL);
+
+                    // Check if we need to load the URL
+                    if (!storeIframe.hasAttribute('data-loaded')) {
+                        console.log('Loading store URL for first time...');
+
+                        // Show loading message
+                        if (loadingMsg) loadingMsg.style.display = 'block';
+                        if (errorMsg) errorMsg.style.display = 'none';
+
+                        // Set a timeout to detect if iframe doesn't load
+                        const loadTimeout = setTimeout(() => {
+                            console.warn('Store iframe load timeout - site may block embedding');
+                            if (loadingMsg) loadingMsg.style.display = 'none';
+                            if (errorMsg) errorMsg.style.display = 'block';
+                        }, 5000); // 5 second timeout
+
+                        // Listen for successful load
+                        storeIframe.onload = () => {
+                            clearTimeout(loadTimeout);
+                            console.log('Store iframe loaded successfully');
+                            if (loadingMsg) loadingMsg.style.display = 'none';
+                            if (errorMsg) errorMsg.style.display = 'none';
+                            storeIframe.setAttribute('data-loaded', 'true');
+                        };
+
+                        // Listen for errors
+                        storeIframe.onerror = (error) => {
+                            clearTimeout(loadTimeout);
+                            console.error('Store iframe error:', error);
+                            if (loadingMsg) loadingMsg.style.display = 'none';
+                            if (errorMsg) errorMsg.style.display = 'block';
+                        };
+
+                        // Actually set the source
+                        console.log('Setting iframe src to:', this.storeURL);
+                        storeIframe.src = this.storeURL;
+
+                        // Double-check it was set
+                        console.log('Iframe src after setting:', storeIframe.src);
+                    } else {
+                        console.log('Store already loaded');
+                    }
+                } else {
+                    console.log('Store panel closed');
+                }
             });
+        } else {
+            console.error('Logo or store panel elements not found');
         }
     }
 

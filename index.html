@@ -141,6 +141,25 @@
             </div>
         </div>
 
+        <!-- Online Store Panel - Slides up from bottom -->
+        <div id="store-panel" class="slide-up-panel full-height-panel">
+            <div class="panel-header">
+                <h2>OTTO Store - Drum Kits & MIDI Files</h2>
+                <button class="panel-close-btn" id="store-panel-close">
+                    <i class="ph-thin ph-x"></i>
+                </button>
+            </div>
+            <div class="panel-body store-body">
+                <div class="store-loading-message" id="store-loading">Loading store...</div>
+                <iframe id="store-iframe" class="store-iframe" src="" title="OTTO Online Store"></iframe>
+                <div class="store-error-message" id="store-error" style="display: none;">
+                    <p>Unable to load the store in this window.</p>
+                    <p>The store will open in a new tab instead.</p>
+                    <button class="open-store-btn" onclick="window.open('https://LarrySeyer.com', '_blank')" style="margin-top: 20px; padding: 10px 20px; background: var(--button-face); color: var(--text-primary); border: none; border-radius: 4px; cursor: pointer;">Open Store in New Tab</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Preset Management Panel - Slides up from bottom -->
         <div id="preset-panel" class="slide-up-panel full-height-panel">
             <div class="panel-header">
