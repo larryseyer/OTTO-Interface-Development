@@ -2292,6 +2292,33 @@ body {
     font-weight: 500;
 }
 
+.panel-header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.panel-control-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.2s ease;
+    font-size: 20px;
+}
+
+.panel-control-btn:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.panel-control-btn i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .panel-close-btn {
     background: transparent;
     border: none;
@@ -2317,8 +2344,8 @@ body {
 
 /* Delete button in row 4 area 3 */
 .row4-left-area3 .group-delete-btn {
-    width: 44px;
-    height: 44px;
+    width: 62px;  /* Matched to chevron size */
+    height: 62px;  /* Matched to chevron size */
     background: transparent;
     border: none;
     color: var(--text-muted);
@@ -2335,7 +2362,7 @@ body {
 }
 
 .row4-left-area3 .group-delete-btn i {
-    font-size: 32px;
+    font-size: 68px;  /* Matched to chevron icon size */
 }
 
 /* Edit mode class for main interface */

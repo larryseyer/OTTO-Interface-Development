@@ -452,6 +452,9 @@ class OTTOAccurateInterface {
             
             // Setup drag and drop for existing pattern buttons
             this.enablePatternEditDragDrop();
+            
+            // Setup new group control buttons
+            this.setupPatternPanelControls();
         } else {
             // Exit edit mode
             panel.classList.remove('active');
@@ -483,6 +486,144 @@ class OTTOAccurateInterface {
             button.removeEventListener('drop', this.handlePatternDrop.bind(this));
             button.classList.remove('edit-mode');
         });
+    }
+
+    setupPatternPanelControls() {
+        // Add new group button
+        const addGroupBtn = document.getElementById('add-group-btn');
+        const renameGroupBtn = document.getElementById('rename-group-btn');
+        
+        // Remove existing listeners to avoid duplicates
+        if (this.addGroupHandler) {
+            addGroupBtn.removeEventListener('click', this.addGroupHandler);
+        }
+        if (this.renameGroupHandler) {
+            renameGroupBtn.removeEventListener('click', this.renameGroupHandler);
+        }
+        
+        // Create new handlers
+        this.addGroupHandler = () => {
+            const groupName = prompt('Enter new group name:');
+            if (!groupName || !groupName.trim()) return;
+            
+            const trimmedName = groupName.trim();
+            const groupKey = trimmedName.toLowerCase().replace(/\s+/g, '-');
+            
+            // Check if group already exists
+            if (this.patternGroups[groupKey]) {
+                alert('A group with this name already exists');
+                return;
+            }
+            
+            // Create new group with empty patterns array
+            this.patternGroups[groupKey] = {
+                name: trimmedName,
+                patterns: Array(16).fill(''),  // Initialize with 16 empty slots for 4x4 grid
+                selectedPattern: null
+            };
+            
+            // Save to storage
+            this.savePatternGroups();
+            
+            // Update dropdown
+            this.updatePatternGroupDropdown();
+            
+            // Select the new group in the dropdown
+            const groupSelected = document.getElementById('group-selected');
+            if (groupSelected) {
+                groupSelected.querySelector('.dropdown-text').textContent = trimmedName;
+            }
+            
+            // Switch the current player to use the new group
+            this.playerStates[this.currentPlayer].patternGroup = groupKey;
+            
+            // Update the pattern grid to show the new (empty) group
+            this.updateMainPatternGrid(this.patternGroups[groupKey].patterns);
+            
+            // Save the state
+            this.triggerAutoSave();
+            
+            // Show notification
+            this.showNotification(`Group "${trimmedName}" created successfully`);
+        };
+        
+        this.renameGroupHandler = () => {
+            const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+            
+            // Don't allow renaming default groups
+            if (currentGroup === 'favorites') {
+                alert('Cannot rename the Favorites group');
+                return;
+            }
+            
+            const currentGroupData = this.patternGroups[currentGroup];
+            if (!currentGroupData) {
+                alert('No group selected');
+                return;
+            }
+            
+            const newName = prompt('Enter new name for group:', currentGroupData.name);
+            if (!newName || !newName.trim()) return;
+            
+            const trimmedName = newName.trim();
+            const newKey = trimmedName.toLowerCase().replace(/\s+/g, '-');
+            
+            // If the key changes, we need to handle that
+            if (newKey !== currentGroup) {
+                // Check if new key already exists
+                if (this.patternGroups[newKey]) {
+                    alert('A group with this name already exists');
+                    return;
+                }
+                
+                // Copy the group with new key
+                this.patternGroups[newKey] = {
+                    ...currentGroupData,
+                    name: trimmedName
+                };
+                
+                // Delete old group
+                delete this.patternGroups[currentGroup];
+                
+                // Update any players using the old group
+                Object.values(this.playerStates).forEach(state => {
+                    if (state.patternGroup === currentGroup) {
+                        state.patternGroup = newKey;
+                    }
+                });
+                
+                // Update the dropdown selected text if this is the current group
+                const groupSelected = document.getElementById('group-selected');
+                if (groupSelected) {
+                    groupSelected.querySelector('.dropdown-text').textContent = trimmedName;
+                }
+            } else {
+                // Just update the display name
+                currentGroupData.name = trimmedName;
+                
+                // Update the dropdown selected text
+                const groupSelected = document.getElementById('group-selected');
+                if (groupSelected) {
+                    groupSelected.querySelector('.dropdown-text').textContent = trimmedName;
+                }
+            }
+            
+            // Save to storage
+            this.savePatternGroups();
+            
+            // Update dropdown
+            this.updatePatternGroupDropdown();
+            
+            // Save the state
+            this.triggerAutoSave();
+            
+            // Show notification
+            this.showNotification(`Group renamed to "${trimmedName}"`);
+        };
+        
+        // Add the event listeners
+        addGroupBtn.addEventListener('click', this.addGroupHandler);
+        renameGroupBtn.addEventListener('click', this.renameGroupHandler);
     }
     
     handleDragOver(e) {
@@ -603,11 +744,6 @@ class OTTOAccurateInterface {
                         'Ska', 'Surf', 'Swing', 'Waltz'
                     ],
                     selectedPattern: 'Funk'
-                },
-                'all': {
-                    name: 'All Patterns',
-                    patterns: [], // Will be populated from MIDI files
-                    selectedPattern: null
                 }
             };
         }
@@ -803,8 +939,8 @@ class OTTOAccurateInterface {
             deleteIconBtn.addEventListener('click', () => {
                 const currentGroup = this.currentEditorGroup;
                 
-                if (currentGroup === 'favorites' || currentGroup === 'all') {
-                    alert('Cannot delete default groups');
+                if (currentGroup === 'favorites') {
+                    alert('Cannot delete the Favorites group');
                     return;
                 }
                 
@@ -1023,7 +1159,10 @@ class OTTOAccurateInterface {
                 btn.dataset.pattern = patterns[index].toLowerCase().replace(/\s+/g, '-');
                 btn.style.display = 'flex';
             } else {
-                btn.style.display = 'none';
+                // Show empty button slot
+                btn.textContent = '';
+                btn.dataset.pattern = '';
+                btn.style.display = 'flex';  // Keep button visible but empty
             }
         });
     }

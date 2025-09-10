@@ -71,9 +71,17 @@
         <div id="pattern-edit-panel" class="pattern-edit-panel">
             <div class="panel-header">
                 <h3>Available Patterns</h3>
-                <button class="panel-close-btn" id="pattern-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
+                <div class="panel-header-controls">
+                    <button class="panel-control-btn" id="add-group-btn" title="Add New Group">
+                        <i class="ph-thin ph-plus"></i>
+                    </button>
+                    <button class="panel-control-btn" id="rename-group-btn" title="Rename Current Group">
+                        <i class="ph-thin ph-pencil-simple"></i>
+                    </button>
+                    <button class="panel-close-btn" id="pattern-panel-close">
+                        <i class="ph-thin ph-x"></i>
+                    </button>
+                </div>
             </div>
             <div class="panel-search">
                 <input type="text" id="pattern-search-input" class="pattern-search-input" placeholder="Search patterns...">
@@ -344,7 +352,6 @@
                             </div>
                             <div class="dropdown-options" id="group-options">
                                 <div class="dropdown-option" data-value="favorites">Favorites</div>
-                                <div class="dropdown-option" data-value="all">All Patterns</div>
                                 <div class="dropdown-option" data-value="custom">Custom</div>
                             </div>
                         </div>
