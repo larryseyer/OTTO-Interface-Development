@@ -21,6 +21,9 @@ class OTTOAccurateInterface {
         this.maxTapTimes = 4;
         this.isPlaying = true;  // Start in playing state to show pause icon
         this.currentPreset = 'default';  // Track current preset
+        
+        // Add destroyed flag to prevent async operations after cleanup
+        this.isDestroyed = false;
 
         // Track all event listeners for cleanup
         this.eventListeners = [];
@@ -28,6 +31,10 @@ class OTTOAccurateInterface {
         this.dropdownListeners = [];
         this.modalListeners = [];
         this.documentListeners = [];
+        
+        // Track debounce timers
+        this.debounceTimers = new Map();
+        this.miniSliderDebounceTimer = null;
 
         // Storage error tracking
         this.storageErrors = [];
@@ -136,6 +143,9 @@ class OTTOAccurateInterface {
     }
     
     processStateUpdateQueue() {
+        // Check if destroyed
+        if (this.isDestroyed) return;
+        
         // Prevent concurrent processing
         if (this.isProcessingStateUpdate) {
             return;
@@ -148,6 +158,12 @@ class OTTOAccurateInterface {
         
         // Batch process updates after delay
         this.stateUpdateTimer = setTimeout(() => {
+            // Check again if destroyed
+            if (this.isDestroyed) {
+                this.stateUpdateTimer = null;
+                return;
+            }
+            
             this.isProcessingStateUpdate = true;
             
             // Process all queued updates
@@ -176,14 +192,18 @@ class OTTOAccurateInterface {
             
             // Apply player state updates
             for (const [playerNum, updates] of Object.entries(playerUpdates)) {
+                if (this.isDestroyed) break;
                 this.applyPlayerStateUpdates(parseInt(playerNum), updates);
             }
             
             // Apply global state updates
-            this.applyGlobalStateUpdates(globalUpdates);
+            if (!this.isDestroyed) {
+                this.applyGlobalStateUpdates(globalUpdates);
+            }
             
             // Execute callbacks
             callbacks.forEach(cb => {
+                if (this.isDestroyed) return;
                 try {
                     cb();
                 } catch (e) {
@@ -192,12 +212,15 @@ class OTTOAccurateInterface {
             });
             
             // Trigger saves as needed
-            this.processPendingSaves();
+            if (!this.isDestroyed) {
+                this.processPendingSaves();
+            }
             
             this.isProcessingStateUpdate = false;
+            this.stateUpdateTimer = null;
             
             // Process any new updates that came in while we were processing
-            if (this.stateUpdateQueue.length > 0) {
+            if (!this.isDestroyed && this.stateUpdateQueue.length > 0) {
                 this.processStateUpdateQueue();
             }
         }, this.stateUpdateDelay);
@@ -243,6 +266,9 @@ class OTTOAccurateInterface {
     
     // Unified save system - prevents race conditions
     scheduleSave(saveType, forceImmediate = false) {
+        // Check if destroyed
+        if (this.isDestroyed) return;
+        
         // Clear existing timer for this save type
         if (this.saveTimers[saveType]) {
             clearTimeout(this.saveTimers[saveType]);
@@ -255,6 +281,11 @@ class OTTOAccurateInterface {
         
         // Schedule the save
         this.saveTimers[saveType] = setTimeout(() => {
+            if (this.isDestroyed) {
+                this.saveTimers[saveType] = null;
+                return;
+            }
+            
             this.executeSave(saveType);
             this.pendingSaves.delete(saveType);
             this.saveTimers[saveType] = null;
@@ -602,6 +633,8 @@ class OTTOAccurateInterface {
     }
 
     logStorageError(key, errorType, message) {
+        if (this.isDestroyed) return;
+        
         const error = {
             key,
             errorType,
@@ -611,8 +644,8 @@ class OTTOAccurateInterface {
 
         this.storageErrors.push(error);
 
-        // Keep only last N errors
-        if (this.storageErrors.length > this.maxStorageErrors) {
+        // Keep only last N errors to prevent memory leak
+        while (this.storageErrors.length > this.maxStorageErrors) {
             this.storageErrors.shift();
         }
 
@@ -1038,13 +1071,17 @@ class OTTOAccurateInterface {
         // Remove existing listeners to avoid duplicates
         if (this.addGroupHandler) {
             addGroupBtn.removeEventListener('click', this.addGroupHandler);
+            this.addGroupHandler = null;
         }
         if (this.renameGroupHandler) {
             renameGroupBtn.removeEventListener('click', this.renameGroupHandler);
+            this.renameGroupHandler = null;
         }
 
         // Create new handlers
         this.addGroupHandler = () => {
+            if (this.isDestroyed) return;
+            
             const groupName = prompt('Enter new group name:');
             if (!groupName || !groupName.trim()) return;
 
@@ -1090,6 +1127,8 @@ class OTTOAccurateInterface {
         };
 
         this.renameGroupHandler = () => {
+            if (this.isDestroyed) return;
+            
             const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
 
             // Don't allow renaming default groups
@@ -1165,9 +1204,16 @@ class OTTOAccurateInterface {
             this.showNotification(`Group renamed to "${trimmedName}"`);
         };
 
-        // Add the event listeners
-        addGroupBtn.addEventListener('click', this.addGroupHandler);
-        renameGroupBtn.addEventListener('click', this.renameGroupHandler);
+        // Add the event listeners and track them
+        if (addGroupBtn) {
+            addGroupBtn.addEventListener('click', this.addGroupHandler);
+            this.eventListeners.push({ element: addGroupBtn, event: 'click', handler: this.addGroupHandler });
+        }
+        
+        if (renameGroupBtn) {
+            renameGroupBtn.addEventListener('click', this.renameGroupHandler);
+            this.eventListeners.push({ element: renameGroupBtn, event: 'click', handler: this.renameGroupHandler });
+        }
     }
 
     handleDragOver(e) {
@@ -1477,22 +1523,26 @@ class OTTOAccurateInterface {
         const patternItems = document.querySelectorAll('.pattern-item');
         const dropZones = document.querySelectorAll('.pattern-drop-zone');
 
-        // Clean up existing drag-drop listeners
+        // Clean up existing drag-drop listeners more thoroughly
         this.eventListeners = this.eventListeners.filter(({ element }) => {
-            const isPatternItem = element && element.classList && element.classList.contains('pattern-item');
-            const isDropZone = element && element.classList && element.classList.contains('pattern-drop-zone');
-            return !isPatternItem && !isDropZone;
+            if (!element || !element.classList) return true;
+            const isPatternItem = element.classList.contains('pattern-item');
+            const isDropZone = element.classList.contains('pattern-drop-zone');
+            const isPatternRemove = element.classList.contains('pattern-remove');
+            return !isPatternItem && !isDropZone && !isPatternRemove;
         });
 
         // Make pattern items draggable
         patternItems.forEach(item => {
             const dragStartHandler = (e) => {
+                if (this.isDestroyed) return;
                 e.dataTransfer.effectAllowed = 'copy';
                 e.dataTransfer.setData('text/plain', item.dataset.pattern);
                 item.classList.add('dragging');
             };
 
             const dragEndHandler = () => {
+                if (this.isDestroyed) return;
                 item.classList.remove('dragging');
             };
 
@@ -1503,16 +1553,19 @@ class OTTOAccurateInterface {
         // Set up drop zones
         dropZones.forEach((zone, index) => {
             const dragOverHandler = (e) => {
+                if (this.isDestroyed) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'copy';
                 zone.classList.add('drag-over');
             };
 
             const dragLeaveHandler = () => {
+                if (this.isDestroyed) return;
                 zone.classList.remove('drag-over');
             };
 
             const dropHandler = (e) => {
+                if (this.isDestroyed) return;
                 e.preventDefault();
                 zone.classList.remove('drag-over');
 
@@ -1530,6 +1583,7 @@ class OTTOAccurateInterface {
                         removeBtn.innerHTML = '×';
 
                         const removeBtnHandler = (e) => {
+                            if (this.isDestroyed) return;
                             e.stopPropagation();
                             zone.classList.remove('has-pattern');
                             zone.dataset.pattern = '';
@@ -1551,6 +1605,7 @@ class OTTOAccurateInterface {
 
             // Click to clear
             const clickHandler = () => {
+                if (this.isDestroyed) return;
                 if (!zone.classList.contains('has-pattern')) return;
 
                 zone.classList.remove('has-pattern');
@@ -2564,11 +2619,22 @@ class OTTOAccurateInterface {
     }
 
     updatePresetDropdown() {
+        if (this.isDestroyed) return;
+        
         const presetOptions = document.getElementById('preset-options');
         const dropdown = document.getElementById('preset-dropdown');
         const dropdownText = dropdown?.querySelector('.dropdown-text');
 
         if (!presetOptions) return;
+
+        // Remove all existing listeners before rebuilding
+        presetOptions.querySelectorAll('.dropdown-option').forEach(option => {
+            const handler = option._clickHandler;
+            if (handler) {
+                option.removeEventListener('click', handler);
+                delete option._clickHandler;
+            }
+        });
 
         presetOptions.innerHTML = '';
 
@@ -2583,8 +2649,10 @@ class OTTOAccurateInterface {
                 option.classList.add('selected');
             }
 
-            // Add click handler directly to each option
-            option.addEventListener('click', (e) => {
+            // Create handler and store reference on element
+            const handler = (e) => {
+                if (this.isDestroyed) return;
+                
                 e.stopPropagation();
 
                 // Update selected text
@@ -2601,7 +2669,11 @@ class OTTOAccurateInterface {
 
                 // Load the preset
                 this.loadPreset(key);
-            });
+            };
+            
+            // Store handler reference on element for cleanup
+            option._clickHandler = handler;
+            option.addEventListener('click', handler);
 
             presetOptions.appendChild(option);
         }
@@ -3733,9 +3805,15 @@ class OTTOAccurateInterface {
             }
         });
         this.sliderListeners = [];
-
-        // Debounce timer for slider updates
-        let sliderDebounceTimers = {};
+        
+        // Clear any existing debounce timers
+        this.debounceTimers.forEach((timer) => clearTimeout(timer));
+        this.debounceTimers.clear();
+        
+        if (this.miniSliderDebounceTimer) {
+            clearTimeout(this.miniSliderDebounceTimer);
+            this.miniSliderDebounceTimer = null;
+        }
 
         // Custom vertical sliders
         document.querySelectorAll('.custom-slider').forEach(slider => {
@@ -3759,16 +3837,21 @@ class OTTOAccurateInterface {
 
             // Debounced update function
             const debouncedUpdate = (newValue) => {
+                if (this.isDestroyed) return;
+                
                 // Clear existing timer for this slider
-                if (sliderDebounceTimers[param]) {
-                    clearTimeout(sliderDebounceTimers[param]);
+                const existingTimer = this.debounceTimers.get(param);
+                if (existingTimer) {
+                    clearTimeout(existingTimer);
                 }
 
                 // Update visual immediately for responsiveness
                 this.updateCustomSlider(slider, newValue);
 
                 // Debounce the actual state update and callbacks
-                sliderDebounceTimers[param] = setTimeout(() => {
+                const timer = setTimeout(() => {
+                    if (this.isDestroyed) return;
+                    
                     // Update player state
                     this.playerStates[this.currentPlayer].sliderValues[param] = newValue;
                     this.onSliderChanged(this.currentPlayer, param, newValue);
@@ -3783,10 +3866,16 @@ class OTTOAccurateInterface {
                     }
 
                     console.log(`Player ${this.currentPlayer} ${param} slider: ${newValue}`);
+                    
+                    // Remove timer from map after execution
+                    this.debounceTimers.delete(param);
                 }, 100); // 100ms debounce delay
+                
+                this.debounceTimers.set(param, timer);
             };
 
             const startDrag = (e) => {
+                if (this.isDestroyed) return;
                 isDragging = true;
                 slider.classList.add('dragging');
                 startY = e.clientY;
@@ -3795,7 +3884,7 @@ class OTTOAccurateInterface {
             };
 
             const doDrag = (e) => {
-                if (!isDragging) return;
+                if (!isDragging || this.isDestroyed) return;
 
                 const deltaY = startY - e.clientY;  // Inverted for vertical slider
                 const trackHeight = track.offsetHeight;
@@ -3810,13 +3899,15 @@ class OTTOAccurateInterface {
             };
 
             const endDrag = () => {
-                if (isDragging) {
+                if (isDragging && !this.isDestroyed) {
                     isDragging = false;
                     slider.classList.remove('dragging');
 
                     // Force final update when drag ends
-                    if (sliderDebounceTimers[param]) {
-                        clearTimeout(sliderDebounceTimers[param]);
+                    const existingTimer = this.debounceTimers.get(param);
+                    if (existingTimer) {
+                        clearTimeout(existingTimer);
+                        this.debounceTimers.delete(param);
                     }
 
                     // Final update without debounce
@@ -3836,6 +3927,7 @@ class OTTOAccurateInterface {
 
             // Handle click on track
             const trackClickHandler = (e) => {
+                if (this.isDestroyed) return;
                 if (e.target === thumb) return;  // Don't handle if clicking thumb
 
                 const rect = track.getBoundingClientRect();
@@ -3878,27 +3970,29 @@ class OTTOAccurateInterface {
             slider.currentValue = value;
         });
 
-        // Mini sliders debounce timer
-        let miniSliderDebounceTimer = null;
-
         // Mini sliders in kit section with proper cleanup and debouncing
         document.querySelectorAll('.mini-slider').forEach((slider, index) => {
             const inputHandler = (e) => {
+                if (this.isDestroyed) return;
+                
                 const sliderIndex = index + 1;
                 const value = parseInt(e.target.value);
 
                 // Clear existing timer
-                if (miniSliderDebounceTimer) {
-                    clearTimeout(miniSliderDebounceTimer);
+                if (this.miniSliderDebounceTimer) {
+                    clearTimeout(this.miniSliderDebounceTimer);
                 }
 
                 // Debounce the update
-                miniSliderDebounceTimer = setTimeout(() => {
+                this.miniSliderDebounceTimer = setTimeout(() => {
+                    if (this.isDestroyed) return;
+                    
                     this.playerStates[this.currentPlayer].miniSliders[sliderIndex] = value;
                     this.onMiniSliderChanged(this.currentPlayer, sliderIndex, value);
                     this.setDirty('preset', true);
 
                     console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
+                    this.miniSliderDebounceTimer = null;
                 }, 100); // 100ms debounce delay
             };
 
@@ -3926,7 +4020,8 @@ class OTTOAccurateInterface {
     }
 
     setupLinkIcons() {
-        // Track link states for each parameter
+        // Track link states for each parameter - using WeakSet to avoid circular references
+        // Note: We'll use a regular Set but clear it properly on destroy
         this.linkStates = {
             swing: { master: null, slaves: new Set() },
             energy: { master: null, slaves: new Set() },
@@ -3937,10 +4032,15 @@ class OTTOAccurateInterface {
         document.querySelectorAll('.link-icon').forEach(linkIcon => {
             const param = linkIcon.dataset.param;
 
-            linkIcon.addEventListener('click', (e) => {
+            const handler = (e) => {
+                if (this.isDestroyed) return;
                 e.preventDefault();
                 this.handleLinkToggle(param, linkIcon);
-            });
+            };
+            
+            linkIcon.addEventListener('click', handler);
+            // Track this listener for cleanup
+            this.eventListeners.push({ element: linkIcon, event: 'click', handler });
         });
     }
 
@@ -4274,12 +4374,19 @@ class OTTOAccurateInterface {
     }
 
     startLoopAnimation() {
-        // Don't start a new animation if one is already running
+        // Cancel any existing animation frame before starting a new one
         if (this.animationFrame) {
-            return;
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
         }
 
         const animate = () => {
+            // Check if destroyed
+            if (this.isDestroyed) {
+                this.animationFrame = null;
+                return;
+            }
+            
             // Only continue animation if playing
             if (!this.isPlaying) {
                 // Stop the animation loop when paused
@@ -4361,6 +4468,8 @@ class OTTOAccurateInterface {
     }
 
     togglePlayPause() {
+        if (this.isDestroyed) return;
+        
         this.isPlaying = !this.isPlaying;
 
         // Update button visual state
@@ -4372,12 +4481,16 @@ class OTTOAccurateInterface {
             if (this.isPlaying) {
                 playIcon.style.display = 'none';
                 pauseIcon.style.display = 'inline-block';
-                // Restart animation when playing
+                // Restart animation when playing (will cancel any existing first)
                 this.startLoopAnimation();
             } else {
                 playIcon.style.display = 'inline-block';
                 pauseIcon.style.display = 'none';
-                // Animation will stop itself when isPlaying is false
+                // Cancel animation immediately when pausing
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                    this.animationFrame = null;
+                }
             }
         }
 
@@ -4604,6 +4717,8 @@ class OTTOAccurateInterface {
     }
 
     showNotification(message, type = 'info') {
+        if (this.isDestroyed) return;
+        
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.textContent = message;
@@ -4623,35 +4738,91 @@ class OTTOAccurateInterface {
         `;
 
         document.body.appendChild(notification);
-
-        setTimeout(() => {
+        
+        // Store timer reference for cleanup if needed
+        const timer1 = setTimeout(() => {
+            if (this.isDestroyed) {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+                return;
+            }
+            
             notification.style.animation = 'fadeOut 0.3s ease';
-            setTimeout(() => {
+            const timer2 = setTimeout(() => {
                 if (document.body.contains(notification)) {
                     document.body.removeChild(notification);
                 }
             }, 300);
+            
+            // Store timer for potential cleanup
+            if (!this.notificationTimers) this.notificationTimers = new Set();
+            this.notificationTimers.add(timer2);
+            setTimeout(() => this.notificationTimers?.delete(timer2), 350);
         }, 3000);
+        
+        // Store timer for potential cleanup
+        if (!this.notificationTimers) this.notificationTimers = new Set();
+        this.notificationTimers.add(timer1);
+        setTimeout(() => this.notificationTimers?.delete(timer1), 3050);
     }
 
     destroy() {
+        // Set destroyed flag first to prevent any async operations
+        this.isDestroyed = true;
+        
         // Cancel animation frame
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
         }
 
-        // Clean up all event listeners
-        this.cleanupAllEventListeners();
+        // Clear all debounce timers
+        this.debounceTimers.forEach((timer) => clearTimeout(timer));
+        this.debounceTimers.clear();
+        
+        if (this.miniSliderDebounceTimer) {
+            clearTimeout(this.miniSliderDebounceTimer);
+            this.miniSliderDebounceTimer = null;
+        }
+        
+        // Clear notification timers
+        if (this.notificationTimers) {
+            this.notificationTimers.forEach(timer => clearTimeout(timer));
+            this.notificationTimers.clear();
+        }
 
         // Clear all save timers
         Object.values(this.saveTimers).forEach(timer => {
             if (timer) clearTimeout(timer);
         });
+        this.saveTimers = {};
         
-        // Clear state update timer
+        // Clear state update timer and queue
         if (this.stateUpdateTimer) {
             clearTimeout(this.stateUpdateTimer);
+            this.stateUpdateTimer = null;
         }
+        this.stateUpdateQueue = [];
+        this.isProcessingStateUpdate = false;
+        
+        // Close all open modals
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.style.display = 'none';
+            modal.classList.remove('open');
+        });
+        
+        // Close all open dropdowns
+        const dropdowns = document.querySelectorAll('.custom-dropdown');
+        dropdowns.forEach(dropdown => {
+            dropdown.classList.remove('open');
+        });
+        
+        // Remove any active notifications
+        document.querySelectorAll('.notification').forEach(notification => {
+            notification.remove();
+        });
         
         // Process any pending saves immediately before cleanup
         this.pendingSaves.forEach(saveType => {
@@ -4661,14 +4832,45 @@ class OTTOAccurateInterface {
                 console.error(`Error saving ${saveType} during cleanup:`, e);
             }
         });
+        this.pendingSaves.clear();
 
-        // Clear references
+        // Clean up all event listeners
+        this.cleanupAllEventListeners();
+        
+        // Clear link states to avoid circular references
+        if (this.linkStates) {
+            Object.values(this.linkStates).forEach(state => {
+                state.slaves.clear();
+                state.master = null;
+            });
+            this.linkStates = null;
+        }
+
+        // Clear all references to prevent memory leaks
         this.playerStates = null;
         this.presets = null;
         this.patternGroups = null;
-        this.linkStates = null;
+        this.drumkits = null;
         this.stateUpdateQueue = null;
         this.pendingSaves = null;
+        this.tapTimes = null;
+        this.storageErrors = null;
+        this.debounceTimers = null;
+        this.notificationTimers = null;
+        
+        // Clear dirty flags
+        this.isDirty = null;
+        
+        // Clear any remaining references
+        this.currentPreset = null;
+        this.numberOfPlayers = null;
+        this.currentPlayer = null;
+        this.tempo = null;
+        this.loopPosition = null;
+        this.isPlaying = null;
+        this.isLoadingPreset = null;
+        
+        console.log('OTTOAccurateInterface destroyed and cleaned up');
     }
 
     cleanupAllEventListeners() {
@@ -4731,6 +4933,28 @@ class OTTOAccurateInterface {
             }
             this.renameGroupHandler = null;
         }
+        
+        // Clean up keyboard shortcut handler
+        if (this.keyboardShortcutHandler) {
+            document.removeEventListener('keydown', this.keyboardShortcutHandler);
+            this.keyboardShortcutHandler = null;
+        }
+        
+        // Clean up any dropdown option handlers
+        document.querySelectorAll('.dropdown-option').forEach(option => {
+            if (option._clickHandler) {
+                option.removeEventListener('click', option._clickHandler);
+                delete option._clickHandler;
+            }
+        });
+        
+        // Clean up drag-drop listeners
+        const patternSlots = document.querySelectorAll('.pattern-slot');
+        patternSlots.forEach(slot => {
+            // Remove all drag-drop event listeners
+            const newSlot = slot.cloneNode(true);
+            slot.parentNode.replaceChild(newSlot, slot);
+        });
     }
 
     addEventListener(element, event, handler, trackingArray = null) {
