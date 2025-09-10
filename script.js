@@ -1575,7 +1575,7 @@ class OTTOAccurateInterface {
         // Setup chevron navigation
         if (editorPrevBtn) {
             editorPrevBtn.addEventListener('click', () => {
-                const groups = Object.keys(this.patternGroups);
+                const groups = Object.keys(this.patternGroups).filter(key => key !== 'all');
                 const currentIndex = groups.indexOf(this.currentEditorGroup);
                 const newIndex = currentIndex > 0 ? currentIndex - 1 : groups.length - 1;
                 this.switchEditorGroup(groups[newIndex]);
@@ -1584,7 +1584,7 @@ class OTTOAccurateInterface {
 
         if (editorNextBtn) {
             editorNextBtn.addEventListener('click', () => {
-                const groups = Object.keys(this.patternGroups);
+                const groups = Object.keys(this.patternGroups).filter(key => key !== 'all');
                 const currentIndex = groups.indexOf(this.currentEditorGroup);
                 const newIndex = currentIndex < groups.length - 1 ? currentIndex + 1 : 0;
                 this.switchEditorGroup(groups[newIndex]);
@@ -1667,8 +1667,11 @@ class OTTOAccurateInterface {
         // Clear existing options
         editorOptions.innerHTML = '';
 
-        // Add all groups
+        // Add all groups EXCEPT 'all' - it's internal only
         Object.keys(this.patternGroups).forEach(key => {
+            // Skip the 'all' group - it's for internal use only
+            if (key === 'all') return;
+            
             const option = document.createElement('div');
             option.className = 'dropdown-option';
             option.dataset.value = key;
@@ -1768,8 +1771,11 @@ class OTTOAccurateInterface {
         // Clear existing options
         groupOptions.innerHTML = '';
 
-        // Add all groups
+        // Add all groups EXCEPT 'all' - it's internal only
         Object.keys(this.patternGroups).forEach(key => {
+            // Skip the 'all' group - it's for internal use only
+            if (key === 'all') return;
+            
             const option = document.createElement('div');
             option.className = 'dropdown-option';
             option.dataset.value = key;
@@ -3448,8 +3454,8 @@ class OTTOAccurateInterface {
 
         if (!groupDropdown || !groupSelected || !this.patternGroups) return;
 
-        // Get actual pattern groups dynamically
-        const groups = Object.keys(this.patternGroups);
+        // Get actual pattern groups dynamically, excluding 'all'
+        const groups = Object.keys(this.patternGroups).filter(key => key !== 'all');
         if (groups.length === 0) return;
 
         // Get current selection - use the player's current pattern group
