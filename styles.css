@@ -2904,3 +2904,245 @@ body {
     padding: 15px 20px;
     border-bottom: 1px solid var(--border-color);
 }
+/* ========================================
+   Slide-up Panels - New implementation for modals
+   ======================================== */
+
+.slide-up-panel {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background: var(--bg-primary);
+    border-top: 2px solid var(--border-color);
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Full height panels (Settings, Presets, Link, Cloud) - from row 2 to row 6 */
+.slide-up-panel.full-height-panel {
+    top: 100%; /* Start hidden below viewport */
+    height: calc(100% - var(--row1-height)); /* Cover rows 2-6 */
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+/* Partial height panels (Drumkit, Mixer) - from row 4 to row 6 */
+.slide-up-panel.partial-height-panel {
+    top: 100%; /* Start hidden below viewport */
+    height: calc(100% - var(--row1-height) - var(--row2-height) - var(--row3-height)); /* Cover rows 4-6 */
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+/* Active state - slide up into view */
+.slide-up-panel.full-height-panel.active {
+    transform: translateY(calc(-100% + var(--row1-height)));
+}
+
+.slide-up-panel.partial-height-panel.active {
+    transform: translateY(calc(-100% + var(--row1-height) + var(--row2-height) + var(--row3-height)));
+}
+
+/* Panel header styling */
+.slide-up-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.slide-up-panel .panel-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.slide-up-panel .panel-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-icon);
+    font-size: 24px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 5px;
+}
+
+.slide-up-panel .panel-close-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Panel body styling */
+.slide-up-panel .panel-body {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Settings panel specific styles */
+#settings-panel .settings-section {
+    margin-bottom: 40px;
+}
+
+#settings-panel .settings-section h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#settings-panel .settings-item {
+    margin-bottom: 20px;
+}
+
+#settings-panel .settings-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--button-face);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#settings-panel .settings-btn:hover {
+    background: var(--button-highlight);
+}
+
+#settings-panel .settings-btn.danger-btn {
+    background-color: #8b0000;
+}
+
+#settings-panel .settings-btn.danger-btn:hover {
+    background-color: #a00000;
+}
+
+#settings-panel .settings-description {
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+#settings-panel .settings-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Preset panel specific styles */
+#preset-panel .preset-panel-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#preset-panel .preset-name-input {
+    flex: 1;
+    padding: 10px 15px;
+    background: var(--bg-darker);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+#preset-panel .preset-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--button-face);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#preset-panel .preset-action-btn:hover {
+    background: var(--button-highlight);
+}
+
+#preset-panel .preset-list-container h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+#preset-panel .preset-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Cloud panel specific styles */
+#cloud-panel .panel-body {
+    padding: 40px;
+}
+
+#cloud-panel .panel-body p {
+    color: var(--text-primary);
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+#cloud-panel .panel-body ul {
+    list-style: none;
+    padding: 0;
+}
+
+#cloud-panel .panel-body li {
+    padding: 10px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding-left: 20px;
+    position: relative;
+}
+
+#cloud-panel .panel-body li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--text-icon);
+}
+
+/* Link panel specific styles */
+#link-panel .panel-placeholder,
+#mixer-panel .panel-placeholder,
+#kit-edit-panel .panel-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: 40px;
+}
+
+/* Scrollbar styling for panel bodies */
+.slide-up-panel .panel-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.slide-up-panel .panel-body::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+
+.slide-up-panel .panel-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}

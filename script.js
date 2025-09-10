@@ -891,19 +891,19 @@ class OTTOAccurateInterface {
     setupPresetManagement() {
         // Preset modal controls
         const presetEditBtn = document.getElementById('preset-edit-btn');
-        const presetModal = document.getElementById('preset-modal');
-        const presetModalClose = document.getElementById('preset-modal-close');
+        const presetPanel = document.getElementById('preset-panel');
+        const presetPanelClose = document.getElementById('preset-panel-close');
         const presetList = document.getElementById('preset-list');
         const presetUndoBtn = document.getElementById('preset-undo-btn');
         const presetNewBtn = document.getElementById('preset-new-btn');
-        const factoryResetBtn = document.getElementById('factory-reset-btn');
+        const factoryResetBtn = document.getElementById('preset-factory-reset-btn');
         const presetNameInput = document.getElementById('preset-name-input');
 
         // Clean up existing preset management listeners
         this.modalListeners = this.modalListeners.filter(({ element }) => {
             return element !== presetEditBtn &&
-                   element !== presetModalClose &&
-                   element !== presetModal &&
+                   element !== presetPanelClose &&
+                   element !== presetPanel &&
                    element !== presetUndoBtn &&
                    element !== presetNewBtn &&
                    element !== factoryResetBtn &&
@@ -919,23 +919,15 @@ class OTTOAccurateInterface {
             this.addEventListener(presetEditBtn, 'click', editHandler, this.modalListeners);
         }
 
-        // Close preset modal
-        if (presetModalClose) {
+        // Close preset panel
+        if (presetPanelClose) {
             const closeHandler = () => {
                 this.closePresetModal();
             };
-            this.addEventListener(presetModalClose, 'click', closeHandler, this.modalListeners);
+            this.addEventListener(presetPanelClose, 'click', closeHandler, this.modalListeners);
         }
 
-        // Click outside to close
-        if (presetModal) {
-            const outsideClickHandler = (e) => {
-                if (e.target === presetModal) {
-                    this.closePresetModal();
-                }
-            };
-            this.addEventListener(presetModal, 'click', outsideClickHandler, this.modalListeners);
-        }
+        // No click-outside-to-close for panels (they're more intentional)
 
         // Undo button
         if (presetUndoBtn) {
@@ -978,24 +970,15 @@ class OTTOAccurateInterface {
     }
 
     setupSettingsWindow() {
-        const settingsModal = document.getElementById('settings-modal');
-        const settingsModalClose = document.getElementById('settings-modal-close');
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsPanelClose = document.getElementById('settings-panel-close');
         const settingsFactoryResetBtn = document.getElementById('settings-factory-reset-btn');
 
-        // Close settings modal
-        if (settingsModalClose) {
-            settingsModalClose.addEventListener('click', () => {
-                if (settingsModal) {
-                    settingsModal.classList.remove('active');
-                }
-            });
-        }
-
-        // Close modal when clicking outside
-        if (settingsModal) {
-            settingsModal.addEventListener('click', (e) => {
-                if (e.target === settingsModal) {
-                    settingsModal.classList.remove('active');
+        // Close settings panel
+        if (settingsPanelClose) {
+            settingsPanelClose.addEventListener('click', () => {
+                if (settingsPanel) {
+                    settingsPanel.classList.remove('active');
                 }
             });
         }
@@ -1004,9 +987,9 @@ class OTTOAccurateInterface {
         if (settingsFactoryResetBtn) {
             settingsFactoryResetBtn.addEventListener('click', () => {
                 this.resetToFactoryDefaults();
-                // Close settings modal after reset
-                if (settingsModal) {
-                    settingsModal.classList.remove('active');
+                // Close settings panel after reset
+                if (settingsPanel) {
+                    settingsPanel.classList.remove('active');
                 }
             });
         }
@@ -1030,58 +1013,54 @@ class OTTOAccurateInterface {
     }
 
     setupModalWindow(modalId) {
-        const modal = document.getElementById(modalId);
-        const closeBtn = modal?.querySelector('.modal-close');
+        // Convert modal ID to panel ID
+        const panelId = modalId.replace('-modal', '-panel');
+        const panel = document.getElementById(panelId);
+        const closeBtn = panel?.querySelector('.panel-close-btn');
 
-        if (modal && closeBtn) {
+        if (panel && closeBtn) {
             // Close button click
             const closeHandler = () => {
-                modal.classList.remove('active');
+                panel.classList.remove('active');
             };
             this.addEventListener(closeBtn, 'click', closeHandler, this.modalListeners);
 
-            // Click outside to close
-            const outsideClickHandler = (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
-                }
-            };
-            this.addEventListener(modal, 'click', outsideClickHandler, this.modalListeners);
+            // No click-outside-to-close for panels (they're more intentional)
         }
     }
 
     openLinkModal() {
-        const modal = document.getElementById('link-modal');
-        if (modal) {
-            modal.classList.add('active');
+        const panel = document.getElementById('link-panel');
+        if (panel) {
+            panel.classList.add('active');
         }
     }
 
     openCloudModal() {
-        const modal = document.getElementById('cloud-modal');
-        if (modal) {
-            modal.classList.add('active');
+        const panel = document.getElementById('cloud-panel');
+        if (panel) {
+            panel.classList.add('active');
         }
     }
 
     openMixerModal() {
-        const modal = document.getElementById('mixer-modal');
-        const kitName = document.getElementById('mixer-kit-name');
-        if (modal) {
-            modal.classList.add('active');
-            // Update kit name in title - mixer belongs to the kit, not the player
-            if (kitName) {
-                const currentKitName = this.playerStates[this.currentPlayer].kitName;
-                kitName.textContent = currentKitName;
+        const panel = document.getElementById('mixer-panel');
+        if (panel) {
+            panel.classList.add('active');
+            // Update the kit name in the header
+            const kitNameSpan = panel.querySelector('#mixer-kit-name');
+            if (kitNameSpan) {
+                const currentPlayer = this.currentPlayer;
+                const kitName = this.playerStates[currentPlayer]?.kitName || 'Acoustic';
+                kitNameSpan.textContent = kitName;
             }
         }
     }
 
     openKitEditModal() {
-        const modal = document.getElementById('kit-edit-modal');
-        if (modal) {
-            modal.classList.add('active');
-            // Note: Kit editing is global - editing a kit affects all players using it
+        const panel = document.getElementById('kit-edit-panel');
+        if (panel) {
+            panel.classList.add('active');
         }
     }
 
@@ -2035,23 +2014,24 @@ class OTTOAccurateInterface {
     }
 
     openPresetModal() {
-        const modal = document.getElementById('preset-modal');
-        if (modal) {
-            modal.classList.add('active');
+        const panel = document.getElementById('preset-panel');
+        if (panel) {
+            panel.classList.add('active');
             this.renderPresetList();
-
-            // Set input to current preset name
-            const presetNameInput = document.getElementById('preset-name-input');
-            if (presetNameInput) {
-                presetNameInput.value = this.currentPreset.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            // Clear and focus the input field
+            const nameInput = document.getElementById('preset-name-input');
+            if (nameInput) {
+                nameInput.value = '';
+                setTimeout(() => nameInput.focus(), 100);
             }
         }
     }
 
     closePresetModal() {
-        const modal = document.getElementById('preset-modal');
-        if (modal) {
-            modal.classList.remove('active');
+        const panel = document.getElementById('preset-panel');
+        if (panel) {
+            panel.classList.remove('active');
         }
     }
 
@@ -4743,10 +4723,10 @@ class OTTOAccurateInterface {
     }
 
     onSettingsClicked() {
-        // Open the settings modal
-        const settingsModal = document.getElementById('settings-modal');
-        if (settingsModal) {
-            settingsModal.classList.add('active');
+        // Open the settings panel
+        const settingsPanel = document.getElementById('settings-panel');
+        if (settingsPanel) {
+            settingsPanel.classList.add('active');
         }
 
         // Also call JUCE if available
