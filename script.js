@@ -56,6 +56,14 @@ class OTTOAccurateInterface {
         
         // Initialize drumkit manager
         this.drumkits = null; // Will be loaded from storage or initialized with defaults
+        
+        // Dirty flags for managers
+        this.isDirty = {
+            preset: false,
+            drumkit: false,
+            patternGroup: false
+        };
+        this.isLoadingPreset = false; // Flag to prevent marking dirty during preset load
 
         // Player state tracking for all possible players
         this.playerStates = {};
@@ -215,8 +223,10 @@ class OTTOAccurateInterface {
             }
         }
         
-        // Mark preset as needing save
-        this.pendingSaves.add('preset');
+        // Mark preset as dirty
+        this.setDirty('preset', true);
+        // Don't auto-save, wait for user to click save button
+        // this.pendingSaves.add('preset');
     }
     
     applyGlobalStateUpdates(updates) {
@@ -226,6 +236,7 @@ class OTTOAccurateInterface {
         
         // Mark app state as needing save
         if (Object.keys(updates).length > 0) {
+            // Auto-save app state (not user-triggered)
             this.pendingSaves.add('appState');
         }
     }
@@ -256,6 +267,7 @@ class OTTOAccurateInterface {
                 if (!this.isPresetLocked(this.currentPreset)) {
                     this.savePreset();
                     console.log(`Saved preset: ${this.currentPreset}`);
+                    this.setDirty('preset', false);
                 }
                 break;
                 
@@ -267,6 +279,13 @@ class OTTOAccurateInterface {
             case 'patternGroups':
                 this.savePatternGroups();
                 console.log('Saved pattern groups');
+                this.setDirty('patternGroup', false);
+                break;
+                
+            case 'drumkits':
+                this.saveDrumkits();
+                console.log('Saved drumkits');
+                this.setDirty('drumkit', false);
                 break;
                 
             default:
@@ -279,6 +298,81 @@ class OTTOAccurateInterface {
         this.pendingSaves.forEach(saveType => {
             this.scheduleSave(saveType);
         });
+    }
+    
+    // Dirty flag management
+    setDirty(manager, isDirty = true) {
+        // Don't mark dirty during preset loading
+        if (this.isLoadingPreset && isDirty) {
+            return;
+        }
+        
+        if (this.isDirty[manager] !== isDirty) {
+            this.isDirty[manager] = isDirty;
+            this.updateSaveButtonVisibility(manager);
+        }
+    }
+    
+    updateSaveButtonVisibility(manager) {
+        let button = null;
+        
+        switch (manager) {
+            case 'preset':
+                button = document.getElementById('preset-save-btn');
+                break;
+            case 'drumkit':
+                button = document.getElementById('drumkit-save-btn');
+                break;
+            case 'patternGroup':
+                button = document.getElementById('pattern-group-save-btn');
+                break;
+        }
+        
+        if (button) {
+            if (this.isDirty[manager]) {
+                button.style.display = 'flex';
+            } else {
+                button.style.display = 'none';
+            }
+        }
+    }
+    
+    // Check if anything is dirty
+    hasUnsavedChanges() {
+        return Object.values(this.isDirty).some(dirty => dirty);
+    }
+    
+    // Setup save button handlers
+    setupSaveButtons() {
+        // Preset save button
+        const presetSaveBtn = document.getElementById('preset-save-btn');
+        if (presetSaveBtn) {
+            presetSaveBtn.addEventListener('click', () => {
+                this.scheduleSave('preset', true);
+            });
+            // Initially hide
+            presetSaveBtn.style.display = 'none';
+        }
+        
+        // Drumkit save button
+        const drumkitSaveBtn = document.getElementById('drumkit-save-btn');
+        if (drumkitSaveBtn) {
+            drumkitSaveBtn.addEventListener('click', () => {
+                this.scheduleSave('drumkits', true);
+            });
+            // Initially hide
+            drumkitSaveBtn.style.display = 'none';
+        }
+        
+        // Pattern group save button
+        const patternGroupSaveBtn = document.getElementById('pattern-group-save-btn');
+        if (patternGroupSaveBtn) {
+            patternGroupSaveBtn.addEventListener('click', () => {
+                this.scheduleSave('patternGroups', true);
+            });
+            // Initially hide
+            patternGroupSaveBtn.style.display = 'none';
+        }
     }
 
     // Safe localStorage wrapper methods
@@ -970,8 +1064,8 @@ class OTTOAccurateInterface {
                 selectedPattern: null
             };
 
-            // Save to storage
-            this.savePatternGroups();
+            // Mark as dirty but don't auto-save
+            this.setDirty('patternGroup', true);
 
             // Update dropdown
             this.updatePatternGroupDropdown();
@@ -989,7 +1083,7 @@ class OTTOAccurateInterface {
             this.updateMainPatternGrid(this.patternGroups[groupKey].patterns);
 
             // Save the state
-            this.scheduleSave('preset');
+            this.setDirty('preset', true);
 
             // Show notification
             this.showNotification(`Group "${trimmedName}" created successfully`);
@@ -1039,6 +1133,9 @@ class OTTOAccurateInterface {
                         state.patternGroup = newKey;
                     }
                 });
+                
+                // Mark as dirty
+                this.setDirty('patternGroup', true);
 
                 // Update the dropdown selected text if this is the current group
                 const groupSelected = document.getElementById('group-selected');
@@ -1056,14 +1153,13 @@ class OTTOAccurateInterface {
                 }
             }
 
-            // Save to storage
-            this.savePatternGroups();
+            // Don't auto-save, just mark as dirty (already done above)
 
             // Update dropdown
             this.updatePatternGroupDropdown();
 
-            // Save the state
-            this.scheduleSave('preset');
+            // Mark preset as dirty
+            this.setDirty('preset', true);
 
             // Show notification
             this.showNotification(`Group renamed to "${trimmedName}"`);
@@ -1299,6 +1395,7 @@ class OTTOAccurateInterface {
     saveDrumkits() {
         // Use safe wrapper with error handling
         this.safeLocalStorageSet('ottoDrumkits', this.drumkits);
+        this.setDirty('drumkit', false);
     }
     
     getDrumkitMixerPreset(kitName) {
@@ -1313,7 +1410,8 @@ class OTTOAccurateInterface {
     setDrumkitMixerPreset(kitName, presetName) {
         if (this.drumkits && this.drumkits[kitName]) {
             this.drumkits[kitName].selectedMixerPreset = presetName;
-            this.saveDrumkits();
+            this.setDirty('drumkit', true);
+            // Don't auto-save, wait for user to click save button
         }
     }
 
@@ -1517,8 +1615,8 @@ class OTTOAccurateInterface {
                 // Clear input
                 newGroupInput.value = '';
 
-                // Save to storage
-                this.savePatternGroups();
+                // Mark as dirty but don't auto-save
+                this.setDirty('patternGroup', true);
 
                 // Update both dropdowns
                 this.updateEditorGroupDropdown();
@@ -1543,8 +1641,8 @@ class OTTOAccurateInterface {
                     // Switch to favorites
                     this.switchEditorGroup('favorites');
 
-                    // Save to storage
-                    this.savePatternGroups();
+                    // Mark as dirty but don't auto-save
+                    this.setDirty('patternGroup', true);
 
                     // Update both dropdowns
                     this.updateEditorGroupDropdown();
@@ -1736,14 +1834,15 @@ class OTTOAccurateInterface {
                 this.updateMainPatternGrid(patterns);
             }
 
-            // Save to storage
-            this.savePatternGroups();
+            // Mark as dirty but don't auto-save
+            this.setDirty('patternGroup', true);
         }
     }
 
     savePatternGroups() {
         // Use safe wrapper with error handling
         this.safeLocalStorageSet('ottoPatternGroups', this.patternGroups);
+        this.setDirty('patternGroup', false);
     }
 
     updateMainPatternGrid(patterns) {
@@ -1795,7 +1894,7 @@ class OTTOAccurateInterface {
                 }
 
                 this.onPatternGroupChanged(this.currentPlayer, key);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);
             });
 
             groupOptions.appendChild(option);
@@ -1961,6 +2060,9 @@ class OTTOAccurateInterface {
         }
 
         console.log(`Loading preset: ${preset.name}`);
+        
+        // Disable dirty tracking during preset load
+        this.isLoadingPreset = true;
 
         // STEP 1: Complete state restoration
         // Deep clone all player states to avoid reference issues
@@ -2061,6 +2163,14 @@ class OTTOAccurateInterface {
 
         console.log(`Successfully loaded preset "${preset.name}"`);
         this.showNotification(`Loaded preset "${preset.name}"`);
+        
+        // Re-enable dirty tracking
+        this.isLoadingPreset = false;
+        
+        // Clear all dirty flags since we just loaded a preset
+        this.setDirty('preset', false);
+        this.setDirty('drumkit', false);
+        this.setDirty('patternGroup', false);
     }
 
     deletePreset(key) {
@@ -2546,6 +2656,7 @@ class OTTOAccurateInterface {
             this.setupLoopTimeline();
             this.setupKeyboardShortcuts();
             this.setupLogoClick();
+            this.setupSaveButtons();
             this.startLoopAnimation();
 
             // Initialize UI for saved or default player
@@ -3248,7 +3359,8 @@ class OTTOAccurateInterface {
                 // Update player state and trigger callback
                 this.playerStates[this.currentPlayer].kitName = kitName;
                 this.onKitChanged(this.currentPlayer, kitName);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);  // Mark preset dirty when kit changes
+                this.setDirty('drumkit', true);  // Mark drumkit dirty too
 
                 console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
             };
@@ -3283,7 +3395,7 @@ class OTTOAccurateInterface {
                 // Trigger callback
                 this.onKitMixerToggle(this.currentPlayer,
                     this.playerStates[this.currentPlayer].kitMixerActive);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);
 
                 console.log(`Player ${this.currentPlayer} kit mixer: ${this.playerStates[this.currentPlayer].kitMixerActive}`);
             };
@@ -3313,7 +3425,7 @@ class OTTOAccurateInterface {
 
                 // Trigger mute callback
                 this.onMuteDrummer(this.currentPlayer, currentState.muted);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);
 
                 // Update mute overlay
                 this.updateMuteOverlay();
@@ -3432,7 +3544,7 @@ class OTTOAccurateInterface {
 
                         // Trigger callback
                         this.onPatternGroupChanged(this.currentPlayer, value);
-                        this.scheduleSave('preset');
+                        this.setDirty('preset', true);  // Mark preset dirty when group changes
                         console.log(`Player ${this.currentPlayer} pattern group: ${value}`);
                     });
                 });
@@ -3480,7 +3592,7 @@ class OTTOAccurateInterface {
         
         // Update the player state and save
         this.onPatternGroupChanged(this.currentPlayer, newGroupKey);
-        this.scheduleSave('preset');
+        this.setDirty('preset', true);
         
         console.log(`Player ${this.currentPlayer} pattern group: ${newGroupKey}`);
     }
@@ -3505,11 +3617,12 @@ class OTTOAccurateInterface {
                 const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
                 if (this.patternGroups && this.patternGroups[currentGroup]) {
                     this.patternGroups[currentGroup].selectedPattern = patternName;
-                    this.savePatternGroups(); // Save pattern groups to storage
+                    this.setDirty('patternGroup', true);
+                    // Don't auto-save, wait for user to click save button
                 }
                 
                 this.onPatternSelected(this.currentPlayer, patternName);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);  // Mark preset as dirty when pattern changes
 
                 console.log(`Player ${this.currentPlayer} selected pattern: ${patternName}`);
             });
@@ -3574,7 +3687,7 @@ class OTTOAccurateInterface {
                 }
 
                 this.onToggleChanged(this.currentPlayer, toggleType, state.toggleStates[toggleType]);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);
                 console.log(`Player ${this.currentPlayer} toggle ${toggleType}: ${state.toggleStates[toggleType]}`);
             });
         });
@@ -3646,7 +3759,7 @@ class OTTOAccurateInterface {
                     // Update player state
                     this.playerStates[this.currentPlayer].sliderValues[param] = newValue;
                     this.onSliderChanged(this.currentPlayer, param, newValue);
-                    this.scheduleSave('preset');
+                    this.setDirty('preset', true);
 
                     // Check if this player is a master and propagate value
                     if (this.linkStates && this.linkStates[param]) {
@@ -3696,7 +3809,7 @@ class OTTOAccurateInterface {
                     // Final update without debounce
                     this.playerStates[this.currentPlayer].sliderValues[param] = value;
                     this.onSliderChanged(this.currentPlayer, param, value);
-                    this.scheduleSave('preset');
+                    this.setDirty('preset', true);
 
                     // Handle link propagation
                     if (this.linkStates && this.linkStates[param]) {
@@ -3724,7 +3837,7 @@ class OTTOAccurateInterface {
                 // Update player state (no debounce for click)
                 this.playerStates[this.currentPlayer].sliderValues[param] = value;
                 this.onSliderChanged(this.currentPlayer, param, value);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);
 
                 // Handle link propagation
                 if (this.linkStates && this.linkStates[param]) {
@@ -3770,7 +3883,7 @@ class OTTOAccurateInterface {
                 miniSliderDebounceTimer = setTimeout(() => {
                     this.playerStates[this.currentPlayer].miniSliders[sliderIndex] = value;
                     this.onMiniSliderChanged(this.currentPlayer, sliderIndex, value);
-                    this.scheduleSave('preset');
+                    this.setDirty('preset', true);
 
                     console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
                 }, 100); // 100ms debounce delay
@@ -4092,7 +4205,7 @@ class OTTOAccurateInterface {
 
                 this.setLoopPosition(percentage);
                 this.onLoopPositionChanged(percentage);
-                this.scheduleSave('preset');
+                this.setDirty('preset', true);
             });
 
             document.addEventListener('mouseup', () => {
@@ -4288,7 +4401,8 @@ class OTTOAccurateInterface {
             // Save to pattern group if it exists
             if (this.patternGroups && this.patternGroups[currentGroup]) {
                 this.patternGroups[currentGroup].selectedPattern = patternName;
-                this.savePatternGroups();
+                this.setDirty('patternGroup', true);
+                // Don't auto-save, wait for user to click save button
             }
         }
 

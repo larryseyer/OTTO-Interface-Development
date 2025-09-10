@@ -206,9 +206,11 @@
 
                 <!-- Area 2: Presets dropdown -->
                 <div class="row1-area2">
+                    <!-- Preset chevrons commented out to make room for save button
                     <button class="preset-nav-btn preset-prev">
                         <i class="ph-thin ph-caret-left"></i>
                     </button>
+                    -->
                     <div class="custom-dropdown" id="preset-dropdown">
                         <div class="dropdown-selected" id="preset-selected">
                             <span class="dropdown-text">Default</span>
@@ -227,8 +229,13 @@
                             <div class="dropdown-option" data-value="world-fusion">World Fusion</div>
                         </div>
                     </div>
+                    <!-- Preset chevron commented out
                     <button class="preset-nav-btn preset-next">
                         <i class="ph-thin ph-caret-right"></i>
+                    </button>
+                    -->
+                    <button class="quick-save-btn preset-save-btn" id="preset-save-btn" title="Save Preset">
+                        <i class="ph-thin ph-floppy-disk"></i>
                     </button>
                 </div>
 
@@ -331,6 +338,9 @@
                     <button class="kit-mixer-btn" id="kit-mixer-btn">
                         <i class="ph-thin ph-faders"></i>
                     </button>
+                    <button class="quick-save-btn drumkit-save-btn" id="drumkit-save-btn" title="Save Drumkit Mixer" style="display: none;">
+                        <i class="ph-thin ph-floppy-disk"></i>
+                    </button>
                 </div>
 
                 <!-- Area 5: Mute/Unmute drummer icon (right-aligned) -->
@@ -369,6 +379,9 @@
                         </div>
                         <button class="group-nav-btn group-next">
                             <i class="ph-thin ph-caret-right"></i>
+                        </button>
+                        <button class="quick-save-btn pattern-group-save-btn" id="pattern-group-save-btn" title="Save Pattern Group" style="display: none;">
+                            <i class="ph-thin ph-floppy-disk"></i>
                         </button>
                     </div>
 

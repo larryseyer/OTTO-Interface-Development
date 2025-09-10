@@ -594,6 +594,40 @@ body {
     filter: invert(0.8);
 }
 
+/* Save buttons with same style as icon buttons */
+.quick-save-btn {
+    width: var(--icon-size-standard);
+    height: var(--icon-size-standard);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-icon);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    outline: none;
+    position: relative;
+    z-index: 30;  /* Above dropdowns but below modals */
+}
+
+.quick-save-btn i {
+    font-size: var(--icon-size-standard);  /* Match other phosphor icons */
+    line-height: 1;
+    display: block;
+    color: inherit;
+}
+
+.quick-save-btn:hover {
+    color: var(--text-white);
+    transform: scale(var(--row1-hover-scale));
+}
+
+.quick-save-btn:hover i {
+    color: var(--text-white);
+}
+
 /* Remove absolute positioning from old center-program */
 /* Area 2 styles are now handled above */
 
