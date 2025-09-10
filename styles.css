@@ -3188,6 +3188,6 @@ body {
 .edit-btn.panel-active,
 .kit-mixer-btn.panel-active,
 .kit-edit-btn.panel-active {
-    background: var(--button-highlight);
-    color: var(--text-primary);
+    background: transparent;  /* NEVER change background */
+    color: var(--text-primary);  /* Only change icon color to white */
 }

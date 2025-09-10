@@ -21,7 +21,7 @@ class OTTOAccurateInterface {
         this.maxTapTimes = 4;
         this.isPlaying = true;  // Start in playing state to show pause icon
         this.currentPreset = 'default';  // Track current preset
-        
+
         // Add destroyed flag to prevent async operations after cleanup
         this.isDestroyed = false;
 
@@ -31,7 +31,7 @@ class OTTOAccurateInterface {
         this.dropdownListeners = [];
         this.modalListeners = [];
         this.documentListeners = [];
-        
+
         // Track debounce timers
         this.debounceTimers = new Map();
         this.miniSliderDebounceTimer = null;
@@ -39,13 +39,13 @@ class OTTOAccurateInterface {
         // Storage error tracking
         this.storageErrors = [];
         this.maxStorageErrors = 10;  // Keep last 10 errors for debugging
-        
+
         // Centralized state management
         this.stateUpdateQueue = [];
         this.isProcessingStateUpdate = false;
         this.stateUpdateTimer = null;
         this.stateUpdateDelay = 50; // 50ms batch delay
-        
+
         // Save management - single source of truth
         this.saveTimers = {
             preset: null,
@@ -60,10 +60,10 @@ class OTTOAccurateInterface {
             drumkits: 300     // 300ms for drumkit changes
         };
         this.pendingSaves = new Set(); // Track what needs saving
-        
+
         // Initialize drumkit manager
         this.drumkits = null; // Will be loaded from storage or initialized with defaults
-        
+
         // Dirty flags hierarchy:
         // 1. Pattern -> 2. Pattern Group -> 3. Drumkit -> 4. Player -> 5. Preset
         this.isDirty = {
@@ -105,20 +105,13 @@ class OTTOAccurateInterface {
                     swing: 10,  // Changed from 25 to 10
                     energy: 50,
                     volume: 75
-                },
-                // Note: These appear to be mini sliders in row 3 that haven't been implemented yet
-                // Keeping them for now but they should be clarified/removed if not needed
-                miniSliders: {
-                    1: 50,
-                    2: 30,
-                    3: 80
                 }
             };
         }
 
         this.init();
     }
-    
+
     // Centralized State Management System
     updatePlayerState(playerNumber, updates, callback = null) {
         // Queue the state update
@@ -129,10 +122,10 @@ class OTTOAccurateInterface {
             callback,
             timestamp: Date.now()
         });
-        
+
         this.processStateUpdateQueue();
     }
-    
+
     updateGlobalState(updates, callback = null) {
         // Queue global state updates (tempo, isPlaying, etc.)
         this.stateUpdateQueue.push({
@@ -141,24 +134,24 @@ class OTTOAccurateInterface {
             callback,
             timestamp: Date.now()
         });
-        
+
         this.processStateUpdateQueue();
     }
-    
+
     processStateUpdateQueue() {
         // Check if destroyed
         if (this.isDestroyed) return;
-        
+
         // Prevent concurrent processing
         if (this.isProcessingStateUpdate) {
             return;
         }
-        
+
         // Clear existing timer
         if (this.stateUpdateTimer) {
             clearTimeout(this.stateUpdateTimer);
         }
-        
+
         // Batch process updates after delay
         this.stateUpdateTimer = setTimeout(() => {
             // Check again if destroyed
@@ -166,18 +159,18 @@ class OTTOAccurateInterface {
                 this.stateUpdateTimer = null;
                 return;
             }
-            
+
             this.isProcessingStateUpdate = true;
-            
+
             // Process all queued updates
             const updates = [...this.stateUpdateQueue];
             this.stateUpdateQueue = [];
-            
+
             // Group updates by type for efficiency
             const playerUpdates = {};
             const globalUpdates = {};
             const callbacks = [];
-            
+
             updates.forEach(update => {
                 if (update.type === 'player') {
                     if (!playerUpdates[update.playerNumber]) {
@@ -187,23 +180,23 @@ class OTTOAccurateInterface {
                 } else if (update.type === 'global') {
                     Object.assign(globalUpdates, update.updates);
                 }
-                
+
                 if (update.callback) {
                     callbacks.push(update.callback);
                 }
             });
-            
+
             // Apply player state updates
             for (const [playerNum, updates] of Object.entries(playerUpdates)) {
                 if (this.isDestroyed) break;
                 this.applyPlayerStateUpdates(parseInt(playerNum), updates);
             }
-            
+
             // Apply global state updates
             if (!this.isDestroyed) {
                 this.applyGlobalStateUpdates(globalUpdates);
             }
-            
+
             // Execute callbacks
             callbacks.forEach(cb => {
                 if (this.isDestroyed) return;
@@ -213,28 +206,28 @@ class OTTOAccurateInterface {
                     console.error('Error in state update callback:', e);
                 }
             });
-            
+
             // Trigger saves as needed
             if (!this.isDestroyed) {
                 this.processPendingSaves();
             }
-            
+
             this.isProcessingStateUpdate = false;
             this.stateUpdateTimer = null;
-            
+
             // Process any new updates that came in while we were processing
             if (!this.isDestroyed && this.stateUpdateQueue.length > 0) {
                 this.processStateUpdateQueue();
             }
         }, this.stateUpdateDelay);
     }
-    
+
     applyPlayerStateUpdates(playerNumber, updates) {
         if (!this.playerStates[playerNumber]) {
             console.error(`Player ${playerNumber} does not exist`);
             return;
         }
-        
+
         // Deep merge updates
         for (const [key, value] of Object.entries(updates)) {
             if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
@@ -248,53 +241,53 @@ class OTTOAccurateInterface {
                 this.playerStates[playerNumber][key] = value;
             }
         }
-        
+
         // Mark preset as dirty
         this.setDirty('preset', true);
         // Don't auto-save, wait for user to click save button
         // this.pendingSaves.add('preset');
     }
-    
+
     applyGlobalStateUpdates(updates) {
         for (const [key, value] of Object.entries(updates)) {
             this[key] = value;
         }
-        
+
         // Mark app state as needing save
         if (Object.keys(updates).length > 0) {
             // Auto-save app state (not user-triggered)
             this.pendingSaves.add('appState');
         }
     }
-    
+
     // Unified save system - prevents race conditions
     scheduleSave(saveType, forceImmediate = false) {
         // Check if destroyed
         if (this.isDestroyed) return;
-        
+
         // Clear existing timer for this save type
         if (this.saveTimers[saveType]) {
             clearTimeout(this.saveTimers[saveType]);
         }
-        
+
         // Add to pending saves
         this.pendingSaves.add(saveType);
-        
+
         const delay = forceImmediate ? 0 : this.saveDelays[saveType];
-        
+
         // Schedule the save
         this.saveTimers[saveType] = setTimeout(() => {
             if (this.isDestroyed) {
                 this.saveTimers[saveType] = null;
                 return;
             }
-            
+
             this.executeSave(saveType);
             this.pendingSaves.delete(saveType);
             this.saveTimers[saveType] = null;
         }, delay);
     }
-    
+
     executeSave(saveType) {
         switch (saveType) {
             case 'preset':
@@ -309,7 +302,7 @@ class OTTOAccurateInterface {
                     this.setDirty('pattern', false);
                 }
                 break;
-                
+
             case 'player':
                 // Save player state (part of preset)
                 this.saveAppStateToStorage();
@@ -320,12 +313,12 @@ class OTTOAccurateInterface {
                 this.setDirty('patternGroup', false);
                 this.setDirty('pattern', false);
                 break;
-                
+
             case 'appState':
                 this.saveAppStateToStorage();
                 console.log('Saved app state');
                 break;
-                
+
             case 'patternGroups':
                 this.savePatternGroups();
                 console.log('Saved pattern groups');
@@ -333,39 +326,39 @@ class OTTOAccurateInterface {
                 this.setDirty('patternGroup', false);
                 this.setDirty('pattern', false);
                 break;
-                
+
             case 'drumkits':
                 this.saveDrumkits();
                 console.log('Saved drumkits');
                 this.setDirty('drumkit', false);
                 break;
-                
+
             case 'pattern':
                 // Save pattern (part of pattern group)
                 this.savePatternGroups();
                 console.log('Saved patterns');
                 this.setDirty('pattern', false);
                 break;
-                
+
             default:
                 console.warn(`Unknown save type: ${saveType}`);
         }
     }
-    
+
     processPendingSaves() {
         // Schedule all pending saves
         this.pendingSaves.forEach(saveType => {
             this.scheduleSave(saveType);
         });
     }
-    
+
     // Dirty flag management
     setDirty(level, isDirty = true) {
         // Don't mark dirty during preset loading
         if (this.isLoadingPreset && isDirty) {
             return;
         }
-        
+
         // Hierarchy levels:
         // 1. pattern -> 2. patternGroup -> 3. drumkit -> 4. player -> 5. preset
         const hierarchy = {
@@ -375,12 +368,12 @@ class OTTOAccurateInterface {
             'player': ['preset'],
             'preset': []
         };
-        
+
         // Set the dirty flag for the specified level
         if (this.isDirty[level] !== isDirty) {
             this.isDirty[level] = isDirty;
             this.updateSaveButtonVisibility(level);
-            
+
             // If setting to dirty, cascade up the hierarchy
             if (isDirty && hierarchy[level]) {
                 hierarchy[level].forEach(higherLevel => {
@@ -392,10 +385,10 @@ class OTTOAccurateInterface {
             }
         }
     }
-    
+
     updateSaveButtonVisibility(level) {
         let button = null;
-        
+
         switch (level) {
             case 'preset':
                 button = document.getElementById('preset-save-btn');
@@ -413,7 +406,7 @@ class OTTOAccurateInterface {
                 button = document.getElementById('pattern-save-btn');
                 break;
         }
-        
+
         if (button) {
             if (this.isDirty[level]) {
                 button.style.display = 'flex';
@@ -422,12 +415,12 @@ class OTTOAccurateInterface {
             }
         }
     }
-    
+
     // Check if anything is dirty
     hasUnsavedChanges() {
         return Object.values(this.isDirty).some(dirty => dirty);
     }
-    
+
     // Setup save button handlers
     setupSaveButtons() {
         // Preset save button (Level 5 - highest)
@@ -439,7 +432,7 @@ class OTTOAccurateInterface {
             // Initially hide
             presetSaveBtn.style.display = 'none';
         }
-        
+
         // Player save button (Level 4)
         const playerSaveBtn = document.getElementById('player-save-btn');
         if (playerSaveBtn) {
@@ -449,7 +442,7 @@ class OTTOAccurateInterface {
             // Initially hide
             playerSaveBtn.style.display = 'none';
         }
-        
+
         // Drumkit save button (Level 3)
         const drumkitSaveBtn = document.getElementById('drumkit-save-btn');
         if (drumkitSaveBtn) {
@@ -459,7 +452,7 @@ class OTTOAccurateInterface {
             // Initially hide
             drumkitSaveBtn.style.display = 'none';
         }
-        
+
         // Pattern group save button (Level 2)
         const patternGroupSaveBtn = document.getElementById('pattern-group-save-btn');
         if (patternGroupSaveBtn) {
@@ -469,7 +462,7 @@ class OTTOAccurateInterface {
             // Initially hide
             patternGroupSaveBtn.style.display = 'none';
         }
-        
+
         // Pattern save button (Level 1 - lowest)
         const patternSaveBtn = document.getElementById('pattern-save-btn');
         if (patternSaveBtn) {
@@ -709,7 +702,7 @@ class OTTOAccurateInterface {
 
     logStorageError(key, errorType, message) {
         if (this.isDestroyed) return;
-        
+
         const error = {
             key,
             errorType,
@@ -995,6 +988,11 @@ class OTTOAccurateInterface {
                 // Close settings panel after reset
                 if (settingsPanel) {
                     settingsPanel.classList.remove('active');
+                    // Also remove panel-active from settings button
+                    const settingsBtn = document.getElementById('settings-btn');
+                    if (settingsBtn) {
+                        settingsBtn.classList.remove('panel-active');
+                    }
                 }
             });
         }
@@ -1027,6 +1025,43 @@ class OTTOAccurateInterface {
             // Close button click
             const closeHandler = () => {
                 panel.classList.remove('active');
+                
+                // Remove panel-active class from corresponding button
+                let btnId = null;
+                switch(panelId) {
+                    case 'link-panel':
+                        btnId = 'link-btn';
+                        break;
+                    case 'cloud-panel':
+                        btnId = 'upload-btn';
+                        break;
+                    case 'mixer-panel':
+                        btnId = 'kit-mixer-btn';
+                        break;
+                    case 'kit-edit-panel':
+                        btnId = null; // Multiple edit buttons, handled separately
+                        break;
+                    case 'settings-panel':
+                        btnId = 'settings-btn';
+                        break;
+                    case 'preset-panel':
+                        btnId = 'preset-edit-btn';
+                        break;
+                }
+                
+                if (btnId) {
+                    const btn = document.getElementById(btnId);
+                    if (btn) {
+                        btn.classList.remove('panel-active');
+                    }
+                }
+                
+                // For kit edit panel, remove active from all edit buttons
+                if (panelId === 'kit-edit-panel') {
+                    document.querySelectorAll('.kit-edit-btn').forEach(btn => {
+                        btn.classList.remove('panel-active');
+                    });
+                }
             };
             this.addEventListener(closeBtn, 'click', closeHandler, this.modalListeners);
 
@@ -1037,10 +1072,10 @@ class OTTOAccurateInterface {
     openLinkModal() {
         const panel = document.getElementById('link-panel');
         const btn = document.getElementById('link-btn');
-        
+
         if (panel) {
             panel.classList.toggle('active');
-            
+
             // Toggle button active state
             if (btn) {
                 btn.classList.toggle('panel-active', panel.classList.contains('active'));
@@ -1051,10 +1086,10 @@ class OTTOAccurateInterface {
     openCloudModal() {
         const panel = document.getElementById('cloud-panel');
         const btn = document.getElementById('upload-btn');
-        
+
         if (panel) {
             panel.classList.toggle('active');
-            
+
             // Toggle button active state
             if (btn) {
                 btn.classList.toggle('panel-active', panel.classList.contains('active'));
@@ -1065,7 +1100,7 @@ class OTTOAccurateInterface {
     openMixerModal() {
         const panel = document.getElementById('mixer-panel');
         const btn = document.getElementById('kit-mixer-btn');
-        
+
         if (panel) {
             // If opening, update the kit name
             if (!panel.classList.contains('active')) {
@@ -1077,7 +1112,7 @@ class OTTOAccurateInterface {
                 }
             }
             panel.classList.toggle('active');
-            
+
             // Toggle button active state
             if (btn) {
                 btn.classList.toggle('panel-active', panel.classList.contains('active'));
@@ -1088,10 +1123,10 @@ class OTTOAccurateInterface {
     openKitEditModal() {
         const panel = document.getElementById('kit-edit-panel');
         const btn = document.querySelector('.kit-edit-btn');
-        
+
         if (panel) {
             panel.classList.toggle('active');
-            
+
             // Toggle button active state
             if (btn) {
                 btn.classList.toggle('panel-active', panel.classList.contains('active'));
@@ -1170,7 +1205,7 @@ class OTTOAccurateInterface {
         // Create new handlers
         this.addGroupHandler = () => {
             if (this.isDestroyed) return;
-            
+
             const groupName = prompt('Enter new group name:');
             if (!groupName || !groupName.trim()) return;
 
@@ -1217,7 +1252,7 @@ class OTTOAccurateInterface {
 
         this.renameGroupHandler = () => {
             if (this.isDestroyed) return;
-            
+
             const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
 
             // Don't allow renaming default groups
@@ -1261,7 +1296,7 @@ class OTTOAccurateInterface {
                         state.patternGroup = newKey;
                     }
                 });
-                
+
                 // Mark as dirty
                 this.setDirty('patternGroup', true);
 
@@ -1298,7 +1333,7 @@ class OTTOAccurateInterface {
             addGroupBtn.addEventListener('click', this.addGroupHandler);
             this.eventListeners.push({ element: addGroupBtn, event: 'click', handler: this.addGroupHandler });
         }
-        
+
         if (renameGroupBtn) {
             renameGroupBtn.addEventListener('click', this.renameGroupHandler);
             this.eventListeners.push({ element: renameGroupBtn, event: 'click', handler: this.renameGroupHandler });
@@ -1334,7 +1369,7 @@ class OTTOAccurateInterface {
         // Update the player's state
         const patternKey = shortName.toLowerCase().replace(/\\s+/g, '-');
         e.currentTarget.dataset.pattern = patternKey;
-        
+
         // Mark pattern as dirty (will cascade up to patternGroup, player, and preset)
         this.setDirty('pattern', true);
     }
@@ -1430,7 +1465,7 @@ class OTTOAccurateInterface {
             };
         }
     }
-    
+
     // Drumkit Management Methods
     loadDrumkits() {
         // Load saved drumkits from localStorage with error handling
@@ -1469,7 +1504,7 @@ class OTTOAccurateInterface {
                     selectedMixerPreset: 'default',
                     mixerPresets: {
                         'default': {
-                            name: 'Default', 
+                            name: 'Default',
                             levels: { kick: 90, snare: 85, hihat: 65, tom: 75, crash: 90, ride: 70 }
                         }
                     }
@@ -1529,13 +1564,13 @@ class OTTOAccurateInterface {
             this.saveDrumkits();
         }
     }
-    
+
     saveDrumkits() {
         // Use safe wrapper with error handling
         this.safeLocalStorageSet('ottoDrumkits', this.drumkits);
         this.setDirty('drumkit', false);
     }
-    
+
     getDrumkitMixerPreset(kitName) {
         if (this.drumkits && this.drumkits[kitName]) {
             const kit = this.drumkits[kitName];
@@ -1544,7 +1579,7 @@ class OTTOAccurateInterface {
         }
         return null;
     }
-    
+
     setDrumkitMixerPreset(kitName, presetName) {
         if (this.drumkits && this.drumkits[kitName]) {
             this.drumkits[kitName].selectedMixerPreset = presetName;
@@ -1916,7 +1951,7 @@ class OTTOAccurateInterface {
         Object.keys(this.patternGroups).forEach(key => {
             // Skip the 'all' group - it's for internal use only
             if (key === 'all') return;
-            
+
             const option = document.createElement('div');
             option.className = 'dropdown-option';
             option.dataset.value = key;
@@ -2021,7 +2056,7 @@ class OTTOAccurateInterface {
         Object.keys(this.patternGroups).forEach(key => {
             // Skip the 'all' group - it's for internal use only
             if (key === 'all') return;
-            
+
             const option = document.createElement('div');
             option.className = 'dropdown-option';
             option.dataset.value = key;
@@ -2051,20 +2086,20 @@ class OTTOAccurateInterface {
     openPresetModal() {
         const panel = document.getElementById('preset-panel');
         const btn = document.getElementById('preset-edit-btn');
-        
+
         if (panel) {
             // Toggle the panel
             panel.classList.toggle('active');
-            
+
             // Toggle button active state
             if (btn) {
                 btn.classList.toggle('panel-active', panel.classList.contains('active'));
             }
-            
+
             // If opening, render list and focus input
             if (panel.classList.contains('active')) {
                 this.renderPresetList();
-                
+
                 // Clear and focus the input field
                 const nameInput = document.getElementById('preset-name-input');
                 if (nameInput) {
@@ -2078,11 +2113,11 @@ class OTTOAccurateInterface {
     closePresetModal() {
         const panel = document.getElementById('preset-panel');
         const btn = document.getElementById('preset-edit-btn');
-        
+
         if (panel) {
             panel.classList.remove('active');
         }
-        
+
         // Remove button active state
         if (btn) {
             btn.classList.remove('panel-active');
@@ -2227,7 +2262,7 @@ class OTTOAccurateInterface {
         }
 
         console.log(`Loading preset: ${preset.name}`);
-        
+
         // Disable dirty tracking during preset load
         this.isLoadingPreset = true;
 
@@ -2334,10 +2369,10 @@ class OTTOAccurateInterface {
 
         console.log(`Successfully loaded preset "${preset.name}"`);
         this.showNotification(`Loaded preset "${preset.name}"`);
-        
+
         // Re-enable dirty tracking
         this.isLoadingPreset = false;
-        
+
         // Clear all dirty flags since we just loaded a preset
         this.setDirty('preset', false);
         this.setDirty('player', false);
@@ -2605,13 +2640,7 @@ class OTTOAccurateInterface {
                 sliderValues: {
                     swing: 10,      // Swing at 10
                     energy: 50,
-                    volume: 75
-                },
-                // Note: These mini sliders may be for future kit mixer implementation
-                miniSliders: {
-                    1: 50,
-                    2: 30,
-                    3: 80
+                    volume: 70
                 }
             };
         }
@@ -2691,11 +2720,6 @@ class OTTOAccurateInterface {
                     swing: 10,
                     energy: 50,
                     volume: 75
-                },
-                miniSliders: {
-                    1: 50,
-                    2: 30,
-                    3: 80
                 }
             };
         }
@@ -2738,7 +2762,7 @@ class OTTOAccurateInterface {
 
     updatePresetDropdown() {
         if (this.isDestroyed) return;
-        
+
         const presetOptions = document.getElementById('preset-options');
         const dropdown = document.getElementById('preset-dropdown');
         const dropdownText = dropdown?.querySelector('.dropdown-text');
@@ -2770,7 +2794,7 @@ class OTTOAccurateInterface {
             // Create handler and store reference on element
             const handler = (e) => {
                 if (this.isDestroyed) return;
-                
+
                 e.stopPropagation();
 
                 // Update selected text
@@ -2788,7 +2812,7 @@ class OTTOAccurateInterface {
                 // Load the preset
                 this.loadPreset(key);
             };
-            
+
             // Store handler reference on element for cleanup
             option._clickHandler = handler;
             option.addEventListener('click', handler);
@@ -3010,7 +3034,7 @@ class OTTOAccurateInterface {
         // Re-get the buttons after potential cloning
         const prevBtn = document.getElementById('player-prev-btn');
         const nextBtn = document.getElementById('player-next-btn');
-        
+
         if (prevBtn) {
             const prevHandler = () => {
                 this.navigatePlayer(-1);
@@ -3065,14 +3089,14 @@ class OTTOAccurateInterface {
         // Add chevron navigation for presets
         const presetPrev = document.querySelector('.preset-prev');
         const presetNext = document.querySelector('.preset-next');
-        
+
         if (presetPrev) {
             const prevHandler = () => {
                 this.navigatePreset(-1);
             };
             this.addEventListener(presetPrev, 'click', prevHandler, this.dropdownListeners);
         }
-        
+
         if (presetNext) {
             const nextHandler = () => {
                 this.navigatePreset(1);
@@ -3139,21 +3163,21 @@ class OTTOAccurateInterface {
     navigatePreset(direction) {
         const presetKeys = Object.keys(this.presets);
         const currentIndex = presetKeys.indexOf(this.currentPreset);
-        
+
         let newIndex = currentIndex + direction;
-        
+
         // Wrap around
         if (newIndex < 0) {
             newIndex = presetKeys.length - 1;
         } else if (newIndex >= presetKeys.length) {
             newIndex = 0;
         }
-        
+
         const newPresetKey = presetKeys[newIndex];
-        
+
         // Load the new preset
         this.loadPreset(newPresetKey);
-        
+
         console.log(`Navigated to preset: ${this.presets[newPresetKey].name}`);
     }
 
@@ -3173,7 +3197,7 @@ class OTTOAccurateInterface {
 
         // Use the comprehensive UI update
         this.updateCompleteUIState();
-        
+
         // Update link icon states for the new current player
         if (this.linkStates) {
             this.updateLinkIconStates();
@@ -3290,11 +3314,11 @@ class OTTOAccurateInterface {
         document.querySelectorAll('.pattern-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        
+
         if (state.selectedPattern) {
             // Convert selectedPattern to the same format used in data-pattern attribute
             const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, '-');
-            
+
             // Find and activate the matching pattern button
             const selectedBtn = document.querySelector(`.pattern-btn[data-pattern="${normalizedPattern}"]`);
             if (selectedBtn) {
@@ -3302,7 +3326,7 @@ class OTTOAccurateInterface {
             } else {
                 // Fallback: try to match by text content
                 document.querySelectorAll('.pattern-btn').forEach(btn => {
-                    if (btn.textContent && 
+                    if (btn.textContent &&
                         btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase().substring(0, 8)) {
                         btn.classList.add('active');
                     }
@@ -3320,15 +3344,6 @@ class OTTOAccurateInterface {
                 }
             });
         }
-
-        // Update mini sliders
-        const miniSliders = document.querySelectorAll('.mini-slider');
-        miniSliders.forEach((slider, index) => {
-            const sliderIndex = index + 1;
-            if (state.miniSliders) {
-                slider.value = state.miniSliders[sliderIndex] || 50;
-            }
-        });
 
         // Update link icon states for current player
         if (this.linkStates) {
@@ -3464,7 +3479,7 @@ class OTTOAccurateInterface {
         if (state.selectedPattern) {
             // Convert selectedPattern to the same format used in data-pattern attribute
             const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, '-');
-            
+
             // Find and activate the matching pattern button
             const selectedBtn = document.querySelector(`.pattern-btn[data-pattern="${normalizedPattern}"]`);
             if (selectedBtn) {
@@ -3472,7 +3487,7 @@ class OTTOAccurateInterface {
             } else {
                 // Fallback: try to match by text content (first 8 chars)
                 document.querySelectorAll('.pattern-btn').forEach(btn => {
-                    if (btn.textContent && 
+                    if (btn.textContent &&
                         (btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase().substring(0, 8) ||
                          btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase())) {
                         btn.classList.add('active');
@@ -3489,15 +3504,6 @@ class OTTOAccurateInterface {
                     const value = state.sliderValues[param] || 0;
                     this.updateCustomSlider(slider, value);
                 }
-            });
-        }
-
-        // Update mini sliders if they exist
-        const miniSliders = document.querySelectorAll('.mini-slider');
-        if (miniSliders.length > 0 && state.miniSliders) {
-            miniSliders.forEach((slider, index) => {
-                const sliderIndex = index + 1;
-                slider.value = state.miniSliders[sliderIndex] || 50;
             });
         }
 
@@ -3826,11 +3832,11 @@ class OTTOAccurateInterface {
 
         // Update the UI
         groupSelected.querySelector('.dropdown-text').textContent = newGroupName;
-        
+
         // Update the player state and save
         this.onPatternGroupChanged(this.currentPlayer, newGroupKey);
         this.setDirty('preset', true);
-        
+
         console.log(`Player ${this.currentPlayer} pattern group: ${newGroupKey}`);
     }
 
@@ -3840,12 +3846,12 @@ class OTTOAccurateInterface {
                 // Get the button index to find the full pattern name
                 const patternButtons = Array.from(document.querySelectorAll('.pattern-btn'));
                 const buttonIndex = patternButtons.indexOf(patternBtn);
-                
+
                 // Get the full pattern name from the pattern group
                 const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
                 let fullPatternName = patternBtn.textContent; // Default to button text
-                
-                if (this.patternGroups && this.patternGroups[currentGroup] && 
+
+                if (this.patternGroups && this.patternGroups[currentGroup] &&
                     this.patternGroups[currentGroup].patterns[buttonIndex]) {
                     fullPatternName = this.patternGroups[currentGroup].patterns[buttonIndex];
                 }
@@ -3860,14 +3866,14 @@ class OTTOAccurateInterface {
 
                 // Update player state with full pattern name
                 this.playerStates[this.currentPlayer].selectedPattern = fullPatternName;
-                
+
                 // Save selected pattern to the current pattern group
                 if (this.patternGroups && this.patternGroups[currentGroup]) {
                     this.patternGroups[currentGroup].selectedPattern = fullPatternName;
                     this.setDirty('patternGroup', true);
                     // Don't auto-save, wait for user to click save button
                 }
-                
+
                 this.onPatternSelected(this.currentPlayer, fullPatternName);
                 this.setDirty('preset', true);  // Mark preset as dirty when pattern changes
 
@@ -3945,7 +3951,7 @@ class OTTOAccurateInterface {
             fillBtn.addEventListener('click', (e) => {
                 const fillType = fillBtn.dataset.fill;
                 const isActive = fillBtn.classList.contains('active');
-                
+
                 // Update state through centralized system
                 this.updatePlayerState(this.currentPlayer, {
                     fillStates: { [fillType]: !isActive }
@@ -3967,11 +3973,11 @@ class OTTOAccurateInterface {
             }
         });
         this.sliderListeners = [];
-        
+
         // Clear any existing debounce timers
         this.debounceTimers.forEach((timer) => clearTimeout(timer));
         this.debounceTimers.clear();
-        
+
         if (this.miniSliderDebounceTimer) {
             clearTimeout(this.miniSliderDebounceTimer);
             this.miniSliderDebounceTimer = null;
@@ -4000,7 +4006,7 @@ class OTTOAccurateInterface {
             // Debounced update function
             const debouncedUpdate = (newValue) => {
                 if (this.isDestroyed) return;
-                
+
                 // Clear existing timer for this slider
                 const existingTimer = this.debounceTimers.get(param);
                 if (existingTimer) {
@@ -4013,7 +4019,7 @@ class OTTOAccurateInterface {
                 // Debounce the actual state update and callbacks
                 const timer = setTimeout(() => {
                     if (this.isDestroyed) return;
-                    
+
                     // Update player state
                     this.playerStates[this.currentPlayer].sliderValues[param] = newValue;
                     this.onSliderChanged(this.currentPlayer, param, newValue);
@@ -4028,17 +4034,17 @@ class OTTOAccurateInterface {
                     }
 
                     console.log(`Player ${this.currentPlayer} ${param} slider: ${newValue}`);
-                    
+
                     // Remove timer from map after execution
                     this.debounceTimers.delete(param);
                 }, 100); // 100ms debounce delay
-                
+
                 this.debounceTimers.set(param, timer);
             };
 
             const startDrag = (e) => {
                 if (this.isDestroyed) return;
-                
+
                 // Check if this slider is a slave
                 if (this.linkStates && this.linkStates[param]) {
                     const linkState = this.linkStates[param];
@@ -4047,7 +4053,7 @@ class OTTOAccurateInterface {
                         return; // Don't allow dragging for slave sliders
                     }
                 }
-                
+
                 isDragging = true;
                 slider.classList.add('dragging');
                 startY = e.clientY;
@@ -4101,7 +4107,7 @@ class OTTOAccurateInterface {
             const trackClickHandler = (e) => {
                 if (this.isDestroyed) return;
                 if (e.target === thumb) return;  // Don't handle if clicking thumb
-                
+
                 // Check if this slider is a slave
                 if (this.linkStates && this.linkStates[param]) {
                     const linkState = this.linkStates[param];
@@ -4151,34 +4157,6 @@ class OTTOAccurateInterface {
             slider.currentValue = value;
         });
 
-        // Mini sliders in kit section with proper cleanup and debouncing
-        document.querySelectorAll('.mini-slider').forEach((slider, index) => {
-            const inputHandler = (e) => {
-                if (this.isDestroyed) return;
-                
-                const sliderIndex = index + 1;
-                const value = parseInt(e.target.value);
-
-                // Clear existing timer
-                if (this.miniSliderDebounceTimer) {
-                    clearTimeout(this.miniSliderDebounceTimer);
-                }
-
-                // Debounce the update
-                this.miniSliderDebounceTimer = setTimeout(() => {
-                    if (this.isDestroyed) return;
-                    
-                    this.playerStates[this.currentPlayer].miniSliders[sliderIndex] = value;
-                    this.onMiniSliderChanged(this.currentPlayer, sliderIndex, value);
-                    this.setDirty('preset', true);
-
-                    console.log(`Player ${this.currentPlayer} mini slider ${sliderIndex}: ${value}`);
-                    this.miniSliderDebounceTimer = null;
-                }, 100); // 100ms debounce delay
-            };
-
-            this.addEventListener(slider, 'input', inputHandler, this.sliderListeners);
-        });
     }
 
     updateCustomSlider(slider, value) {
@@ -4223,7 +4201,7 @@ class OTTOAccurateInterface {
                 console.log(`Link icon clicked for ${param} by player ${this.currentPlayer}`);
                 this.handleLinkToggle(param, linkIcon);
             };
-            
+
             linkIcon.addEventListener('click', handler);
             // Track this listener for cleanup
             this.eventListeners.push({ element: linkIcon, event: 'click', handler });
@@ -4235,7 +4213,7 @@ class OTTOAccurateInterface {
             console.error('linkStates not initialized!');
             return;
         }
-        
+
         const currentPlayer = this.currentPlayer;
         const linkState = this.linkStates[param];
 
@@ -4316,7 +4294,7 @@ class OTTOAccurateInterface {
             const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
 
             linkIcon.classList.remove('master', 'linked');
-            
+
             // Also update slider visual states
             if (slider) {
                 slider.classList.remove('master', 'slave');
@@ -4591,7 +4569,7 @@ class OTTOAccurateInterface {
                 this.animationFrame = null;
                 return;
             }
-            
+
             // Only continue animation if playing
             if (!this.isPlaying) {
                 // Stop the animation loop when paused
@@ -4674,7 +4652,7 @@ class OTTOAccurateInterface {
 
     togglePlayPause() {
         if (this.isDestroyed) return;
-        
+
         this.isPlaying = !this.isPlaying;
 
         // Update button visual state
@@ -4718,7 +4696,7 @@ class OTTOAccurateInterface {
     onKitChanged(playerNumber, kitName) {
         // Mark drumkit as dirty (will cascade to player and preset)
         this.setDirty('drumkit', true);
-        
+
         if (window.juce?.onKitChanged) {
             window.juce.onKitChanged(playerNumber, kitName);
         }
@@ -4750,7 +4728,7 @@ class OTTOAccurateInterface {
         // Save pattern group to player state
         if (this.playerStates[playerNumber]) {
             this.playerStates[playerNumber].patternGroup = groupName;
-            
+
             // Mark patternGroup as dirty (will cascade to player and preset)
             this.setDirty('patternGroup', true);
 
@@ -4765,7 +4743,7 @@ class OTTOAccurateInterface {
                     patternButtons.forEach(btn => {
                         btn.classList.remove('active');
                         // Check both full name and first 8 characters
-                        if (btn.textContent === selectedPattern || 
+                        if (btn.textContent === selectedPattern ||
                             btn.textContent === selectedPattern.substring(0, 8)) {
                             btn.classList.add('active');
                             this.playerStates[playerNumber].selectedPattern = selectedPattern;
@@ -4783,7 +4761,7 @@ class OTTOAccurateInterface {
     onToggleChanged(playerNumber, toggleType, isActive) {
         // Mark player as dirty (will cascade to preset)
         this.setDirty('player', true);
-        
+
         if (window.juce?.onToggleChanged) {
             window.juce.onToggleChanged(playerNumber, toggleType, isActive);
         }
@@ -4792,7 +4770,7 @@ class OTTOAccurateInterface {
     onFillChanged(playerNumber, fillType, isActive) {
         // Mark player as dirty (will cascade to preset)
         this.setDirty('player', true);
-        
+
         if (window.juce?.onFillChanged) {
             window.juce.onFillChanged(playerNumber, fillType, isActive);
         }
@@ -4801,7 +4779,7 @@ class OTTOAccurateInterface {
     onSliderChanged(playerNumber, sliderType, value) {
         // Mark player as dirty (will cascade to preset)
         this.setDirty('player', true);
-        
+
         if (window.juce?.onSliderChanged) {
             window.juce.onSliderChanged(playerNumber, sliderType, value);
         }
@@ -4810,7 +4788,7 @@ class OTTOAccurateInterface {
     onMiniSliderChanged(playerNumber, sliderIndex, value) {
         // Mark player as dirty (will cascade to preset)
         this.setDirty('player', true);
-        
+
         if (window.juce?.onMiniSliderChanged) {
             window.juce.onMiniSliderChanged(playerNumber, sliderIndex, value);
         }
@@ -4858,10 +4836,10 @@ class OTTOAccurateInterface {
         // Toggle the settings panel
         const settingsPanel = document.getElementById('settings-panel');
         const btn = document.getElementById('settings-btn');
-        
+
         if (settingsPanel) {
             settingsPanel.classList.toggle('active');
-            
+
             // Toggle button active state
             if (btn) {
                 btn.classList.toggle('panel-active', settingsPanel.classList.contains('active'));
@@ -4951,7 +4929,7 @@ class OTTOAccurateInterface {
 
     showNotification(message, type = 'info') {
         if (this.isDestroyed) return;
-        
+
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.textContent = message;
@@ -4971,7 +4949,7 @@ class OTTOAccurateInterface {
         `;
 
         document.body.appendChild(notification);
-        
+
         // Store timer reference for cleanup if needed
         const timer1 = setTimeout(() => {
             if (this.isDestroyed) {
@@ -4980,20 +4958,20 @@ class OTTOAccurateInterface {
                 }
                 return;
             }
-            
+
             notification.style.animation = 'fadeOut 0.3s ease';
             const timer2 = setTimeout(() => {
                 if (document.body.contains(notification)) {
                     document.body.removeChild(notification);
                 }
             }, 300);
-            
+
             // Store timer for potential cleanup
             if (!this.notificationTimers) this.notificationTimers = new Set();
             this.notificationTimers.add(timer2);
             setTimeout(() => this.notificationTimers?.delete(timer2), 350);
         }, 3000);
-        
+
         // Store timer for potential cleanup
         if (!this.notificationTimers) this.notificationTimers = new Set();
         this.notificationTimers.add(timer1);
@@ -5003,7 +4981,7 @@ class OTTOAccurateInterface {
     destroy() {
         // Set destroyed flag first to prevent any async operations
         this.isDestroyed = true;
-        
+
         // Cancel animation frame
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
@@ -5013,12 +4991,12 @@ class OTTOAccurateInterface {
         // Clear all debounce timers
         this.debounceTimers.forEach((timer) => clearTimeout(timer));
         this.debounceTimers.clear();
-        
+
         if (this.miniSliderDebounceTimer) {
             clearTimeout(this.miniSliderDebounceTimer);
             this.miniSliderDebounceTimer = null;
         }
-        
+
         // Clear notification timers
         if (this.notificationTimers) {
             this.notificationTimers.forEach(timer => clearTimeout(timer));
@@ -5030,7 +5008,7 @@ class OTTOAccurateInterface {
             if (timer) clearTimeout(timer);
         });
         this.saveTimers = {};
-        
+
         // Clear state update timer and queue
         if (this.stateUpdateTimer) {
             clearTimeout(this.stateUpdateTimer);
@@ -5038,25 +5016,25 @@ class OTTOAccurateInterface {
         }
         this.stateUpdateQueue = [];
         this.isProcessingStateUpdate = false;
-        
+
         // Close all open modals
         const modals = document.querySelectorAll('.modal');
         modals.forEach(modal => {
             modal.style.display = 'none';
             modal.classList.remove('open');
         });
-        
+
         // Close all open dropdowns
         const dropdowns = document.querySelectorAll('.custom-dropdown');
         dropdowns.forEach(dropdown => {
             dropdown.classList.remove('open');
         });
-        
+
         // Remove any active notifications
         document.querySelectorAll('.notification').forEach(notification => {
             notification.remove();
         });
-        
+
         // Process any pending saves immediately before cleanup
         this.pendingSaves.forEach(saveType => {
             try {
@@ -5069,7 +5047,7 @@ class OTTOAccurateInterface {
 
         // Clean up all event listeners
         this.cleanupAllEventListeners();
-        
+
         // Clear link states to avoid circular references
         if (this.linkStates) {
             Object.values(this.linkStates).forEach(state => {
@@ -5090,10 +5068,10 @@ class OTTOAccurateInterface {
         this.storageErrors = null;
         this.debounceTimers = null;
         this.notificationTimers = null;
-        
+
         // Clear dirty flags
         this.isDirty = null;
-        
+
         // Clear any remaining references
         this.currentPreset = null;
         this.numberOfPlayers = null;
@@ -5102,7 +5080,7 @@ class OTTOAccurateInterface {
         this.loopPosition = null;
         this.isPlaying = null;
         this.isLoadingPreset = null;
-        
+
         console.log('OTTOAccurateInterface destroyed and cleaned up');
     }
 
@@ -5166,13 +5144,13 @@ class OTTOAccurateInterface {
             }
             this.renameGroupHandler = null;
         }
-        
+
         // Clean up keyboard shortcut handler
         if (this.keyboardShortcutHandler) {
             document.removeEventListener('keydown', this.keyboardShortcutHandler);
             this.keyboardShortcutHandler = null;
         }
-        
+
         // Clean up any dropdown option handlers
         document.querySelectorAll('.dropdown-option').forEach(option => {
             if (option._clickHandler) {
@@ -5180,7 +5158,7 @@ class OTTOAccurateInterface {
                 delete option._clickHandler;
             }
         });
-        
+
         // Clean up drag-drop listeners
         const patternSlots = document.querySelectorAll('.pattern-slot');
         patternSlots.forEach(slot => {
