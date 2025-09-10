@@ -2616,6 +2616,24 @@ class OTTOAccurateInterface {
             this.addEventListener(dropdownSelected, 'click', toggleHandler, this.dropdownListeners);
         }
 
+        // Add chevron navigation for presets
+        const presetPrev = document.querySelector('.preset-prev');
+        const presetNext = document.querySelector('.preset-next');
+        
+        if (presetPrev) {
+            const prevHandler = () => {
+                this.navigatePreset(-1);
+            };
+            this.addEventListener(presetPrev, 'click', prevHandler, this.dropdownListeners);
+        }
+        
+        if (presetNext) {
+            const nextHandler = () => {
+                this.navigatePreset(1);
+            };
+            this.addEventListener(presetNext, 'click', nextHandler, this.dropdownListeners);
+        }
+
         // Re-add option selection handlers
         if (dropdownOptions) {
             dropdownOptions.innerHTML = '';
@@ -2673,36 +2691,24 @@ class OTTOAccurateInterface {
     }
 
     navigatePreset(direction) {
-        // these should eventually come from our INI storage system.
-        const presets = ['Default', 'Rock Ballad', 'Jazz Combo', 'Funk Groove', 'Latin Rhythm', 'Electronic Pulse', 'Acoustic Folk', 'Blues Shuffle', 'Pop Modern', 'World Fusion'];
-        const state = this.playerStates[this.currentPlayer];
-        const currentIndex = presets.indexOf(state.presetName);
+        const presetKeys = Object.keys(this.presets);
+        const currentIndex = presetKeys.indexOf(this.currentPreset);
+        
         let newIndex = currentIndex + direction;
-
-        if (newIndex < 0) newIndex = presets.length - 1;
-        if (newIndex >= presets.length) newIndex = 0;
-
-        state.presetName = presets[newIndex];
-        this.updateUIForCurrentPlayer();
-
-        // Update custom dropdown
-        const dropdownText = document.querySelector('.dropdown-text');
-        if (dropdownText) {
-            dropdownText.textContent = state.presetName;
+        
+        // Wrap around
+        if (newIndex < 0) {
+            newIndex = presetKeys.length - 1;
+        } else if (newIndex >= presetKeys.length) {
+            newIndex = 0;
         }
-
-        // Update selected state on options
-        const options = document.querySelectorAll('.dropdown-option');
-        const presetValue = state.presetName.toLowerCase().replace(/\s+/g, '-');
-        options.forEach(option => {
-            option.classList.remove('selected');
-            if (option.dataset.value === presetValue) {
-                option.classList.add('selected');
-            }
-        });
-
-        this.onPresetChanged(this.currentPlayer, state.presetName);
-        console.log(`Player ${this.currentPlayer} preset: ${state.presetName}`);
+        
+        const newPresetKey = presetKeys[newIndex];
+        
+        // Load the new preset
+        this.loadPreset(newPresetKey);
+        
+        console.log(`Navigated to preset: ${this.presets[newPresetKey].name}`);
     }
 
     switchToPlayer(playerNumber) {
@@ -2765,7 +2771,7 @@ class OTTOAccurateInterface {
         const kitOptions = document.querySelectorAll('#kit-dropdown .dropdown-option');
         kitOptions.forEach(option => {
             option.classList.remove('selected');
-            if (option.dataset.value === state.kitName.toLowerCase()) {
+            if (option.textContent === state.kitName) {
                 option.classList.add('selected');
             }
         });
@@ -3046,8 +3052,8 @@ class OTTOAccurateInterface {
         const kitDropdownSelected = document.getElementById('kit-selected');
         const kitDropdownOptions = document.getElementById('kit-options');
         const kitOptions = document.querySelectorAll('#kit-options .dropdown-option');
-        const kitPrev = document.getElementById('kit-prev-btn');
-        const kitNext = document.getElementById('kit-next-btn');
+        const kitPrev = document.querySelector('.kit-prev');
+        const kitNext = document.querySelector('.kit-next');
         const kitMixerBtn = document.getElementById('kit-mixer-btn');
         const muteDrummerBtn = document.getElementById('mute-drummer-btn');
 
@@ -3093,7 +3099,7 @@ class OTTOAccurateInterface {
         kitOptions?.forEach(option => {
             const optionHandler = (e) => {
                 e.stopPropagation();
-                const kitName = option.dataset.value;
+                const kitName = option.textContent; // Use the actual text content, not the data-value
 
                 // Update selected text
                 if (dropdownText) {
@@ -3209,7 +3215,7 @@ class OTTOAccurateInterface {
         const kitOptions = document.querySelectorAll('#kit-dropdown .dropdown-option');
         kitOptions.forEach(option => {
             option.classList.remove('selected');
-            if (option.dataset.value === state.kitName.toLowerCase()) {
+            if (option.textContent === state.kitName) {
                 option.classList.add('selected');
             }
         });
