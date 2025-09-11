@@ -3,123 +3,123 @@
 /* Font import removed - fonts are loaded in HTML with proper weights */
 
 :root {
-    /* Accurate colors from HISE interface */
-    --bg-primary: #3a3a3a;
-    --bg-secondary: #2a2a2a;
-    --bg-darker: #1e1e1e;
-    --text-primary: #ffffff;
-    --text-secondary: #cccccc;
-    --text-muted: #999999;
-    --text-icon: #777777;  /* Icon color */
-    --text-black: #111111;  /* Black text color - was #000000 */
+  /* Accurate colors from HISE interface */
+  --bg-primary: #3a3a3a;
+  --bg-secondary: #2a2a2a;
+  --bg-darker: #1e1e1e;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #999999;
+  --text-icon: #777777; /* Icon color */
+  --text-black: #111111; /* Black text color - was #000000 */
 
-    /* Global button text states */
-    --button-text-normal: #777777;  /* Normal state */
-    --button-text-hover: #aaaaaa;   /* Hover state */
-    --button-text-active: #ffffff;  /* Active/selected state */
-    --border-color: #000000;  /* Black borders between rows */
+  /* Global button text states */
+  --button-text-normal: #777777; /* Normal state */
+  --button-text-hover: #aaaaaa; /* Hover state */
+  --button-text-active: #ffffff; /* Active/selected state */
+  --border-color: #000000; /* Black borders between rows */
 
-    /* Button colors - 3D metallic style */
-    --button-face: #888888;
-    --button-highlight: #aaaaaa;
-    --button-shadow: #333333;
-    --button-active-face: #999999;
-    --button-active-highlight: #bbbbbb;
+  /* Button colors - 3D metallic style */
+  --button-face: #888888;
+  --button-highlight: #aaaaaa;
+  --button-shadow: #333333;
+  --button-active-face: #999999;
+  --button-active-highlight: #bbbbbb;
 
-    /* Modal overlay settings */
-    --modal-overlay-opacity: 0.8;  /* Global overlay darkness - adjust as needed */
-    --modal-animation-speed: 0.3s;  /* Animation duration for modal transitions */
+  /* Modal overlay settings */
+  --modal-overlay-opacity: 0.8; /* Global overlay darkness - adjust as needed */
+  --modal-animation-speed: 0.3s; /* Animation duration for modal transitions */
 
-    /* Interface dimensions */
-    --interface-width: 1280px;
-    --interface-height: 720px;
+  /* Interface dimensions */
+  --interface-width: 1280px;
+  --interface-height: 720px;
 
-    /* Icon sizes */
-    --icon-size-standard: 60px;
-    --icon-size-small: 20px;
+  /* Icon sizes */
+  --icon-size-standard: 60px;
+  --icon-size-small: 20px;
 
-    /* Dropdown menu font size */
-    --dropdown-menu-font-size: 24px;  /* Base font size for all dropdown menu items */
+  /* Dropdown menu font size */
+  --dropdown-menu-font-size: 24px; /* Base font size for all dropdown menu items */
 
-    /* Row 1 Area Percentages - Must total 100% */
-    --row1-area1-width: 18%;  /* Settings, Link, Preset Edit buttons - increased for 3 icons */
-    --row1-area2-width: 28%;  /* Presets dropdown - needs space for text */
-    --row1-area3-width: 8%;   /* Play/Pause button (centered) */
-    --row1-area4-width: 18%;  /* Tempo Display - reduced to give area5 more space */
-    --row1-area5-width: 28%;  /* Cloud, Logo and Version - increased for hover space */
-    /* Total: 18% + 28% + 8% + 18% + 28% = 100% */
+  /* Row 1 Area Percentages - Must total 100% */
+  --row1-area1-width: 18%; /* Settings, Link, Preset Edit buttons - increased for 3 icons */
+  --row1-area2-width: 28%; /* Presets dropdown - needs space for text */
+  --row1-area3-width: 8%; /* Play/Pause button (centered) */
+  --row1-area4-width: 18%; /* Tempo Display - reduced to give area5 more space */
+  --row1-area5-width: 28%; /* Cloud, Logo and Version - increased for hover space */
+  /* Total: 18% + 28% + 8% + 18% + 28% = 100% */
 
-    /* Row 2 - Single area for player tabs */
-    --row2-area1-width: 100%;  /* Player tabs full width */
+  /* Row 2 - Single area for player tabs */
+  --row2-area1-width: 100%; /* Player tabs full width */
 
-    /* Row 3 Area Percentages - 5 areas */
-    --row3-area1-width: 10%;   /* Player number display */
-    --row3-area2-width: 15%;   /* Kit edit icon */
-    --row3-area3-width: 50%;   /* Kit selection center */
-    --row3-area4-width: 15%;   /* Mixer icon */
-    --row3-area5-width: 10%;   /* Mute drummer icon */
+  /* Row 3 Area Percentages - 5 areas */
+  --row3-area1-width: 10%; /* Player number display */
+  --row3-area2-width: 15%; /* Kit edit icon */
+  --row3-area3-width: 50%; /* Kit selection center */
+  --row3-area4-width: 15%; /* Mixer icon */
+  --row3-area5-width: 10%; /* Mute drummer icon */
 
-    /* Row 4 - Main 50/50 split */
-    --row4-left-width: 50%;     /* Left half */
-    --row4-right-width: 50%;    /* Right half */
+  /* Row 4 - Main 50/50 split */
+  --row4-left-width: 50%; /* Left half */
+  --row4-right-width: 50%; /* Right half */
 
-    /* Row 4 Left side - 3 areas */
-    --row4-left-area1-width: 20%;   /* Edit button area */
-    --row4-left-area2-width: 60%;   /* Pattern group selection */
-    --row4-left-area3-width: 20%;   /* Navigation controls */
+  /* Row 4 Left side - 3 areas */
+  --row4-left-area1-width: 20%; /* Edit button area */
+  --row4-left-area2-width: 60%; /* Pattern group selection */
+  --row4-left-area3-width: 20%; /* Navigation controls */
 
-    /* Row 4 Right side - 5 areas */
-    --row4-right-area1-width: 23%;  /* Right area 1 */
-    --row4-right-area2-width: 23%;  /* Right area 2 */
-    --row4-right-area3-width: 18%;    /* Right area 3 */
-    --row4-right-area4-width: 18%;    /* Right area 4 */
-    --row4-right-area5-width: 18%;    /* Right area 5 */
+  /* Row 4 Right side - 5 areas */
+  --row4-right-area1-width: 23%; /* Right area 1 */
+  --row4-right-area2-width: 23%; /* Right area 2 */
+  --row4-right-area3-width: 18%; /* Right area 3 */
+  --row4-right-area4-width: 18%; /* Right area 4 */
+  --row4-right-area5-width: 18%; /* Right area 5 */
 
-    /* Row 5 - Main 50/50 split */
-    --row5-left-width: 50%;     /* Left half - Pattern matrix */
-    --row5-right-width: 50%;    /* Right half - Controls */
+  /* Row 5 - Main 50/50 split */
+  --row5-left-width: 50%; /* Left half - Pattern matrix */
+  --row5-right-width: 50%; /* Right half - Controls */
 
-    /* Row 5 Right side - 5 areas (same as Row 4 right) */
-    --row5-right-area1-width: 23%;  /* Toggles area */
-    --row5-right-area2-width: 23%;  /* Fills area */
-    --row5-right-area3-width: 18%;  /* Sliders area 1 */
-    --row5-right-area4-width: 18%;  /* Sliders area 2 */
-    --row5-right-area5-width: 18%;  /* Sliders area 3 */
+  /* Row 5 Right side - 5 areas (same as Row 4 right) */
+  --row5-right-area1-width: 23%; /* Toggles area */
+  --row5-right-area2-width: 23%; /* Fills area */
+  --row5-right-area3-width: 18%; /* Sliders area 1 */
+  --row5-right-area4-width: 18%; /* Sliders area 2 */
+  --row5-right-area5-width: 18%; /* Sliders area 3 */
 
-    /* Row 6 - Single area for loop timeline */
-    --row6-area1-width: 100%;  /* Full width loop timeline */
+  /* Row 6 - Single area for loop timeline */
+  --row6-area1-width: 100%; /* Full width loop timeline */
 
-    /* Row Heights - Configurable percentages */
-    --row1-height: 10%;  /* Top bar */
-    --row2-height: 8%;  /* Player tabs */
-    --row3-height: 18%;  /* Drum kit section */
-    --row4-height: 12%;  /* Pattern groups */
-    --row5-height: 47%;  /* Pattern matrix - largest section */
-    --row6-height: 5%;   /* Loop section */
+  /* Row Heights - Configurable percentages */
+  --row1-height: 10%; /* Top bar */
+  --row2-height: 8%; /* Player tabs */
+  --row3-height: 18%; /* Drum kit section */
+  --row4-height: 12%; /* Pattern groups */
+  --row5-height: 47%; /* Pattern matrix - largest section */
+  --row6-height: 5%; /* Loop section */
 
-    /* Global hover zoom for row1 elements */
-    --row1-hover-scale: 1.2;  /* 20% increase (was 1.05-1.1, now 1.2) */
+  /* Global hover zoom for row1 elements */
+  --row1-hover-scale: 1.2; /* 20% increase (was 1.05-1.1, now 1.2) */
 
-    /* Dynamic player tab spacing */
-    --player-tab-gap: 5px;  /* Default for 8 players */
+  /* Dynamic player tab spacing */
+  --player-tab-gap: 5px; /* Default for 8 players */
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    cursor: default;  /* Default cursor for everything */
-    user-select: none;  /* Prevent text selection globally */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    outline: none !important;  /* Remove ALL focus outlines globally */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: default; /* Default cursor for everything */
+  user-select: none; /* Prevent text selection globally */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  outline: none !important; /* Remove ALL focus outlines globally */
 }
 
 /* Remove focus outlines for all interactive elements */
 *:focus {
-    outline: none !important;
-    box-shadow: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Ensure interactive elements keep pointer cursor */
@@ -132,1448 +132,1465 @@ button,
 .dropdown-selected,
 .dropdown-option,
 select {
-    cursor: pointer !important;
+  cursor: pointer !important;
 }
 
 /* Text cursor and selection only when actually editing */
 .tempo-display.editing {
-    cursor: text !important;
-    user-select: text !important;
-    -webkit-user-select: text !important;
-    -moz-user-select: text !important;
-    -ms-user-select: text !important;
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 input[type="text"]:focus,
 textarea:focus,
 [contenteditable="true"] {
-    cursor: text !important;
-    user-select: text !important;
-    -webkit-user-select: text !important;
-    -moz-user-select: text !important;
-    -ms-user-select: text !important;
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 /* Force pointer cursor when not editing */
 .tempo-display:not(.editing) {
-    cursor: pointer !important;
+  cursor: pointer !important;
 }
 
 body {
-    font-family: 'Playfair Display', 'Lato', serif;
-    background: var(--bg-darker);
-    color: var(--text-primary);
-    overflow: hidden;
-    font-size: 14px;
+  font-family: "Playfair Display", "Lato", serif;
+  background: var(--bg-darker);
+  color: var(--text-primary);
+  overflow: hidden;
+  font-size: 14px;
 }
 
 .interface-container {
-    width: var(--interface-width);
-    height: var(--interface-height);
-    margin: 0 auto;
-    background: var(--bg-primary);
-    position: relative;
-    border: 1px solid var(--border-color);
-    overflow: hidden; /* Clip panels when they're below the interface */
+  width: var(--interface-width);
+  height: var(--interface-height);
+  margin: 0 auto;
+  background: var(--bg-primary);
+  position: relative;
+  border: 1px solid var(--border-color);
+  overflow: hidden; /* Clip panels when they're below the interface */
 }
 
 /* Mute Overlay - covers rows 3-5 */
 .mute-overlay {
-    position: absolute;
-    top: calc(var(--row1-height) + var(--row2-height));  /* Start after row 1 and 2 */
-    left: 0;
-    width: 100%;
-    height: calc(var(--row3-height) + var(--row4-height) + var(--row5-height));  /* Cover rows 3-5 */
-    background: rgba(0, 0, 0, 0.5);  /* Semi-transparent black overlay */
-    pointer-events: none;  /* Allow interaction with elements below */
-    z-index: 100;  /* Above content but below modals */
-    display: none;  /* Hidden by default */
-    transition: opacity 0.3s ease;
+  position: absolute;
+  top: calc(
+    var(--row1-height) + var(--row2-height)
+  ); /* Start after row 1 and 2 */
+  left: 0;
+  width: 100%;
+  height: calc(
+    var(--row3-height) + var(--row4-height) + var(--row5-height)
+  ); /* Cover rows 3-5 */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+  pointer-events: none; /* Allow interaction with elements below */
+  z-index: 100; /* Above content but below modals */
+  display: none; /* Hidden by default */
+  transition: opacity 0.3s ease;
 }
 
 .mute-overlay.active {
-    display: block;
+  display: block;
 }
 
 /* Splash Screen */
 .splash-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    transition: opacity 0.5s ease-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.5s ease-out;
 }
 
 .splash-screen.hidden {
-    opacity: 0;
-    pointer-events: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .splash-screen.show {
-    display: flex !important;
-    opacity: 1 !important;
-    pointer-events: all !important;
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: all !important;
 }
 
 /* Preset Management Modal - Specific overrides only */
 .preset-modal-content {
-    max-width: 700px;  /* Slightly wider for preset list */
+  max-width: 700px; /* Slightly wider for preset list */
 }
 
 .preset-modal-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
 }
 
 .preset-name-input {
-    flex: 1;
-    padding: 10px 15px;
-    background: var(--bg-darker);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    font-weight: 300;
+  flex: 1;
+  padding: 10px 15px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 300;
 }
 
 .preset-name-input::placeholder {
-    color: var(--text-muted);
+  color: var(--text-muted);
 }
 
 .preset-name-input:focus {
-    outline: none;
-    border-color: var(--text-icon);
+  outline: none;
+  border-color: var(--text-icon);
 }
 
 .preset-action-btn {
-    padding: 10px 20px;
-    background: var(--bg-darker);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-icon);
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    font-weight: 300;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  padding: 10px 20px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-icon);
+  font-family: "Playfair Display", serif;
+  font-size: 16px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .preset-action-btn:hover {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    transform: scale(1.05);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transform: scale(1.05);
 }
 
 .preset-action-btn i {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .preset-list-container h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    font-weight: 300;
-    color: var(--text-secondary);
-    margin: 0 0 15px 0;
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--text-secondary);
+  margin: 0 0 15px 0;
 }
 
 .preset-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 400px;
-    overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .preset-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background: var(--bg-darker);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .preset-item:hover {
-    background: var(--bg-primary);
-    border-color: var(--text-icon);
+  background: var(--bg-primary);
+  border-color: var(--text-icon);
 }
 
 .preset-item-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    font-weight: 300;
-    color: var(--text-primary);
-    cursor: pointer;
-    flex: 1;
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text-primary);
+  cursor: pointer;
+  flex: 1;
 }
 
 .preset-item-actions {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 .preset-item-btn {
-    width: 32px;
-    height: 32px;
-    background: transparent;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-icon);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .preset-item-btn:hover {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    border-color: var(--text-icon);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--text-icon);
 }
 
 /* Lock button specific states */
 .preset-item-btn.locked {
-    color: var(--text-primary);  /* White when locked */
-    border-color: var(--text-primary);
+  color: var(--text-primary); /* White when locked */
+  border-color: var(--text-primary);
 }
 
 .preset-item-btn.unlocked {
-    color: var(--text-icon);  /* Grey when unlocked */
+  color: var(--text-icon); /* Grey when unlocked */
 }
 
 .preset-item-btn.delete:hover {
-    color: #ff4444;
-    border-color: #ff4444;
+  color: #ff4444;
+  border-color: #ff4444;
 }
 
 .preset-item-btn i {
-    font-size: 18px;
+  font-size: 18px;
 }
 
 /* Preset lock icon that appears next to preset names */
 .preset-lock-icon {
-    display: inline-block;
-    margin-left: 8px;
-    color: var(--text-icon);
-    font-size: 16px;
-    vertical-align: middle;
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--text-icon);
+  font-size: 16px;
+  vertical-align: middle;
 }
 
 .preset-item-name .preset-lock-icon {
-    color: var(--text-icon);
-    opacity: 0.8;
+  color: var(--text-icon);
+  opacity: 0.8;
 }
 
 /* Lock indicator in main dropdown */
 .preset-lock-indicator {
-    display: none;
-    align-items: center;
-    margin-left: 8px;
-    color: var(--text-icon);
-    font-size: 18px;
+  display: none;
+  align-items: center;
+  margin-left: 8px;
+  color: var(--text-icon);
+  font-size: 18px;
 }
 
 .splash-logo {
-    max-width: 1600px;
-    max-height: 1200px;
-    object-fit: contain;
+  max-width: 1600px;
+  max-height: 1200px;
+  object-fit: contain;
 }
 
 /* Main Interface - 6 Row Layout */
 .main-interface {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Row 1: Top Bar - 5 Main Areas */
 .top-bar {
-    height: var(--row1-height);
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;  /* Center all areas */
-    padding: 0 20px;  /* Fixed padding to match other rows */
-    position: relative;
-    box-sizing: border-box;  /* Include padding in width calculation */
+  height: var(--row1-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center all areas */
+  padding: 0 20px; /* Fixed padding to match other rows */
+  position: relative;
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 /* Row 1 Area 1: Settings, Link, and Preset Edit buttons */
 .row1-area1 {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    flex: 0 0 var(--row1-area1-width);
-    justify-content: flex-start;
-    min-width: 150px;  /* Minimum width to prevent crushing */
-    overflow: visible;  /* Allow buttons to be fully clickable */
-    padding-right: 10px;  /* Add space between area1 and area2 */
-    box-sizing: border-box;  /* Include padding in width calculation */
-    position: relative;
-    z-index: 20;  /* Higher z-index to ensure buttons are above dropdown */
-    flex-shrink: 0;  /* Prevent shrinking */
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex: 0 0 var(--row1-area1-width);
+  justify-content: flex-start;
+  min-width: 150px; /* Minimum width to prevent crushing */
+  overflow: visible; /* Allow buttons to be fully clickable */
+  padding-right: 10px; /* Add space between area1 and area2 */
+  box-sizing: border-box; /* Include padding in width calculation */
+  position: relative;
+  z-index: 20; /* Higher z-index to ensure buttons are above dropdown */
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .row1-area1 .icon-btn {
-    position: relative;
-    z-index: 25;  /* Ensure edit button is above dropdown */
+  position: relative;
+  z-index: 25; /* Ensure edit button is above dropdown */
 }
 
 /* Row 1 Area 2: Chevrons and Presets dropdown */
 .row1-area2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1 1 var(--row1-area2-width);  /* Allow shrinking and growing */
-    justify-content: center;
-    position: relative;  /* For dropdown arrow positioning */
-    overflow: visible;  /* Allow dropdown menu to show */
-    padding: 0 10px;  /* Add padding to keep content away from edges */
-    box-sizing: border-box;  /* Include padding in width calculation */
-    z-index: 5;  /* Lower than area1 buttons */
-    min-width: 0;  /* Allow shrinking below content size */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 var(--row1-area2-width); /* Allow shrinking and growing */
+  justify-content: center;
+  position: relative; /* For dropdown arrow positioning */
+  overflow: visible; /* Allow dropdown menu to show */
+  padding: 0 10px; /* Add padding to keep content away from edges */
+  box-sizing: border-box; /* Include padding in width calculation */
+  z-index: 5; /* Lower than area1 buttons */
+  min-width: 0; /* Allow shrinking below content size */
 }
 
 /* Specific constraint for preset dropdown */
 #preset-dropdown {
-    width: 100%;  /* Use full width of container */
-    max-width: 100%;  /* Don't exceed container */
-    margin: 0 auto;
-    min-width: 0;  /* Allow shrinking */
+  width: 100%; /* Use full width of container */
+  max-width: 100%; /* Don't exceed container */
+  margin: 0 auto;
+  min-width: 0; /* Allow shrinking */
 }
 
 /* Increase height for preset dropdown options to extend to bottom of row 5 */
 #preset-dropdown .dropdown-options {
-    max-height: calc(85vh);  /* Can extend through row 5 (10% + 8% + 18% + 12% + 47% = 95% - 10% for row1 = 85%) */
+  max-height: calc(
+    85vh
+  ); /* Can extend through row 5 (10% + 8% + 18% + 12% + 47% = 95% - 10% for row1 = 85%) */
 }
 
 /* Row 1 Area 3: Play/Pause Transport (centered) */
 .row1-area3 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 var(--row1-area3-width);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 var(--row1-area3-width);
 }
 
 /* Row 1 Area 4: Tempo Display (Tap & Edit) */
 .row1-area4 {
-    display: flex;
-    align-items: center;
-    flex: 0 0 var(--row1-area4-width);
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  flex: 0 0 var(--row1-area4-width);
+  justify-content: center;
 }
 
 /* Row 1 Area 5: Cloud Upload, Logo and Version */
 .row1-area5 {
-    display: flex;
-    align-items: center;
-    flex: 0 0 var(--row1-area5-width);
-    justify-content: flex-end;
-    gap: 15px;  /* Match other icon spacing */
-    min-width: 200px;  /* Minimum width to prevent crushing */
-    position: relative;  /* Create stacking context */
-    flex-shrink: 0;  /* Prevent shrinking */
+  display: flex;
+  align-items: center;
+  flex: 0 0 var(--row1-area5-width);
+  justify-content: flex-end;
+  gap: 15px; /* Match other icon spacing */
+  min-width: 200px; /* Minimum width to prevent crushing */
+  position: relative; /* Create stacking context */
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .row1-area5 .icon-btn {
-    position: relative;
-    z-index: 100;  /* Much higher z-index to ensure it stays on top */
+  position: relative;
+  z-index: 100; /* Much higher z-index to ensure it stays on top */
 }
 
 .logo-version-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transform-origin: 100% center;  /* Scale from far right edge only */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transform-origin: 100% center; /* Scale from far right edge only */
 }
 
 .logo-version-container:hover {
-    transform: scale(1.1);  /* Smaller scale to prevent overlap */
-    position: relative;
+  transform: scale(1.1); /* Smaller scale to prevent overlap */
+  position: relative;
 }
 
 .logo-version-container:active {
-    transform: scale(0.98);
-    transform-origin: right center;  /* Maintain right origin on active state */
+  transform: scale(0.98);
+  transform-origin: right center; /* Maintain right origin on active state */
 }
 
 /* Play/Pause button styling */
 .play-pause-btn {
-    width: 60px;
-    height: 60px;
-    background: transparent;
-    border: none;  /* Remove border */
-    cursor: pointer !important;  /* Ensure pointer cursor */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    padding: 0;
-    outline: none;
+  width: 60px;
+  height: 60px;
+  background: transparent;
+  border: none; /* Remove border */
+  cursor: pointer !important; /* Ensure pointer cursor */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+  outline: none;
 }
 
 .play-pause-btn:focus {
-    outline: none;  /* Remove focus outline */
+  outline: none; /* Remove focus outline */
 }
 
 .play-pause-btn:hover {
-    transform: scale(var(--row1-hover-scale));  /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
 }
 
 .play-pause-btn:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 .play-pause-btn i {
-    font-size: 50px;  /* Slightly larger since no border */
-    line-height: 1;
-    color: var(--text-icon);
-    transition: color 0.2s ease;
+  font-size: 50px; /* Slightly larger since no border */
+  line-height: 1;
+  color: var(--text-icon);
+  transition: color 0.2s ease;
 }
 
 .icon-btn {
-    width: var(--icon-size-standard);
-    height: var(--icon-size-standard);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-icon);
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    outline: none;  /* Remove focus outline */
+  width: var(--icon-size-standard);
+  height: var(--icon-size-standard);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-icon);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  outline: none; /* Remove focus outline */
 }
 
 .icon-btn:focus {
-    outline: none;  /* Remove focus box */
+  outline: none; /* Remove focus box */
 }
 
 .icon-btn:hover {
-    transform: scale(var(--row1-hover-scale));  /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
 }
 
 .icon-btn:active,
 .icon-btn.active {
-    color: var(--text-primary);  /* White color when clicked/active */
-    transform: scale(0.95);
+  color: var(--text-primary); /* White color when clicked/active */
+  transform: scale(0.95);
 }
 
 .icon-btn i {
-    font-size: var(--icon-size-standard);
-    line-height: 1;
-    display: block;
-    color: inherit;  /* Inherit color from parent button */
+  font-size: var(--icon-size-standard);
+  line-height: 1;
+  display: block;
+  color: inherit; /* Inherit color from parent button */
 }
 
 .icon-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    filter: invert(0.8);
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(0.8);
 }
 
 /* Save buttons with same style as icon buttons */
 .quick-save-btn {
-    width: var(--icon-size-standard);
-    height: var(--icon-size-standard);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-icon);
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    outline: none;
-    position: relative;
-    z-index: 30;  /* Above dropdowns but below modals */
+  width: var(--icon-size-standard);
+  height: var(--icon-size-standard);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-icon);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  outline: none;
+  position: relative;
+  z-index: 30; /* Above dropdowns but below modals */
 }
 
 .quick-save-btn i {
-    font-size: var(--icon-size-standard);  /* Match other phosphor icons */
-    line-height: 1;
-    display: block;
-    color: inherit;
+  font-size: var(--icon-size-standard); /* Match other phosphor icons */
+  line-height: 1;
+  display: block;
+  color: inherit;
 }
 
 .quick-save-btn:hover {
-    color: var(--text-white);
-    transform: scale(var(--row1-hover-scale));
+  color: var(--text-white);
+  transform: scale(var(--row1-hover-scale));
 }
 
 .quick-save-btn:hover i {
-    color: var(--text-white);
+  color: var(--text-white);
 }
 
 /* Specific styles for drumkit save button in row 3 */
 .drumkit-save-btn {
-    width: 75px !important;  /* Match kit-mixer-btn size */
-    height: 75px !important;  /* Match kit-mixer-btn size */
+  width: 75px !important; /* Match kit-mixer-btn size */
+  height: 75px !important; /* Match kit-mixer-btn size */
 }
 
 .drumkit-save-btn i {
-    font-size: 63px !important;  /* Match kit-mixer-btn icon size */
+  font-size: 63px !important; /* Match kit-mixer-btn icon size */
 }
 
 /* Remove absolute positioning from old center-program */
 /* Area 2 styles are now handled above */
 
 .preset-nav-btn {
-    width: var(--icon-size-standard);
-    height: var(--icon-size-standard);
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+  width: var(--icon-size-standard);
+  height: var(--icon-size-standard);
+  background: transparent;
+  border: none;
+  color: var(--text-icon);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .preset-nav-btn:hover {
-    color: var(--text-primary);
-    transform: scale(var(--row1-hover-scale));  /* Use global hover scale */
+  color: var(--text-primary);
+  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
 }
 
 .preset-nav-btn:active {
-    color: var(--text-secondary);
-    transform: scale(0.95);
+  color: var(--text-secondary);
+  transform: scale(0.95);
 }
 
 .preset-nav-btn i {
-    font-size: var(--icon-size-standard);
-    line-height: 1;
-    display: block;
-    color: var(--text-icon);
+  font-size: var(--icon-size-standard);
+  line-height: 1;
+  display: block;
+  color: var(--text-icon);
 }
 
 /* Custom Dropdown Styles */
 .custom-dropdown {
-    position: relative;
-    width: 100%;
-    max-width: 100%;  /* Changed from 350px to prevent overflow */
-    font-family: 'Playfair Display', serif;
-    user-select: none;  /* Prevent text selection */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+  position: relative;
+  width: 100%;
+  max-width: 100%; /* Changed from 350px to prevent overflow */
+  font-family: "Playfair Display", serif;
+  user-select: none; /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .dropdown-selected {
-    background: transparent;
-    color: var(--text-icon);
-    font-size: 44px;
-    font-weight: 400;
-    padding: 5px 15px;
-    cursor: pointer !important;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: all 0.2s ease;
-    user-select: none !important;  /* Prevent text selection */
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    min-width: 0;  /* Allow shrinking */
+  background: transparent;
+  color: var(--text-icon);
+  font-size: 44px;
+  font-weight: 400;
+  padding: 5px 15px;
+  cursor: pointer !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  user-select: none !important; /* Prevent text selection */
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  min-width: 0; /* Allow shrinking */
 }
 
 .dropdown-selected:hover {
-    transform: scale(var(--row1-hover-scale));  /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
 }
 
 .dropdown-text {
-    flex: 1;
-    text-align: center;
-    user-select: none !important;  /* Prevent text selection */
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    white-space: nowrap;  /* Prevent text wrapping */
-    overflow: hidden;  /* Hide overflow */
-    text-overflow: ellipsis;  /* Add ellipsis for truncated text */
+  flex: 1;
+  text-align: center;
+  user-select: none !important; /* Prevent text selection */
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis for truncated text */
 }
 
 .dropdown-arrow {
-    display: none !important;  /* Hide all dropdown arrows */
-    font-size: 24px;
-    color: var(--text-icon);
-    transition: transform 0.3s ease;
-    user-select: none !important;  /* Prevent text selection */
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
+  display: none !important; /* Hide all dropdown arrows */
+  font-size: 24px;
+  color: var(--text-icon);
+  transition: transform 0.3s ease;
+  user-select: none !important; /* Prevent text selection */
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .custom-dropdown.open .dropdown-arrow {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .dropdown-options {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--bg-darker);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-top: 5px;
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-top: 5px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .custom-dropdown.open .dropdown-options {
-    display: block;
+  display: block;
 }
 
 .dropdown-option {
-    padding: 12px 20px;
-    color: var(--text-icon);
-    font-family: 'Playfair Display', serif;
-    font-size: var(--dropdown-menu-font-size);
-    font-weight: 400;
-    cursor: pointer !important;
-    transition: all 0.2s ease;
-    text-align: center;
-    user-select: none !important;  /* Prevent text selection */
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
+  padding: 12px 20px;
+  color: var(--text-icon);
+  font-family: "Playfair Display", serif;
+  font-size: var(--dropdown-menu-font-size);
+  font-weight: 400;
+  cursor: pointer !important;
+  transition: all 0.2s ease;
+  text-align: center;
+  user-select: none !important; /* Prevent text selection */
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .dropdown-option:hover {
-    transform: scale(var(--row1-hover-scale));  /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
 }
 
 .dropdown-option.selected {
-    color: var(--text-primary);
-    background: var(--bg-secondary);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
 }
 
 /* Remove absolute positioning from old transport-controls */
 /* Area 4 styles are now handled above */
 
 .tap-tempo-btn {
-    width: 60px;
-    height: 30px;
-    background-image: url('Images/Button080.png');
-    background-size: 100% 600%;
-    background-position: 0 0%;
-    background-repeat: no-repeat;
-    background-color: transparent;
-    padding-bottom: 2px;
-    border: none;
-    /*color: var(--text-primary);*/
-    color: var(--text-black);
-    font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.02s ease;  /* Near instantaneous transition */
-    /*text-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
+  width: 60px;
+  height: 30px;
+  background-image: url("Images/Button080.png");
+  background-size: 100% 600%;
+  background-position: 0 0%;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  padding-bottom: 2px;
+  border: none;
+  /*color: var(--text-primary);*/
+  color: var(--text-black);
+  font-family: "Playfair Display", serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.02s ease; /* Near instantaneous transition */
+  /*text-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
 }
 
 .tap-tempo-btn:hover {
-    background-position: 0 40%; /* WHITE button for hover */
+  background-position: 0 40%; /* WHITE button for hover */
 }
 
 .tap-tempo-btn:active {
-    background-position: 0 20%; /* BLACK button for pressed */
+  background-position: 0 20%; /* BLACK button for pressed */
 }
 
 .tempo-display {
-    font-family: 'Roboto', sans-serif;
-    font-size: 55px;  /* Perfect size */
-    font-weight: 100; /* ExtraLight */
-    color: var(--text-icon);
-    min-width: 95px;  /* Adjusted min-width */
-    text-align: center;
-    letter-spacing: -2px;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    padding: 10px 20px;
-    outline: none;
-    cursor: pointer;  /* Pointer cursor for tap functionality */
-    transition: all 0.2s ease;
-    user-select: none;  /* Prevent text selection during tap */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    background: transparent;
+  font-family: "Roboto", sans-serif;
+  font-size: 55px; /* Perfect size */
+  font-weight: 100; /* ExtraLight */
+  color: var(--text-icon);
+  min-width: 95px; /* Adjusted min-width */
+  text-align: center;
+  letter-spacing: -2px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 10px 20px;
+  outline: none;
+  cursor: pointer; /* Pointer cursor for tap functionality */
+  transition: all 0.2s ease;
+  user-select: none; /* Prevent text selection during tap */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  background: transparent;
 }
 
 .tempo-display:focus {
-    outline: none !important;
-    background-color: transparent !important;
-    border-color: transparent !important;
+  outline: none !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 .tempo-display:hover {
-    transform: scale(var(--row1-hover-scale));  /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
 }
 
 .tempo-display:active {
-    transform: scale(0.98);  /* Only scale, no color change */
+  transform: scale(0.98); /* Only scale, no color change */
 }
 
 .tempo-display.editing {
-    border-color: transparent !important;  /* No visible border when editing */
-    background-color: transparent !important;  /* Force transparent background */
-    color: var(--text-primary) !important;  /* White text when editing */
-    transform: scale(1.05);  /* Slightly larger when editing */
-    cursor: text;
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    outline: none !important;  /* Remove any outline */
+  border-color: transparent !important; /* No visible border when editing */
+  background-color: transparent !important; /* Force transparent background */
+  color: var(--text-primary) !important; /* White text when editing */
+  transform: scale(1.05); /* Slightly larger when editing */
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  outline: none !important; /* Remove any outline */
 }
 
 .tempo-display.tapped {
-    animation: tap-pulse 0.2s ease;
+  animation: tap-pulse 0.2s ease;
 }
 
 @keyframes tap-pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); background-color: rgba(255, 255, 255, 0.1); }
-    100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Remove absolute positioning from old version-info */
 /* Area 5 styles are now handled above */
 
 .otto-logo {
-    font-size: 60px;
-    font-weight: 400;
-    color: var(--text-icon);
-    font-family: 'Playfair Display', serif;
-    letter-spacing: 1px;
+  font-size: 60px;
+  font-weight: 400;
+  color: var(--text-icon);
+  font-family: "Playfair Display", serif;
+  letter-spacing: 1px;
 }
 
 .version-text {
-    margin: 0;
-    padding-top: 35px;
-    font-size: 16px;
-    font-weight: 300;
-    color: var(--text-muted);
-    font-family: 'Lato', sans-serif;
-    white-space: nowrap;  /* Keep on same line */
-    display: inline-block;
+  margin: 0;
+  padding-top: 35px;
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text-muted);
+  font-family: "Lato", sans-serif;
+  white-space: nowrap; /* Keep on same line */
+  display: inline-block;
 }
 
 .version-text #version-number {
-    font-size: inherit;  /* Same size as parent */
-    font-weight: inherit;  /* Same weight as parent */
-    font-family: inherit;  /* Same font as parent */
-    color: inherit;  /* Same color as parent */
+  font-size: inherit; /* Same size as parent */
+  font-weight: inherit; /* Same weight as parent */
+  font-family: inherit; /* Same font as parent */
+  color: inherit; /* Same color as parent */
 }
 
 /* Row 2: Player Tabs  - 8 Player Selection */
 .player-tabs-section {
-    height: var(--row2-height);
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 20px;  /* Add horizontal padding */
+  height: var(--row2-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px; /* Add horizontal padding */
 }
 
 .player-tabs {
-    display: flex;
-    gap: var(--player-tab-gap);  /* Dynamic gap based on player count */
-    padding: 8px 0;  /* Reduced horizontal padding since chevrons are closer */
-    background: transparent;
-    margin: 0 15px;  /* Space between tabs and chevrons */
+  display: flex;
+  gap: var(--player-tab-gap); /* Dynamic gap based on player count */
+  padding: 8px 0; /* Reduced horizontal padding since chevrons are closer */
+  background: transparent;
+  margin: 0 15px; /* Space between tabs and chevrons */
 }
 
 /* Player navigation chevrons - sized for row2 */
 .player-nav-btn {
-    width: 50px;  /* Smaller than row3's 75px, appropriate for row2 */
-    height: 50px;
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
+  width: 50px; /* Smaller than row3's 75px, appropriate for row2 */
+  height: 50px;
+  background: transparent;
+  border: none;
+  color: var(--text-icon);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 
 .player-nav-btn:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .player-nav-btn:active,
 .player-nav-btn.active {
-    color: var(--text-primary);  /* White color when clicked/active */
-    transform: scale(0.95);
+  color: var(--text-primary); /* White color when clicked/active */
+  transform: scale(0.95);
 }
 
 .player-nav-btn i {
-    font-size: 50px;  /* Sized appropriately for row2 */
-    line-height: 1;
-    display: block;
-    color: inherit;
-    margin: 0;
-    padding: 0;
+  font-size: 50px; /* Sized appropriately for row2 */
+  line-height: 1;
+  display: block;
+  color: inherit;
+  margin: 0;
+  padding: 0;
 }
 
 .player-tab {
-    padding: 15px 15px;  /* Reduced horizontal padding to save space */
-    background: transparent;
-    border: none;
-    color: var(--button-text-normal);
-    font-family: 'Playfair Display', serif;
-    font-size: 24px !important;
-    font-weight: 400;  /* Regular weight */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 0.5px;
-    position: relative;
-    border-radius: 3px;
-    min-height: 60px;
-    height: 60px;
-    width: auto;
-    min-width: 120px;  /* Reduced from 140px to save space */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    line-height: 1;
-    white-space: nowrap;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
+  padding: 15px 15px; /* Reduced horizontal padding to save space */
+  background: transparent;
+  border: none;
+  color: var(--button-text-normal);
+  font-family: "Playfair Display", serif;
+  font-size: 24px !important;
+  font-weight: 400; /* Regular weight */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+  position: relative;
+  border-radius: 3px;
+  min-height: 60px;
+  height: 60px;
+  width: auto;
+  min-width: 120px; /* Reduced from 140px to save space */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 .player-tab:first-child {
-    margin-left: 0;
+  margin-left: 0;
 }
 
 .player-tab:active {
-    transform: scale(0.98);
+  transform: scale(0.98);
 }
 
 .player-tab:hover {
-    color: var(--button-text-hover);
-    transform: scale(var(--row1-hover-scale));
+  color: var(--button-text-hover);
+  transform: scale(var(--row1-hover-scale));
 }
 
 .player-tab.active {
-    color: var(--button-text-active);
-    font-weight: 400;  /* Keep regular weight even when active */
+  color: var(--button-text-active);
+  font-weight: 400; /* Keep regular weight even when active */
 }
 
 /* Muted player tab styling */
 .player-tab.muted {
-    color: var(--text-black);  /* Black color for muted players */
-    opacity: 0.7;  /* Slightly dimmed */
+  color: var(--text-black); /* Black color for muted players */
+  opacity: 0.7; /* Slightly dimmed */
 }
 
 .player-tab.muted.active {
-    color: var(--text-black);  /* Stay black even when active and muted */
+  color: var(--text-black); /* Stay black even when active and muted */
 }
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */
 .drum-kit-section {
-    height: var(--row3-height);
-    background: var(--bg-secondary);
-    /* border-bottom: 1px solid var(--border-color); */  /* Commented out - no border between row3 and row4 */
-    display: flex;
-    align-items: flex-start;  /* Align items to top instead of center */
-    padding: 10px 20px 0 20px;  /* Add small top padding for alignment */
-    /* gap removed to allow proper percentage-based layout */
+  height: var(--row3-height);
+  background: var(--bg-secondary);
+  /* border-bottom: 1px solid var(--border-color); */ /* Commented out - no border between row3 and row4 */
+  display: flex;
+  align-items: flex-start; /* Align items to top instead of center */
+  padding: 10px 20px 0 20px; /* Add small top padding for alignment */
+  /* gap removed to allow proper percentage-based layout */
 }
 
 .player-number-display {
-    min-width: 60px;
+  min-width: 60px;
 }
 
 .player-number {
-    font-family: 'Roboto', sans-serif;
-    font-size: 75px; /* 25% larger than 60px */
-    font-weight: 100; /* ExtraLight */
-    color: var(--text-muted);
-    opacity: 0.6;
-    line-height: 1;
-    margin: 0;
-    padding: 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 75px; /* 25% larger than 60px */
+  font-weight: 100; /* ExtraLight */
+  color: var(--text-muted);
+  opacity: 0.6;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .kit-controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex: 1;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+  justify-content: center;
 }
 
 .edit-btn {
-    width: 75px; /* 25% larger than 60px */
-    height: 75px; /* 25% larger than 60px */
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-icon);
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
+  width: 75px; /* 25% larger than 60px */
+  height: 75px; /* 25% larger than 60px */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-icon);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 
 .edit-btn:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .edit-btn:active,
 .edit-btn.active {
-    color: var(--text-primary);  /* White color when clicked/active */
-    transform: scale(0.95);
+  color: var(--text-primary); /* White color when clicked/active */
+  transform: scale(0.95);
 }
 
 .edit-btn i {
-    font-size: 63px; /* 25% larger than 50px, rounded */
-    color: inherit;
-    line-height: 1;
-    margin: 0;
-    padding: 0;
+  font-size: 63px; /* 25% larger than 50px, rounded */
+  color: inherit;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .kit-nav-btn {
-    width: 75px; /* 25% larger than 60px */
-    height: 75px; /* 25% larger than 60px */
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+  width: 75px; /* 25% larger than 60px */
+  height: 75px; /* 25% larger than 60px */
+  background: transparent;
+  border: none;
+  color: var(--text-icon);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .kit-nav-btn:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .kit-nav-btn:active,
 .kit-nav-btn.active {
-    color: var(--text-primary);  /* White color when clicked/active */
-    transform: scale(0.95);
+  color: var(--text-primary); /* White color when clicked/active */
+  transform: scale(0.95);
 }
 
 .kit-nav-btn i {
-    font-size: 75px; /* 25% larger than 60px */
-    line-height: 1;
-    display: block;
-    color: inherit;
-    margin: 0;
-    padding: 0;
+  font-size: 75px; /* 25% larger than 60px */
+  line-height: 1;
+  display: block;
+  color: inherit;
+  margin: 0;
+  padding: 0;
 }
 
 /* Kit dropdown - styled like presets dropdown but 20% larger */
 .kit-dropdown {
-    position: relative;
-    width: 100%;
-    max-width: 420px; /* 20% larger than presets (350px) */
-    font-family: 'Playfair Display', serif;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
+  position: relative;
+  width: 100%;
+  max-width: 420px; /* 20% larger than presets (350px) */
+  font-family: "Playfair Display", serif;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .kit-dropdown .dropdown-selected {
-    background: transparent;
-    color: var(--text-icon);
-    font-size: 58px; /* 20% larger than 48px */
-    font-weight: 400;
-    padding: 0 15px;
-    cursor: pointer !important;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: all 0.2s ease;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
+  background: transparent;
+  color: var(--text-icon);
+  font-size: 58px; /* 20% larger than 48px */
+  font-weight: 400;
+  padding: 0 15px;
+  cursor: pointer !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .kit-dropdown .dropdown-selected:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .kit-dropdown .dropdown-arrow {
-    font-size: 29px; /* 20% larger than presets (24px) */
-    color: var(--text-icon);
-    transition: transform 0.3s ease;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
+  font-size: 29px; /* 20% larger than presets (24px) */
+  color: var(--text-icon);
+  transition: transform 0.3s ease;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .kit-dropdown.open .dropdown-arrow {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .kit-dropdown .dropdown-options {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--bg-darker);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-top: 5px;
-    max-height: 300px;
-    overflow-y: auto;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-top: 5px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .kit-dropdown.open .dropdown-options {
-    display: block;
+  display: block;
 }
 
 .kit-dropdown .dropdown-option {
-    padding: 12px 20px;
-    color: var(--text-icon);
-    font-family: 'Playfair Display', serif;
-    font-size: var(--dropdown-menu-font-size);  /* Using global dropdown menu font size */
-    font-weight: 400;
-    cursor: pointer !important;
-    transition: all 0.2s ease;
-    text-align: center;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
+  padding: 12px 20px;
+  color: var(--text-icon);
+  font-family: "Playfair Display", serif;
+  font-size: var(
+    --dropdown-menu-font-size
+  ); /* Using global dropdown menu font size */
+  font-weight: 400;
+  cursor: pointer !important;
+  transition: all 0.2s ease;
+  text-align: center;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
 }
 
 .kit-dropdown .dropdown-option:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .kit-dropdown .dropdown-option.selected {
-    color: var(--text-primary);
-    background: var(--bg-secondary);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
 }
 
 .kit-name-display {
-    min-width: 200px;
-    text-align: center;
+  min-width: 200px;
+  text-align: center;
 }
 
 .kit-name {
-    font-size: 36px;
-    font-weight: 400;
-    color: var(--text-primary);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--text-primary);
 }
 
 .drum-kit-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
 }
 
 .kit-mixer-btn {
-    width: 75px !important; /* Standardized to 75px */
-    height: 75px !important; /* Standardized to 75px */
-    background: transparent !important;
-    border: none !important;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    color: var(--text-icon);
+  width: 75px !important; /* Standardized to 75px */
+  height: 75px !important; /* Standardized to 75px */
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--text-icon);
 }
 
 .kit-mixer-btn i {
-    font-size: 63px; /* Adjusted to fit 75px button */
-    color: inherit;
-    line-height: 1;
-    margin: 0;
-    padding: 0;
+  font-size: 63px; /* Adjusted to fit 75px button */
+  color: inherit;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .kit-mixer-btn:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .kit-mixer-btn:active {
-    color: var(--text-primary);  /* White color while clicking */
-    transform: scale(0.95);
+  color: var(--text-primary); /* White color while clicking */
+  transform: scale(0.95);
 }
 
 /* Row 4: Pattern Groups - Pattern Groups */
 .pattern-groups-section {
-    height: var(--row4-height);
-    background: var(--bg-secondary);
-    /* border-bottom: 1px solid var(--border-color); */  /* Commented out - no border between row4 and row5 */
-    display: flex;
-    align-items: flex-end;  /* Align items to bottom */
-    padding: 0 20px 10px 20px;  /* Add bottom padding */
+  height: var(--row4-height);
+  background: var(--bg-secondary);
+  /* border-bottom: 1px solid var(--border-color); */ /* Commented out - no border between row4 and row5 */
+  display: flex;
+  align-items: flex-end; /* Align items to bottom */
+  padding: 0 20px 10px 20px; /* Add bottom padding */
 }
 
 .pattern-group-controls {
-    display: flex;
-    align-items: center;
-    gap: 25px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
 }
 
 .group-nav-btn {
-    width: 62px;  /* 40% larger than 44px */
-    height: 62px;  /* 40% larger than 44px */
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
+  width: 62px; /* 40% larger than 44px */
+  height: 62px; /* 40% larger than 44px */
+  background: transparent;
+  border: none;
+  color: var(--text-icon);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
 
 .group-nav-btn i {
-    font-size: 68px;  /* 40% larger than 48.75px */
-    color: var(--text-icon);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
+  font-size: 68px; /* 40% larger than 48.75px */
+  color: var(--text-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .group-nav-btn:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .group-nav-btn:active {
-    transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 /* Group dropdown - increased by 50% */
 .group-dropdown {
-    position: relative;
-    min-width: 216px;  /* 50% larger than 144px */
-    margin: 0;
-    padding: 0;
+  position: relative;
+  min-width: 216px; /* 50% larger than 144px */
+  margin: 0;
+  padding: 0;
 }
 
 .group-dropdown .dropdown-selected {
-    padding: 0 18px 0 18px;  /* Equal padding for true centering */
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 216px;  /* Match the dropdown width */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    position: relative;
-    font-family: 'Playfair Display', serif;
-    font-size: 38px;  /* 40% larger than 27px */
-    font-weight: 400;
-    color: var(--text-icon);  /* Match preset and drumkit menu color */
-    white-space: nowrap;
-    margin: 0;
-    line-height: 1;
+  padding: 0 18px 0 18px; /* Equal padding for true centering */
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 216px; /* Match the dropdown width */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  font-family: "Playfair Display", serif;
+  font-size: 38px; /* 40% larger than 27px */
+  font-weight: 400;
+  color: var(--text-icon); /* Match preset and drumkit menu color */
+  white-space: nowrap;
+  margin: 0;
+  line-height: 1;
 }
 
 .group-dropdown .dropdown-arrow {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 36px;  /* 40% larger than 26px */
-    color: var(--text-icon);  /* Match preset and drumkit menu color */
-    transition: transform 0.3s ease;
-    pointer-events: none;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 36px; /* 40% larger than 26px */
+  color: var(--text-icon); /* Match preset and drumkit menu color */
+  transition: transform 0.3s ease;
+  pointer-events: none;
 }
 
 .group-dropdown.active .dropdown-arrow {
-    transform: translateY(-50%) rotate(180deg);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .group-dropdown .dropdown-options {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg-darker);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-top: 5px;
-    z-index: 1000;
-    display: none;
-    min-width: 100%;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-top: 5px;
+  z-index: 1000;
+  display: none;
+  min-width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .group-dropdown.active .dropdown-options {
-    display: block;
+  display: block;
 }
 
 .group-dropdown .dropdown-option {
-    padding: 12px 18px;  /* 50% larger padding */
-    cursor: pointer;
-    transition: background 0.2s ease;
-    font-family: 'Playfair Display', serif;
-    font-size: var(--dropdown-menu-font-size);  /* Using global dropdown menu font size */
-    color: var(--text-icon);  /* Match preset and drumkit menu color */
-    white-space: nowrap;
-    text-align: center;  /* Center the dropdown option text */
+  padding: 12px 18px; /* 50% larger padding */
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: "Playfair Display", serif;
+  font-size: var(
+    --dropdown-menu-font-size
+  ); /* Using global dropdown menu font size */
+  color: var(--text-icon); /* Match preset and drumkit menu color */
+  white-space: nowrap;
+  text-align: center; /* Center the dropdown option text */
 }
 
 .group-dropdown .dropdown-option:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--text-primary);  /* Brighten on hover */
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary); /* Brighten on hover */
 }
 
 .group-dropdown:hover .dropdown-selected {
-    transform: scale(var(--row1-hover-scale));
-    /* Removed color change - only scale on hover */
+  transform: scale(var(--row1-hover-scale));
+  /* Removed color change - only scale on hover */
 }
 
 /* Row 5: Pattern Matrix  - 50/50 Split */
 .pattern-matrix-section {
-    height: var(--row5-height);
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    padding: 0 20px;  /* Match row4's horizontal padding */
-    gap: 0;  /* Remove gap to maintain alignment */
+  height: var(--row5-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  padding: 0 20px; /* Match row4's horizontal padding */
+  gap: 0; /* Remove gap to maintain alignment */
 }
 
 /* Old left-half and right-half styles - removed as they're not used */
 
 .pattern-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 10px;
-    width: 100%;
-    max-width: 600px;
-    height: 100%;  /* Fill available height */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+  height: 100%; /* Fill available height */
 }
 
 .pattern-btn {
-    background: transparent;
-    background-image: url('Images/Button100.png');
-    background-size: 100% 600%; /* 6 states vertically */
-    background-position: 0 0%; /* Normal state - top segment */
-    background-repeat: no-repeat;
-    color: var(--text-black);
-    border: none;
-    font-family: 'Playfair Display', serif;
-    font-size: 28.6px;  /* 10% larger than 26px */
-    font-weight: 300;
-    cursor: pointer;
-    transition: all 0.02s ease;  /* Near instantaneous transition */
-    text-align: center;
-    min-height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
-    padding-bottom: 11px;  /* Add 5px more to bottom to push text up */
-    letter-spacing: 0.5px;
-    white-space: nowrap; /* Prevent text from wrapping to new line */
-    /*text-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
-    border-radius: 3px;
+  background: transparent;
+  background-image: url("Images/Button100.png");
+  background-size: 100% 600%; /* 6 states vertically */
+  background-position: 0 0%; /* Normal state - top segment */
+  background-repeat: no-repeat;
+  color: var(--text-black);
+  border: none;
+  font-family: "Playfair Display", serif;
+  font-size: 28.6px; /* 10% larger than 26px */
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.02s ease; /* Near instantaneous transition */
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  padding-bottom: 11px; /* Add 5px more to bottom to push text up */
+  letter-spacing: 0.5px;
+  white-space: nowrap; /* Prevent text from wrapping to new line */
+  /*text-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
+  border-radius: 3px;
 }
 
 .pattern-btn:hover {
-    background-position: 0 40%; /* Third segment - WHITE button for hover */
-    color: var(--text-primary);  /* White text on hover */
+  background-position: 0 40%; /* Third segment - WHITE button for hover */
+  color: var(--text-primary); /* White text on hover */
 }
 
 .pattern-btn:active,
 .pattern-btn.active {
-    background-position: 0 20%; /* Second segment - BLACK button for active/on */
+  background-position: 0 20%; /* Second segment - BLACK button for active/on */
 }
 
 .pattern-btn.active:hover {
-    background-position: 0 60%; /* Fourth segment - hover while active */
-    color: var(--text-primary);  /* White text on hover */
+  background-position: 0 60%; /* Fourth segment - hover while active */
+  color: var(--text-primary); /* White text on hover */
 }
 
 /* Top 20% - Control Labels */
 .control-labels-row {
-    height: 20%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
+  height: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
 }
 
 .label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-align: center;
-    font-family: 'Playfair Display', serif;
-    letter-spacing: 0.5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  font-family: "Playfair Display", serif;
+  letter-spacing: 0.5px;
 }
 
 .sliders-labels {
-    display: flex;
-    gap: 25px;
-    justify-content: space-around;
-    width: 180px;
+  display: flex;
+  gap: 25px;
+  justify-content: space-around;
+  width: 180px;
 }
 
 .sliders-labels span {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    font-family: 'Playfair Display', serif;
-    text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-family: "Playfair Display", serif;
+  text-align: center;
 }
 
 /* Bottom 80% - Controls */
 .controls-area {
-    height: 80%;
-    display: flex;
-    gap: 15px;
-    padding: 0 20px;
+  height: 80%;
+  display: flex;
+  gap: 15px;
+  padding: 0 20px;
 }
 
 .toggles-column,
 .fills-column {
-    width: 100%;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;  /* Same gap for both */
-    box-sizing: border-box;
-    height: 100%;  /* Fill available height */
-    justify-content: space-between;  /* Distribute buttons evenly */
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Same gap for both */
+  box-sizing: border-box;
+  height: 100%; /* Fill available height */
+  justify-content: space-between; /* Distribute buttons evenly */
 }
 
 .sliders-column {
-    flex: 1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-around;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
 }
 
 .toggle-btn {
-    background: transparent;
-    padding: 10px 12px;  /* Reduced vertical padding for 6 buttons */
-    background-image: url('Images/Button080.png');
-    background-size: 100% 600%; /* 6 states vertically */
-    background-position: 0 0%; /* Normal state */
-    background-repeat: no-repeat;
-    color: var(--text-black);  /* Black text like matrix buttons */
-    border: none;
-    font-family: 'Playfair Display', serif;
-    font-size: 23px;  /* Reduced for 6 buttons */
-    font-weight: 300;  /* Lighter weight for better readability */
-    cursor: pointer;
-    transition: all 0.02s ease;  /* Near instantaneous transition */
-    width: 100%;
-    flex: 1;  /* Grow to fill available space - match fill buttons */
-    line-height: 0.9;  /* Compensate for Playfair Display vs Roboto height */
-    /* Removed text-shadow for better readability */
+  background: transparent;
+  padding: 10px 12px; /* Reduced vertical padding for 6 buttons */
+  background-image: url("Images/Button080.png");
+  background-size: 100% 600%; /* 6 states vertically */
+  background-position: 0 0%; /* Normal state */
+  background-repeat: no-repeat;
+  color: var(--text-black); /* Black text like matrix buttons */
+  border: none;
+  font-family: "Playfair Display", serif;
+  font-size: 23px; /* Reduced for 6 buttons */
+  font-weight: 300; /* Lighter weight for better readability */
+  cursor: pointer;
+  transition: all 0.02s ease; /* Near instantaneous transition */
+  width: 100%;
+  flex: 1; /* Grow to fill available space - match fill buttons */
+  line-height: 0.9; /* Compensate for Playfair Display vs Roboto height */
+  /* Removed text-shadow for better readability */
 }
 
 .toggle-btn:hover {
-    background-position: 0 40%; /* WHITE button for hover */
-    color: var(--text-primary);  /* White text on hover */
+  background-position: 0 40%; /* WHITE button for hover */
+  color: var(--text-primary); /* White text on hover */
 }
 
 .toggle-btn.active {
-    background-position: 0 20%; /* BLACK button for active/on */
+  background-position: 0 20%; /* BLACK button for active/on */
 }
 
 .toggle-btn.active:hover {
-    background-position: 0 60%; /* Fourth segment - hover while active */
-    color: var(--text-primary);  /* White text on hover */
+  background-position: 0 60%; /* Fourth segment - hover while active */
+  color: var(--text-primary); /* White text on hover */
 }
 
 /* Lock button (last toggle) matches Solo button padding */
 .toggle-btn[data-toggle="lock"] {
-    padding-bottom: 12px;  /* Reduced for 6 buttons */
+  padding-bottom: 12px; /* Reduced for 6 buttons */
 }
 
 .fill-btn {
-    background: transparent;
-    padding: 10px 12px;  /* Reduced vertical padding for 6 buttons */
-    background-image: url('Images/Button080.png');
-    background-size: 100% 600%; /* 6 states vertically */
-    background-position: 0 0%; /* Normal state */
-    background-repeat: no-repeat;
-    color: var(--text-black);  /* Black text like matrix buttons */
-    border: none;
-    font-family: 'Playfair Display', serif;
-    font-size: 23px;  /* Reduced for 6 buttons */
-    font-weight: 300;
-    cursor: pointer;
-    transition: all 0.02s ease;  /* Near instantaneous transition */
-    width: 100%;
-    flex: 1;  /* Grow to fill available space */
-    line-height: 0.9;  /* Compensate for Playfair Display vs Roboto height - same as toggle buttons */
-    /* Removed text-shadow for better readability */
+  background: transparent;
+  padding: 10px 12px; /* Reduced vertical padding for 6 buttons */
+  background-image: url("Images/Button080.png");
+  background-size: 100% 600%; /* 6 states vertically */
+  background-position: 0 0%; /* Normal state */
+  background-repeat: no-repeat;
+  color: var(--text-black); /* Black text like matrix buttons */
+  border: none;
+  font-family: "Playfair Display", serif;
+  font-size: 23px; /* Reduced for 6 buttons */
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.02s ease; /* Near instantaneous transition */
+  width: 100%;
+  flex: 1; /* Grow to fill available space */
+  line-height: 0.9; /* Compensate for Playfair Display vs Roboto height - same as toggle buttons */
+  /* Removed text-shadow for better readability */
 }
 
 .fill-btn:hover {
-    background-position: 0 40%; /* WHITE button for hover */
-    color: var(--text-primary);  /* White text on hover */
+  background-position: 0 40%; /* WHITE button for hover */
+  color: var(--text-primary); /* White text on hover */
 }
 
 .fill-btn.active {
-    background-position: 0 20%; /* BLACK button for active/on */
+  background-position: 0 20%; /* BLACK button for active/on */
 }
 
 .fill-btn.active:hover {
-    background-position: 0 60%; /* Fourth segment - hover while active */
-    color: var(--text-primary);  /* White text on hover */
+  background-position: 0 60%; /* Fourth segment - hover while active */
+  color: var(--text-primary); /* White text on hover */
 }
 
 /* Numbered fills buttons (1-4) use Roboto */
@@ -1581,1653 +1598,1677 @@ body {
 .fill-btn[data-fill="8"],
 .fill-btn[data-fill="16"],
 .fill-btn[data-fill="32"] {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 400;  /* Regular weight */
+  font-family: "Roboto", sans-serif;
+  font-weight: 400; /* Regular weight */
 }
 
 /* Now button and Solo button use Playfair Display */
 .fill-btn[data-fill="now"] {
-    font-family: 'Playfair Display', serif;
-    font-weight: 300;  /* Match other Playfair buttons */
+  font-family: "Playfair Display", serif;
+  font-weight: 300; /* Match other Playfair buttons */
 }
 
 /* Solo button keeps Playfair Display */
 .fill-btn.solo {
-    font-family: 'Playfair Display', serif;
-    font-weight: 300;  /* Match other Playfair buttons */
-    padding-bottom: 12px;  /* Reduced for 6 buttons */
+  font-family: "Playfair Display", serif;
+  font-weight: 300; /* Match other Playfair buttons */
+  padding-bottom: 12px; /* Reduced for 6 buttons */
 }
 
 .main-sliders {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    gap: 30px;
-    height: 180px;
-    padding: 0 20px;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 30px;
+  height: 180px;
+  padding: 0 20px;
 }
 
 .slider-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    position: relative;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Custom Vertical Sliders */
 .custom-slider {
-    position: relative;
-    width: 32px;  /* Width for click area */
-    height: calc(100vh * 0.55 * 0.6 - 40px);  /* Same height as before */
-    min-height: 200px;
-    max-height: 400px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
+  position: relative;
+  width: 32px; /* Width for click area */
+  height: calc(100vh * 0.55 * 0.6 - 40px); /* Same height as before */
+  min-height: 200px;
+  max-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 
 .slider-track {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;  /* Slightly wider for visibility */
-    height: 100%;
-    background: #3a3a3a;  /* Slightly lighter to ensure visibility */
-    border-radius: 2px;
-    z-index: 1;  /* Base layer */
-    box-shadow: inset 0 0 2px rgba(0,0,0,0.3);  /* Inner shadow for depth */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px; /* Slightly wider for visibility */
+  height: 100%;
+  background: #3a3a3a; /* Slightly lighter to ensure visibility */
+  border-radius: 2px;
+  z-index: 1; /* Base layer */
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3); /* Inner shadow for depth */
 }
 
 .slider-fill {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 50%;  /* Will be updated dynamically */
-    background: #777777;  /* Light grey - filled portion (below thumb) */
-    border-radius: 0 0 2px 2px;  /* Only round bottom corners */
-    transition: none;  /* No transition for immediate response */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%; /* Will be updated dynamically */
+  background: #777777; /* Light grey - filled portion (below thumb) */
+  border-radius: 0 0 2px 2px; /* Only round bottom corners */
+  transition: none; /* No transition for immediate response */
 }
 
 .slider-thumb {
-    position: absolute;
-    left: 50%;
-    bottom: 50%;  /* Will be updated dynamically */
-    transform: translateX(-50%) translateY(50%);
-    width: 32px;
-    height: 24px;
-    background: #999999;  /* Medium-light grey for thumb */
-    border-radius: 7px;
-    box-shadow:
-        inset 1px 1px 2px rgba(255,255,255,0.2),
-        inset -1px -1px 2px rgba(0,0,0,0.3),
-        1px 1px 3px rgba(0,0,0,0.2);
-    cursor: grab;
-    z-index: 10;  /* Higher z-index to ensure it's above track */
-    pointer-events: all;  /* Ensure it receives mouse events */
+  position: absolute;
+  left: 50%;
+  bottom: 50%; /* Will be updated dynamically */
+  transform: translateX(-50%) translateY(50%);
+  width: 32px;
+  height: 24px;
+  background: #999999; /* Medium-light grey for thumb */
+  border-radius: 7px;
+  box-shadow:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.3),
+    1px 1px 3px rgba(0, 0, 0, 0.2);
+  cursor: grab;
+  z-index: 10; /* Higher z-index to ensure it's above track */
+  pointer-events: all; /* Ensure it receives mouse events */
 }
 
 .slider-thumb:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 /* Hover effects */
 .custom-slider:hover .slider-thumb {
-    background: #aaaaaa;
+  background: #aaaaaa;
 }
 
 .custom-slider.dragging .slider-thumb {
-    background: #bbbbbb;
+  background: #bbbbbb;
 }
 
 /* Slave slider states - visual feedback for linked sliders */
 .custom-slider.slave .slider-fill {
-    background: var(--text-black) !important;  /* Black for slave sliders */
+  background: var(--text-black) !important; /* Black for slave sliders */
 }
 
 .custom-slider.slave .slider-thumb {
-    background: var(--text-black) !important;  /* Black thumb for slave sliders */
-    cursor: not-allowed !important;
+  background: var(--text-black) !important; /* Black thumb for slave sliders */
+  cursor: not-allowed !important;
 }
 
 .custom-slider.slave .slider-track {
-    opacity: 0.7;  /* Slightly dimmed track for slave sliders */
+  opacity: 0.7; /* Slightly dimmed track for slave sliders */
 }
 
 /* Master slider states - optional visual enhancement */
 .custom-slider.master .slider-fill {
-    background: #999999;  /* Slightly brighter for master */
+  background: #999999; /* Slightly brighter for master */
 }
 
 .custom-slider.master .slider-thumb {
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);  /* Subtle glow for master */
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* Subtle glow for master */
 }
 
 .link-icon {
-    width: 40px;  /* Doubled from 20px */
-    height: 40px;  /* Doubled from 20px */
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 40px; /* Doubled from 20px */
+  height: 40px; /* Doubled from 20px */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .link-icon i {
-    font-size: 32px;  /* Doubled from 16px */
-    color: var(--text-icon);  /* Default grey state - unlinked */
-    transition: color 0.2s ease, transform 0.2s ease;
-    line-height: 1;
-    display: block;
+  font-size: 32px; /* Doubled from 16px */
+  color: var(--text-icon); /* Default grey state - unlinked */
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+  line-height: 1;
+  display: block;
 }
 
 /* Unlinked state (default) */
 .link-icon:not(.linked):not(.master) i {
-    color: var(--text-icon);  /* Grey */
+  color: var(--text-icon); /* Grey */
 }
 
 /* Linked slave state */
 .link-icon.linked:not(.master) i {
-    color: var(--text-black);  /* Black for slaves */
+  color: var(--text-black); /* Black for slaves */
 }
 
 /* Master state */
 .link-icon.master i {
-    color: var(--text-primary);  /* White for master */
+  color: var(--text-primary); /* White for master */
 }
 
 /* Hover effects */
 .link-icon:hover i {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 .link-icon:hover:not(.linked):not(.master) i {
-    color: var(--text-secondary);  /* Lighter grey on hover when unlinked */
+  color: var(--text-secondary); /* Lighter grey on hover when unlinked */
 }
 
 .link-icon.linked:hover:not(.master) i {
-    color: var(--text-muted);  /* Darker on hover when slave */
+  color: var(--text-muted); /* Darker on hover when slave */
 }
 
 .link-icon.master:hover i {
-    color: var(--text-primary);  /* Stay white on hover when master */
-    filter: drop-shadow(0 0 3px rgba(255,255,255,0.5));  /* Glow effect */
+  color: var(--text-primary); /* Stay white on hover when master */
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)); /* Glow effect */
 }
 
 /* Row 6: Loop Section  - Timeline Controls */
 .loop-section {
-    height: var(--row6-height);
-    background: var(--bg-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;  /* Reduced from 50px to 25px */
-    border-top: 1px solid var(--border-color);
+  height: var(--row6-height);
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px; /* Reduced from 50px to 25px */
+  border-top: 1px solid var(--border-color);
 }
 
 .loop-start-label,
 .loop-end-label {
-    font-size: 18px;
-    color: var(--text-muted);
-    font-weight: 300;  /* Match pattern button weight */
-    letter-spacing: 1.2px;
-    font-family: 'Playfair Display', serif;
-    min-width: 80px;
-    text-align: center;
+  font-size: 18px;
+  color: var(--text-muted);
+  font-weight: 300; /* Match pattern button weight */
+  letter-spacing: 1.2px;
+  font-family: "Playfair Display", serif;
+  min-width: 80px;
+  text-align: center;
 }
 
 .loop-timeline {
-    flex: 1;
-    margin: 0 25px;  /* Reduced from 50px to 25px */
-    height: 24px;
-    display: flex;
-    align-items: center;
+  flex: 1;
+  margin: 0 25px; /* Reduced from 50px to 25px */
+  height: 24px;
+  display: flex;
+  align-items: center;
 }
 
 .timeline-track {
-    width: 100%;
-    height: 4px;  /* Same thickness as vertical sliders */
-    background: #444444;  /* Gray color to match vertical sliders */
-    border-radius: 2px;
-    position: relative;
-    border: none;  /* Remove border for cleaner look */
-    opacity: 0.7;  /* Subtle opacity like vertical sliders */
+  width: 100%;
+  height: 4px; /* Same thickness as vertical sliders */
+  background: #444444; /* Gray color to match vertical sliders */
+  border-radius: 2px;
+  position: relative;
+  border: none; /* Remove border for cleaner look */
+  opacity: 0.7; /* Subtle opacity like vertical sliders */
 }
 
 .timeline-handle {
-    width: 24px;
-    height: 32px;  /* Taller to match vertical slider proportions */
-    background: var(--text-icon);  /* Match vertical slider thumb color */
-    border-radius: 7px;  /* Updated to match vertical sliders */
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 0;
-    cursor: pointer;
-    box-shadow:
-        inset 1px 1px 2px rgba(255,255,255,0.2),
-        inset -1px -1px 2px rgba(0,0,0,0.3),
-        1px 1px 3px rgba(0,0,0,0.2);
-    transition: left 0.1s ease;
+  width: 24px;
+  height: 32px; /* Taller to match vertical slider proportions */
+  background: var(--text-icon); /* Match vertical slider thumb color */
+  border-radius: 7px; /* Updated to match vertical sliders */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  cursor: pointer;
+  box-shadow:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.3),
+    1px 1px 3px rgba(0, 0, 0, 0.2);
+  transition: left 0.1s ease;
 }
 
 /* Responsive Adjustments */
 @media (max-width: 1400px) {
-    .interface-container {
-        transform: scale(0.9);
-        transform-origin: top center;
-    }
+  .interface-container {
+    transform: scale(0.9);
+    transform-origin: top center;
+  }
 }
 
 @media (max-width: 1200px) {
-    .interface-container {
-        transform: scale(0.8);
-    }
+  .interface-container {
+    transform: scale(0.8);
+  }
 
-    .pattern-grid {
-        gap: 8px;
-    }
+  .pattern-grid {
+    gap: 8px;
+  }
 
-    .player-tab {
-        padding: 12px 25px;
-        font-size: 24px !important;
-    }
+  .player-tab {
+    padding: 12px 25px;
+    font-size: 24px !important;
+  }
 }
 
 @media (max-width: 1000px) {
-    .interface-container {
-        transform: scale(0.7);
-    }
+  .interface-container {
+    transform: scale(0.7);
+  }
 
-    .player-tabs {
-        overflow-x: auto;
-    }
+  .player-tabs {
+    overflow-x: auto;
+  }
 
-    .player-tab {
-        white-space: nowrap;
-    }
+  .player-tab {
+    white-space: nowrap;
+  }
 }
 
 /* Animation Classes */
 .fade-in {
-    animation: fadeIn 0.3s ease-in;
+  animation: fadeIn 0.3s ease-in;
 }
 
 .fade-out {
-    animation: fadeOut 0.3s ease-out;
+  animation: fadeOut 0.3s ease-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-5px); }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
 }
 
 /* Focus States - Removed to prevent any focus outlines */
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-darker);
+  background: var(--bg-darker);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--bg-secondary);
-    border-radius: 4px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--button-face);
+  background: var(--button-face);
 }
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
-    :root {
-        --bg-primary: #000000;
-        --bg-secondary: #000000;
-        --text-primary: #ffffff;
-        --text-secondary: #ffffff;
-        --border-color: #ffffff;
-    }
+  :root {
+    --bg-primary: #000000;
+    --bg-secondary: #000000;
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --border-color: #ffffff;
+  }
 }
-
 
 /* ===== NEW ROW AREA STYLES ===== */
 
 /* Row 3 Areas */
 .row3-area-1 {
-    flex: 0 0 var(--row3-area1-width);
-    display: flex;
-    align-items: flex-start;  /* Top-align player number */
-    justify-content: flex-start;  /* Left-align player number */
-    padding-left: 20px;  /* Match the container padding */
-    padding-top: 5px;  /* Small top padding */
+  flex: 0 0 var(--row3-area1-width);
+  display: flex;
+  align-items: flex-start; /* Top-align player number */
+  justify-content: flex-start; /* Left-align player number */
+  padding-left: 20px; /* Match the container padding */
+  padding-top: 5px; /* Small top padding */
 }
 
 .row3-area-2 {
-    flex: 0 0 var(--row3-area2-width);
-    display: flex;
-    align-items: flex-start;  /* Top-align edit button */
-    justify-content: flex-end;  /* Right-align edit button */
-    padding-top: 5px;  /* Small top padding */
+  flex: 0 0 var(--row3-area2-width);
+  display: flex;
+  align-items: flex-start; /* Top-align edit button */
+  justify-content: flex-end; /* Right-align edit button */
+  padding-top: 5px; /* Small top padding */
 }
 
 .row3-area-3 {
-    flex: 0 0 var(--row3-area3-width);
-    display: flex;
-    align-items: flex-start;  /* Top-align dropdown and chevrons */
-    justify-content: center;
-    gap: 10px;
-    padding-top: 5px;  /* Small top padding */
+  flex: 0 0 var(--row3-area3-width);
+  display: flex;
+  align-items: flex-start; /* Top-align dropdown and chevrons */
+  justify-content: center;
+  gap: 10px;
+  padding-top: 5px; /* Small top padding */
 }
 
 .row3-area-4 {
-    flex: 0 0 var(--row3-area4-width);
-    display: flex;
-    align-items: center;  /* Center vertically for both icons */
-    justify-content: flex-start;  /* Left-align mixer icon */
-    gap: 10px;  /* Space between mixer and save buttons */
+  flex: 0 0 var(--row3-area4-width);
+  display: flex;
+  align-items: center; /* Center vertically for both icons */
+  justify-content: flex-start; /* Left-align mixer icon */
+  gap: 10px; /* Space between mixer and save buttons */
 }
 
 .row3-area-5 {
-    flex: 0 0 var(--row3-area5-width);
-    display: flex;
-    align-items: flex-start;  /* Top-align mute button */
-    justify-content: flex-end;  /* Right-align mute button */
-    padding-right: 20px;  /* Match the container padding */
-    padding-top: 5px;  /* Small top padding */
+  flex: 0 0 var(--row3-area5-width);
+  display: flex;
+  align-items: flex-start; /* Top-align mute button */
+  justify-content: flex-end; /* Right-align mute button */
+  padding-right: 20px; /* Match the container padding */
+  padding-top: 5px; /* Small top padding */
 }
 
 /* Row 4 Main Divisions */
 .row4-left {
-    flex: 0 0 var(--row4-left-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
+  flex: 0 0 var(--row4-left-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
 }
 
 .row4-right {
-    flex: 0 0 var(--row4-right-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
+  flex: 0 0 var(--row4-right-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
 }
 
 /* Row 4 Left Areas */
 .row4-left-area1 {
-    flex: 0 0 var(--row4-left-area1-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
-    justify-content: flex-end;  /* Right-align gear icon */
-    padding-right: 10px;  /* Add some space from the edge */
+  flex: 0 0 var(--row4-left-area1-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
+  justify-content: flex-end; /* Right-align gear icon */
+  padding-right: 10px; /* Add some space from the edge */
 }
 
 .row4-left-area2 {
-    flex: 0 0 var(--row4-left-area2-width);
-    display: flex;
-    align-items: center;  /* Center vertically */
-    justify-content: center;
-    gap: 10px;  /* Reduced gap for tighter grouping */
+  flex: 0 0 var(--row4-left-area2-width);
+  display: flex;
+  align-items: center; /* Center vertically */
+  justify-content: center;
+  gap: 10px; /* Reduced gap for tighter grouping */
 }
 
 .row4-left-area3 {
-    flex: 0 0 var(--row4-left-area3-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom like other row4 areas */
-    justify-content: flex-start;  /* Align to left */
-    padding-left: 10px;  /* Add spacing from area2 */
+  flex: 0 0 var(--row4-left-area3-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom like other row4 areas */
+  justify-content: flex-start; /* Align to left */
+  padding-left: 10px; /* Add spacing from area2 */
 }
 
 /* Row 4 Right Areas - Labels */
 .row4-right-area1 {
-    flex: 0 0 var(--row4-right-area1-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
-    justify-content: center;
-    height: 100%;
+  flex: 0 0 var(--row4-right-area1-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
+  justify-content: center;
+  height: 100%;
 }
 
 .row4-right-area2 {
-    flex: 0 0 var(--row4-right-area2-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
-    justify-content: center;
-    height: 100%;
+  flex: 0 0 var(--row4-right-area2-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
+  justify-content: center;
+  height: 100%;
 }
 
 .row4-right-area3 {
-    flex: 0 0 var(--row4-right-area3-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
-    justify-content: center;
-    height: 100%;
+  flex: 0 0 var(--row4-right-area3-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
+  justify-content: center;
+  height: 100%;
 }
 
 .row4-right-area4 {
-    flex: 0 0 var(--row4-right-area4-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
-    justify-content: center;
-    height: 100%;
+  flex: 0 0 var(--row4-right-area4-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
+  justify-content: center;
+  height: 100%;
 }
 
 .row4-right-area5 {
-    flex: 0 0 var(--row4-right-area5-width);
-    display: flex;
-    align-items: flex-end;  /* Align to bottom */
-    justify-content: center;
-    height: 100%;
+  flex: 0 0 var(--row4-right-area5-width);
+  display: flex;
+  align-items: flex-end; /* Align to bottom */
+  justify-content: center;
+  height: 100%;
 }
 
 .section-label {
-    font-family: 'Playfair Display', serif !important;
-    font-size: 29px;  /* Reduced by 5% more from 31px */
-    color: var(--text-icon);  /* Match preset and drumkit menu color */
-    text-transform: none;
-    letter-spacing: 0.5px;
-    font-weight: 300;
+  font-family: "Playfair Display", serif !important;
+  font-size: 29px; /* Reduced by 5% more from 31px */
+  color: var(--text-icon); /* Match preset and drumkit menu color */
+  text-transform: none;
+  letter-spacing: 0.5px;
+  font-weight: 300;
 }
 
 /* Row 5 Main Divisions */
 .row5-left {
-    flex: 0 0 var(--row5-left-width);
-    display: flex;
-    align-items: stretch;  /* Stretch to full height */
-    justify-content: center;
-    padding: 5px 10px 20px 10px;  /* Reduced top padding */
+  flex: 0 0 var(--row5-left-width);
+  display: flex;
+  align-items: stretch; /* Stretch to full height */
+  justify-content: center;
+  padding: 5px 10px 20px 10px; /* Reduced top padding */
 }
 
 .row5-right {
-    flex: 0 0 var(--row5-right-width);
-    display: flex;
-    align-items: stretch;
+  flex: 0 0 var(--row5-right-width);
+  display: flex;
+  align-items: stretch;
 }
 
 /* Row 5 Right Areas */
 .row5-right-area1 {
-    flex: 0 0 var(--row5-right-area1-width);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: stretch;
-    padding: 5px 10px 20px 10px;  /* Reduced top padding */
-    box-sizing: border-box;
-    overflow: hidden;
-    height: 100%;  /* Match row5 height */
+  flex: 0 0 var(--row5-right-area1-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  box-sizing: border-box;
+  overflow: hidden;
+  height: 100%; /* Match row5 height */
 }
 
 .row5-right-area2 {
-    flex: 0 0 var(--row5-right-area2-width);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: stretch;
-    padding: 5px 10px 20px 10px;  /* Reduced top padding */
-    box-sizing: border-box;
-    overflow: hidden;
-    height: 100%;  /* Match row5 height */
+  flex: 0 0 var(--row5-right-area2-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  box-sizing: border-box;
+  overflow: hidden;
+  height: 100%; /* Match row5 height */
 }
 
 .row5-right-area3 {
-    flex: 0 0 var(--row5-right-area3-width);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;  /* Align sliders to bottom */
-    padding: 5px 10px 20px 10px;  /* Reduced top padding */
-    box-sizing: border-box;
-    overflow: hidden;
+  flex: 0 0 var(--row5-right-area3-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* Align sliders to bottom */
+  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .row5-right-area4 {
-    flex: 0 0 var(--row5-right-area4-width);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;  /* Align sliders to bottom */
-    padding: 5px 10px 20px 10px;  /* Reduced top padding */
-    box-sizing: border-box;
-    overflow: hidden;
+  flex: 0 0 var(--row5-right-area4-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* Align sliders to bottom */
+  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .row5-right-area5 {
-    flex: 0 0 var(--row5-right-area5-width);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;  /* Align sliders to bottom */
-    padding: 5px 10px 20px 10px;  /* Reduced top padding */
-    box-sizing: border-box;
-    overflow: hidden;
+  flex: 0 0 var(--row5-right-area5-width);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* Align sliders to bottom */
+  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .control-label {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Mute drummer button - using OTTO_Button_Glyph segmented icon */
 .mute-drummer-btn {
-    width: 75px !important; /* 25% larger than 60px */
-    height: 75px !important; /* 25% larger than 60px */
-    background-image: url('Images/OTTO_Button_Glyph.png');
-    background-size: 100% 600% !important;  /* 6 states vertically */
-    background-position: 0 20% !important;  /* Normal state - shows unmuted drummer */
-    background-color: transparent !important;
-    border: none !important;
-    cursor: pointer;
-    transition: background-position 0.05s ease;
-    padding: 0 !important;
-    margin: 0 !important;
-    display: block !important;
-    overflow: hidden !important;
+  width: 75px !important; /* 25% larger than 60px */
+  height: 75px !important; /* 25% larger than 60px */
+  background-image: url("Images/OTTO_Button_Glyph.png");
+  background-size: 100% 600% !important; /* 6 states vertically */
+  background-position: 0 20% !important; /* Normal state - shows unmuted drummer */
+  background-color: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  transition: background-position 0.05s ease;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden !important;
 }
 
 .mute-drummer-btn:hover {
-    background-position: 0 40% !important;  /* Hover state */
-    background-color: transparent !important;
+  background-position: 0 40% !important; /* Hover state */
+  background-color: transparent !important;
 }
 
 .mute-drummer-btn.muted {
-    background-position: 0 0% !important;  /* Muted state - shows crossed out */
-    background-color: transparent !important;
+  background-position: 0 0% !important; /* Muted state - shows crossed out */
+  background-color: transparent !important;
 }
 
 .mute-drummer-btn.muted:hover {
-    background-position: 0 60% !important;  /* Muted hover state */
-    background-color: transparent !important;
+  background-position: 0 60% !important; /* Muted hover state */
+  background-color: transparent !important;
 }
 
 .mute-icon {
-    display: none;  /* Hide the img tag - using background image instead */
+  display: none; /* Hide the img tag - using background image instead */
 }
 
 /* Edit pattern button - increased by 50% from previous */
 .edit-pattern-btn {
-    width: 67px;  /* 40% larger than 48px */
-    height: 67px;  /* 40% larger than 48px */
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    margin: 0;
-    padding: 0;
+  width: 67px; /* 40% larger than 48px */
+  height: 67px; /* 40% larger than 48px */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin: 0;
+  padding: 0;
 }
 
 .edit-pattern-btn i {
-    font-size: 50px;  /* 40% larger than 36px */
-    color: var(--text-icon);
+  font-size: 50px; /* 40% larger than 36px */
+  color: var(--text-icon);
 }
 
 .edit-pattern-btn:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .edit-pattern-btn:active i,
 .edit-pattern-btn.active i {
-    color: var(--text-primary);  /* White icon when clicked/active */
+  color: var(--text-primary); /* White icon when clicked/active */
 }
 
 /* Generic Modal Window Styles */
 .modal-window {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, var(--modal-overlay-opacity));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--modal-animation-speed) ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, var(--modal-overlay-opacity));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--modal-animation-speed) ease;
 }
 
 .modal-window.active {
-    opacity: 1;
-    pointer-events: all;
+  opacity: 1;
+  pointer-events: all;
 }
 
 .modal-content {
-    background: var(--bg-main);
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    transform: scale(0.95);
-    transition: transform var(--modal-animation-speed) ease;
+  background: var(--bg-main);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transform: scale(0.95);
+  transition: transform var(--modal-animation-speed) ease;
 }
 
 .modal-window.active .modal-content {
-    transform: scale(1);
+  transform: scale(1);
 }
 
 .modal-header {
-    padding: 20px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .modal-header h2 {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
 }
 
 .modal-close {
-    background: none;
-    border: none;
-    color: var(--text-icon);
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 5px;
-    transition: color 0.2s;
+  background: none;
+  border: none;
+  color: var(--text-icon);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.2s;
 }
 
 .modal-close:hover {
-    color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .modal-body {
-    padding: 20px;
-    overflow-y: auto;
-    flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
 }
 
 .modal-placeholder {
-    color: var(--text-secondary);
-    font-style: italic;
-    text-align: center;
-    padding: 40px 20px;
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: 40px 20px;
 }
 
 /* Settings Modal Specific Styles */
 
 .settings-section {
-    margin-bottom: 30px;
+  margin-bottom: 30px;
 }
 
 .settings-section h3 {
-    color: var(--text-primary);
-    margin-bottom: 15px;
-    font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  font-size: 1.1rem;
 }
 
 .settings-item {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .settings-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.2s;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
 }
 
 .settings-btn.danger-btn {
-    background: #8b0000;
-    color: white;
+  background: #8b0000;
+  color: white;
 }
 
 .settings-btn.danger-btn:hover {
-    background: #a00000;
-    transform: translateY(-1px);
+  background: #a00000;
+  transform: translateY(-1px);
 }
 
 .settings-description {
-    margin-top: 10px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.5;
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .settings-placeholder {
-    color: var(--text-secondary);
-    font-style: italic;
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 /* Pattern Edit Panel - Simple slide-out panel */
 .pattern-edit-panel {
-    position: fixed;
-    right: -100%; /* Fully hidden off-screen initially */
-    top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height)); /* Start at row 4 */
-    width: 50%;
-    height: calc(var(--row4-height) + var(--row5-height)); /* Cover rows 4 and 5 */
-    background: var(--bg-primary);
-    border-left: 2px solid var(--border-color);
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
-    transition: right 0.3s ease;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  position: fixed;
+  right: -100%; /* Fully hidden off-screen initially */
+  top: calc(
+    var(--row1-height) + var(--row2-height) + var(--row3-height)
+  ); /* Start at row 4 */
+  width: 50%;
+  height: calc(
+    var(--row4-height) + var(--row5-height)
+  ); /* Cover rows 4 and 5 */
+  background: var(--bg-primary);
+  border-left: 2px solid var(--border-color);
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+  transition: right 0.3s ease;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .pattern-edit-panel.active {
-    right: 0; /* Slide in when active */
+  right: 0; /* Slide in when active */
 }
 
 .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    height: 60px; /* Slightly taller for better visual hierarchy */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  height: 60px; /* Slightly taller for better visual hierarchy */
 }
 
 .panel-header-left {
-    flex: 1;
-    display: flex;
-    align-items: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .panel-header-divider {
-    width: 1px;
-    height: 30px;
-    background: #666666; /* Medium grey - visible but not too prominent */
-    margin: 0 20px;
+  width: 1px;
+  height: 30px;
+  background: #666666; /* Medium grey - visible but not too prominent */
+  margin: 0 20px;
 }
 
 .panel-header-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .panel-section-label {
-    color: var(--text-muted);
-    font-size: 14px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.8;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
 }
 
 .panel-header h3 {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 18px;
-    font-weight: 500;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .panel-header-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .panel-control-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 5px;
-    transition: all 0.2s ease;
-    font-size: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  transition: all 0.2s ease;
+  font-size: 20px;
 }
 
 .panel-control-btn:hover {
-    color: var(--text-primary);
-    transform: scale(1.1);
+  color: var(--text-primary);
+  transform: scale(1.1);
 }
 
 .panel-control-btn i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .panel-close-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 5px;
-    transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  transition: all 0.2s ease;
 }
 
 .panel-close-btn:hover {
-    color: var(--text-primary);
-    transform: scale(1.1);
+  color: var(--text-primary);
+  transform: scale(1.1);
 }
 
 .panel-close-btn i {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 .panel-search {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* Delete button in row 4 area 3 */
 .row4-left-area3 .group-delete-btn {
-    width: 62px;  /* Matched to chevron size */
-    height: 62px;  /* Matched to chevron size */
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 62px; /* Matched to chevron size */
+  height: 62px; /* Matched to chevron size */
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .row4-left-area3 .group-delete-btn:hover {
-    color: #8b0000;
-    transform: scale(1.1);
+  color: #8b0000;
+  transform: scale(1.1);
 }
 
 .row4-left-area3 .group-delete-btn i {
-    font-size: 68px;  /* Matched to chevron icon size */
+  font-size: 68px; /* Matched to chevron icon size */
 }
 
 /* Edit mode class for main interface */
 .main-interface.edit-mode .pattern-btn {
-    cursor: move;
+  cursor: move;
 }
 
 .main-interface.edit-mode .pattern-btn.drag-over {
-    background-position: 0 40%; /* Highlight on drag over */
-    transform: scale(1.05);
+  background-position: 0 40%; /* Highlight on drag over */
+  transform: scale(1.05);
 }
 
 /* Old Pattern Group Editor Modal Styles - REMOVED */
 .pattern-group-modal-content {
-    width: 1200px;
-    height: 600px;
-    max-width: 90vw;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    background: var(--bg-primary); /* Opaque background */
+  width: 1200px;
+  height: 600px;
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg-primary); /* Opaque background */
 }
 
 .pattern-group-body {
-    height: calc(100% - 60px);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-secondary); /* Match main interface background */
+  height: calc(100% - 60px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary); /* Match main interface background */
 }
 
 .pattern-group-container {
-    display: flex;
-    flex: 1;
-    height: 100%;
-    background: var(--bg-secondary); /* Ensure opaque background */
+  display: flex;
+  flex: 1;
+  height: 100%;
+  background: var(--bg-secondary); /* Ensure opaque background */
 }
 
 /* Left side matches row5-left exactly */
 .pattern-group-left {
-    flex: 0 0 var(--row5-left-width); /* Use the actual variable! */
-    display: flex;
-    flex-direction: column;
+  flex: 0 0 var(--row5-left-width); /* Use the actual variable! */
+  display: flex;
+  flex-direction: column;
 }
 
 /* Right side for available patterns */
 .pattern-group-right {
-    flex: 0 0 var(--row5-right-width); /* Use the actual variable! */
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid var(--border-color);
-    padding: 20px;
+  flex: 0 0 var(--row5-right-width); /* Use the actual variable! */
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border-color);
+  padding: 20px;
 }
 
 /* Pattern Group Top Controls */
 .pattern-group-top-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border-color);
-    height: 60px;
-    flex-shrink: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border-color);
+  height: 60px;
+  flex-shrink: 0;
 }
 
 /* Pattern Group Selector Row - Using actual row 4 variables */
 .pattern-group-selector-row {
-    height: var(--row4-height); /* Use the actual row 4 height variable! */
-    display: flex;
-    align-items: flex-end; /* Align to bottom like row 4 */
-    justify-content: center;
-    padding: 0 20px 10px 20px;
-    gap: 10px;
-    flex-shrink: 0;
+  height: var(--row4-height); /* Use the actual row 4 height variable! */
+  display: flex;
+  align-items: flex-end; /* Align to bottom like row 4 */
+  justify-content: center;
+  padding: 0 20px 10px 20px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 /* Group delete button - trash icon */
 .group-delete-btn {
-    width: 44px;
-    height: 44px;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 20px;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 20px;
 }
 
 .group-delete-btn:hover {
-    color: #8b0000;
-    transform: scale(1.1);
+  color: #8b0000;
+  transform: scale(1.1);
 }
 
 .group-delete-btn i {
-    font-size: 32px;
+  font-size: 32px;
 }
 
 .editor-group-dropdown {
-    min-width: 200px;
+  min-width: 200px;
 }
 
 .editor-group-dropdown .dropdown-selected {
-    padding: 8px 35px 8px 12px;
-    background: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    cursor: pointer;
-    position: relative;
-    color: var(--text-primary);
-    font-size: 16px;
-    text-align: center;
+  padding: 8px 35px 8px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  color: var(--text-primary);
+  font-size: 16px;
+  text-align: center;
 }
 
 .editor-group-dropdown .dropdown-selected::after {
-    content: '▼';
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 12px;
-    color: var(--text-muted);
+  content: "▼";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .editor-group-dropdown.active .dropdown-selected::after {
-    transform: translateY(-50%) rotate(180deg);
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .editor-group-dropdown .dropdown-options {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--dropdown-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-top: 4px;
-    z-index: 1000;
-    max-height: 300px;
-    overflow-y: auto;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-top: 4px;
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .editor-group-dropdown.active .dropdown-options {
-    display: block;
+  display: block;
 }
 
 .editor-group-dropdown .dropdown-option {
-    padding: 10px 12px;
-    cursor: pointer;
-    transition: background 0.2s ease;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .editor-group-dropdown .dropdown-option:hover {
-    background: var(--dropdown-hover);
+  background: var(--dropdown-hover);
 }
 
 .editor-group-dropdown .dropdown-option.selected {
-    background: var(--accent-color);
-    color: white;
+  background: var(--accent-color);
+  color: white;
 }
 
 .group-name-input {
-    flex: 1;
-    padding: 8px 12px;
-    background: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-size: 14px;
+  flex: 1;
+  padding: 8px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 .group-selector {
-    padding: 8px 12px;
-    background: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-size: 14px;
-    min-width: 150px;
+  padding: 8px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  min-width: 150px;
 }
 
 .group-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    background: var(--button-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .group-action-btn:hover {
-    background: var(--button-hover);
+  background: var(--button-hover);
 }
 
 .group-action-btn.danger {
-    background: #4a1a1a;
-    border-color: #8b0000;
+  background: #4a1a1a;
+  border-color: #8b0000;
 }
 
 .group-action-btn.danger:hover {
-    background: #8b0000;
+  background: #8b0000;
 }
 
 /* Pattern Grid Editor - Using row 5 variables */
 .pattern-grid-editor {
-    height: var(--row5-height); /* Use the actual row 5 height variable! */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 10px 20px 10px; /* Same padding as row5-left */
+  height: var(--row5-height); /* Use the actual row 5 height variable! */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px 20px 10px; /* Same padding as row5-left */
 }
 
 .pattern-edit-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 10px; /* Match main grid gap */
-    width: 100%;
-    max-width: 600px; /* Same as main pattern grid */
-    height: 100%;
-    aspect-ratio: 1; /* Keep it square */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px; /* Match main grid gap */
+  width: 100%;
+  max-width: 600px; /* Same as main pattern grid */
+  height: 100%;
+  aspect-ratio: 1; /* Keep it square */
 }
 
 .pattern-drop-zone {
-    background: transparent;
-    background-image: url('Images/Button100.png');
-    background-size: 100% 600%; /* 6 states vertically */
-    background-position: 0 0%; /* Normal state - top segment */
-    background-repeat: no-repeat;
-    border: none;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Playfair Display', serif;
-    font-size: 28.6px;  /* Exact same as pattern-btn */
-    font-weight: 300;
-    color: var(--text-black);
-    cursor: pointer;
-    transition: all 0.02s ease;
-    position: relative;
-    min-height: 60px;
-    padding: 6px;
-    padding-bottom: 11px;  /* Push text up like main buttons */
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-    text-align: center;
+  background: transparent;
+  background-image: url("Images/Button100.png");
+  background-size: 100% 600%; /* 6 states vertically */
+  background-position: 0 0%; /* Normal state - top segment */
+  background-repeat: no-repeat;
+  border: none;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", serif;
+  font-size: 28.6px; /* Exact same as pattern-btn */
+  font-weight: 300;
+  color: var(--text-black);
+  cursor: pointer;
+  transition: all 0.02s ease;
+  position: relative;
+  min-height: 60px;
+  padding: 6px;
+  padding-bottom: 11px; /* Push text up like main buttons */
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .pattern-drop-zone.has-pattern {
-    background-position: 0 20%; /* Second segment - BLACK button for filled */
-    color: var(--text-black);
+  background-position: 0 20%; /* Second segment - BLACK button for filled */
+  color: var(--text-black);
 }
 
 .pattern-drop-zone.drag-over {
-    background-position: 0 40%; /* Third segment - WHITE button for drag over */
-    color: var(--text-primary);
-    transform: scale(1.02);
+  background-position: 0 40%; /* Third segment - WHITE button for drag over */
+  color: var(--text-primary);
+  transform: scale(1.02);
 }
 
 .pattern-drop-zone .remove-pattern {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 18px;
-    height: 18px;
-    background: rgba(139, 0, 0, 0.9);
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-    line-height: 1;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  background: rgba(139, 0, 0, 0.9);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .pattern-drop-zone.has-pattern:hover .remove-pattern {
-    display: flex;
+  display: flex;
 }
 
 /* Available Patterns List */
 .pattern-group-right h3 {
-    margin: 0 0 15px 0;
-    color: var(--text-primary);
-    font-size: 16px;
-    font-weight: 500;
+  margin: 0 0 15px 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .pattern-search {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .pattern-search-input {
-    width: 100%;
-    padding: 8px 12px;
-    background: var(--input-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-size: 14px;
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 .available-patterns-list {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-right: 10px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 10px;
 }
 
 .pattern-item {
-    padding: 10px 12px;
-    background: var(--button-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: move;
-    transition: all 0.2s ease;
-    color: var(--text-primary);
-    font-size: 14px;
-    user-select: none;
+  padding: 10px 12px;
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: move;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  font-size: 14px;
+  user-select: none;
 }
 
 .pattern-item:hover {
-    background: var(--button-hover);
-    transform: translateX(-2px);
+  background: var(--button-hover);
+  transform: translateX(-2px);
 }
 
 .pattern-item.dragging {
-    opacity: 0.5;
-    cursor: grabbing;
+  opacity: 0.5;
+  cursor: grabbing;
 }
 
 /* Scrollbar styling for pattern list */
 .available-patterns-list::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 .available-patterns-list::-webkit-scrollbar-track {
-    background: var(--input-bg);
-    border-radius: 4px;
+  background: var(--input-bg);
+  border-radius: 4px;
 }
 
 .available-patterns-list::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
+  background: var(--border-color);
+  border-radius: 4px;
 }
 
 .available-patterns-list::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+  background: var(--text-muted);
 }
 
 /* Done button styled like other group action buttons */
 .group-action-btn.done-compact {
-    background: var(--accent-color);
-    border-color: var(--accent-color);
-    margin-left: auto; /* Push to the right */
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  margin-left: auto; /* Push to the right */
 }
 
 .group-action-btn.done-compact:hover {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
-
 
 /* Pattern Edit Mode Styles */
 .pattern-list-item {
-    padding: 10px 12px;
-    background: var(--button-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: move;
-    transition: all 0.2s ease;
-    color: var(--text-primary);
-    font-size: 14px;
-    user-select: none;
-    margin-bottom: 8px;
+  padding: 10px 12px;
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: move;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+  font-size: 14px;
+  user-select: none;
+  margin-bottom: 8px;
 }
 
 .pattern-list-item:hover {
-    background: var(--button-hover);
-    transform: translateX(-2px);
+  background: var(--button-hover);
+  transform: translateX(-2px);
 }
 
 .pattern-list-item.dragging {
-    opacity: 0.5;
-    cursor: grabbing;
+  opacity: 0.5;
+  cursor: grabbing;
 }
 
 /* Pattern buttons in edit mode */
 .pattern-btn.edit-mode {
-    /* Only add subtle visual cue, don't break the button styling */
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+  /* Only add subtle visual cue, don't break the button styling */
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .pattern-btn.drag-over {
-    background-position: 0 40% !important; /* WHITE button for drag over */
-    transform: scale(1.05);
-    color: var(--text-primary) !important;
+  background-position: 0 40% !important; /* WHITE button for drag over */
+  transform: scale(1.05);
+  color: var(--text-primary) !important;
 }
 
 /* Delete button styling */
 .group-delete-btn {
-    width: 67px;  /* Match edit-pattern-btn size */
-    height: 67px;  /* Match edit-pattern-btn size */
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 67px; /* Match edit-pattern-btn size */
+  height: 67px; /* Match edit-pattern-btn size */
+  background: transparent;
+  border: none;
+  color: var(--text-icon);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .group-delete-btn:hover {
-    transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-scale));
 }
 
 .group-delete-btn i {
-    font-size: 50px;  /* Match edit-pattern-btn icon size */
-    color: var(--text-icon);
+  font-size: 50px; /* Match edit-pattern-btn icon size */
+  color: var(--text-icon);
 }
 
 .group-delete-btn:hover i {
-    color: #ff4444;  /* Red on hover */
+  color: #ff4444; /* Red on hover */
 }
 
 .group-delete-btn:active i {
-    color: var(--text-primary);  /* White when clicked */
-    transform: scale(0.95);
+  color: var(--text-primary); /* White when clicked */
+  transform: scale(0.95);
 }
 
 /* Edit button active state */
 .edit-pattern-btn.active {
-    background: var(--accent-purple);
-    border-color: var(--accent-purple);
+  background: var(--accent-purple);
+  border-color: var(--accent-purple);
 }
 
 /* Panel close button */
 .panel-close-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 24px;
-    cursor: pointer;
-    padding: 5px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
 }
 
 .panel-close-btn:hover {
-    color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 /* Pattern search input */
 .pattern-search-input {
-    width: 100%;
-    padding: 10px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    border-radius: 4px;
+  width: 100%;
+  padding: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 4px;
 }
 
 .panel-search {
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--border-color);
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 /* ========================================
    Slide-up Panels - New implementation for modals
    ======================================== */
 
 .slide-up-panel {
-    position: absolute; /* Changed from fixed to absolute to be relative to interface-container */
-    left: 0;
-    width: 100%;
-    background: var(--bg-primary);
-    border-top: 2px solid var(--border-color);
-    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  position: absolute; /* Changed from fixed to absolute to be relative to interface-container */
+  left: 0;
+  width: 100%;
+  background: var(--bg-primary);
+  border-top: 2px solid var(--border-color);
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Full height panels (Settings, Presets, Link, Cloud) - from row 2 to row 6 */
 .slide-up-panel.full-height-panel {
-    top: calc(var(--row1-height)); /* Position at row 2 */
-    height: calc(100% - var(--row1-height)); /* Cover rows 2-6 */
-    transform: translateY(calc(100% + 30px)); /* Move further down to hide shadow (20px shadow + 10px buffer) */
-    transition: transform 0.3s ease;
+  top: calc(var(--row1-height)); /* Position at row 2 */
+  height: calc(100% - var(--row1-height)); /* Cover rows 2-6 */
+  transform: translateY(
+    calc(100% + 30px)
+  ); /* Move further down to hide shadow (20px shadow + 10px buffer) */
+  transition: transform 0.3s ease;
 }
 
 /* Partial height panels (Drumkit, Mixer) - from row 4 to row 6 */
 .slide-up-panel.partial-height-panel {
-    top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height)); /* Position at row 4 */
-    height: calc(100% - var(--row1-height) - var(--row2-height) - var(--row3-height)); /* Cover rows 4-6 */
-    transform: translateY(calc(100% + 30px)); /* Move further down to hide shadow (20px shadow + 10px buffer) */
-    transition: transform 0.3s ease;
+  top: calc(
+    var(--row1-height) + var(--row2-height) + var(--row3-height)
+  ); /* Position at row 4 */
+  height: calc(
+    100% - var(--row1-height) - var(--row2-height) - var(--row3-height)
+  ); /* Cover rows 4-6 */
+  transform: translateY(
+    calc(100% + 30px)
+  ); /* Move further down to hide shadow (20px shadow + 10px buffer) */
+  transition: transform 0.3s ease;
 }
 
 /* Active state - slide up into view */
 .slide-up-panel.full-height-panel.active {
-    transform: translateY(0); /* Slide up to normal position */
+  transform: translateY(0); /* Slide up to normal position */
 }
 
 .slide-up-panel.partial-height-panel.active {
-    transform: translateY(0); /* Slide up to normal position */
+  transform: translateY(0); /* Slide up to normal position */
 }
 
 /* Panel header styling */
 .slide-up-panel .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 30px;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .slide-up-panel .panel-header h2 {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .slide-up-panel .panel-close-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-icon);
-    font-size: 24px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-    padding: 5px;
+  background: transparent;
+  border: none;
+  color: var(--text-icon);
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 5px;
 }
 
 .slide-up-panel .panel-close-btn:hover {
-    color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 /* Panel body styling */
 .slide-up-panel .panel-body {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
-    overflow-x: hidden;
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Settings panel specific styles */
 #settings-panel .settings-section {
-    margin-bottom: 40px;
+  margin-bottom: 40px;
 }
 
 #settings-panel .settings-section h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border-color);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 #settings-panel .settings-item {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 #settings-panel .settings-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 20px;
-    background: var(--button-face);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--button-face);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 #settings-panel .settings-btn:hover {
-    background: var(--button-highlight);
+  background: var(--button-highlight);
 }
 
 #settings-panel .settings-btn.danger-btn {
-    background-color: #8b0000;
+  background-color: #8b0000;
 }
 
 #settings-panel .settings-btn.danger-btn:hover {
-    background-color: #a00000;
+  background-color: #a00000;
 }
 
 #settings-panel .settings-description {
-    margin-top: 10px;
-    color: var(--text-muted);
-    font-size: 13px;
-    line-height: 1.5;
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 #settings-panel .settings-placeholder {
-    color: var(--text-muted);
-    font-style: italic;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 /* Preset panel specific styles */
 #preset-panel .preset-panel-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 #preset-panel .preset-name-input {
-    flex: 1;
-    padding: 10px 15px;
-    background: var(--bg-darker);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-size: 14px;
+  flex: 1;
+  padding: 10px 15px;
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 #preset-panel .preset-action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: var(--button-face);
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    color: var(--text-primary);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--button-face);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 #preset-panel .preset-action-btn:hover {
-    background: var(--button-highlight);
+  background: var(--button-highlight);
 }
 
 #preset-panel .preset-list-container h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
 }
 
 #preset-panel .preset-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* Cloud panel specific styles */
 #cloud-panel .panel-body {
-    padding: 40px;
+  padding: 40px;
 }
 
 #cloud-panel .panel-body p {
-    color: var(--text-primary);
-    font-size: 16px;
-    margin-bottom: 20px;
+  color: var(--text-primary);
+  font-size: 16px;
+  margin-bottom: 20px;
 }
 
 #cloud-panel .panel-body ul {
-    list-style: none;
-    padding: 0;
+  list-style: none;
+  padding: 0;
 }
 
 #cloud-panel .panel-body li {
-    padding: 10px 0;
-    color: var(--text-secondary);
-    font-size: 14px;
-    padding-left: 20px;
-    position: relative;
+  padding: 10px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding-left: 20px;
+  position: relative;
 }
 
 #cloud-panel .panel-body li::before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: var(--text-icon);
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--text-icon);
 }
 
 /* Online Store panel styling */
 #store-panel .store-body {
-    padding: 0;
-    height: calc(100% - 60px); /* Account for panel header */
-    display: flex;
-    flex-direction: column;
-    position: relative;
+  padding: 0;
+  height: calc(100% - 60px); /* Account for panel header */
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .store-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: var(--bg-secondary);
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--bg-secondary);
 }
 
 .store-loading-message,
 .store-error-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 18px;
-    z-index: 10;
-    pointer-events: none; /* Allow clicks through to iframe */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 18px;
+  z-index: 10;
+  pointer-events: none; /* Allow clicks through to iframe */
 }
 
 .store-error-message {
-    color: var(--text-primary);
-    pointer-events: auto; /* Allow interaction with error message */
+  color: var(--text-primary);
+  pointer-events: auto; /* Allow interaction with error message */
 }
 
 .store-iframe {
-    z-index: 1;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Link panel specific styles */
 #link-panel .panel-placeholder,
 #mixer-panel .panel-placeholder,
 #kit-edit-panel .panel-placeholder {
-    color: var(--text-muted);
-    font-style: italic;
-    text-align: center;
-    padding: 40px;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 40px;
 }
 
 /* Scrollbar styling for panel bodies */
 .slide-up-panel .panel-body::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 .slide-up-panel .panel-body::-webkit-scrollbar-track {
-    background: var(--bg-darker);
+  background: var(--bg-darker);
 }
 
 .slide-up-panel .panel-body::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
+  background: var(--border-color);
+  border-radius: 4px;
 }
 
 /* Active state for buttons when panels are open */
@@ -3235,6 +3276,6 @@ body {
 .edit-btn.panel-active,
 .kit-mixer-btn.panel-active,
 .kit-edit-btn.panel-active {
-    background: transparent;  /* NEVER change background */
-    color: var(--text-primary);  /* Only change icon color to white */
+  background: transparent; /* NEVER change background */
+  color: var(--text-primary); /* Only change icon color to white */
 }

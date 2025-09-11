@@ -1,552 +1,712 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OTTO - Organic Timing Trigger Orchestrator</title>
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"> </script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="interface-container">
-        <!-- Splash Screen -->
-        <div id="splash-screen" class="splash-screen">
-            <img src="Images/OTTO_Splash_Screen.png" alt="OTTO" class="splash-logo">
+      <!-- Splash Screen -->
+      <div id="splash-screen" class="splash-screen">
+        <img
+          src="Images/OTTO_Splash_Screen.png"
+          alt="OTTO"
+          class="splash-logo"
+        />
+      </div>
+
+      <!-- Link Panel - Slides up from bottom -->
+      <div id="link-panel" class="slide-up-panel full-height-panel">
+        <div class="panel-header">
+          <h2>Link Settings</h2>
+          <button class="panel-close-btn" id="link-panel-close">
+            <i class="ph-thin ph-x"></i>
+          </button>
         </div>
-
-        <!-- Link Panel - Slides up from bottom -->
-        <div id="link-panel" class="slide-up-panel full-height-panel">
-            <div class="panel-header">
-                <h2>Link Settings</h2>
-                <button class="panel-close-btn" id="link-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
-            </div>
-            <div class="panel-body">
-                <p class="panel-placeholder">Link configuration will be available here.</p>
-            </div>
+        <div class="panel-body">
+          <p class="panel-placeholder">
+            Link configuration will be available here.
+          </p>
         </div>
+      </div>
 
-        <!-- Mixer Panel - Slides up from bottom (rows 4-6) -->
-        <div id="mixer-panel" class="slide-up-panel partial-height-panel">
-            <div class="panel-header">
-                <h2>Kit Mixer: <span id="mixer-kit-name">Acoustic</span></h2>
-                <button class="panel-close-btn" id="mixer-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
-            </div>
-            <div class="panel-body">
-                <p class="panel-placeholder">Mixer controls will be available here.</p>
-            </div>
+      <!-- Mixer Panel - Slides up from bottom (rows 4-6) -->
+      <div id="mixer-panel" class="slide-up-panel partial-height-panel">
+        <div class="panel-header">
+          <h2>Kit Mixer: <span id="mixer-kit-name">Acoustic</span></h2>
+          <button class="panel-close-btn" id="mixer-panel-close">
+            <i class="ph-thin ph-x"></i>
+          </button>
         </div>
-
-        <!-- Drum Kit Edit Panel - Slides up from bottom (rows 4-6) -->
-        <div id="kit-edit-panel" class="slide-up-panel partial-height-panel">
-            <div class="panel-header">
-                <h2>Edit Drum Kit</h2>
-                <button class="panel-close-btn" id="kit-edit-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
-            </div>
-            <div class="panel-body">
-                <p class="panel-placeholder">Drum kit editor will be available here.</p>
-            </div>
+        <div class="panel-body">
+          <p class="panel-placeholder">
+            Mixer controls will be available here.
+          </p>
         </div>
+      </div>
 
-        <!-- Pattern Edit Panel - Simple slide-out panel for editing -->
-        <div id="pattern-edit-panel" class="pattern-edit-panel">
-            <div class="panel-header">
-                <div class="panel-header-left">
-                    <span class="panel-section-label">Available Patterns</span>
-                </div>
-                <div class="panel-header-divider"></div>
-                <div class="panel-header-right">
-                    <span class="panel-section-label">Pattern Groups</span>
-                    <div class="panel-header-controls">
-                        <button class="panel-control-btn" id="add-group-btn" title="Add New Group">
-                            <i class="ph-thin ph-plus"></i>
-                        </button>
-                        <button class="panel-control-btn" id="rename-group-btn" title="Rename Current Group">
-                            <i class="ph-thin ph-pencil-simple"></i>
-                        </button>
-                        <button class="panel-close-btn" id="pattern-panel-close">
-                            <i class="ph-thin ph-x"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="panel-search">
-                <input type="text" id="pattern-search-input" class="pattern-search-input" placeholder="Search patterns...">
-            </div>
-            <div class="available-patterns-list" id="available-patterns-list">
-                <!-- Patterns will be dynamically loaded here -->
-            </div>
+      <!-- Drum Kit Edit Panel - Slides up from bottom (rows 4-6) -->
+      <div id="kit-edit-panel" class="slide-up-panel partial-height-panel">
+        <div class="panel-header">
+          <h2>Edit Drum Kit</h2>
+          <button class="panel-close-btn" id="kit-edit-panel-close">
+            <i class="ph-thin ph-x"></i>
+          </button>
         </div>
-
-        <!-- Settings Panel - Slides up from bottom -->
-        <div id="settings-panel" class="slide-up-panel full-height-panel">
-            <div class="panel-header">
-                <h2>Settings</h2>
-                <button class="panel-close-btn" id="settings-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
-            </div>
-            <div class="panel-body">
-                <div class="settings-section">
-                    <h3>Application Settings</h3>
-                    <div class="settings-item">
-                        <button class="settings-btn danger-btn" id="settings-factory-reset-btn">
-                            <i class="ph-thin ph-arrow-clockwise"></i>
-                            <span>Reset Default Preset to Factory Settings</span>
-                        </button>
-                        <p class="settings-description">Restores the Default preset to original factory values. Use this if your Default preset has become corrupted.</p>
-                    </div>
-                </div>
-                <div class="settings-section">
-                    <h3>MIDI Settings</h3>
-                    <p class="settings-placeholder">MIDI configuration will be available in a future update.</p>
-                </div>
-                <div class="settings-section">
-                    <h3>Audio Settings</h3>
-                    <p class="settings-placeholder">Audio configuration will be available in a future update.</p>
-                </div>
-            </div>
+        <div class="panel-body">
+          <p class="panel-placeholder">
+            Drum kit editor will be available here.
+          </p>
         </div>
+      </div>
 
-        <!-- Cloud Panel - Slides up from bottom -->
-        <div id="cloud-panel" class="slide-up-panel full-height-panel">
-            <div class="panel-header">
-                <h2>Cloud Storage</h2>
-                <button class="panel-close-btn" id="cloud-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
+      <!-- Pattern Edit Panel - Simple slide-out panel for editing -->
+      <div id="pattern-edit-panel" class="pattern-edit-panel">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-section-label">Available Patterns</span>
+          </div>
+          <div class="panel-header-divider"></div>
+          <div class="panel-header-right">
+            <span class="panel-section-label">Pattern Groups</span>
+            <div class="panel-header-controls">
+              <button
+                class="panel-control-btn"
+                id="add-group-btn"
+                title="Add New Group"
+              >
+                <i class="ph-thin ph-plus"></i>
+              </button>
+              <button
+                class="panel-control-btn"
+                id="rename-group-btn"
+                title="Rename Current Group"
+              >
+                <i class="ph-thin ph-pencil-simple"></i>
+              </button>
+              <button class="panel-close-btn" id="pattern-panel-close">
+                <i class="ph-thin ph-x"></i>
+              </button>
             </div>
-            <div class="panel-body">
-                <p>Cloud storage functionality coming soon!</p>
-                <p>This will allow you to:</p>
-                <ul>
-                    <li>Backup your presets to the cloud</li>
-                    <li>Sync presets across devices</li>
-                    <li>Share presets with other users</li>
-                    <li>Access your presets from anywhere</li>
-                </ul>
-            </div>
+          </div>
         </div>
-
-        <!-- Online Store Panel - Slides up from bottom -->
-        <div id="store-panel" class="slide-up-panel full-height-panel">
-            <div class="panel-header">
-                <h2>OTTO Store - Drum Kits & MIDI Files</h2>
-                <button class="panel-close-btn" id="store-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
-            </div>
-            <div class="panel-body store-body">
-                <div class="store-loading-message" id="store-loading">Loading store...</div>
-                <iframe id="store-iframe" class="store-iframe" src="" title="OTTO Online Store"></iframe>
-                <div class="store-error-message" id="store-error" style="display: none;">
-                    <p>Unable to load the store in this window.</p>
-                    <p>The store will open in a new tab instead.</p>
-                    <button class="open-store-btn" onclick="window.open('https://LarrySeyer.com', '_blank')" style="margin-top: 20px; padding: 10px 20px; background: var(--button-face); color: var(--text-primary); border: none; border-radius: 4px; cursor: pointer;">Open Store in New Tab</button>
-                </div>
-            </div>
+        <div class="panel-search">
+          <input
+            type="text"
+            id="pattern-search-input"
+            class="pattern-search-input"
+            placeholder="Search patterns..."
+          />
         </div>
-
-        <!-- Preset Management Panel - Slides up from bottom -->
-        <div id="preset-panel" class="slide-up-panel full-height-panel">
-            <div class="panel-header">
-                <h2>Preset Management</h2>
-                <button class="panel-close-btn" id="preset-panel-close">
-                    <i class="ph-thin ph-x"></i>
-                </button>
-            </div>
-            <div class="panel-body">
-                <div class="preset-panel-controls">
-                    <input type="text" id="preset-name-input" class="preset-name-input" placeholder="Enter preset name...">
-                    <button class="preset-action-btn" id="preset-new-btn">
-                        <i class="ph-thin ph-plus"></i>
-                        <span>New</span>
-                    </button>
-                    <button class="preset-action-btn" id="preset-undo-btn">
-                        <i class="ph-thin ph-arrow-counter-clockwise"></i>
-                        <span>Undo</span>
-                    </button>
-                    <button class="preset-action-btn" id="preset-factory-reset-btn" style="background-color: #8b0000;">
-                        <i class="ph-thin ph-arrow-clockwise"></i>
-                        <span>Reset Default</span>
-                    </button>
-                </div>
-                <div class="preset-list-container">
-                    <h3>Saved Presets</h3>
-                    <div class="preset-list" id="preset-list">
-                        <!-- Preset items will be dynamically added here -->
-                    </div>
-                </div>
-            </div>
+        <div class="available-patterns-list" id="available-patterns-list">
+          <!-- Patterns will be dynamically loaded here -->
         </div>
+      </div>
 
-        <!-- Main Interface - 6 Rows -->
-        <div class="main-interface">
+      <!-- Settings Panel - Slides up from bottom -->
+      <div id="settings-panel" class="slide-up-panel full-height-panel">
+        <div class="panel-header">
+          <h2>Settings</h2>
+          <button class="panel-close-btn" id="settings-panel-close">
+            <i class="ph-thin ph-x"></i>
+          </button>
+        </div>
+        <div class="panel-body">
+          <div class="settings-section">
+            <h3>Application Settings</h3>
+            <div class="settings-item">
+              <button
+                class="settings-btn danger-btn"
+                id="settings-factory-reset-btn"
+              >
+                <i class="ph-thin ph-arrow-clockwise"></i>
+                <span>Reset Default Preset to Factory Settings</span>
+              </button>
+              <p class="settings-description">
+                Restores the Default preset to original factory values. Use this
+                if your Default preset has become corrupted.
+              </p>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>MIDI Settings</h3>
+            <p class="settings-placeholder">
+              MIDI configuration will be available in a future update.
+            </p>
+          </div>
+          <div class="settings-section">
+            <h3>Audio Settings</h3>
+            <p class="settings-placeholder">
+              Audio configuration will be available in a future update.
+            </p>
+          </div>
+        </div>
+      </div>
 
-            <!-- Row 1: Top Bar (8% height) - 5 Main Areas -->
-            <div class="top-bar">
-                <!-- Area 1: Settings, Link, and Preset Edit buttons -->
-                <div class="row1-area1">
-                    <button class="icon-btn" id="settings-btn">
-                        <i class="ph-thin ph-gear"></i>
-                    </button>
-                    <button class="icon-btn" id="link-btn">
-                        <i class="ph-thin ph-link"></i>
-                    </button>
-                    <button class="icon-btn" id="preset-edit-btn" title="Manage Presets">
-                        <i class="ph-thin ph-pencil-simple"></i>
-                    </button>
-                </div>
+      <!-- Cloud Panel - Slides up from bottom -->
+      <div id="cloud-panel" class="slide-up-panel full-height-panel">
+        <div class="panel-header">
+          <h2>Cloud Storage</h2>
+          <button class="panel-close-btn" id="cloud-panel-close">
+            <i class="ph-thin ph-x"></i>
+          </button>
+        </div>
+        <div class="panel-body">
+          <p>Cloud storage functionality coming soon!</p>
+          <p>This will allow you to:</p>
+          <ul>
+            <li>Backup your presets to the cloud</li>
+            <li>Sync presets across devices</li>
+            <li>Share presets with other users</li>
+            <li>Access your presets from anywhere</li>
+          </ul>
+        </div>
+      </div>
 
-                <!-- Area 2: Presets dropdown -->
-                <div class="row1-area2">
-                    <!-- Preset chevrons commented out to make room for save button
+      <!-- Online Store Panel - Slides up from bottom -->
+      <div id="store-panel" class="slide-up-panel full-height-panel">
+        <div class="panel-header">
+          <h2>OTTO Store - Drum Kits & MIDI Files</h2>
+          <button class="panel-close-btn" id="store-panel-close">
+            <i class="ph-thin ph-x"></i>
+          </button>
+        </div>
+        <div class="panel-body store-body">
+          <div class="store-loading-message" id="store-loading">
+            Loading store...
+          </div>
+          <iframe
+            id="store-iframe"
+            class="store-iframe"
+            src=""
+            title="OTTO Online Store"
+          ></iframe>
+          <div
+            class="store-error-message"
+            id="store-error"
+            style="display: none"
+          >
+            <p>Unable to load the store in this window.</p>
+            <p>The store will open in a new tab instead.</p>
+            <button
+              class="open-store-btn"
+              onclick="window.open('https://LarrySeyer.com', '_blank')"
+              style="
+                margin-top: 20px;
+                padding: 10px 20px;
+                background: var(--button-face);
+                color: var(--text-primary);
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+              "
+            >
+              Open Store in New Tab
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preset Management Panel - Slides up from bottom -->
+      <div id="preset-panel" class="slide-up-panel full-height-panel">
+        <div class="panel-header">
+          <h2>Preset Management</h2>
+          <button class="panel-close-btn" id="preset-panel-close">
+            <i class="ph-thin ph-x"></i>
+          </button>
+        </div>
+        <div class="panel-body">
+          <div class="preset-panel-controls">
+            <input
+              type="text"
+              id="preset-name-input"
+              class="preset-name-input"
+              placeholder="Enter preset name..."
+            />
+            <button class="preset-action-btn" id="preset-new-btn">
+              <i class="ph-thin ph-plus"></i>
+              <span>New</span>
+            </button>
+            <button class="preset-action-btn" id="preset-undo-btn">
+              <i class="ph-thin ph-arrow-counter-clockwise"></i>
+              <span>Undo</span>
+            </button>
+            <button
+              class="preset-action-btn"
+              id="preset-factory-reset-btn"
+              style="background-color: #8b0000"
+            >
+              <i class="ph-thin ph-arrow-clockwise"></i>
+              <span>Reset Default</span>
+            </button>
+          </div>
+          <div class="preset-list-container">
+            <h3>Saved Presets</h3>
+            <div class="preset-list" id="preset-list">
+              <!-- Preset items will be dynamically added here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Interface - 6 Rows -->
+      <div class="main-interface">
+        <!-- Row 1: Top Bar (8% height) - 5 Main Areas -->
+        <div class="top-bar">
+          <!-- Area 1: Settings, Link, and Preset Edit buttons -->
+          <div class="row1-area1">
+            <button class="icon-btn" id="settings-btn">
+              <i class="ph-thin ph-gear"></i>
+            </button>
+            <button class="icon-btn" id="link-btn">
+              <i class="ph-thin ph-link"></i>
+            </button>
+            <button
+              class="icon-btn"
+              id="preset-edit-btn"
+              title="Manage Presets"
+            >
+              <i class="ph-thin ph-pencil-simple"></i>
+            </button>
+          </div>
+
+          <!-- Area 2: Presets dropdown -->
+          <div class="row1-area2">
+            <!-- Preset chevrons commented out to make room for save button
                     <button class="preset-nav-btn preset-prev">
                         <i class="ph-thin ph-caret-left"></i>
                     </button>
                     -->
-                    <div class="custom-dropdown" id="preset-dropdown">
-                        <div class="dropdown-selected" id="preset-selected">
-                            <span class="dropdown-text">Default</span>
-                            <i class="ph-thin ph-lock preset-lock-indicator" id="preset-lock-indicator" style="display: none; margin-left: 8px; color: var(--text-icon);"></i>
-                        </div>
-                        <div class="dropdown-options" id="preset-options">
-                            <div class="dropdown-option" data-value="default">Default</div>
-                            <div class="dropdown-option" data-value="rock-ballad">Rock Ballad</div>
-                            <div class="dropdown-option" data-value="jazz-combo">Jazz Combo</div>
-                            <div class="dropdown-option" data-value="funk-groove">Funk Groove</div>
-                            <div class="dropdown-option" data-value="latin-rhythm">Latin Rhythm</div>
-                            <div class="dropdown-option" data-value="electronic-pulse">Electronic Pulse</div>
-                            <div class="dropdown-option" data-value="acoustic-folk">Acoustic Folk</div>
-                            <div class="dropdown-option" data-value="blues-shuffle">Blues Shuffle</div>
-                            <div class="dropdown-option" data-value="pop-modern">Pop Modern</div>
-                            <div class="dropdown-option" data-value="world-fusion">World Fusion</div>
-                        </div>
-                    </div>
-                    <!-- Preset chevron commented out
+            <div class="custom-dropdown" id="preset-dropdown">
+              <div class="dropdown-selected" id="preset-selected">
+                <span class="dropdown-text">Default</span>
+                <i
+                  class="ph-thin ph-lock preset-lock-indicator"
+                  id="preset-lock-indicator"
+                  style="
+                    display: none;
+                    margin-left: 8px;
+                    color: var(--text-icon);
+                  "
+                ></i>
+              </div>
+              <div class="dropdown-options" id="preset-options">
+                <div class="dropdown-option" data-value="default">Default</div>
+                <div class="dropdown-option" data-value="rock-ballad">
+                  Rock Ballad
+                </div>
+                <div class="dropdown-option" data-value="jazz-combo">
+                  Jazz Combo
+                </div>
+                <div class="dropdown-option" data-value="funk-groove">
+                  Funk Groove
+                </div>
+                <div class="dropdown-option" data-value="latin-rhythm">
+                  Latin Rhythm
+                </div>
+                <div class="dropdown-option" data-value="electronic-pulse">
+                  Electronic Pulse
+                </div>
+                <div class="dropdown-option" data-value="acoustic-folk">
+                  Acoustic Folk
+                </div>
+                <div class="dropdown-option" data-value="blues-shuffle">
+                  Blues Shuffle
+                </div>
+                <div class="dropdown-option" data-value="pop-modern">
+                  Pop Modern
+                </div>
+                <div class="dropdown-option" data-value="world-fusion">
+                  World Fusion
+                </div>
+              </div>
+            </div>
+            <!-- Preset chevron commented out
                     <button class="preset-nav-btn preset-next">
                         <i class="ph-thin ph-caret-right"></i>
                     </button>
                     -->
-                    <button class="quick-save-btn preset-save-btn" id="preset-save-btn" title="Save Preset">
-                        <i class="ph-thin ph-floppy-disk"></i>
-                    </button>
-                </div>
+            <button
+              class="quick-save-btn preset-save-btn"
+              id="preset-save-btn"
+              title="Save Preset"
+            >
+              <i class="ph-thin ph-floppy-disk"></i>
+            </button>
+          </div>
 
-                <!-- Area 3: Play/Pause Transport (centered) -->
-                <div class="row1-area3">
-                    <button class="play-pause-btn" id="play-pause-btn">
-                        <i class="ph-thin ph-play play-icon" style="display:none;"></i>
-                        <i class="ph-thin ph-pause pause-icon"></i>
-                    </button>
-                </div>
+          <!-- Area 3: Play/Pause Transport (centered) -->
+          <div class="row1-area3">
+            <button class="play-pause-btn" id="play-pause-btn">
+              <i class="ph-thin ph-play play-icon" style="display: none"></i>
+              <i class="ph-thin ph-pause pause-icon"></i>
+            </button>
+          </div>
 
-                <!-- Area 4: Tempo Display (Tap & Edit) -->
-                <div class="row1-area4">
-                    <div class="tempo-display" id="tempo-display" contenteditable="false">120</div>
-                </div>
-
-                <!-- Area 5: Cloud Upload, Logo and Version -->
-                <div class="row1-area5">
-                    <button class="icon-btn" id="upload-btn">
-                        <i class="ph-thin ph-cloud-arrow-up"></i>
-                    </button>
-                    <div class="logo-version-container" id="logo-version">
-                        <span class="otto-logo">Otto</span>
-                        <span class="version-text">Ver. <span id="version-number"></span></span>
-                    </div>
-                </div>
+          <!-- Area 4: Tempo Display (Tap & Edit) -->
+          <div class="row1-area4">
+            <div
+              class="tempo-display"
+              id="tempo-display"
+              contenteditable="false"
+            >
+              120
             </div>
+          </div>
 
-            <!-- Mute Overlay for rows 2-5 -->
-            <div class="mute-overlay"></div>
-
-            <!-- Row 2: Player Tabs with Chevron Navigation -->
-            <div class="player-tabs-section">
-                <!-- Left chevron for player navigation -->
-                <button class="player-nav-btn player-nav-prev" id="player-prev-btn">
-                    <i class="ph-thin ph-caret-left"></i>
-                </button>
-
-                <div class="player-tabs">
-                    <button class="player-tab active" data-player="1">PLAYER 1</button>
-                    <button class="player-tab" data-player="2">PLAYER 2</button>
-                    <button class="player-tab" data-player="3">PLAYER 3</button>
-                    <button class="player-tab" data-player="4">PLAYER 4</button>
-                    <button class="player-tab" data-player="5">PLAYER 5</button>
-                    <button class="player-tab" data-player="6">PLAYER 6</button>
-                    <button class="player-tab" data-player="7">PLAYER 7</button>
-                    <button class="player-tab" data-player="8">PLAYER 8</button>
-                </div>
-
-                <!-- Right chevron for player navigation -->
-                <button class="player-nav-btn player-nav-next" id="player-next-btn">
-                    <i class="ph-thin ph-caret-right"></i>
-                </button>
+          <!-- Area 5: Cloud Upload, Logo and Version -->
+          <div class="row1-area5">
+            <button class="icon-btn" id="upload-btn">
+              <i class="ph-thin ph-cloud-arrow-up"></i>
+            </button>
+            <div class="logo-version-container" id="logo-version">
+              <span class="otto-logo">Otto</span>
+              <span class="version-text"
+                >Ver. <span id="version-number"></span
+              ></span>
             </div>
-
-            <!-- Row 3: Drum Kit Section - 5 Areas -->
-            <div class="drum-kit-section">
-                <!-- Area 1: Player number display -->
-                <div class="row3-area-1">
-                    <div class="player-number-display">
-                        <span class="player-number" id="current-player-number">1</span>
-                    </div>
-                </div>
-
-                <!-- Area 2: Edit kit icon (right-aligned to be next to chevron) -->
-                <div class="row3-area-2">
-                    <button class="edit-btn kit-edit-btn">
-                        <i class="ph-thin ph-pencil-simple"></i>
-                    </button>
-                </div>
-
-                <!-- Area 3: Drum kit dropdown and chevrons -->
-                <div class="row3-area-3">
-                    <button class="kit-nav-btn kit-prev">
-                        <i class="ph-thin ph-caret-left"></i>
-                    </button>
-                    <div class="custom-dropdown kit-dropdown" id="kit-dropdown">
-                        <div class="dropdown-selected" id="kit-selected">
-                            <span class="dropdown-text">Acoustic</span>
-                        </div>
-                        <div class="dropdown-options" id="kit-options">
-    <!-- This list should eventually come from our INI file storage system -->
-                            <div class="dropdown-option" data-value="acoustic">Acoustic</div>
-                            <div class="dropdown-option" data-value="electronic">Electronic</div>
-                            <div class="dropdown-option" data-value="rock">Rock</div>
-                            <div class="dropdown-option" data-value="jazz">Jazz</div>
-                            <div class="dropdown-option" data-value="pop">Pop</div>
-                            <div class="dropdown-option" data-value="funk">Funk</div>
-                            <div class="dropdown-option" data-value="latin">Latin</div>
-                            <div class="dropdown-option" data-value="vintage">Vintage</div>
-                        </div>
-                    </div>
-                    <button class="kit-nav-btn kit-next">
-                        <i class="ph-thin ph-caret-right"></i>
-                    </button>
-                </div>
-
-                <!-- Area 4: Mixer icon -->
-                <div class="row3-area-4">
-                    <button class="kit-mixer-btn" id="kit-mixer-btn">
-                        <i class="ph-thin ph-faders"></i>
-                    </button>
-                    <button class="quick-save-btn drumkit-save-btn" id="drumkit-save-btn" title="Save Drumkit Mixer" style="display: none;">
-                        <i class="ph-thin ph-floppy-disk"></i>
-                    </button>
-                </div>
-
-                <!-- Area 5: Mute/Unmute drummer icon (right-aligned) -->
-                <div class="row3-area-5">
-                    <button class="mute-drummer-btn" id="mute-drummer-btn">
-            <!-- This incorrectly appears off screen on right  -->
-                        <!-- Using OTTO_Button_Glyph.png as background image -->
-                    </button>
-                </div>
-            </div>
-
-            <!-- Row 4: Pattern Groups - 50/50 Split -->
-            <div class="pattern-groups-section">
-                <!-- Left Half (50%) -->
-                <div class="row4-left">
-                    <!-- Left Area 1: Edit pattern icon (25% of left) -->
-                    <div class="row4-left-area1">
-                        <button class="edit-pattern-btn">
-                            <i class="ph-thin ph-pencil-simple"></i>
-                        </button>
-                    </div>
-
-                    <!-- Left Area 2: Pattern group chevron combo (50% of left) -->
-                    <div class="row4-left-area2">
-                        <button class="group-nav-btn group-prev">
-                            <i class="ph-thin ph-caret-left"></i>
-                        </button>
-                        <div class="custom-dropdown group-dropdown" id="group-dropdown">
-                            <div class="dropdown-selected" id="group-selected">
-                                <span class="dropdown-text">Favorites</span>
-                            </div>
-                            <div class="dropdown-options" id="group-options">
-                                <div class="dropdown-option" data-value="favorites">Favorites</div>
-                                <div class="dropdown-option" data-value="custom">Custom</div>
-                            </div>
-                        </div>
-                        <button class="group-nav-btn group-next">
-                            <i class="ph-thin ph-caret-right"></i>
-                        </button>
-                        <button class="quick-save-btn pattern-group-save-btn" id="pattern-group-save-btn" title="Save Pattern Group" style="display: none;">
-                            <i class="ph-thin ph-floppy-disk"></i>
-                        </button>
-                    </div>
-
-                    <!-- Left Area 3: Delete button (only shows in edit mode) -->
-                    <div class="row4-left-area3">
-                        <button class="group-delete-btn" id="group-delete-btn" style="display: none;">
-                            <i class="ph-thin ph-trash"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Right Half (50%) - Labels -->
-                <div class="row4-right">
-                    <!-- Right Area 1: Toggles label (20% of right) -->
-                    <div class="row4-right-area1">
-                        <div class="section-label">Toggles</div>
-                    </div>
-
-                    <!-- Right Area 2: Fills label (20% of right) -->
-                    <div class="row4-right-area2">
-                        <div class="section-label">Fills</div>
-                    </div>
-
-                    <!-- Right Area 3: Swing label (20% of right) -->
-                    <div class="row4-right-area3">
-                        <div class="section-label">Swing</div>
-                    </div>
-
-                    <!-- Right Area 4: Energy label (20% of right) -->
-                    <div class="row4-right-area4">
-                        <div class="section-label">Energy</div>
-                    </div>
-
-                    <!-- Right Area 5: Volume label (20% of right) -->
-                    <div class="row4-right-area5">
-                        <div class="section-label">Volume</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Row 5: Pattern Matrix - 50/50 Split -->
-            <div class="pattern-matrix-section">
-                <!-- Left Half (50%): 4x4 Pattern Grid -->
-                <div class="row5-left">
-                    <div class="pattern-grid">
-        <!-- these names should eventually come from our MIDI filenames in the MIDI folder. -->
-                        <button class="pattern-btn" data-pattern="basic">Basic</button>
-                        <button class="pattern-btn" data-pattern="bassa">Bassa</button>
-                        <button class="pattern-btn" data-pattern="busybeat">BusyBeat</button>
-                        <button class="pattern-btn" data-pattern="buyoun">Buyoun</button>
-                        <button class="pattern-btn" data-pattern="chacha">ChaCha</button>
-                        <button class="pattern-btn active" data-pattern="funk">Funk</button>
-                        <button class="pattern-btn" data-pattern="jazz">Jazz</button>
-                        <button class="pattern-btn" data-pattern="just-hat">Just Hat</button>
-                        <button class="pattern-btn" data-pattern="just-kick">Just Kick</button>
-                        <button class="pattern-btn" data-pattern="polka">Polka</button>
-                        <button class="pattern-btn" data-pattern="push">Push</button>
-                        <button class="pattern-btn" data-pattern="shuffle">Shuffle</button>
-                        <button class="pattern-btn" data-pattern="ska">Ska</button>
-                        <button class="pattern-btn" data-pattern="surf">Surf</button>
-                        <button class="pattern-btn" data-pattern="swing">Swing</button>
-                        <button class="pattern-btn" data-pattern="waltz">Waltz</button>
-                    </div>
-                </div>
-
-                <!-- Right Half (50%): Controls divided into 5 areas -->
-                <div class="row5-right">
-                    <!-- Right Area 1 (20%): Toggles -->
-                    <div class="row5-right-area1">
-                        <!-- <div class="control-label">Toggles</div> -->
-                        <div class="toggles-column">
-                            <button class="toggle-btn" data-toggle="none">None</button>
-                            <button class="toggle-btn active" data-toggle="auto">Auto</button>
-                            <button class="toggle-btn" data-toggle="manual">Manual</button>
-                            <button class="toggle-btn" data-toggle="stick">Stick</button>
-                            <button class="toggle-btn" data-toggle="ride">Ride</button>
-                            <button class="toggle-btn" data-toggle="lock">Lock</button>
-                        </div>
-                    </div>
-
-                    <!-- Right Area 2 (20%): Fills -->
-                    <div class="row5-right-area2">
-                        <!-- <div class="control-label">Fills</div> -->
-                        <div class="fills-column">
-                            <button class="fill-btn" data-fill="now">Now</button>
-                            <button class="fill-btn" data-fill="4">4</button>
-                            <button class="fill-btn" data-fill="8">8</button>
-                            <button class="fill-btn" data-fill="16">16</button>
-                            <button class="fill-btn" data-fill="32">32</button>
-                            <button class="fill-btn solo" data-fill="solo">Solo</button>
-                        </div>
-                    </div>
-
-                    <!-- Right Area 3 (20%): Swing Slider -->
-                    <div class="row5-right-area3">
-                        <!-- <div class="control-label">Swing</div> -->
-                        <div class="slider-container">
-                            <div class="custom-slider" data-param="swing" data-min="0" data-max="100" data-value="25">
-                                <div class="slider-track">
-                                    <div class="slider-fill"></div>
-                                </div>
-                                <div class="slider-thumb"></div>
-                            </div>
-                            <button class="link-icon" data-param="swing">
-                                <i class="ph-thin ph-broadcast"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Right Area 4 (20%): Energy Slider -->
-                    <div class="row5-right-area4">
-                        <!-- <div class="control-label">Energy</div> -->
-                        <div class="slider-container">
-                            <div class="custom-slider" data-param="energy" data-min="0" data-max="100" data-value="50">
-                                <div class="slider-track">
-                                    <div class="slider-fill"></div>
-                                </div>
-                                <div class="slider-thumb"></div>
-                            </div>
-                            <button class="link-icon" data-param="energy">
-                                <i class="ph-thin ph-broadcast"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Right Area 5 (20%): Volume Slider -->
-                    <div class="row5-right-area5">
-                        <!-- <div class="control-label">Volume</div> -->
-                        <div class="slider-container">
-                            <div class="custom-slider" data-param="volume" data-min="0" data-max="100" data-value="75">
-                                <div class="slider-track">
-                                    <div class="slider-fill"></div>
-                                </div>
-                                <div class="slider-thumb"></div>
-                            </div>
-                            <button class="link-icon" data-param="volume">
-                                <i class="ph-thin ph-broadcast"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Row 6: Loop Section - Timeline Controls -->
-            <div class="loop-section">
-                <div class="loop-start-label">LOOP START</div>
-                <div class="loop-timeline">
-                    <div class="timeline-track">
-                        <div class="timeline-handle" id="timeline-handle"></div>
-                    </div>
-                </div>
-                <div class="loop-end-label">LOOP END</div>
-            </div>
-
+          </div>
         </div>
+
+        <!-- Mute Overlay for rows 2-5 -->
+        <div class="mute-overlay"></div>
+
+        <!-- Row 2: Player Tabs with Chevron Navigation -->
+        <div class="player-tabs-section">
+          <!-- Left chevron for player navigation -->
+          <button class="player-nav-btn player-nav-prev" id="player-prev-btn">
+            <i class="ph-thin ph-caret-left"></i>
+          </button>
+
+          <div class="player-tabs">
+            <button class="player-tab active" data-player="1">PLAYER 1</button>
+            <button class="player-tab" data-player="2">PLAYER 2</button>
+            <button class="player-tab" data-player="3">PLAYER 3</button>
+            <button class="player-tab" data-player="4">PLAYER 4</button>
+            <button class="player-tab" data-player="5">PLAYER 5</button>
+            <button class="player-tab" data-player="6">PLAYER 6</button>
+            <button class="player-tab" data-player="7">PLAYER 7</button>
+            <button class="player-tab" data-player="8">PLAYER 8</button>
+          </div>
+
+          <!-- Right chevron for player navigation -->
+          <button class="player-nav-btn player-nav-next" id="player-next-btn">
+            <i class="ph-thin ph-caret-right"></i>
+          </button>
+        </div>
+
+        <!-- Row 3: Drum Kit Section - 5 Areas -->
+        <div class="drum-kit-section">
+          <!-- Area 1: Player number display -->
+          <div class="row3-area-1">
+            <div class="player-number-display">
+              <span class="player-number" id="current-player-number">1</span>
+            </div>
+          </div>
+
+          <!-- Area 2: Edit kit icon (right-aligned to be next to chevron) -->
+          <div class="row3-area-2">
+            <button class="edit-btn kit-edit-btn">
+              <i class="ph-thin ph-pencil-simple"></i>
+            </button>
+          </div>
+
+          <!-- Area 3: Drum kit dropdown and chevrons -->
+          <div class="row3-area-3">
+            <button class="kit-nav-btn kit-prev">
+              <i class="ph-thin ph-caret-left"></i>
+            </button>
+            <div class="custom-dropdown kit-dropdown" id="kit-dropdown">
+              <div class="dropdown-selected" id="kit-selected">
+                <span class="dropdown-text">Acoustic</span>
+              </div>
+              <div class="dropdown-options" id="kit-options">
+                <!-- This list should eventually come from our INI file storage system -->
+                <div class="dropdown-option" data-value="acoustic">
+                  Acoustic
+                </div>
+                <div class="dropdown-option" data-value="electronic">
+                  Electronic
+                </div>
+                <div class="dropdown-option" data-value="rock">Rock</div>
+                <div class="dropdown-option" data-value="jazz">Jazz</div>
+                <div class="dropdown-option" data-value="pop">Pop</div>
+                <div class="dropdown-option" data-value="funk">Funk</div>
+                <div class="dropdown-option" data-value="latin">Latin</div>
+                <div class="dropdown-option" data-value="vintage">Vintage</div>
+              </div>
+            </div>
+            <button class="kit-nav-btn kit-next">
+              <i class="ph-thin ph-caret-right"></i>
+            </button>
+          </div>
+
+          <!-- Area 4: Mixer icon -->
+          <div class="row3-area-4">
+            <button class="kit-mixer-btn" id="kit-mixer-btn">
+              <i class="ph-thin ph-faders"></i>
+            </button>
+            <button
+              class="quick-save-btn drumkit-save-btn"
+              id="drumkit-save-btn"
+              title="Save Drumkit Mixer"
+              style="display: none"
+            >
+              <i class="ph-thin ph-floppy-disk"></i>
+            </button>
+          </div>
+
+          <!-- Area 5: Mute/Unmute drummer icon (right-aligned) -->
+          <div class="row3-area-5">
+            <button class="mute-drummer-btn" id="mute-drummer-btn">
+              <!-- This incorrectly appears off screen on right  -->
+              <!-- Using OTTO_Button_Glyph.png as background image -->
+            </button>
+          </div>
+        </div>
+
+        <!-- Row 4: Pattern Groups - 50/50 Split -->
+        <div class="pattern-groups-section">
+          <!-- Left Half (50%) -->
+          <div class="row4-left">
+            <!-- Left Area 1: Edit pattern icon (25% of left) -->
+            <div class="row4-left-area1">
+              <button class="edit-pattern-btn">
+                <i class="ph-thin ph-pencil-simple"></i>
+              </button>
+            </div>
+
+            <!-- Left Area 2: Pattern group chevron combo (50% of left) -->
+            <div class="row4-left-area2">
+              <button class="group-nav-btn group-prev">
+                <i class="ph-thin ph-caret-left"></i>
+              </button>
+              <div class="custom-dropdown group-dropdown" id="group-dropdown">
+                <div class="dropdown-selected" id="group-selected">
+                  <span class="dropdown-text">Favorites</span>
+                </div>
+                <div class="dropdown-options" id="group-options">
+                  <div class="dropdown-option" data-value="favorites">
+                    Favorites
+                  </div>
+                  <div class="dropdown-option" data-value="custom">Custom</div>
+                </div>
+              </div>
+              <button class="group-nav-btn group-next">
+                <i class="ph-thin ph-caret-right"></i>
+              </button>
+              <button
+                class="quick-save-btn pattern-group-save-btn"
+                id="pattern-group-save-btn"
+                title="Save Pattern Group"
+                style="display: none"
+              >
+                <i class="ph-thin ph-floppy-disk"></i>
+              </button>
+            </div>
+
+            <!-- Left Area 3: Delete button (only shows in edit mode) -->
+            <div class="row4-left-area3">
+              <button
+                class="group-delete-btn"
+                id="group-delete-btn"
+                style="display: none"
+              >
+                <i class="ph-thin ph-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Half (50%) - Labels -->
+          <div class="row4-right">
+            <!-- Right Area 1: Toggles label (20% of right) -->
+            <div class="row4-right-area1">
+              <div class="section-label">Toggles</div>
+            </div>
+
+            <!-- Right Area 2: Fills label (20% of right) -->
+            <div class="row4-right-area2">
+              <div class="section-label">Fills</div>
+            </div>
+
+            <!-- Right Area 3: Swing label (20% of right) -->
+            <div class="row4-right-area3">
+              <div class="section-label">Swing</div>
+            </div>
+
+            <!-- Right Area 4: Energy label (20% of right) -->
+            <div class="row4-right-area4">
+              <div class="section-label">Energy</div>
+            </div>
+
+            <!-- Right Area 5: Volume label (20% of right) -->
+            <div class="row4-right-area5">
+              <div class="section-label">Volume</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 5: Pattern Matrix - 50/50 Split -->
+        <div class="pattern-matrix-section">
+          <!-- Left Half (50%): 4x4 Pattern Grid -->
+          <div class="row5-left">
+            <div class="pattern-grid">
+              <!-- these names should eventually come from our MIDI filenames in the MIDI folder. -->
+              <button class="pattern-btn" data-pattern="basic">Basic</button>
+              <button class="pattern-btn" data-pattern="bassa">Bassa</button>
+              <button class="pattern-btn" data-pattern="busybeat">
+                BusyBeat
+              </button>
+              <button class="pattern-btn" data-pattern="buyoun">Buyoun</button>
+              <button class="pattern-btn" data-pattern="chacha">ChaCha</button>
+              <button class="pattern-btn active" data-pattern="funk">
+                Funk
+              </button>
+              <button class="pattern-btn" data-pattern="jazz">Jazz</button>
+              <button class="pattern-btn" data-pattern="just-hat">
+                Just Hat
+              </button>
+              <button class="pattern-btn" data-pattern="just-kick">
+                Just Kick
+              </button>
+              <button class="pattern-btn" data-pattern="polka">Polka</button>
+              <button class="pattern-btn" data-pattern="push">Push</button>
+              <button class="pattern-btn" data-pattern="shuffle">
+                Shuffle
+              </button>
+              <button class="pattern-btn" data-pattern="ska">Ska</button>
+              <button class="pattern-btn" data-pattern="surf">Surf</button>
+              <button class="pattern-btn" data-pattern="swing">Swing</button>
+              <button class="pattern-btn" data-pattern="waltz">Waltz</button>
+            </div>
+          </div>
+
+          <!-- Right Half (50%): Controls divided into 5 areas -->
+          <div class="row5-right">
+            <!-- Right Area 1 (20%): Toggles -->
+            <div class="row5-right-area1">
+              <!-- <div class="control-label">Toggles</div> -->
+              <div class="toggles-column">
+                <button class="toggle-btn" data-toggle="none">None</button>
+                <button class="toggle-btn active" data-toggle="auto">
+                  Auto
+                </button>
+                <button class="toggle-btn" data-toggle="manual">Manual</button>
+                <button class="toggle-btn" data-toggle="stick">Stick</button>
+                <button class="toggle-btn" data-toggle="ride">Ride</button>
+                <button class="toggle-btn" data-toggle="lock">Lock</button>
+              </div>
+            </div>
+
+            <!-- Right Area 2 (20%): Fills -->
+            <div class="row5-right-area2">
+              <!-- <div class="control-label">Fills</div> -->
+              <div class="fills-column">
+                <button class="fill-btn" data-fill="now">Now</button>
+                <button class="fill-btn" data-fill="4">4</button>
+                <button class="fill-btn" data-fill="8">8</button>
+                <button class="fill-btn" data-fill="16">16</button>
+                <button class="fill-btn" data-fill="32">32</button>
+                <button class="fill-btn solo" data-fill="solo">Solo</button>
+              </div>
+            </div>
+
+            <!-- Right Area 3 (20%): Swing Slider -->
+            <div class="row5-right-area3">
+              <!-- <div class="control-label">Swing</div> -->
+              <div class="slider-container">
+                <div
+                  class="custom-slider"
+                  data-param="swing"
+                  data-min="0"
+                  data-max="100"
+                  data-value="25"
+                >
+                  <div class="slider-track">
+                    <div class="slider-fill"></div>
+                  </div>
+                  <div class="slider-thumb"></div>
+                </div>
+                <button class="link-icon" data-param="swing">
+                  <i class="ph-thin ph-broadcast"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Area 4 (20%): Energy Slider -->
+            <div class="row5-right-area4">
+              <!-- <div class="control-label">Energy</div> -->
+              <div class="slider-container">
+                <div
+                  class="custom-slider"
+                  data-param="energy"
+                  data-min="0"
+                  data-max="100"
+                  data-value="50"
+                >
+                  <div class="slider-track">
+                    <div class="slider-fill"></div>
+                  </div>
+                  <div class="slider-thumb"></div>
+                </div>
+                <button class="link-icon" data-param="energy">
+                  <i class="ph-thin ph-broadcast"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Area 5 (20%): Volume Slider -->
+            <div class="row5-right-area5">
+              <!-- <div class="control-label">Volume</div> -->
+              <div class="slider-container">
+                <div
+                  class="custom-slider"
+                  data-param="volume"
+                  data-min="0"
+                  data-max="100"
+                  data-value="75"
+                >
+                  <div class="slider-track">
+                    <div class="slider-fill"></div>
+                  </div>
+                  <div class="slider-thumb"></div>
+                </div>
+                <button class="link-icon" data-param="volume">
+                  <i class="ph-thin ph-broadcast"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 6: Loop Section - Timeline Controls -->
+        <div class="loop-section">
+          <div class="loop-start-label">LOOP START</div>
+          <div class="loop-timeline">
+            <div class="timeline-track">
+              <div class="timeline-handle" id="timeline-handle"></div>
+            </div>
+          </div>
+          <div class="loop-end-label">LOOP END</div>
+        </div>
+      </div>
     </div>
 
     <script src="WindowManager.js"></script>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
