@@ -197,6 +197,14 @@ class OTTOAccurateInterface {
     this.memoryCleanupInterval = null;
     this.rateLimitCleanupInterval = null;
 
+    // DOM element cache for performance
+    this.domCache = new Map();
+    this.domCacheTimeout = 5000; // Clear cache after 5 seconds of inactivity
+    this.domCacheTimer = null;
+
+    // Pending storage writes for debouncing
+    this.pendingStorageWrites = new Map();
+
     this.init();
   }
   // Enhanced Timer Management System
@@ -777,6 +785,92 @@ class OTTOAccurateInterface {
     }
   }
 
+  // Debounced version of localStorage save for frequent updates
+  debouncedLocalStorageSet(key, value, delay = 500) {
+    // Create a unique debounce key for this storage key
+    const debounceKey = `storage_${key}`;
+    
+    // Clear existing timer if any
+    if (this.debounceTimers.has(debounceKey)) {
+      const existingTimer = this.debounceTimers.get(debounceKey);
+      if (existingTimer) {
+        clearTimeout(existingTimer);
+        this.debounceTimers.delete(debounceKey);
+      }
+    }
+    
+    // Store the latest value to be saved
+    if (!this.pendingStorageWrites) {
+      this.pendingStorageWrites = new Map();
+    }
+    this.pendingStorageWrites.set(key, value);
+    
+    // Create new debounced save
+    const timer = this.createSafeTimeout(() => {
+      // Get the latest value
+      const latestValue = this.pendingStorageWrites.get(key);
+      if (latestValue !== undefined) {
+        this.safeLocalStorageSet(key, latestValue);
+        this.pendingStorageWrites.delete(key);
+      }
+      this.debounceTimers.delete(debounceKey);
+    }, delay, `debouncedStorage_${key}`);
+    
+    this.debounceTimers.set(debounceKey, timer);
+  }
+
+  // Save presets with debouncing
+  savePresetsToStorageDebounced() {
+    // Convert Sets to arrays for storage
+    const presetsToStore = {};
+    for (const [key, preset] of Object.entries(this.presets)) {
+      const presetCopy = this.structuredClone(preset);
+      if (presetCopy.linkStates) {
+        for (const param of ["swing", "energy", "volume"]) {
+          if (
+            presetCopy.linkStates[param] &&
+            presetCopy.linkStates[param].slaves
+          ) {
+            presetCopy.linkStates[param].slaves = Array.from(
+              presetCopy.linkStates[param].slaves,
+            );
+          }
+        }
+      }
+      presetsToStore[key] = presetCopy;
+    }
+    // Use debounced save for presets
+    this.debouncedLocalStorageSet("otto_presets", presetsToStore, 1000);
+  }
+
+  // Save pattern groups with debouncing
+  savePatternGroupsDebounced() {
+    this.debouncedLocalStorageSet("otto_pattern_groups", this.patternGroups, 800);
+  }
+
+  // Save player states with debouncing
+  savePlayerStatesDebounced() {
+    if (!this.playerStates) return;
+    
+    // Convert Sets to arrays for storage
+    const statesToStore = {};
+    for (const [key, state] of Object.entries(this.playerStates)) {
+      const stateCopy = this.structuredClone(state);
+      if (stateCopy.linkStates) {
+        for (const param of ["swing", "energy", "volume"]) {
+          if (stateCopy.linkStates[param]?.slaves) {
+            stateCopy.linkStates[param].slaves = Array.from(
+              stateCopy.linkStates[param].slaves
+            );
+          }
+        }
+      }
+      statesToStore[key] = stateCopy;
+    }
+    
+    this.debouncedLocalStorageSet("otto_player_states", statesToStore, 500);
+  }
+
   safeLocalStorageGet(key, defaultValue = null) {
     try {
       const item = localStorage.getItem(key);
@@ -1065,72 +1159,6 @@ class OTTOAccurateInterface {
     }
   }
 
-  // Data migration system
-  migrateData(key, data, fromVersion, toVersion) {
-    debugLog(`Migrating ${key} from version ${fromVersion} to ${toVersion}`);
-
-    // Define migration paths
-    const migrations = {
-      otto_presets: {
-        "1.0.0_to_1.1.0": (data) => {
-          // Example: Add new field to all presets
-          for (const preset of Object.values(data)) {
-            if (!preset.version) {
-              preset.version = "1.1.0";
-            }
-            // Ensure linkStates exist
-            if (!preset.linkStates) {
-              preset.linkStates = {
-                swing: { master: null, slaves: [] },
-                energy: { master: null, slaves: [] },
-                volume: { master: null, slaves: [] },
-              };
-            }
-          }
-          return data;
-        },
-      },
-      otto_app_state: {
-        "1.0.0_to_1.1.0": (data) => {
-          // Add version field if missing
-          if (!data.version) {
-            data.version = "1.1.0";
-          }
-          return data;
-        },
-      },
-      ottoPatternGroups: {
-        "1.0.0_to_1.1.0": (data) => {
-          // Ensure all groups have 16 patterns
-          for (const group of Object.values(data)) {
-            if (!Array.isArray(group.patterns)) {
-              group.patterns = Array(16).fill("");
-            } else if (group.patterns.length < 16) {
-              while (group.patterns.length < 16) {
-                group.patterns.push("");
-              }
-            }
-          }
-          return data;
-        },
-      },
-    };
-
-    // Apply migrations
-    if (migrations[key]) {
-      const migrationKey = `${fromVersion}_to_${toVersion}`;
-      if (migrations[key][migrationKey]) {
-        try {
-          return migrations[key][migrationKey](data);
-        } catch (error) {
-          debugError(`Migration failed for ${key}:`, error);
-          return data; // Return unmigrated data on error
-        }
-      }
-    }
-
-    return data; // No migration needed
-  }
 
   // Compression utilities
   compressData(data) {
@@ -1469,10 +1497,10 @@ class OTTOAccurateInterface {
   }
 
   // Storage abstraction layer with fallbacks
+  // Simple storage layer
   createStorageLayer() {
     return {
       primary: localStorage,
-      fallback: null,
       memoryCache: new Map(),
 
       get(key) {
@@ -1490,16 +1518,7 @@ class OTTOAccurateInterface {
             return parsed;
           }
         } catch (e) {
-          debugError(`Error reading ${key} from primary storage:`, e);
-        }
-
-        // Try fallback storage
-        if (this.fallback) {
-          try {
-            return this.fallback.get(key);
-          } catch (e) {
-            debugError(`Error reading ${key} from fallback storage:`, e);
-          }
+          debugError(`Error reading ${key} from storage:`, e);
         }
 
         return null;
@@ -1509,7 +1528,7 @@ class OTTOAccurateInterface {
         // Update memory cache
         this.memoryCache.set(key, value);
 
-        // Try to save to primary storage
+        // Save to primary storage
         try {
           const stringified = JSON.stringify(value);
           this.primary.setItem(key, stringified);
@@ -1523,20 +1542,7 @@ class OTTOAccurateInterface {
             }
           }
 
-          debugError(`Error saving ${key} to primary storage:`, e);
-
-          // Try fallback storage
-          if (this.fallback) {
-            try {
-              this.fallback.set(key, value);
-              return true;
-            } catch (fallbackError) {
-              debugError(
-                `Error saving ${key} to fallback storage:`,
-                fallbackError,
-              );
-            }
-          }
+          debugError(`Error saving ${key} to storage:`, e);
         }
 
         return false;
@@ -1549,15 +1555,7 @@ class OTTOAccurateInterface {
         try {
           this.primary.removeItem(key);
         } catch (e) {
-          debugError(`Error removing ${key} from primary storage:`, e);
-        }
-
-        if (this.fallback) {
-          try {
-            this.fallback.remove(key);
-          } catch (e) {
-            debugError(`Error removing ${key} from fallback storage:`, e);
-          }
+          debugError(`Error removing ${key} from storage:`, e);
         }
       },
 
@@ -1589,11 +1587,6 @@ class OTTOAccurateInterface {
             debugError(`Error removing ${key}:`, e);
           }
         });
-
-        // Clear fallback storage
-        if (this.fallback) {
-          this.fallback.clear(preserveKeys);
-        }
       },
 
       getSize() {
@@ -1604,12 +1597,12 @@ class OTTOAccurateInterface {
             const key = this.primary.key(i);
             if (key) {
               try {
-                const value = this.primary.getItem(key);
-                if (value !== null && value !== undefined) {
-                  totalSize += key.length + value.length;
+                const item = this.primary.getItem(key);
+                if (item) {
+                  totalSize += item.length + key.length;
                 }
               } catch (e) {
-                // Ignore items that can't be accessed
+                debugError(`Error getting size for ${key}:`, e);
               }
             }
           }
@@ -1619,28 +1612,33 @@ class OTTOAccurateInterface {
 
         return totalSize;
       },
-
-      compress(data) {
-        // Implement compression logic from earlier
-        return data; // Simplified for now
-      },
-
-      handleQuotaExceeded(key, value) {
-        // Delegate to main handler
-        return false; // Simplified for now
-      },
     };
   }
 
   // Safe DOM manipulation helpers
   safeQuerySelector(selector, parent = document) {
     try {
-      // Use DOM cache if querying from document
-      const element =
-        parent === document && this.domCache
-          ? this.domCache.get(selector)
-          : parent.querySelector(selector);
-
+      // Use DOM cache for document queries
+      if (parent === document && this.domCache) {
+        const cacheKey = `qs:${selector}`;
+        if (this.domCache.has(cacheKey)) {
+          return this.domCache.get(cacheKey);
+        }
+        
+        const element = document.querySelector(selector);
+        if (element) {
+          this.domCache.set(cacheKey, element);
+          this.refreshDomCacheTimer();
+        }
+        
+        if (!element && DEBUG_MODE) {
+          debugLog(`Element not found: ${selector}`);
+        }
+        return element;
+      }
+      
+      // Non-cached query for non-document parents
+      const element = parent.querySelector(selector);
       if (!element && DEBUG_MODE) {
         debugLog(`Element not found: ${selector}`);
       }
@@ -1653,10 +1651,21 @@ class OTTOAccurateInterface {
 
   safeQuerySelectorAll(selector, parent = document) {
     try {
-      // Use DOM cache if querying from document
-      return parent === document && this.domCache
-        ? this.domCache.getAll(selector)
-        : parent.querySelectorAll(selector) || [];
+      // Use DOM cache for document queries
+      if (parent === document && this.domCache) {
+        const cacheKey = `qsa:${selector}`;
+        if (this.domCache.has(cacheKey)) {
+          return this.domCache.get(cacheKey);
+        }
+        
+        const elements = Array.from(document.querySelectorAll(selector));
+        this.domCache.set(cacheKey, elements);
+        this.refreshDomCacheTimer();
+        return elements;
+      }
+      
+      // Non-cached query for non-document parents
+      return Array.from(parent.querySelectorAll(selector) || []);
     } catch (error) {
       debugError(`Invalid selector: ${selector}`, error);
       return [];
@@ -1664,14 +1673,54 @@ class OTTOAccurateInterface {
   }
 
   safeGetElementById(id) {
-    // Use DOM cache for better performance
-    const element = this.domCache
-      ? this.domCache.getById(id)
-      : document.getElementById(id);
-    if (!element && DEBUG_MODE) {
-      debugLog(`Element with ID not found: ${id}`);
+    try {
+      if (this.domCache) {
+        const cacheKey = `id:${id}`;
+        if (this.domCache.has(cacheKey)) {
+          return this.domCache.get(cacheKey);
+        }
+        
+        const element = document.getElementById(id);
+        if (element) {
+          this.domCache.set(cacheKey, element);
+          this.refreshDomCacheTimer();
+        }
+        
+        if (!element && DEBUG_MODE) {
+          debugLog(`Element with ID not found: ${id}`);
+        }
+        return element;
+      }
+      
+      return document.getElementById(id);
+    } catch (error) {
+      debugError(`Invalid ID: ${id}`, error);
+      return null;
     }
-    return element;
+  }
+
+  // Refresh DOM cache timer
+  refreshDomCacheTimer() {
+    if (this.domCacheTimer) {
+      clearTimeout(this.domCacheTimer);
+    }
+    
+    this.domCacheTimer = this.createSafeTimeout(() => {
+      this.clearDomCache();
+    }, this.domCacheTimeout, "domCache");
+  }
+
+  // Clear DOM cache
+  clearDomCache() {
+    if (this.domCache) {
+      debugLog("Clearing DOM cache");
+      this.domCache.clear();
+    }
+    
+    if (this.domCacheTimer) {
+      clearTimeout(this.domCacheTimer);
+      this.domCacheTimer = null;
+    }
   }
 
   safeSetTextContent(selector, text, parent = document) {
@@ -5014,7 +5063,7 @@ class OTTOAccurateInterface {
         this.elementHandlerMap.delete(option);
       }
 
-      // Also clean up legacy _clickHandler if it exists
+      // Clean up _clickHandler if it exists
       if (option._clickHandler) {
         option.removeEventListener("click", option._clickHandler);
         delete option._clickHandler;
@@ -5555,7 +5604,7 @@ class OTTOAccurateInterface {
         programSelect.value = presetValue;
       }
 
-      // Update kit name display (legacy - kept for compatibility)
+      // Update kit name display
       const kitNameDisplay = document.getElementById("current-kit-name");
       if (kitNameDisplay) {
         kitNameDisplay.textContent = state.kitName;
@@ -5743,6 +5792,200 @@ class OTTOAccurateInterface {
         this.scheduleUIUpdate();
       }
     }
+  }
+
+  // Selective UI update based on dirty flags
+  updateSelectiveUI() {
+    // Validate current player state exists
+    if (!this.playerStates || !this.playerStates[this.currentPlayer]) {
+      debugError(`No state found for player ${this.currentPlayer}`);
+      return;
+    }
+
+    const state = this.playerStates[this.currentPlayer];
+    const updates = [];
+
+    // Only update components that are marked dirty
+    if (this.dirtyFlags.playerNumber) {
+      updates.push(() => {
+        this.safeSetTextContent("#current-player-number", this.currentPlayer);
+      });
+    }
+
+    if (this.dirtyFlags.kit) {
+      updates.push(() => {
+        this.safeSetTextContent("#kit-dropdown .dropdown-text", state.kitName);
+        const kitOptions = this.safeQuerySelectorAll("#kit-dropdown .dropdown-option");
+        kitOptions.forEach((option) => {
+          if (!option) return;
+          this.safeRemoveClass(option, "selected");
+          if (option.textContent === state.kitName) {
+            this.safeAddClass(option, "selected");
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.patternGroup) {
+      updates.push(() => {
+        const groupText = this.safeQuerySelector("#group-dropdown .dropdown-text");
+        if (groupText && state.patternGroup && this.patternGroups) {
+          const group = this.patternGroups[state.patternGroup];
+          if (group) {
+            groupText.textContent = group.name;
+          }
+        }
+        const groupOptions = this.safeQuerySelectorAll("#group-dropdown .dropdown-option");
+        groupOptions.forEach((option) => {
+          if (!option) return;
+          this.safeRemoveClass(option, "selected");
+          if (option.dataset.value === state.patternGroup) {
+            this.safeAddClass(option, "selected");
+          }
+        });
+      });
+
+      // Update pattern grid if group changed
+      if (state.patternGroup && this.patternGroups && this.patternGroups[state.patternGroup]) {
+        const patterns = this.patternGroups[state.patternGroup].patterns;
+        if (patterns) {
+          this.updateMainPatternGrid(patterns);
+        }
+      }
+    }
+
+    if (this.dirtyFlags.toggles) {
+      const toggleButtons = this.safeQuerySelectorAll("[data-toggle]");
+      toggleButtons.forEach((button) => {
+        if (!button || !button.dataset.toggle) return;
+        updates.push(() => {
+          const toggleKey = button.dataset.toggle;
+          this.safeRemoveClass(button, "active");
+          if (state.toggleStates && state.toggleStates[toggleKey]) {
+            this.safeAddClass(button, "active");
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.fills) {
+      const fillButtons = this.safeQuerySelectorAll("[data-fill]");
+      fillButtons.forEach((button) => {
+        if (!button || !button.dataset.fill) return;
+        updates.push(() => {
+          const fillKey = button.dataset.fill;
+          this.safeRemoveClass(button, "active");
+          if (state.fillStates && state.fillStates[fillKey]) {
+            this.safeAddClass(button, "active");
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.pattern) {
+      const patternButtons = this.safeQuerySelectorAll(".pattern-btn");
+      patternButtons.forEach((btn) => {
+        if (!btn) return;
+        updates.push(() => {
+          this.safeRemoveClass(btn, "active");
+          if (state.selectedPattern) {
+            const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, "-");
+            if (btn.dataset.pattern === normalizedPattern ||
+                (btn.textContent && btn.textContent.toLowerCase() === 
+                 state.selectedPattern.toLowerCase().substring(0, 8))) {
+              this.safeAddClass(btn, "active");
+            }
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.sliders && state.sliderValues) {
+      Object.keys(state.sliderValues).forEach((sliderKey) => {
+        const slider = this.safeQuerySelector(`.custom-slider[data-param="${sliderKey}"]`);
+        if (slider) {
+          updates.push(() => {
+            const value = state.sliderValues[sliderKey];
+            this.updateCustomSlider(slider, value);
+          });
+        }
+      });
+    }
+
+    if (this.dirtyFlags.mute) {
+      const muteDrummerBtn = this.safeGetElementById("mute-drummer-btn");
+      if (muteDrummerBtn) {
+        updates.push(() => {
+          this.safeToggleClass(muteDrummerBtn, "muted", state.muted || false);
+        });
+      }
+      const kitMixerBtn = this.safeGetElementById("kit-mixer-btn");
+      if (kitMixerBtn) {
+        updates.push(() => {
+          this.safeToggleClass(kitMixerBtn, "active", state.kitMixerActive || false);
+        });
+      }
+    }
+
+    if (this.dirtyFlags.playerTabs) {
+      for (let i = 1; i <= this.maxPlayers; i++) {
+        const tab = this.safeQuerySelector(`.player-tab[data-player="${i}"]`);
+        if (tab && this.playerStates[i]) {
+          updates.push(() => {
+            this.safeToggleClass(tab, "muted", this.playerStates[i].muted || false);
+            this.safeToggleClass(tab, "active", i === this.currentPlayer);
+          });
+        }
+      }
+    }
+
+    if (this.dirtyFlags.tempo) {
+      updates.push(() => {
+        this.safeSetTextContent("#tempo-display", this.tempo);
+      });
+    }
+
+    if (this.dirtyFlags.loop && this.loopPosition !== undefined) {
+      updates.push(() => {
+        this.updateLoopTimelineDisplay();
+      });
+    }
+
+    if (this.dirtyFlags.links && this.linkStates) {
+      updates.push(() => {
+        this.updateLinkIconStates();
+      });
+    }
+
+    if (this.dirtyFlags.mute || this.dirtyFlags.playerTabs) {
+      updates.push(() => {
+        this.updateMuteOverlay();
+      });
+    }
+
+    // Execute only necessary updates
+    if (updates.length > 0) {
+      this.batchDOMUpdates(updates);
+    }
+
+    // Reset dirty flags
+    this.resetDirtyFlags();
+  }
+
+  resetDirtyFlags() {
+    Object.keys(this.dirtyFlags).forEach(key => {
+      this.dirtyFlags[key] = false;
+    });
+    this.updateScheduled = false;
+  }
+
+  scheduleUIUpdate() {
+    if (this.updateScheduled) return;
+    
+    this.updateScheduled = true;
+    requestAnimationFrame(() => {
+      this.updateSelectiveUI();
+    });
   }
 
   markAllDirty() {
@@ -6784,7 +7027,7 @@ class OTTOAccurateInterface {
     });
     this.eventListenerRegistry.slider = [];
 
-    // Also clean legacy array
+    // Clean tracking array
     this.sliderListeners.forEach(({ element, event, handler }) => {
       if (element) {
         element.removeEventListener(event, handler);
@@ -8297,8 +8540,8 @@ class OTTOAccurateInterface {
       this.eventListenerRegistry[category] = [];
     });
 
-    // Clean up legacy arrays (for backward compatibility)
-    const legacyArrays = [
+    // Clean up tracking arrays
+    const trackingArrays = [
       this.eventListeners,
       this.sliderListeners,
       this.dropdownListeners,
@@ -8306,7 +8549,7 @@ class OTTOAccurateInterface {
       this.documentListeners,
     ];
 
-    legacyArrays.forEach((array) => {
+    trackingArrays.forEach((array) => {
       array.forEach(({ element, event, handler }) => {
         if (element && handler) {
           element.removeEventListener(event, handler);
@@ -8400,7 +8643,7 @@ class OTTOAccurateInterface {
   }
 
   addEventListener(element, event, handler, category = "element") {
-    // Enhanced event listener management with proper tracking
+    // Event listener management with duplicate prevention
     if (!element || !handler || this.isDestroyed) return false;
 
     // Check if this exact listener already exists to prevent duplicates
@@ -8433,19 +8676,6 @@ class OTTOAccurateInterface {
       // Default to element category if invalid category provided
       this.eventListenerRegistry.element.push({ element, event, handler });
     }
-
-    // Also store in legacy arrays for backward compatibility
-    const legacyMap = {
-      element: this.eventListeners,
-      slider: this.sliderListeners,
-      dropdown: this.dropdownListeners,
-      modal: this.modalListeners,
-      document: this.documentListeners,
-      pattern: this.eventListeners,
-    };
-
-    const trackingArray = legacyMap[category] || this.eventListeners;
-    trackingArray.push({ element, event, handler });
 
     return true; // Successfully added
   }
@@ -8488,8 +8718,8 @@ class OTTOAccurateInterface {
       }
     }
 
-    // Remove from legacy arrays
-    const legacyMap = {
+    // Remove from tracking arrays
+    const trackingMap = {
       element: this.eventListeners,
       slider: this.sliderListeners,
       dropdown: this.dropdownListeners,
@@ -8498,15 +8728,15 @@ class OTTOAccurateInterface {
       pattern: this.eventListeners,
     };
 
-    const trackingArray = legacyMap[category] || this.eventListeners;
-    const legacyIndex = trackingArray.findIndex(
+    const trackingArray = trackingMap[category] || this.eventListeners;
+    const trackingIndex = trackingArray.findIndex(
       (item) =>
         item.element === element &&
         item.event === event &&
         item.handler === handler,
     );
-    if (legacyIndex > -1) {
-      trackingArray.splice(legacyIndex, 1);
+    if (trackingIndex > -1) {
+      trackingArray.splice(trackingIndex, 1);
     }
 
     return true; // Successfully removed
@@ -8562,6 +8792,9 @@ class OTTOAccurateInterface {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
+
+    // Clear DOM cache
+    this.clearDomCache();
   }
 
   // State Operation Management System
