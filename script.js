@@ -154,6 +154,13 @@ class OTTOAccurateInterface {
                 }
             };
         }
+        
+        // Set up periodic memory cleanup (every 5 minutes)
+        this.memoryCleanupInterval = setInterval(() => {
+            if (!this.isDestroyed) {
+                this.cleanupMemory();
+            }
+        }, 5 * 60 * 1000);
 
         this.init();
     }
@@ -941,7 +948,7 @@ class OTTOAccurateInterface {
     // Compression utilities
     compressData(data) {
         // Remove unnecessary fields to save space
-        const compressed = JSON.parse(JSON.stringify(data)); // Deep clone
+        const compressed = this.structuredClone(data); // Deep clone
         
         // Remove timestamps if they exist
         this.removeFieldRecursive(compressed, 'timestamp');
@@ -968,7 +975,7 @@ class OTTOAccurateInterface {
 
     decompressData(data) {
         // Restore full format from compressed data
-        const decompressed = JSON.parse(JSON.stringify(data)); // Deep clone
+        const decompressed = this.structuredClone(data); // Deep clone
         
         // Restore boolean states from bit flags
         if (decompressed.playerStates) {
@@ -1502,6 +1509,124 @@ class OTTOAccurateInterface {
         });
     }
 
+    // Performance optimization utilities
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    throttle(func, limit) {
+        let inThrottle;
+        return function(...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+
+    // Efficient deep clone without JSON stringify
+    structuredClone(obj) {
+        // Use native structuredClone if available (modern browsers)
+        if (typeof window.structuredClone === 'function') {
+            try {
+                return window.structuredClone(obj);
+            } catch (e) {
+                // Fall back if structuredClone fails
+            }
+        }
+        
+        // Fallback to JSON method for older browsers
+        return this.structuredClone(obj);
+    }
+
+    // Optimize state cloning
+    clonePlayerStates() {
+        // Use more efficient cloning for player states
+        if (typeof window.structuredClone === 'function') {
+            try {
+                // structuredClone is much faster than JSON for complex objects
+                const cloned = window.structuredClone(this.playerStates);
+                
+                // Convert arrays back to Sets for link states if needed
+                if (this.linkStates) {
+                    // Link states need special handling for Sets
+                    for (const param of ['swing', 'energy', 'volume']) {
+                        if (this.linkStates[param] && Array.isArray(this.linkStates[param].slaves)) {
+                            this.linkStates[param].slaves = new Set(this.linkStates[param].slaves);
+                        }
+                    }
+                }
+                
+                return cloned;
+            } catch (e) {
+                // Fall back if structuredClone fails
+            }
+        }
+        
+        // Fallback method
+        return this.clonePlayerStates();
+    }
+
+    // Lazy load heavy components
+    lazyLoadComponent(componentId, loadFunction) {
+        // Use Intersection Observer for lazy loading
+        const element = document.getElementById(componentId);
+        if (!element) return;
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    loadFunction();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+        
+        observer.observe(element);
+    }
+
+    // Memory cleanup utility
+    cleanupMemory() {
+        // Clear unused caches
+        if (this.domCache && this.domCache.size > 100) {
+            // Keep only frequently used elements
+            const frequentlyUsed = [
+                '#tempo-display',
+                '#current-player-number',
+                '.player-tabs',
+                '.pattern-grid'
+            ];
+            
+            const newCache = new Map();
+            frequentlyUsed.forEach(selector => {
+                if (this.domCache.has(selector)) {
+                    newCache.set(selector, this.domCache.get(selector));
+                }
+            });
+            
+            this.domCache = newCache;
+        }
+        
+        // Clear old storage errors
+        if (this.storageErrors && this.storageErrors.length > this.maxStorageErrors) {
+            this.storageErrors = this.storageErrors.slice(-this.maxStorageErrors);
+        }
+        
+        // Clear old state update history
+        if (this.stateUpdateHistory && this.stateUpdateHistory.length > 100) {
+            this.stateUpdateHistory = this.stateUpdateHistory.slice(-100);
+        }
+    }
+
     // Differential DOM updates - only update what changed
     differentialUpdate(selector, updates) {
         const element = typeof selector === 'string' ? 
@@ -1776,7 +1901,7 @@ class OTTOAccurateInterface {
             tempo: this.tempo,
             currentPlayer: this.currentPlayer,
             numberOfPlayers: this.numberOfPlayers,
-            loopPosition: this.loopPosition,
+            // NOTE: Do NOT save loopPosition - it's a real-time transport position
             timestamp: Date.now(),
             version: this.version
         };
@@ -1795,9 +1920,9 @@ class OTTOAccurateInterface {
             name: name,
             timestamp: Date.now(),
             // Store complete state of all players
-            playerStates: JSON.parse(JSON.stringify(this.playerStates)),
+            playerStates: this.clonePlayerStates(),
             // Store link states
-            linkStates: this.linkStates ? JSON.parse(JSON.stringify(this.linkStates)) : null,
+            linkStates: this.linkStates ? this.structuredClone(this.linkStates) : null,
             // Store global settings
             tempo: this.tempo,
             numberOfPlayers: this.numberOfPlayers
@@ -3319,11 +3444,11 @@ class OTTOAccurateInterface {
             try {
                 // STEP 1: Complete state restoration
                 // Deep clone all player states to avoid reference issues
-                this.playerStates = JSON.parse(JSON.stringify(preset.playerStates));
+                this.playerStates = this.structuredClone(preset.playerStates);
 
                 // Restore link states if they exist
                 if (preset.linkStates) {
-                    this.linkStates = JSON.parse(JSON.stringify(preset.linkStates));
+                    this.linkStates = this.structuredClone(preset.linkStates);
                     // Convert Sets back from arrays
                     if (this.linkStates) {
                         for (const param of ['swing', 'energy', 'volume']) {
@@ -3474,7 +3599,7 @@ class OTTOAccurateInterface {
         }
 
         // Create the duplicate
-        const duplicatedPreset = JSON.parse(JSON.stringify(originalPreset));
+        const duplicatedPreset = this.structuredClone(originalPreset);
         duplicatedPreset.name = newName;
         duplicatedPreset.timestamp = Date.now();
 
@@ -3597,9 +3722,9 @@ class OTTOAccurateInterface {
     saveToHistory() {
         // Save current state to history
         const historyEntry = {
-            presets: JSON.parse(JSON.stringify(this.presets)),
+            presets: this.structuredClone(this.presets),
             currentPreset: this.currentPreset,
-            presetLocks: JSON.parse(JSON.stringify(this.presetLocks)),
+            presetLocks: this.structuredClone(this.presetLocks),
             timestamp: Date.now()
         };
 
@@ -3907,7 +4032,7 @@ class OTTOAccurateInterface {
         // Convert Sets to arrays for storage
         const presetsToStore = {};
         for (const [key, preset] of Object.entries(this.presets)) {
-            const presetCopy = JSON.parse(JSON.stringify(preset));
+            const presetCopy = this.structuredClone(preset);
             if (presetCopy.linkStates) {
                 for (const param of ['swing', 'energy', 'volume']) {
                     if (presetCopy.linkStates[param] && presetCopy.linkStates[param].slaves) {
@@ -4984,6 +5109,52 @@ class OTTOAccurateInterface {
     setupPatternGrid() {
         const patternButtons = document.querySelectorAll('.pattern-btn');
         
+        // Debounced pattern selection handler
+        const debouncedPatternSelect = this.debounce((patternBtn, buttonIndex) => {
+            // Get the full pattern name from the pattern group
+            const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+            let fullPatternName = patternBtn.textContent || ''; // Default to button text
+
+            if (this.patternGroups && this.patternGroups[currentGroup]) {
+                const patterns = this.patternGroups[currentGroup].patterns;
+                if (patterns && patterns[buttonIndex]) {
+                    fullPatternName = patterns[buttonIndex];
+                } else if (!fullPatternName) {
+                    console.warn(`No pattern at index ${buttonIndex} in group "${currentGroup}"`);
+                    return; // Don't select empty patterns
+                }
+            }
+            
+            // Don't select empty patterns
+            if (!fullPatternName || fullPatternName.trim() === '') {
+                console.log('Empty pattern slot clicked, ignoring');
+                return;
+            }
+
+            // Clear other pattern selections
+            const allButtons = Array.from(document.querySelectorAll('.pattern-btn'));
+            allButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Activate clicked pattern
+            patternBtn.classList.add('active');
+
+            // Update player state with full pattern name
+            this.playerStates[this.currentPlayer].selectedPattern = fullPatternName;
+
+            // Save selected pattern to the current pattern group
+            if (this.patternGroups && this.patternGroups[currentGroup]) {
+                this.patternGroups[currentGroup].selectedPattern = fullPatternName;
+                this.setDirty('patternGroup', true);
+            }
+
+            this.onPatternSelected(this.currentPlayer, fullPatternName);
+            this.setDirty('preset', true);  // Mark preset as dirty when pattern changes
+
+            console.log(`Player ${this.currentPlayer} selected pattern: ${fullPatternName}`);
+        }, 50); // 50ms debounce for rapid clicking
+        
         patternButtons.forEach(patternBtn => {
             const clickHandler = (e) => {
                 // Prevent if destroyed
@@ -4998,47 +5169,8 @@ class OTTOAccurateInterface {
                     return;
                 }
 
-                // Get the full pattern name from the pattern group
-                const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
-                let fullPatternName = patternBtn.textContent || ''; // Default to button text
-
-                if (this.patternGroups && this.patternGroups[currentGroup]) {
-                    const patterns = this.patternGroups[currentGroup].patterns;
-                    if (patterns && patterns[buttonIndex]) {
-                        fullPatternName = patterns[buttonIndex];
-                    } else if (!fullPatternName) {
-                        console.warn(`No pattern at index ${buttonIndex} in group "${currentGroup}"`);
-                        return; // Don't select empty patterns
-                    }
-                }
-                
-                // Don't select empty patterns
-                if (!fullPatternName || fullPatternName.trim() === '') {
-                    console.log('Empty pattern slot clicked, ignoring');
-                    return;
-                }
-
-                // Clear other pattern selections
-                allButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                });
-
-                // Activate clicked pattern
-                patternBtn.classList.add('active');
-
-                // Update player state with full pattern name
-                this.playerStates[this.currentPlayer].selectedPattern = fullPatternName;
-
-                // Save selected pattern to the current pattern group
-                if (this.patternGroups && this.patternGroups[currentGroup]) {
-                    this.patternGroups[currentGroup].selectedPattern = fullPatternName;
-                    this.setDirty('patternGroup', true);
-                }
-
-                this.onPatternSelected(this.currentPlayer, fullPatternName);
-                this.setDirty('preset', true);  // Mark preset as dirty when pattern changes
-
-                console.log(`Player ${this.currentPlayer} selected pattern: ${fullPatternName}`);
+                // Call debounced handler
+                debouncedPatternSelect(patternBtn, buttonIndex);
             };
             
             // Use enhanced event listener management
@@ -5047,85 +5179,101 @@ class OTTOAccurateInterface {
     }
 
     setupToggleButtons() {
+        // Throttled toggle handler to prevent rapid state changes
+        const throttledToggleHandler = this.throttle((toggleBtn, toggleType) => {
+            const state = this.playerStates[this.currentPlayer];
+
+            // Handle 'None' button - turns off all other toggles
+            if (toggleType === 'none') {
+                // Turn off all toggles
+                Object.keys(state.toggleStates).forEach(key => {
+                    state.toggleStates[key] = false;
+                });
+
+                // Turn on 'none'
+                state.toggleStates.none = true;
+
+                // Update UI - remove active from all, add to none
+                document.querySelectorAll('.toggle-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                toggleBtn.classList.add('active');
+            }
+            // Handle radio group behavior for Auto/Manual
+            else if (toggleType === 'auto' || toggleType === 'manual') {
+                // Turn off 'none' if it's active
+                if (state.toggleStates.none) {
+                    state.toggleStates.none = false;
+                    document.querySelector('[data-toggle="none"]').classList.remove('active');
+                }
+
+                // Clear both auto/manual
+                state.toggleStates.auto = false;
+                state.toggleStates.manual = false;
+
+                // Set the clicked one
+                state.toggleStates[toggleType] = true;
+
+                // Update all Auto/Manual buttons
+                document.querySelectorAll('[data-toggle="auto"], [data-toggle="manual"]').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.toggle === toggleType) {
+                        btn.classList.add('active');
+                    }
+                });
+            } else {
+                // Turn off 'none' if it's active
+                if (state.toggleStates.none) {
+                    state.toggleStates.none = false;
+                    document.querySelector('[data-toggle="none"]').classList.remove('active');
+                }
+
+                // Toggle individual buttons
+                const isActive = toggleBtn.classList.contains('active');
+                toggleBtn.classList.toggle('active');
+                state.toggleStates[toggleType] = !isActive;
+            }
+
+            this.onToggleChanged(this.currentPlayer, toggleType, state.toggleStates[toggleType]);
+            this.setDirty('preset', true);
+            console.log(`Player ${this.currentPlayer} toggle ${toggleType}: ${state.toggleStates[toggleType]}`);
+        }, 100); // 100ms throttle for toggle buttons
+
         document.querySelectorAll('.toggle-btn').forEach(toggleBtn => {
-            toggleBtn.addEventListener('click', (e) => {
+            const clickHandler = (e) => {
                 const toggleType = toggleBtn.dataset.toggle;
-                const state = this.playerStates[this.currentPlayer];
-
-                // Handle 'None' button - turns off all other toggles
-                if (toggleType === 'none') {
-                    // Turn off all toggles
-                    Object.keys(state.toggleStates).forEach(key => {
-                        state.toggleStates[key] = false;
-                    });
-
-                    // Turn on 'none'
-                    state.toggleStates.none = true;
-
-                    // Update UI - remove active from all, add to none
-                    document.querySelectorAll('.toggle-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    toggleBtn.classList.add('active');
-                }
-                // Handle radio group behavior for Auto/Manual
-                else if (toggleType === 'auto' || toggleType === 'manual') {
-                    // Turn off 'none' if it's active
-                    if (state.toggleStates.none) {
-                        state.toggleStates.none = false;
-                        document.querySelector('[data-toggle="none"]').classList.remove('active');
-                    }
-
-                    // Clear both auto/manual
-                    state.toggleStates.auto = false;
-                    state.toggleStates.manual = false;
-
-                    // Set the clicked one
-                    state.toggleStates[toggleType] = true;
-
-                    // Update all Auto/Manual buttons
-                    document.querySelectorAll('[data-toggle="auto"], [data-toggle="manual"]').forEach(btn => {
-                        btn.classList.remove('active');
-                        if (btn.dataset.toggle === toggleType) {
-                            btn.classList.add('active');
-                        }
-                    });
-                } else {
-                    // Turn off 'none' if it's active
-                    if (state.toggleStates.none) {
-                        state.toggleStates.none = false;
-                        document.querySelector('[data-toggle="none"]').classList.remove('active');
-                    }
-
-                    // Toggle individual buttons
-                    const isActive = toggleBtn.classList.contains('active');
-                    toggleBtn.classList.toggle('active');
-                    state.toggleStates[toggleType] = !isActive;
-                }
-
-                this.onToggleChanged(this.currentPlayer, toggleType, state.toggleStates[toggleType]);
-                this.setDirty('preset', true);
-                console.log(`Player ${this.currentPlayer} toggle ${toggleType}: ${state.toggleStates[toggleType]}`);
-            });
+                throttledToggleHandler(toggleBtn, toggleType);
+            };
+            
+            // Use enhanced event listener management
+            this.addEventListener(toggleBtn, 'click', clickHandler, 'element');
         });
     }
 
     setupFillButtons() {
-        document.querySelectorAll('.fill-btn').forEach(fillBtn => {
-            fillBtn.addEventListener('click', (e) => {
-                const fillType = fillBtn.dataset.fill;
-                const isActive = fillBtn.classList.contains('active');
+        // Throttled fill handler to prevent rapid state changes
+        const throttledFillHandler = this.throttle((fillBtn, fillType) => {
+            const isActive = fillBtn.classList.contains('active');
 
-                // Update state through centralized system
-                this.updatePlayerState(this.currentPlayer, {
-                    fillStates: { [fillType]: !isActive }
-                }, () => {
-                    // Update UI and trigger callback after state is updated
-                    fillBtn.classList.toggle('active');
-                    this.onFillChanged(this.currentPlayer, fillType, !isActive);
-                    console.log(`Player ${this.currentPlayer} fill ${fillType}: ${!isActive}`);
-                });
+            // Update state through centralized system
+            this.updatePlayerState(this.currentPlayer, {
+                fillStates: { [fillType]: !isActive }
+            }, () => {
+                // Update UI and trigger callback after state is updated
+                fillBtn.classList.toggle('active');
+                this.onFillChanged(this.currentPlayer, fillType, !isActive);
+                console.log(`Player ${this.currentPlayer} fill ${fillType}: ${!isActive}`);
             });
+        }, 100); // 100ms throttle for fill buttons
+
+        document.querySelectorAll('.fill-btn').forEach(fillBtn => {
+            const clickHandler = (e) => {
+                const fillType = fillBtn.dataset.fill;
+                throttledFillHandler(fillBtn, fillType);
+            };
+            
+            // Use enhanced event listener management
+            this.addEventListener(fillBtn, 'click', clickHandler, 'element');
         });
     }
 
@@ -5901,7 +6049,7 @@ class OTTOAccurateInterface {
 
                 this.setLoopPosition(percentage);
                 this.onLoopPositionChanged(percentage);
-                this.setDirty('preset', true);
+                // Don't set dirty flag - loop position is transport-controlled, not saved
             });
 
             document.addEventListener('mouseup', () => {
@@ -6817,6 +6965,12 @@ class OTTOAccurateInterface {
         if (this.stateUpdateTimer) {
             clearTimeout(this.stateUpdateTimer);
             this.stateUpdateTimer = null;
+        }
+
+        // Clear memory cleanup interval
+        if (this.memoryCleanupInterval) {
+            clearInterval(this.memoryCleanupInterval);
+            this.memoryCleanupInterval = null;
         }
 
         // Clear animation frame
