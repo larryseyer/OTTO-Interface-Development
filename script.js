@@ -3362,8 +3362,15 @@ class OTTOAccurateInterface {
     const savedGroups = this.safeLocalStorageGet("ottoPatternGroups", null);
     if (savedGroups) {
       this.patternGroups = savedGroups;
+      
+      // Clean up legacy selectedPattern fields if they exist
+      for (const key in this.patternGroups) {
+        if (this.patternGroups[key].selectedPattern !== undefined) {
+          delete this.patternGroups[key].selectedPattern;
+        }
+      }
     } else {
-      // Initialize with default groups
+      // Initialize with default groups (no selectedPattern)
       this.patternGroups = {
         favorites: {
           name: "Favorites",
@@ -3385,7 +3392,8 @@ class OTTOAccurateInterface {
             "Swing",
             "Waltz",
           ],
-          selectedPattern: "Funk",
+          deletable: false,  // Favorites cannot be deleted
+          editable: true      // But contents can be edited
         },
       };
     }
@@ -3608,6 +3616,184 @@ class OTTOAccurateInterface {
     
     this.midiFileRegistry = newRegistry;
     this.saveMidiRegistry();
+  }
+
+  // Group CRUD Operations
+  createGroup(name) {
+    // Create a new empty group
+    if (!name || name.trim() === "") {
+      debugError("Group name cannot be empty");
+      return null;
+    }
+    
+    // Generate key from name
+    const groupKey = name.toLowerCase().replace(/\s+/g, "-");
+    
+    // Check if group already exists
+    if (this.patternGroups[groupKey]) {
+      debugWarn(`Group "${name}" already exists`);
+      return null;
+    }
+    
+    // Create the group
+    this.patternGroups[groupKey] = {
+      name: name.trim(),
+      patterns: [],
+      deletable: true,
+      editable: true
+    };
+    
+    this.savePatternGroups();
+    debugLog(`Created group: ${name}`);
+    return groupKey;
+  }
+  
+  deleteGroup(groupKey) {
+    // Delete a group with safety checks
+    if (!this.patternGroups[groupKey]) {
+      debugError(`Group "${groupKey}" does not exist`);
+      return false;
+    }
+    
+    // Cannot delete favorites
+    if (groupKey === "favorites") {
+      debugWarn("Cannot delete Favorites group");
+      return false;
+    }
+    
+    const group = this.patternGroups[groupKey];
+    if (group.deletable === false) {
+      debugWarn(`Group "${group.name}" is not deletable`);
+      return false;
+    }
+    
+    // Check if any patterns would become orphaned
+    const patterns = group.patterns || [];
+    for (const pattern of patterns) {
+      const groups = this.getMidiFileGroups(pattern);
+      if (groups.length === 1 && groups[0] === groupKey) {
+        // This pattern would be orphaned - reassign it
+        debugLog(`Reassigning orphaned pattern "${pattern}" to favorites`);
+        this.addPatternToGroup(pattern, "favorites");
+      }
+      // Remove from registry
+      const updatedGroups = groups.filter(g => g !== groupKey);
+      this.updateMidiRegistry(pattern, updatedGroups);
+    }
+    
+    // Delete the group
+    delete this.patternGroups[groupKey];
+    this.savePatternGroups();
+    
+    debugLog(`Deleted group: ${groupKey}`);
+    return true;
+  }
+  
+  renameGroup(groupKey, newName) {
+    // Rename a group
+    if (!this.patternGroups[groupKey]) {
+      debugError(`Group "${groupKey}" does not exist`);
+      return false;
+    }
+    
+    // Cannot rename favorites
+    if (groupKey === "favorites") {
+      debugWarn("Cannot rename Favorites group");
+      return false;
+    }
+    
+    const group = this.patternGroups[groupKey];
+    if (group.editable === false) {
+      debugWarn(`Group "${group.name}" is not editable`);
+      return false;
+    }
+    
+    if (!newName || newName.trim() === "") {
+      debugError("New name cannot be empty");
+      return false;
+    }
+    
+    // Update the name
+    group.name = newName.trim();
+    this.savePatternGroups();
+    
+    debugLog(`Renamed group "${groupKey}" to "${newName}"`);
+    return true;
+  }
+  
+  addPatternToGroup(midiFile, groupKey) {
+    // Add a MIDI file to a group
+    if (!this.patternGroups[groupKey]) {
+      debugError(`Group "${groupKey}" does not exist`);
+      return false;
+    }
+    
+    const group = this.patternGroups[groupKey];
+    const patterns = group.patterns || [];
+    
+    // Check if already in group
+    if (patterns.includes(midiFile)) {
+      debugLog(`Pattern "${midiFile}" already in group "${groupKey}"`);
+      return true;
+    }
+    
+    // Check group capacity
+    if (patterns.length >= 16) {
+      debugWarn(`Group "${groupKey}" is full (16 patterns max)`);
+      return false;
+    }
+    
+    // Add to group
+    patterns.push(midiFile);
+    group.patterns = patterns;
+    
+    // Update registry
+    const groups = this.getMidiFileGroups(midiFile);
+    if (!groups.includes(groupKey)) {
+      groups.push(groupKey);
+      this.updateMidiRegistry(midiFile, groups);
+    }
+    
+    this.savePatternGroups();
+    debugLog(`Added "${midiFile}" to group "${groupKey}"`);
+    return true;
+  }
+  
+  removePatternFromGroup(midiFile, groupKey) {
+    // Remove a MIDI file from a group
+    if (!this.patternGroups[groupKey]) {
+      debugError(`Group "${groupKey}" does not exist`);
+      return false;
+    }
+    
+    const group = this.patternGroups[groupKey];
+    const patterns = group.patterns || [];
+    
+    // Check if in group
+    const index = patterns.indexOf(midiFile);
+    if (index === -1) {
+      debugLog(`Pattern "${midiFile}" not in group "${groupKey}"`);
+      return true;
+    }
+    
+    // Check if this is the last group
+    const groups = this.getMidiFileGroups(midiFile);
+    if (groups.length === 1 && groups[0] === groupKey) {
+      debugWarn(`Cannot remove "${midiFile}" from last group. Reassigning to favorites.`);
+      this.addPatternToGroup(midiFile, "favorites");
+    }
+    
+    // Remove from group
+    patterns.splice(index, 1);
+    group.patterns = patterns;
+    
+    // Update registry
+    const updatedGroups = groups.filter(g => g !== groupKey);
+    this.updateMidiRegistry(midiFile, updatedGroups);
+    
+    this.savePatternGroups();
+    debugLog(`Removed "${midiFile}" from group "${groupKey}"`);
+    return true;
   }
 
   // Drumkit Management Methods
@@ -7230,11 +7416,7 @@ class OTTOAccurateInterface {
       // NEW: Also update the midiFile field
       this.playerStates[this.currentPlayer].midiFile = fullPatternName;
 
-      // Save selected pattern to the current pattern group
-      if (this.patternGroups && this.patternGroups[currentGroup]) {
-        this.patternGroups[currentGroup].selectedPattern = fullPatternName;
-        this.setDirty("patternGroup", true);
-      }
+      // Groups no longer track selected pattern - they are purely organizational
 
       this.onPatternSelected(this.currentPlayer, fullPatternName);
       this.setDirty("preset", true); // Mark preset as dirty when pattern changes
@@ -8443,9 +8625,7 @@ class OTTOAccurateInterface {
     this.playerStates[playerNumber].selectedPattern = patternName;
     const currentGroup = this.playerStates[playerNumber].patternGroup;
     
-    if (this.patternGroups && this.patternGroups[currentGroup]) {
-      this.patternGroups[currentGroup].selectedPattern = patternName;
-    }
+    // Groups no longer track selected pattern
 
     // Mark as dirty
     this.setDirty("player", true);
@@ -8526,10 +8706,9 @@ class OTTOAccurateInterface {
           }
         });
 
-        // If pattern wasn't found, clear the selection
+        // If pattern wasn't found, just warn
         if (!patternFound) {
           debugWarn(`Selected pattern "${selectedPattern}" not found in grid`);
-          group.selectedPattern = null;
         }
       }
     }
