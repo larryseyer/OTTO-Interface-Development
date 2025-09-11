@@ -346,7 +346,7 @@ class WindowManager {
     // Get element
     const element = this.getElement(config);
     if (!element) {
-      console.error(`Element not found for ${key}`);
+      console.error(`Element not found for ${key}: ${config.element}`);
       this.transitioning.delete(key);
       return false;
     }
@@ -485,7 +485,12 @@ class WindowManager {
     for (const key of group) {
       if (key !== exceptKey) {
         const [type, name] = key.split("-");
-        if (this.states[type + "s"][name].isOpen) {
+        const stateCategory = type + "s";
+        
+        // Check if state exists before accessing isOpen
+        if (this.states[stateCategory] && 
+            this.states[stateCategory][name] && 
+            this.states[stateCategory][name].isOpen) {
           promises.push(this.closeWindow(type, name));
         }
       }

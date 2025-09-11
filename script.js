@@ -5665,7 +5665,7 @@ class OTTOAccurateInterface {
         kitPrev,
         "click",
         prevHandler,
-        this.dropdownListeners,
+        "dropdown"
       );
     }
 
@@ -5677,7 +5677,7 @@ class OTTOAccurateInterface {
         kitNext,
         "click",
         nextHandler,
-        this.dropdownListeners,
+        "dropdown"
       );
     }
 
@@ -5694,7 +5694,7 @@ class OTTOAccurateInterface {
         kitDropdownSelected,
         "click",
         toggleHandler,
-        this.dropdownListeners,
+        "dropdown"
       );
     }
 
@@ -5728,7 +5728,7 @@ class OTTOAccurateInterface {
         option,
         "click",
         optionHandler,
-        this.dropdownListeners,
+        "dropdown"
       );
     });
 
@@ -5764,7 +5764,7 @@ class OTTOAccurateInterface {
           this.currentPlayer,
           this.playerStates[this.currentPlayer].kitMixerActive,
         );
-        this.setDirty("preset", true);
+        // Don't set dirty flag - just opening/closing the mixer doesn't change any data
 
         console.log(
           `Player ${this.currentPlayer} kit mixer: ${this.playerStates[this.currentPlayer].kitMixerActive}`,
@@ -5774,7 +5774,7 @@ class OTTOAccurateInterface {
         kitMixerBtn,
         "click",
         mixerHandler,
-        this.dropdownListeners,
+        "dropdown"
       );
     }
 
