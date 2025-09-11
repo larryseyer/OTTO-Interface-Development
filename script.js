@@ -2923,6 +2923,33 @@ class OTTOAccurateInterface {
         this.windowManager.closeWindow("panel", "settings");
       });
     }
+
+    // Export settings button
+    const exportBtn = document.getElementById("settings-export-btn");
+    if (exportBtn) {
+      exportBtn.addEventListener("click", () => {
+        this.exportSettings();
+      });
+    }
+
+    // Import settings button
+    const importBtn = document.getElementById("settings-import-btn");
+    const importInput = document.getElementById("settings-import-input");
+    
+    if (importBtn && importInput) {
+      importBtn.addEventListener("click", () => {
+        importInput.click();
+      });
+      
+      importInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          this.importSettings(file);
+          // Reset the input so the same file can be selected again
+          importInput.value = "";
+        }
+      });
+    }
   }
 
   setupAllModals() {
@@ -4870,6 +4897,98 @@ class OTTOAccurateInterface {
     }
 
     this.showNotification("Default preset reset to factory settings");
+  }
+
+  exportSettings() {
+    try {
+      // Gather all settings and presets
+      const exportData = {
+        version: "1.0",
+        exportDate: new Date().toISOString(),
+        appName: "OTTO Interface",
+        currentPlayer: this.currentPlayer,
+        currentPreset: this.currentPreset,
+        presets: this.presets,
+        // Include any other app-wide settings here if needed
+        appState: {
+          loopPosition: this.loopPosition,
+          currentTempo: this.currentTempo
+        }
+      };
+
+      // Convert to JSON string
+      const jsonString = JSON.stringify(exportData, null, 2);
+      
+      // Create blob and download link
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      // Create download link and trigger download
+      const a = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+      a.download = `otto-settings-${timestamp}.json`;
+      a.href = url;
+      a.click();
+      
+      // Clean up
+      URL.revokeObjectURL(url);
+      
+      this.showNotification("Settings exported successfully");
+    } catch (error) {
+      console.error("Export failed:", error);
+      this.showNotification("Failed to export settings", true);
+    }
+  }
+
+  async importSettings(file) {
+    try {
+      // Read the file
+      const text = await file.text();
+      const importData = JSON.parse(text);
+      
+      // Validate the import data
+      if (!importData.version || !importData.presets) {
+        throw new Error("Invalid settings file format");
+      }
+      
+      // Confirm with user before importing
+      const confirmImport = confirm(
+        `Import settings from ${file.name}?\n\nThis will replace all current settings and presets.`
+      );
+      if (!confirmImport) return;
+      
+      // Import the data
+      this.presets = importData.presets || {};
+      this.currentPlayer = importData.currentPlayer || 1;
+      
+      // Load the preset that was active at export time
+      if (importData.currentPreset && this.presets[importData.currentPreset]) {
+        this.loadPreset(importData.currentPreset);
+      } else {
+        // Load default if the saved current preset doesn't exist
+        this.loadPreset("default");
+      }
+      
+      // Apply app state if available
+      if (importData.appState) {
+        if (importData.appState.loopPosition !== undefined) {
+          this.loopPosition = importData.appState.loopPosition;
+          this.updateLoopTimelineDisplay();
+        }
+        if (importData.appState.currentTempo !== undefined) {
+          this.currentTempo = importData.appState.currentTempo;
+        }
+      }
+      
+      // Update UI
+      this.renderPresetList();
+      this.savePresetsToStorage();
+      
+      this.showNotification("Settings imported successfully");
+    } catch (error) {
+      console.error("Import failed:", error);
+      this.showNotification("Failed to import settings: " + error.message, true);
+    }
   }
 
   updatePresetDropdown() {

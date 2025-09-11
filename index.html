@@ -144,6 +144,25 @@
               if your Default preset has become corrupted.
             </p>
           </div>
+          <div class="settings-item">
+            <button class="settings-btn" id="settings-export-btn">
+              <i class="ph-thin ph-download"></i>
+              <span>Export Settings to File</span>
+            </button>
+            <p class="settings-description">
+              Download all current settings and presets to a JSON file for backup or sharing.
+            </p>
+          </div>
+          <div class="settings-item">
+            <button class="settings-btn" id="settings-import-btn">
+              <i class="ph-thin ph-upload"></i>
+              <span>Import Settings from File</span>
+            </button>
+            <input type="file" id="settings-import-input" accept=".json" style="display: none;">
+            <p class="settings-description">
+              Load settings and presets from a previously exported JSON file.
+            </p>
+          </div>
         </div>
         <div class="settings-section">
           <h3>MIDI Settings</h3>
