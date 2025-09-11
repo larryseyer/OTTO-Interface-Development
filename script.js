@@ -165,8 +165,8 @@ class OTTOAccurateInterface {
         presetName: "Default",
         midiFile: "Basic", // NEW: Direct MIDI file reference
         kitName: "Acoustic", // This is the drumkit (SFZ + mixer)
-        patternGroup: "favorites", // Will be removed in later phase
-        selectedPattern: "basic", // Will be removed in later phase
+        patternGroup: "favorites", // DEPRECATED: Will be removed after full migration
+        selectedPattern: "basic", // DEPRECATED: Use midiFile instead
         kitMixerActive: false,
         muted: false,
         toggleStates: {
@@ -3400,6 +3400,10 @@ class OTTOAccurateInterface {
   }
 
   // MIDI File Registry Management Methods
+  // NEW SYSTEM: Players directly track their MIDI file and drumkit
+  // Pattern groups are now purely organizational tools without state
+  // The registry tracks which groups contain which MIDI files
+  // Every MIDI file must be in at least one group
   initializeMidiRegistry() {
     // Load saved registry or create new one
     const savedRegistry = this.safeLocalStorageGet("ottoMidiRegistry", null);
@@ -5259,8 +5263,8 @@ class OTTOAccurateInterface {
         presetName: "Default",
         midiFile: "Basic", // NEW: Direct MIDI file reference
         kitName: "Acoustic", // Drumkit (SFZ + mixer)
-        patternGroup: "favorites", // Default pattern group (will be removed later)
-        selectedPattern: "basic", // "Basic" pattern selected (will be removed later)
+        patternGroup: "favorites", // DEPRECATED: Will be removed after full migration
+        selectedPattern: "basic", // DEPRECATED: Use midiFile instead
         kitMixerActive: false,
         muted: false,
         toggleStates: {
@@ -5341,8 +5345,8 @@ class OTTOAccurateInterface {
         presetName: "Default",
         midiFile: "Basic", // NEW: Direct MIDI file reference
         kitName: "Acoustic", // Drumkit (SFZ + mixer)
-        patternGroup: "favorites", // Will be removed in later phase
-        selectedPattern: "basic", // Will be removed in later phase
+        patternGroup: "favorites", // DEPRECATED: Will be removed after full migration
+        selectedPattern: "basic", // DEPRECATED: Use midiFile instead
         kitMixerActive: false,
         muted: false, // Ensure no players are muted
         toggleStates: {
