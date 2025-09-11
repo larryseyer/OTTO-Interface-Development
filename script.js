@@ -1835,7 +1835,7 @@ class OTTOAccurateInterface {
     }
 
     // Fallback to JSON method for older browsers
-    return this.structuredClone(obj);
+    return JSON.parse(JSON.stringify(obj));
   }
 
   // Optimize state cloning
@@ -1868,7 +1868,7 @@ class OTTOAccurateInterface {
     }
 
     // Fallback method
-    return this.clonePlayerStates();
+    return JSON.parse(JSON.stringify(this.playerStates));
   }
 
   // Lazy load heavy components
@@ -4275,8 +4275,8 @@ class OTTOAccurateInterface {
       presetName.className = "preset-item-name";
       presetName.textContent = preset.name;
 
-      // Add lock icon next to name if locked
-      if (this.isPresetLocked(key)) {
+      // Add lock icon next to name if locked (but not for default - it's always protected)
+      if (key !== "default" && this.isPresetLocked(key)) {
         const lockIcon = document.createElement("i");
         lockIcon.className = "ph-thin ph-lock preset-lock-icon";
         lockIcon.style.marginLeft = "8px";
@@ -4294,14 +4294,17 @@ class OTTOAccurateInterface {
       const presetActions = document.createElement("div");
       presetActions.className = "preset-item-actions";
 
-      // Rename button
-      const renameBtn = document.createElement("button");
-      renameBtn.className = "preset-item-btn";
-      renameBtn.innerHTML = '<i class="ph-thin ph-pencil-simple"></i>';
-      renameBtn.title = "Rename Preset";
-      renameBtn.addEventListener("click", () => {
-        this.renamePreset(key);
-      });
+      // Rename button (not for default)
+      if (key !== "default") {
+        const renameBtn = document.createElement("button");
+        renameBtn.className = "preset-item-btn";
+        renameBtn.innerHTML = '<i class="ph-thin ph-pencil-simple"></i>';
+        renameBtn.title = "Rename Preset";
+        renameBtn.addEventListener("click", () => {
+          this.renamePreset(key);
+        });
+        presetActions.appendChild(renameBtn);
+      }
 
       // Duplicate button
       const duplicateBtn = document.createElement("button");
@@ -4311,21 +4314,25 @@ class OTTOAccurateInterface {
       duplicateBtn.addEventListener("click", () => {
         this.duplicatePreset(key);
       });
+      presetActions.appendChild(duplicateBtn);
 
-      // Lock/Unlock button - instant toggle
-      const lockBtn = document.createElement("button");
-      const isLocked = this.isPresetLocked(key);
-      lockBtn.className = isLocked
-        ? "preset-item-btn locked"
-        : "preset-item-btn unlocked";
-      lockBtn.innerHTML = isLocked
-        ? '<i class="ph-thin ph-lock"></i>' // Show lock icon when locked
-        : '<i class="ph-thin ph-lock-open"></i>'; // Show lock-open when unlocked
-      lockBtn.title = isLocked ? "Unlock Preset" : "Lock Preset";
-      lockBtn.addEventListener("click", () => {
-        this.togglePresetLock(key);
-        // Instant toggle - no confirmation needed
-      });
+      // Lock/Unlock button (not for default) - instant toggle
+      if (key !== "default") {
+        const lockBtn = document.createElement("button");
+        const isLocked = this.isPresetLocked(key);
+        lockBtn.className = isLocked
+          ? "preset-item-btn locked"
+          : "preset-item-btn unlocked";
+        lockBtn.innerHTML = isLocked
+          ? '<i class="ph-thin ph-lock"></i>' // Show lock icon when locked
+          : '<i class="ph-thin ph-lock-open"></i>'; // Show lock-open when unlocked
+        lockBtn.title = isLocked ? "Unlock Preset" : "Lock Preset";
+        lockBtn.addEventListener("click", () => {
+          this.togglePresetLock(key);
+          // Instant toggle - no confirmation needed
+        });
+        presetActions.appendChild(lockBtn);
+      }
 
       // Export button (formerly Load button)
       const exportBtn = document.createElement("button");
@@ -4335,6 +4342,7 @@ class OTTOAccurateInterface {
       exportBtn.addEventListener("click", () => {
         this.exportPreset(key);
       });
+      presetActions.appendChild(exportBtn);
 
       // Delete button (not for default) - instant delete
       if (key !== "default") {
@@ -4342,18 +4350,14 @@ class OTTOAccurateInterface {
         deleteBtn.className = "preset-item-btn delete";
         deleteBtn.innerHTML = '<i class="ph-thin ph-trash"></i>';
         deleteBtn.title = "Delete Preset";
-        deleteBtn.addEventListener("click", () => {
+        deleteBtn.addEventListener("click", (e) => {
+          e.stopPropagation(); // Prevent event bubbling
           // Instant delete - no confirmation
           this.saveToHistory(); // Save state before delete
           this.deletePreset(key);
         });
         presetActions.appendChild(deleteBtn);
       }
-
-      presetActions.appendChild(renameBtn);
-      presetActions.appendChild(duplicateBtn);
-      presetActions.appendChild(lockBtn);
-      presetActions.appendChild(exportBtn);
       presetItem.appendChild(presetName);
       presetItem.appendChild(presetActions);
       presetList.appendChild(presetItem);
@@ -4560,9 +4564,16 @@ class OTTOAccurateInterface {
   }
 
   deletePreset(key) {
-    if (key === "default") return; // Can't delete default
+    if (key === "default") {
+      return; // Can't delete default
+    }
 
     const name = this.presets[key]?.name;
+    
+    if (!this.presets[key]) {
+      return;
+    }
+    
     delete this.presets[key];
 
     // If we deleted the current preset, switch to default
@@ -4727,19 +4738,32 @@ class OTTOAccurateInterface {
   }
 
   saveToHistory() {
-    // Save current state to history
-    const historyEntry = {
-      presets: this.structuredClone(this.presets),
-      currentPreset: this.currentPreset,
-      presetLocks: this.structuredClone(this.presetLocks),
-      timestamp: Date.now(),
-    };
+    try {
+      // Initialize if needed
+      if (!this.presetHistory) {
+        this.presetHistory = [];
+      }
+      if (!this.maxHistorySize) {
+        this.maxHistorySize = 10; // Default history size
+      }
+      
+      // Save current state to history
+      const historyEntry = {
+        presets: this.structuredClone(this.presets),
+        currentPreset: this.currentPreset,
+        presetLocks: this.presetLocks ? this.structuredClone(this.presetLocks) : {},
+        timestamp: Date.now(),
+      };
 
-    this.presetHistory.push(historyEntry);
+      this.presetHistory.push(historyEntry);
 
-    // Limit history size
-    if (this.presetHistory.length > this.maxHistorySize) {
-      this.presetHistory.shift();
+      // Limit history size
+      if (this.presetHistory.length > this.maxHistorySize) {
+        this.presetHistory.shift();
+      }
+    } catch (error) {
+      debugError("Error in saveToHistory:", error);
+      // Don't prevent the operation from continuing
     }
   }
 
