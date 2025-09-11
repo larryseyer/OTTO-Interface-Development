@@ -7,8 +7,8 @@
  * Based on actual HISE interface screenshot with correct 6-row structure
  */
 
-// Debug logging system - set to true temporarily for debugging
-const DEBUG_MODE = true; // Can be controlled via environment variable or build process
+// Debug logging system - set to false for production
+const DEBUG_MODE = false; // Can be controlled via environment variable or build process
 
 // Debug logging functions
 function debugLog(...args) {
