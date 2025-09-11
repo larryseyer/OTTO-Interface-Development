@@ -10,7 +10,7 @@ class PlayerStateManager {
     this.maxPlayers = maxPlayers;
     this.activePlayerCount = 4; // Default 4 players active
     this.currentPlayer = 1;
-    
+
     // Default player configuration
     this.defaultPlayerState = {
       presetName: "Default",
@@ -25,7 +25,7 @@ class PlayerStateManager {
         manual: false,
         stick: false,
         ride: false,
-        lock: false
+        lock: false,
       },
       fillStates: {
         now: false,
@@ -33,48 +33,48 @@ class PlayerStateManager {
         8: false,
         16: true,
         32: false,
-        solo: false
+        solo: false,
       },
       sliderValues: {
         swing: 10,
         energy: 50,
-        volume: 75
+        volume: 75,
       },
       linkStates: {
         swing: false,
         energy: false,
-        volume: false
-      }
+        volume: false,
+      },
     };
-    
+
     // Player state cache for quick access
     this.playerCache = new Map();
-    
+
     // Listeners for player changes
     this.listeners = new Map();
-    
+
     // Initialize player states
     this.initializePlayers();
   }
-  
+
   /**
    * Initialize all player states
    */
   initializePlayers() {
     for (let i = 1; i <= this.maxPlayers; i++) {
       const playerState = this.deepClone(this.defaultPlayerState);
-      
+
       // Store in state manager
       this.stateManager.setState(`players.${i}`, playerState, {
         validate: false,
-        notify: false
+        notify: false,
       });
-      
+
       // Cache for quick access
       this.playerCache.set(i, playerState);
     }
   }
-  
+
   /**
    * Get player state
    */
@@ -83,12 +83,12 @@ class PlayerStateManager {
       console.error(`Invalid player number: ${playerNum}`);
       return null;
     }
-    
+
     // Try cache first
     if (this.playerCache.has(playerNum)) {
       return this.playerCache.get(playerNum);
     }
-    
+
     // Fallback to state manager
     const state = this.stateManager.getState(`players.${playerNum}`);
     if (state) {
@@ -96,7 +96,7 @@ class PlayerStateManager {
     }
     return state;
   }
-  
+
   /**
    * Update player state
    */
@@ -105,35 +105,35 @@ class PlayerStateManager {
       console.error(`Invalid player number: ${playerNum}`);
       return false;
     }
-    
+
     const currentState = this.getPlayerState(playerNum);
     if (!currentState) return false;
-    
+
     // Merge updates
     const newState = this.mergeDeep(currentState, updates);
-    
+
     // Validate if needed
     if (options.validate !== false) {
       if (!this.validatePlayerState(newState)) {
-        console.error('Player state validation failed');
+        console.error("Player state validation failed");
         return false;
       }
     }
-    
+
     // Update in state manager
     this.stateManager.setState(`players.${playerNum}`, newState, options);
-    
+
     // Update cache
     this.playerCache.set(playerNum, newState);
-    
+
     // Notify listeners
     if (options.notify !== false) {
       this.notifyListeners(playerNum, newState, currentState);
     }
-    
+
     return true;
   }
-  
+
   /**
    * Set current player
    */
@@ -142,19 +142,19 @@ class PlayerStateManager {
       console.error(`Invalid player number: ${playerNum}`);
       return false;
     }
-    
+
     const previousPlayer = this.currentPlayer;
     this.currentPlayer = playerNum;
-    
+
     // Update global state
-    this.stateManager.setState('global.currentPlayer', playerNum);
-    
+    this.stateManager.setState("global.currentPlayer", playerNum);
+
     // Notify player change
     this.notifyPlayerChange(playerNum, previousPlayer);
-    
+
     return true;
   }
-  
+
   /**
    * Set number of active players
    */
@@ -163,97 +163,97 @@ class PlayerStateManager {
       console.error(`Invalid player count: ${count}`);
       return false;
     }
-    
+
     this.activePlayerCount = count;
-    
+
     // Update global state
-    this.stateManager.setState('global.numberOfPlayers', count);
-    
+    this.stateManager.setState("global.numberOfPlayers", count);
+
     // Adjust current player if needed
     if (this.currentPlayer > count) {
       this.setCurrentPlayer(1);
     }
-    
+
     return true;
   }
-  
+
   /**
    * Update kit for a player
    */
   setPlayerKit(playerNum, kitName) {
     return this.updatePlayerState(playerNum, {
-      kitName: kitName
+      kitName: kitName,
     });
   }
-  
+
   /**
    * Update pattern for a player
    */
   setPlayerPattern(playerNum, patternName) {
     return this.updatePlayerState(playerNum, {
-      selectedPattern: patternName
+      selectedPattern: patternName,
     });
   }
-  
+
   /**
    * Update pattern group for a player
    */
   setPlayerPatternGroup(playerNum, groupName) {
     return this.updatePlayerState(playerNum, {
-      patternGroup: groupName
+      patternGroup: groupName,
     });
   }
-  
+
   /**
    * Update toggle state for a player
    */
   setToggleState(playerNum, toggleName, value) {
     const state = this.getPlayerState(playerNum);
     if (!state) return false;
-    
+
     // Handle radio button behavior for auto/manual/none
-    const radioToggles = ['none', 'auto', 'manual'];
+    const radioToggles = ["none", "auto", "manual"];
     const newToggleStates = { ...state.toggleStates };
-    
+
     if (radioToggles.includes(toggleName) && value) {
       // Turn off other radio toggles
-      radioToggles.forEach(toggle => {
+      radioToggles.forEach((toggle) => {
         newToggleStates[toggle] = toggle === toggleName;
       });
     } else {
       newToggleStates[toggleName] = value;
     }
-    
+
     return this.updatePlayerState(playerNum, {
-      toggleStates: newToggleStates
+      toggleStates: newToggleStates,
     });
   }
-  
+
   /**
    * Update fill state for a player
    */
   setFillState(playerNum, fillName, value) {
     const state = this.getPlayerState(playerNum);
     if (!state) return false;
-    
+
     const newFillStates = { ...state.fillStates };
-    
+
     // Only one fill can be active at a time (except 'now' and 'solo')
-    const exclusiveFills = ['4', '8', '16', '32'];
-    
+    const exclusiveFills = ["4", "8", "16", "32"];
+
     if (exclusiveFills.includes(fillName) && value) {
-      exclusiveFills.forEach(fill => {
+      exclusiveFills.forEach((fill) => {
         newFillStates[fill] = fill === fillName;
       });
     } else {
       newFillStates[fillName] = value;
     }
-    
+
     return this.updatePlayerState(playerNum, {
-      fillStates: newFillStates
+      fillStates: newFillStates,
     });
   }
-  
+
   /**
    * Update slider value for a player
    */
@@ -263,59 +263,59 @@ class PlayerStateManager {
       console.error(`Invalid slider value: ${value}`);
       return false;
     }
-    
+
     const state = this.getPlayerState(playerNum);
     if (!state) return false;
-    
+
     const newSliderValues = { ...state.sliderValues };
     newSliderValues[sliderName] = value;
-    
+
     return this.updatePlayerState(playerNum, {
-      sliderValues: newSliderValues
+      sliderValues: newSliderValues,
     });
   }
-  
+
   /**
    * Toggle mute state for a player
    */
   togglePlayerMute(playerNum) {
     const state = this.getPlayerState(playerNum);
     if (!state) return false;
-    
+
     return this.updatePlayerState(playerNum, {
-      muted: !state.muted
+      muted: !state.muted,
     });
   }
-  
+
   /**
    * Set link state for a parameter
    */
   setLinkState(playerNum, paramName, linked) {
     const state = this.getPlayerState(playerNum);
     if (!state) return false;
-    
+
     const newLinkStates = { ...state.linkStates };
     newLinkStates[paramName] = linked;
-    
+
     return this.updatePlayerState(playerNum, {
-      linkStates: newLinkStates
+      linkStates: newLinkStates,
     });
   }
-  
+
   /**
    * Copy player state to another player
    */
   copyPlayerState(fromPlayer, toPlayer) {
     const sourceState = this.getPlayerState(fromPlayer);
     if (!sourceState) return false;
-    
+
     // Deep clone the state
     const copiedState = this.deepClone(sourceState);
-    
+
     // Update the target player
     return this.updatePlayerState(toPlayer, copiedState);
   }
-  
+
   /**
    * Reset player to default state
    */
@@ -323,7 +323,7 @@ class PlayerStateManager {
     const defaultState = this.deepClone(this.defaultPlayerState);
     return this.updatePlayerState(playerNum, defaultState);
   }
-  
+
   /**
    * Get all active player states
    */
@@ -334,70 +334,70 @@ class PlayerStateManager {
     }
     return states;
   }
-  
+
   /**
    * Batch update multiple players
    */
   batchUpdate(updates) {
     const results = [];
-    
+
     // Start transaction
-    this.stateManager.beginTransaction('batch-player-update');
-    
+    this.stateManager.beginTransaction("batch-player-update");
+
     for (const [playerNum, playerUpdates] of Object.entries(updates)) {
       const success = this.updatePlayerState(
         parseInt(playerNum),
         playerUpdates,
-        { notify: false }
+        { notify: false },
       );
       results.push({ player: playerNum, success });
     }
-    
+
     // Commit transaction
     this.stateManager.commitTransaction();
-    
+
     // Notify all changes at once
     this.notifyBatchUpdate(updates);
-    
+
     return results;
   }
-  
+
   /**
    * Validate player state
    */
   validatePlayerState(state) {
     // Check required fields
-    const requiredFields = ['kitName', 'patternGroup', 'selectedPattern'];
+    const requiredFields = ["kitName", "patternGroup", "selectedPattern"];
     for (const field of requiredFields) {
       if (!state[field]) {
         console.error(`Missing required field: ${field}`);
         return false;
       }
     }
-    
+
     // Validate slider values
     if (state.sliderValues) {
       for (const [param, value] of Object.entries(state.sliderValues)) {
-        if (typeof value !== 'number' || value < 0 || value > 100) {
+        if (typeof value !== "number" || value < 0 || value > 100) {
           console.error(`Invalid slider value for ${param}: ${value}`);
           return false;
         }
       }
     }
-    
+
     // Validate toggle states
     if (state.toggleStates) {
-      const radioToggles = ['none', 'auto', 'manual'];
-      const activeRadio = radioToggles.filter(t => state.toggleStates[t]);
+      const radioToggles = ["none", "auto", "manual"];
+      const activeRadio = radioToggles.filter((t) => state.toggleStates[t]);
       if (activeRadio.length !== 1) {
-        console.error('Exactly one radio toggle must be active');
+        console.error("Exactly one radio toggle must be active");
         return false;
       }
     }
-    
+
     return true;
   }
-  
+
   /**
    * Add listener for player changes
    */
@@ -406,10 +406,10 @@ class PlayerStateManager {
       this.listeners.set(playerNum, new Set());
     }
     this.listeners.get(playerNum).add(listener);
-    
+
     return () => this.removeListener(playerNum, listener);
   }
-  
+
   /**
    * Remove listener
    */
@@ -419,7 +419,7 @@ class PlayerStateManager {
       playerListeners.delete(listener);
     }
   }
-  
+
   /**
    * Notify listeners of player changes
    */
@@ -427,60 +427,60 @@ class PlayerStateManager {
     // Notify specific player listeners
     const playerListeners = this.listeners.get(playerNum);
     if (playerListeners) {
-      playerListeners.forEach(listener => {
+      playerListeners.forEach((listener) => {
         try {
           listener(newState, oldState, playerNum);
         } catch (error) {
-          console.error('Error in player listener:', error);
+          console.error("Error in player listener:", error);
         }
       });
     }
-    
+
     // Notify global listeners
-    const globalListeners = this.listeners.get('*');
+    const globalListeners = this.listeners.get("*");
     if (globalListeners) {
-      globalListeners.forEach(listener => {
+      globalListeners.forEach((listener) => {
         try {
           listener(newState, oldState, playerNum);
         } catch (error) {
-          console.error('Error in global player listener:', error);
+          console.error("Error in global player listener:", error);
         }
       });
     }
   }
-  
+
   /**
    * Notify player change
    */
   notifyPlayerChange(newPlayer, oldPlayer) {
-    const changeListeners = this.listeners.get('player-change');
+    const changeListeners = this.listeners.get("player-change");
     if (changeListeners) {
-      changeListeners.forEach(listener => {
+      changeListeners.forEach((listener) => {
         try {
           listener(newPlayer, oldPlayer);
         } catch (error) {
-          console.error('Error in player change listener:', error);
+          console.error("Error in player change listener:", error);
         }
       });
     }
   }
-  
+
   /**
    * Notify batch update
    */
   notifyBatchUpdate(updates) {
-    const batchListeners = this.listeners.get('batch-update');
+    const batchListeners = this.listeners.get("batch-update");
     if (batchListeners) {
-      batchListeners.forEach(listener => {
+      batchListeners.forEach((listener) => {
         try {
           listener(updates);
         } catch (error) {
-          console.error('Error in batch update listener:', error);
+          console.error("Error in batch update listener:", error);
         }
       });
     }
   }
-  
+
   /**
    * Export player states for saving
    */
@@ -488,28 +488,28 @@ class PlayerStateManager {
     const exported = {
       currentPlayer: this.currentPlayer,
       activePlayerCount: this.activePlayerCount,
-      players: {}
+      players: {},
     };
-    
+
     for (let i = 1; i <= this.maxPlayers; i++) {
       exported.players[i] = this.getPlayerState(i);
     }
-    
+
     return exported;
   }
-  
+
   /**
    * Import player states
    */
   importStates(data) {
     if (!data || !data.players) {
-      console.error('Invalid import data');
+      console.error("Invalid import data");
       return false;
     }
-    
+
     // Start transaction
-    this.stateManager.beginTransaction('import-players');
-    
+    this.stateManager.beginTransaction("import-players");
+
     try {
       // Set global values
       if (data.currentPlayer) {
@@ -518,7 +518,7 @@ class PlayerStateManager {
       if (data.activePlayerCount) {
         this.activePlayerCount = data.activePlayerCount;
       }
-      
+
       // Import player states
       for (const [playerNum, state] of Object.entries(data.players)) {
         const num = parseInt(playerNum);
@@ -526,38 +526,45 @@ class PlayerStateManager {
           this.updatePlayerState(num, state, { notify: false });
         }
       }
-      
+
       // Commit transaction
       this.stateManager.commitTransaction();
-      
+
       // Notify all changes
       this.notifyBatchUpdate(data.players);
-      
+
       return true;
-      
     } catch (error) {
-      console.error('Error importing player states:', error);
+      console.error("Error importing player states:", error);
       this.stateManager.rollbackTransaction();
       return false;
     }
   }
-  
+
   /**
    * Deep clone helper
    */
   deepClone(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
-  
+
   /**
    * Deep merge helper
    */
   mergeDeep(target, source) {
     const output = { ...target };
-    
+
     for (const key in source) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-        if (target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])) {
+      if (
+        source[key] &&
+        typeof source[key] === "object" &&
+        !Array.isArray(source[key])
+      ) {
+        if (
+          target[key] &&
+          typeof target[key] === "object" &&
+          !Array.isArray(target[key])
+        ) {
           output[key] = this.mergeDeep(target[key], source[key]);
         } else {
           output[key] = source[key];
@@ -566,10 +573,10 @@ class PlayerStateManager {
         output[key] = source[key];
       }
     }
-    
+
     return output;
   }
-  
+
   /**
    * Get statistics
    */
@@ -579,17 +586,17 @@ class PlayerStateManager {
       activePlayerCount: this.activePlayerCount,
       currentPlayer: this.currentPlayer,
       cacheSize: this.playerCache.size,
-      listenerCount: this.listeners.size
+      listenerCount: this.listeners.size,
     };
   }
-  
+
   /**
    * Clear cache
    */
   clearCache() {
     this.playerCache.clear();
   }
-  
+
   /**
    * Destroy manager
    */
@@ -600,6 +607,6 @@ class PlayerStateManager {
 }
 
 // Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = PlayerStateManager;
 }

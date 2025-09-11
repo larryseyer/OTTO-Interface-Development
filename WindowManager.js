@@ -486,11 +486,13 @@ class WindowManager {
       if (key !== exceptKey) {
         const [type, name] = key.split("-");
         const stateCategory = type + "s";
-        
+
         // Check if state exists before accessing isOpen
-        if (this.states[stateCategory] && 
-            this.states[stateCategory][name] && 
-            this.states[stateCategory][name].isOpen) {
+        if (
+          this.states[stateCategory] &&
+          this.states[stateCategory][name] &&
+          this.states[stateCategory][name].isOpen
+        ) {
           promises.push(this.closeWindow(type, name));
         }
       }

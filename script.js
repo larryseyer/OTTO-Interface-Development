@@ -5661,24 +5661,14 @@ class OTTOAccurateInterface {
       const prevHandler = () => {
         this.navigateKit(-1);
       };
-      this.addEventListener(
-        kitPrev,
-        "click",
-        prevHandler,
-        "dropdown"
-      );
+      this.addEventListener(kitPrev, "click", prevHandler, "dropdown");
     }
 
     if (kitNext) {
       const nextHandler = () => {
         this.navigateKit(1);
       };
-      this.addEventListener(
-        kitNext,
-        "click",
-        nextHandler,
-        "dropdown"
-      );
+      this.addEventListener(kitNext, "click", nextHandler, "dropdown");
     }
 
     // Custom dropdown functionality
@@ -5694,7 +5684,7 @@ class OTTOAccurateInterface {
         kitDropdownSelected,
         "click",
         toggleHandler,
-        "dropdown"
+        "dropdown",
       );
     }
 
@@ -5724,12 +5714,7 @@ class OTTOAccurateInterface {
 
         console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
-      this.addEventListener(
-        option,
-        "click",
-        optionHandler,
-        "dropdown"
-      );
+      this.addEventListener(option, "click", optionHandler, "dropdown");
     });
 
     // Close kit dropdown when clicking outside
@@ -5770,12 +5755,7 @@ class OTTOAccurateInterface {
           `Player ${this.currentPlayer} kit mixer: ${this.playerStates[this.currentPlayer].kitMixerActive}`,
         );
       };
-      this.addEventListener(
-        kitMixerBtn,
-        "click",
-        mixerHandler,
-        "dropdown"
-      );
+      this.addEventListener(kitMixerBtn, "click", mixerHandler, "dropdown");
     }
 
     // Edit kit buttons

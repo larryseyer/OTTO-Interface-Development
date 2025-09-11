@@ -17,13 +17,13 @@
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 
     <link rel="stylesheet" href="styles.css" />
-    
+
     <!-- Load new manager classes BEFORE main script -->
     <!-- Phase 1: Core Infrastructure -->
     <script src="EventManager.js"></script>
     <script src="TimerManager.js"></script>
     <script src="StateManager.js"></script>
-    
+
     <!-- Phase 2: Manager Classes -->
     <script src="PlayerStateManager.js"></script>
     <script src="PatternGroupManager.js"></script>
@@ -31,27 +31,27 @@
     <script src="PresetManager.js"></script>
     <script src="LinkManager.js"></script>
     <script src="StorageManager.js"></script>
-    
+
     <!-- Phase 3: Data Integrity & Validation -->
     <script src="DataValidator.js"></script>
     <script src="InputSanitizer.js"></script>
-    
+
     <!-- Phase 4: Performance Optimizations -->
     <script src="RenderOptimizer.js"></script>
     <script src="AudioScheduler.js"></script>
     <script src="ResourcePool.js"></script>
-    
+
     <!-- Phase 5: UI Component Refactoring -->
     <script src="UIComponent.js"></script>
     <script src="SliderComponent.js"></script>
     <script src="ButtonComponent.js"></script>
     <script src="PatternGridComponent.js"></script>
-    
+
     <!-- Phase 6: JUCE-Ready Architecture -->
     <script src="MessageProtocol.js"></script>
     <script src="JUCEBridge.js"></script>
     <script src="InterfaceAdapter.js"></script>
-    
+
     <!-- Window Manager -->
     <script src="WindowManager.js"></script>
   </head>
@@ -695,24 +695,44 @@
 
     <!-- Load original script with new managers available -->
     <script src="script.js"></script>
-    
+
     <!-- Debug panel for Phase 1 testing -->
-    <div id="debug-panel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; max-width: 300px; display: none;">
-      <h4 style="margin: 0 0 10px 0;">Phase 1 Debug Info</h4>
+    <div
+      id="debug-panel"
+      style="
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 11px;
+        max-width: 300px;
+        display: none;
+      "
+    >
+      <h4 style="margin: 0 0 10px 0">Phase 1 Debug Info</h4>
       <div id="debug-content"></div>
-      <button onclick="toggleDebugMode()" style="margin-top: 10px; padding: 5px 10px;">Toggle Debug Mode</button>
+      <button
+        onclick="toggleDebugMode()"
+        style="margin-top: 10px; padding: 5px 10px"
+      >
+        Toggle Debug Mode
+      </button>
     </div>
-    
+
     <script>
       // Debug helper for Phase 1 testing
       function updateDebugPanel() {
         if (!window.OTTOApp) return;
-        
-        const debugContent = document.getElementById('debug-content');
+
+        const debugContent = document.getElementById("debug-content");
         const eventStats = window.OTTOApp.eventManager.getStats();
         const timerStats = window.OTTOApp.timerManager.getStats();
         const stateStats = window.OTTOApp.stateManager.getStats();
-        
+
         debugContent.innerHTML = `
           <strong>Event Manager:</strong><br>
           Active: ${eventStats.activeCount}<br>
@@ -733,21 +753,24 @@
           Listeners: ${stateStats.listeners}<br>
         `;
       }
-      
+
       function toggleDebugMode() {
         if (!window.OTTOApp) return;
-        
+
         const isDebug = !window.OTTOApp.eventManager.debugMode;
         window.OTTOApp.eventManager.setDebugMode(isDebug);
         window.OTTOApp.timerManager.setDebugMode(isDebug);
         window.OTTOApp.stateManager.setDebugMode(isDebug);
-        
-        console.log(`Debug mode ${isDebug ? 'enabled' : 'disabled'}`);
+
+        console.log(`Debug mode ${isDebug ? "enabled" : "disabled"}`);
       }
-      
+
       // Show debug panel in development
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        document.getElementById('debug-panel').style.display = 'block';
+      if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+      ) {
+        document.getElementById("debug-panel").style.display = "block";
         setInterval(updateDebugPanel, 1000);
       }
     </script>

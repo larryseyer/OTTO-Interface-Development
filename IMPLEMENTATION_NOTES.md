@@ -3,17 +3,20 @@
 ## Pending Tasks and Issues
 
 ### 1. Mixer Window State Management (IMPORTANT)
+
 **Date Added:** 2025-09-10  
 **Status:** Needs Implementation  
 **Priority:** High
 
 #### Current Issue:
+
 - The `kitMixerActive` boolean is stored in player state and saved with presets
 - This tracks whether the mixer window is open/closed, NOT actual mixer values
 - Opening/closing the mixer window was incorrectly marking presets as dirty
 - This creates duplicate state tracking (WindowManager already tracks open windows)
 
 #### What Needs to Be Done:
+
 1. **Remove `kitMixerActive` from player state completely**
    - Remove from initial state creation
    - Remove from preset saving/loading
@@ -34,11 +37,13 @@
    - Controls should update the mixer values and trigger dirty flags appropriately
 
 #### Files to Modify:
+
 - `script.js` - Remove kitMixerActive from player states
 - `WindowManager.js` - Already handles window state properly
 - `index.html` - Update mixer panel with actual controls
 
 #### Example of Proper Implementation:
+
 ```javascript
 // Instead of kitMixerActive, track actual mixer values:
 playerStates[playerNum].mixerSettings = {
@@ -74,8 +79,9 @@ onMixerVolumeChange(playerNum, value) {
 ## Completed Fixes
 
 ### Phase 1-5 Completed:
+
 - ✅ Memory leak fixes with WeakMap
-- ✅ Event listener lifecycle management  
+- ✅ Event listener lifecycle management
 - ✅ Timer management system
 - ✅ Separate manager classes architecture
 - ✅ Data validation layer
@@ -83,6 +89,7 @@ onMixerVolumeChange(playerNum, value) {
 - ✅ UI component refactoring
 
 ### Recent Fixes:
+
 - ✅ Fixed mixer window not opening (WindowManager mutex group error)
 - ✅ Fixed incorrect addEventListener parameter usage
 - ✅ Removed unnecessary dirty flag when opening mixer window
@@ -92,6 +99,7 @@ onMixerVolumeChange(playerNum, value) {
 ## Architecture Notes
 
 ### Manager Classes:
+
 - **EventManager** - Centralized event handling with automatic cleanup
 - **TimerManager** - Timer lifecycle management
 - **StateManager** - State transactions and validation
@@ -102,6 +110,7 @@ onMixerVolumeChange(playerNum, value) {
 - **InputSanitizer** - Security and input sanitization
 
 ### Key Principles:
+
 1. No backward compatibility needed (internal use only)
 2. Preparing for JUCE 8 C++ implementation
 3. 4 players active by default, 8 maximum

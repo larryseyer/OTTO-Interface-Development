@@ -2,7 +2,7 @@
 
 ## HTML/CSS/JS Version
 
-This is a web mockup of the interface for the OTTO app.  It's only function is to provide a working visual representation of what the app should look and act like while simlating an interactive session with a user.
+This is a web mockup of the interface for the OTTO app. It's only function is to provide a working visual representation of what the app should look and act like while simlating an interactive session with a user.
 
 ---
 

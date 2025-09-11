@@ -11,44 +11,44 @@ class JUCEBridge {
     this.isConnected = false;
     this.pendingCallbacks = new Map();
     this.callbackId = 0;
-    
+
     // Message types
     this.MessageTypes = {
       // UI to JUCE
-      UI_READY: 'ui_ready',
-      STATE_CHANGE: 'state_change',
-      PRESET_LOAD: 'preset_load',
-      PRESET_SAVE: 'preset_save',
-      PATTERN_CHANGE: 'pattern_change',
-      KIT_CHANGE: 'kit_change',
-      TRANSPORT_CONTROL: 'transport_control',
-      PARAMETER_CHANGE: 'parameter_change',
-      WINDOW_EVENT: 'window_event',
-      
+      UI_READY: "ui_ready",
+      STATE_CHANGE: "state_change",
+      PRESET_LOAD: "preset_load",
+      PRESET_SAVE: "preset_save",
+      PATTERN_CHANGE: "pattern_change",
+      KIT_CHANGE: "kit_change",
+      TRANSPORT_CONTROL: "transport_control",
+      PARAMETER_CHANGE: "parameter_change",
+      WINDOW_EVENT: "window_event",
+
       // JUCE to UI
-      ENGINE_STATE: 'engine_state',
-      AUDIO_LEVELS: 'audio_levels',
-      MIDI_EVENT: 'midi_event',
-      PRESET_LIST: 'preset_list',
-      ERROR: 'error',
-      ACK: 'acknowledge'
+      ENGINE_STATE: "engine_state",
+      AUDIO_LEVELS: "audio_levels",
+      MIDI_EVENT: "midi_event",
+      PRESET_LIST: "preset_list",
+      ERROR: "error",
+      ACK: "acknowledge",
     };
-    
+
     // Protocol version for compatibility checking
-    this.protocolVersion = '1.0.0';
-    
+    this.protocolVersion = "1.0.0";
+
     // Performance monitoring
     this.metrics = {
       messagesSent: 0,
       messagesReceived: 0,
       averageLatency: 0,
-      errors: 0
+      errors: 0,
     };
-    
+
     // Initialize connection
     this.initialize();
   }
-  
+
   /**
    * Initialize JUCE bridge connection
    */
@@ -57,26 +57,28 @@ class JUCEBridge {
     if (this.isJUCEAvailable()) {
       this.connectToJUCE();
     } else {
-      console.log('JUCE backend not available, running in standalone mode');
+      console.log("JUCE backend not available, running in standalone mode");
       this.setupStandaloneMode();
     }
-    
+
     // Setup message handlers
     this.setupMessageHandlers();
-    
+
     // Setup heartbeat
     this.startHeartbeat();
   }
-  
+
   /**
    * Check if JUCE backend is available
    */
   isJUCEAvailable() {
     // JUCE will inject a global object or use WebView messaging
-    return typeof window.__JUCE__ !== 'undefined' || 
-           typeof window.webkit?.messageHandlers?.juce !== 'undefined';
+    return (
+      typeof window.__JUCE__ !== "undefined" ||
+      typeof window.webkit?.messageHandlers?.juce !== "undefined"
+    );
   }
-  
+
   /**
    * Connect to JUCE backend
    */
@@ -92,24 +94,24 @@ class JUCEBridge {
         this.backend = {
           postMessage: (msg) => {
             window.webkit.messageHandlers.juce.postMessage(msg);
-          }
+          },
         };
         this.isConnected = true;
       }
-      
+
       if (this.isConnected) {
-        console.log('Connected to JUCE backend');
+        console.log("Connected to JUCE backend");
         this.sendMessage(this.MessageTypes.UI_READY, {
           version: this.protocolVersion,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
     } catch (error) {
-      console.error('Failed to connect to JUCE:', error);
+      console.error("Failed to connect to JUCE:", error);
       this.isConnected = false;
     }
   }
-  
+
   /**
    * Setup standalone mode for development
    */
@@ -118,38 +120,38 @@ class JUCEBridge {
     this.backend = {
       postMessage: (msg) => {
         // Echo messages back for testing
-        console.log('[Mock JUCE] Received:', msg);
-        
+        console.log("[Mock JUCE] Received:", msg);
+
         // Simulate response
         setTimeout(() => {
           this.handleMessage({
             type: this.MessageTypes.ACK,
             id: msg.id,
-            data: { received: true }
+            data: { received: true },
           });
         }, 10);
-      }
+      },
     };
   }
-  
+
   /**
    * Setup message handlers
    */
   setupMessageHandlers() {
     // Listen for messages from JUCE
-    window.addEventListener('message', (event) => {
+    window.addEventListener("message", (event) => {
       // Validate origin if needed
       if (this.isValidOrigin(event.origin)) {
         this.handleMessage(event.data);
       }
     });
-    
+
     // Alternative: direct function call from JUCE
     window.onJUCEMessage = (message) => {
       this.handleMessage(message);
     };
   }
-  
+
   /**
    * Validate message origin
    */
@@ -158,7 +160,7 @@ class JUCEBridge {
     // For now, accept all in development
     return true;
   }
-  
+
   /**
    * Send message to JUCE
    */
@@ -167,28 +169,28 @@ class JUCEBridge {
       id: ++this.callbackId,
       type,
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
-    
+
     // Store callback if provided
     if (callback) {
       this.pendingCallbacks.set(message.id, {
         callback,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
-    
+
     // Queue or send message
     if (this.isConnected) {
       this.sendMessageDirect(message);
     } else {
       this.messageQueue.push(message);
     }
-    
+
     this.metrics.messagesSent++;
     return message.id;
   }
-  
+
   /**
    * Send message directly to backend
    */
@@ -198,49 +200,48 @@ class JUCEBridge {
         // Send as JSON string
         this.backend.postMessage(JSON.stringify(message));
       } else {
-        console.warn('Backend not available for message:', message);
+        console.warn("Backend not available for message:", message);
       }
     } catch (error) {
-      console.error('Error sending message to JUCE:', error);
+      console.error("Error sending message to JUCE:", error);
       this.metrics.errors++;
     }
   }
-  
+
   /**
    * Handle incoming message from JUCE
    */
   handleMessage(message) {
     try {
       // Parse if string
-      if (typeof message === 'string') {
+      if (typeof message === "string") {
         message = JSON.parse(message);
       }
-      
+
       this.metrics.messagesReceived++;
-      
+
       // Handle callback if this is a response
       if (message.id && this.pendingCallbacks.has(message.id)) {
         const { callback, timestamp } = this.pendingCallbacks.get(message.id);
         this.pendingCallbacks.delete(message.id);
-        
+
         // Update latency metric
         const latency = Date.now() - timestamp;
         this.updateLatencyMetric(latency);
-        
+
         if (callback) {
           callback(message.data);
         }
       }
-      
+
       // Route message by type
       this.routeMessage(message);
-      
     } catch (error) {
-      console.error('Error handling JUCE message:', error);
+      console.error("Error handling JUCE message:", error);
       this.metrics.errors++;
     }
   }
-  
+
   /**
    * Route message to appropriate handler
    */
@@ -249,32 +250,32 @@ class JUCEBridge {
       case this.MessageTypes.ENGINE_STATE:
         this.handleEngineState(message.data);
         break;
-        
+
       case this.MessageTypes.AUDIO_LEVELS:
         this.handleAudioLevels(message.data);
         break;
-        
+
       case this.MessageTypes.MIDI_EVENT:
         this.handleMidiEvent(message.data);
         break;
-        
+
       case this.MessageTypes.PRESET_LIST:
         this.handlePresetList(message.data);
         break;
-        
+
       case this.MessageTypes.ERROR:
         this.handleError(message.data);
         break;
-        
+
       case this.MessageTypes.ACK:
         // Acknowledgment already handled
         break;
-        
+
       default:
-        console.warn('Unknown message type from JUCE:', message.type);
+        console.warn("Unknown message type from JUCE:", message.type);
     }
   }
-  
+
   /**
    * Handle engine state update
    */
@@ -290,7 +291,7 @@ class JUCEBridge {
       // Update other state as needed
     }
   }
-  
+
   /**
    * Handle audio level meters
    */
@@ -300,7 +301,7 @@ class JUCEBridge {
       window.ottoInterface.updateLevelMeters(data);
     }
   }
-  
+
   /**
    * Handle MIDI events
    */
@@ -310,7 +311,7 @@ class JUCEBridge {
       window.ottoInterface.handleMidiEvent(data);
     }
   }
-  
+
   /**
    * Handle preset list update
    */
@@ -320,17 +321,17 @@ class JUCEBridge {
       window.ottoInterface.renderPresetList();
     }
   }
-  
+
   /**
    * Handle errors from JUCE
    */
   handleError(data) {
-    console.error('JUCE Error:', data.message);
+    console.error("JUCE Error:", data.message);
     if (window.ottoInterface && window.ottoInterface.showNotification) {
-      window.ottoInterface.showNotification(data.message, 'error');
+      window.ottoInterface.showNotification(data.message, "error");
     }
   }
-  
+
   /**
    * Send state change to JUCE
    */
@@ -338,10 +339,10 @@ class JUCEBridge {
     this.sendMessage(this.MessageTypes.STATE_CHANGE, {
       player: playerNum,
       type: stateType,
-      value: value
+      value: value,
     });
   }
-  
+
   /**
    * Send parameter change to JUCE
    */
@@ -349,58 +350,66 @@ class JUCEBridge {
     this.sendMessage(this.MessageTypes.PARAMETER_CHANGE, {
       player: playerNum,
       parameter: param,
-      value: value
+      value: value,
     });
   }
-  
+
   /**
    * Send transport control
    */
   sendTransportControl(action) {
     this.sendMessage(this.MessageTypes.TRANSPORT_CONTROL, {
-      action: action // play, pause, stop, record
+      action: action, // play, pause, stop, record
     });
   }
-  
+
   /**
    * Request preset load
    */
   loadPreset(presetName, callback) {
-    this.sendMessage(this.MessageTypes.PRESET_LOAD, {
-      name: presetName
-    }, callback);
+    this.sendMessage(
+      this.MessageTypes.PRESET_LOAD,
+      {
+        name: presetName,
+      },
+      callback,
+    );
   }
-  
+
   /**
    * Request preset save
    */
   savePreset(presetName, data, callback) {
-    this.sendMessage(this.MessageTypes.PRESET_SAVE, {
-      name: presetName,
-      data: data
-    }, callback);
+    this.sendMessage(
+      this.MessageTypes.PRESET_SAVE,
+      {
+        name: presetName,
+        data: data,
+      },
+      callback,
+    );
   }
-  
+
   /**
    * Send pattern change
    */
   sendPatternChange(playerNum, patternData) {
     this.sendMessage(this.MessageTypes.PATTERN_CHANGE, {
       player: playerNum,
-      pattern: patternData
+      pattern: patternData,
     });
   }
-  
+
   /**
    * Send kit change
    */
   sendKitChange(playerNum, kitName) {
     this.sendMessage(this.MessageTypes.KIT_CHANGE, {
       player: playerNum,
-      kit: kitName
+      kit: kitName,
     });
   }
-  
+
   /**
    * Send window event
    */
@@ -408,32 +417,32 @@ class JUCEBridge {
     this.sendMessage(this.MessageTypes.WINDOW_EVENT, {
       event: eventType,
       window: windowName,
-      ...data
+      ...data,
     });
   }
-  
+
   /**
    * Start heartbeat to check connection
    */
   startHeartbeat() {
     setInterval(() => {
       if (this.isConnected) {
-        this.sendMessage('heartbeat', {}, (response) => {
+        this.sendMessage("heartbeat", {}, (response) => {
           if (!response) {
-            console.warn('JUCE heartbeat failed');
+            console.warn("JUCE heartbeat failed");
             this.isConnected = false;
           }
         });
       }
-      
+
       // Clean up old callbacks
       this.cleanupCallbacks();
-      
+
       // Process queued messages
       this.processMessageQueue();
     }, 5000);
   }
-  
+
   /**
    * Process queued messages
    */
@@ -441,18 +450,18 @@ class JUCEBridge {
     if (this.isConnected && this.messageQueue.length > 0) {
       const messages = [...this.messageQueue];
       this.messageQueue = [];
-      
-      messages.forEach(msg => this.sendMessageDirect(msg));
+
+      messages.forEach((msg) => this.sendMessageDirect(msg));
     }
   }
-  
+
   /**
    * Cleanup old callbacks
    */
   cleanupCallbacks() {
     const timeout = 30000; // 30 seconds
     const now = Date.now();
-    
+
     for (const [id, { timestamp }] of this.pendingCallbacks) {
       if (now - timestamp > timeout) {
         this.pendingCallbacks.delete(id);
@@ -460,16 +469,16 @@ class JUCEBridge {
       }
     }
   }
-  
+
   /**
    * Update latency metric
    */
   updateLatencyMetric(latency) {
     const weight = 0.1; // Exponential moving average weight
-    this.metrics.averageLatency = 
+    this.metrics.averageLatency =
       this.metrics.averageLatency * (1 - weight) + latency * weight;
   }
-  
+
   /**
    * Get metrics
    */
@@ -478,10 +487,10 @@ class JUCEBridge {
       ...this.metrics,
       queuedMessages: this.messageQueue.length,
       pendingCallbacks: this.pendingCallbacks.size,
-      connected: this.isConnected
+      connected: this.isConnected,
     };
   }
-  
+
   /**
    * Destroy bridge
    */
@@ -489,13 +498,13 @@ class JUCEBridge {
     this.isConnected = false;
     this.messageQueue = [];
     this.pendingCallbacks.clear();
-    
+
     // Remove event listeners
     window.onJUCEMessage = null;
   }
 }
 
 // Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = JUCEBridge;
 }
