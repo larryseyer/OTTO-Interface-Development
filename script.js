@@ -61,6 +61,9 @@ class OTTOAccurateInterface {
     // Add destroyed flag to prevent async operations after cleanup
     this.isDestroyed = false;
 
+    // Initialize DOM Cache Manager for performance
+    this.domCache = new DOMCacheManager();
+
     // Enhanced Event Listener Management System
     // Use WeakMap to prevent memory leaks with DOM element references
     this.elementHandlerMap = new WeakMap(); // Maps DOM elements to their handlers
@@ -185,6 +188,10 @@ class OTTOAccurateInterface {
         },
       };
     }
+
+    // Initialize selective update system
+    this.initializeDirtyFlags();
+    this.updateScheduled = false;
 
     // Memory cleanup interval will be set after initialization
     this.memoryCleanupInterval = null;
@@ -488,16 +495,25 @@ class OTTOAccurateInterface {
 
     // Clear existing timer for this save type
     if (this.saveTimers[saveType]) {
-      clearTimeout(this.saveTimers[saveType]);
+      this.clearSafeTimer(this.saveTimers[saveType], 'save');
+      this.saveTimers[saveType] = null;
     }
 
     // Add to pending saves
     this.pendingSaves.add(saveType);
 
-    const delay = forceImmediate ? 0 : this.saveDelays[saveType];
+    // Use longer delays for better debouncing
+    const enhancedDelays = {
+      preset: 1000,      // 1 second for preset changes (was 500ms)
+      appState: 2000,    // 2 seconds for app state (was 1s)
+      patternGroups: 500, // 500ms for pattern groups (was 300ms)
+      drumkits: 500,     // 500ms for drumkits (was 300ms)
+    };
+    
+    const delay = forceImmediate ? 0 : (enhancedDelays[saveType] || this.saveDelays[saveType]);
 
-    // Schedule the save
-    this.saveTimers[saveType] = setTimeout(() => {
+    // Schedule the save using safe timer
+    this.saveTimers[saveType] = this.createSafeTimeout(() => {
       if (this.isDestroyed) {
         this.saveTimers[saveType] = null;
         return;
@@ -506,7 +522,7 @@ class OTTOAccurateInterface {
       this.executeSave(saveType);
       this.pendingSaves.delete(saveType);
       this.saveTimers[saveType] = null;
-    }, delay);
+    }, delay, 'save');
   }
 
   executeSave(saveType) {
@@ -1614,9 +1630,13 @@ class OTTOAccurateInterface {
   // Safe DOM manipulation helpers
   safeQuerySelector(selector, parent = document) {
     try {
-      const element = parent.querySelector(selector);
-      if (!element) {
-        console.debug(`Element not found: ${selector}`);
+      // Use DOM cache if querying from document
+      const element = (parent === document && this.domCache) 
+        ? this.domCache.get(selector)
+        : parent.querySelector(selector);
+      
+      if (!element && DEBUG_MODE) {
+        debugLog(`Element not found: ${selector}`);
       }
       return element;
     } catch (error) {
@@ -1627,7 +1647,10 @@ class OTTOAccurateInterface {
 
   safeQuerySelectorAll(selector, parent = document) {
     try {
-      return parent.querySelectorAll(selector) || [];
+      // Use DOM cache if querying from document
+      return (parent === document && this.domCache)
+        ? this.domCache.getAll(selector)
+        : parent.querySelectorAll(selector) || [];
     } catch (error) {
       debugError(`Invalid selector: ${selector}`, error);
       return [];
@@ -1635,9 +1658,10 @@ class OTTOAccurateInterface {
   }
 
   safeGetElementById(id) {
-    const element = document.getElementById(id);
-    if (!element) {
-      console.debug(`Element with ID not found: ${id}`);
+    // Use DOM cache for better performance
+    const element = this.domCache ? this.domCache.getById(id) : document.getElementById(id);
+    if (!element && DEBUG_MODE) {
+      debugLog(`Element with ID not found: ${id}`);
     }
     return element;
   }
@@ -5566,6 +5590,236 @@ class OTTOAccurateInterface {
   }
 
   // Complete UI state update - used when loading presets to ensure everything is in sync
+  // Selective UI Update System with dirty flags
+  initializeDirtyFlags() {
+    this.dirtyFlags = {
+      playerNumber: false,
+      kit: false,
+      patternGroup: false,
+      pattern: false,
+      toggles: false,
+      fills: false,
+      sliders: false,
+      mute: false,
+      tempo: false,
+      loop: false,
+      links: false,
+      playerTabs: false
+    };
+  }
+
+  markDirty(component) {
+    if (this.dirtyFlags.hasOwnProperty(component)) {
+      this.dirtyFlags[component] = true;
+      // Schedule update if not already scheduled
+      if (!this.updateScheduled) {
+        this.scheduleUIUpdate();
+      }
+    }
+  }
+
+  markAllDirty() {
+    Object.keys(this.dirtyFlags).forEach(key => {
+      this.dirtyFlags[key] = true;
+    });
+  }
+
+  clearDirtyFlags() {
+    Object.keys(this.dirtyFlags).forEach(key => {
+      this.dirtyFlags[key] = false;
+    });
+  }
+
+  scheduleUIUpdate() {
+    if (this.updateScheduled || this.isDestroyed) return;
+    
+    this.updateScheduled = true;
+    requestAnimationFrame(() => {
+      if (!this.isDestroyed) {
+        this.performSelectiveUpdate();
+        this.updateScheduled = false;
+      }
+    });
+  }
+
+  performSelectiveUpdate() {
+    // Validate current player state exists
+    if (!this.playerStates || !this.playerStates[this.currentPlayer]) {
+      debugError(`No state found for player ${this.currentPlayer}`);
+      return;
+    }
+
+    const state = this.playerStates[this.currentPlayer];
+    const updates = [];
+
+    // Only update components that are marked dirty
+    if (this.dirtyFlags.playerNumber) {
+      updates.push(() => {
+        this.safeSetTextContent("#current-player-number", this.currentPlayer);
+      });
+    }
+
+    if (this.dirtyFlags.kit) {
+      updates.push(() => {
+        this.safeSetTextContent("#kit-dropdown .dropdown-text", state.kitName);
+        const kitOptions = this.safeQuerySelectorAll("#kit-dropdown .dropdown-option");
+        kitOptions.forEach((option) => {
+          if (!option) return;
+          this.safeRemoveClass(option, "selected");
+          if (option.textContent === state.kitName) {
+            this.safeAddClass(option, "selected");
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.patternGroup) {
+      updates.push(() => {
+        const groupText = this.safeQuerySelector("#group-dropdown .dropdown-text");
+        if (groupText && state.patternGroup && this.patternGroups) {
+          const group = this.patternGroups[state.patternGroup];
+          if (group) {
+            groupText.textContent = group.name;
+          }
+        }
+        
+        const groupOptions = this.safeQuerySelectorAll("#group-dropdown .dropdown-option");
+        groupOptions.forEach((option) => {
+          if (!option) return;
+          this.safeRemoveClass(option, "selected");
+          if (option.dataset.value === state.patternGroup) {
+            this.safeAddClass(option, "selected");
+          }
+        });
+      });
+
+      // Update pattern grid if group changed
+      if (state.patternGroup && this.patternGroups && this.patternGroups[state.patternGroup]) {
+        const patterns = this.patternGroups[state.patternGroup].patterns;
+        if (patterns) {
+          this.updateMainPatternGrid(patterns);
+        }
+      }
+    }
+
+    if (this.dirtyFlags.toggles) {
+      const toggleButtons = this.safeQuerySelectorAll("[data-toggle]");
+      toggleButtons.forEach((button) => {
+        if (!button || !button.dataset.toggle) return;
+        updates.push(() => {
+          const toggleKey = button.dataset.toggle;
+          this.safeRemoveClass(button, "active");
+          if (state.toggleStates && state.toggleStates[toggleKey]) {
+            this.safeAddClass(button, "active");
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.fills) {
+      const fillButtons = this.safeQuerySelectorAll("[data-fill]");
+      fillButtons.forEach((button) => {
+        if (!button || !button.dataset.fill) return;
+        updates.push(() => {
+          const fillKey = button.dataset.fill;
+          this.safeRemoveClass(button, "active");
+          if (state.fillStates && state.fillStates[fillKey]) {
+            this.safeAddClass(button, "active");
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.pattern) {
+      const patternButtons = this.safeQuerySelectorAll(".pattern-btn");
+      patternButtons.forEach((btn) => {
+        if (!btn) return;
+        updates.push(() => {
+          this.safeRemoveClass(btn, "active");
+          if (state.selectedPattern) {
+            const normalizedPattern = state.selectedPattern
+              .toLowerCase()
+              .replace(/\s+/g, "-");
+            if (
+              btn.dataset.pattern === normalizedPattern ||
+              (btn.textContent &&
+                btn.textContent.toLowerCase() ===
+                  state.selectedPattern.toLowerCase().substring(0, 8))
+            ) {
+              this.safeAddClass(btn, "active");
+            }
+          }
+        });
+      });
+    }
+
+    if (this.dirtyFlags.sliders && state.sliderValues) {
+      Object.keys(state.sliderValues).forEach((sliderKey) => {
+        const slider = this.safeQuerySelector(`.custom-slider[data-param="${sliderKey}"]`);
+        if (slider) {
+          updates.push(() => {
+            const value = state.sliderValues[sliderKey];
+            this.updateCustomSlider(slider, value);
+          });
+        }
+      });
+    }
+
+    if (this.dirtyFlags.mute) {
+      updates.push(() => {
+        const muteDrummerBtn = this.safeGetElementById("mute-drummer-btn");
+        if (muteDrummerBtn) {
+          this.safeToggleClass(muteDrummerBtn, "muted", state.muted || false);
+        }
+        
+        const kitMixerBtn = this.safeGetElementById("kit-mixer-btn");
+        if (kitMixerBtn) {
+          this.safeToggleClass(kitMixerBtn, "active", state.kitMixerActive || false);
+        }
+        
+        this.updateMuteOverlay();
+      });
+    }
+
+    if (this.dirtyFlags.playerTabs) {
+      for (let i = 1; i <= this.maxPlayers; i++) {
+        const tab = this.safeQuerySelector(`.player-tab[data-player="${i}"]`);
+        if (tab && this.playerStates[i]) {
+          updates.push(() => {
+            this.safeToggleClass(tab, "muted", this.playerStates[i].muted || false);
+            this.safeToggleClass(tab, "active", i === this.currentPlayer);
+          });
+        }
+      }
+    }
+
+    if (this.dirtyFlags.tempo) {
+      updates.push(() => {
+        this.safeSetTextContent("#tempo-display", this.tempo);
+      });
+    }
+
+    if (this.dirtyFlags.loop && this.loopPosition !== undefined) {
+      updates.push(() => {
+        this.updateLoopTimelineDisplay();
+      });
+    }
+
+    if (this.dirtyFlags.links && this.linkStates) {
+      updates.push(() => {
+        this.updateLinkIconStates();
+      });
+    }
+
+    // Execute all updates in a single batch
+    if (updates.length > 0) {
+      this.batchDOMUpdates(updates);
+    }
+
+    // Clear dirty flags after update
+    this.clearDirtyFlags();
+  }
+
   updateCompleteUIState() {
     // Validate current player state exists
     if (!this.playerStates || !this.playerStates[this.currentPlayer]) {
