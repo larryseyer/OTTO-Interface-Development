@@ -716,7 +716,7 @@ body {
     -ms-user-select: none !important;
     white-space: nowrap;  /* Prevent text wrapping */
     overflow: hidden;  /* Hide overflow */
-    text-overflow: ellipsis;  /* Add ellipsis for long text */
+    text-overflow: ellipsis;  /* Add ellipsis for truncated text */
 }
 
 .dropdown-arrow {
@@ -1307,6 +1307,10 @@ body {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 216px;  /* Match the dropdown width */
     display: flex;
     align-items: center;
     justify-content: center;

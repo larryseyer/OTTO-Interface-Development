@@ -30,26 +30,67 @@ class OTTOAccurateInterface {
         // Add destroyed flag to prevent async operations after cleanup
         this.isDestroyed = false;
 
-        // Track all event listeners for cleanup
+        // Enhanced Event Listener Management System
+        // Use WeakMap to prevent memory leaks with DOM element references
+        this.elementHandlerMap = new WeakMap(); // Maps DOM elements to their handlers
+        this.documentHandlers = new Map(); // Maps event types to document-level handlers
+        
+        // Track all event listeners for cleanup with improved structure
+        this.eventListenerRegistry = {
+            element: [],      // Element-specific listeners
+            document: [],     // Document-level listeners
+            window: [],       // Window-level listeners
+            slider: [],       // Slider-specific listeners
+            dropdown: [],     // Dropdown-specific listeners
+            modal: [],        // Modal-specific listeners
+            pattern: []       // Pattern panel listeners
+        };
+        
+        // Legacy arrays for backward compatibility (will migrate gradually)
         this.eventListeners = [];
         this.sliderListeners = [];
         this.dropdownListeners = [];
         this.modalListeners = [];
         this.documentListeners = [];
 
-        // Track debounce timers
+        // Track specific handlers for cleanup
+        this.specificHandlers = {
+            presetDropdownClose: null,
+            addGroup: null,
+            renameGroup: null,
+            keyboardShortcut: null,
+            beforeUnload: null
+        };
+
+        // Track debounce timers with improved management
         this.debounceTimers = new Map();
         this.miniSliderDebounceTimer = null;
+        
+        // Timer registry for all timers (not just debounce)
+        this.activeTimers = new Set();
+        this.notificationTimers = new Set();
 
         // Storage error tracking
         this.storageErrors = [];
         this.maxStorageErrors = 10;  // Keep last 10 errors for debugging
 
-        // Centralized state management
+        // Enhanced State Management with Race Condition Prevention
         this.stateUpdateQueue = [];
         this.isProcessingStateUpdate = false;
         this.stateUpdateTimer = null;
         this.stateUpdateDelay = 50; // 50ms batch delay
+        this.stateUpdateInProgress = false; // New flag for atomic operations
+        this.stateUpdatePending = false; // Track pending updates
+        
+        // State versioning for consistency
+        this.stateVersion = 0;
+        this.stateUpdateHistory = [];
+        this.loadingVersion = null;
+        
+        // State operation locks
+        this.stateLocks = new Map();
+        this.lockQueue = [];
+        this.activeLock = null;
 
         // Save management - single source of truth
         this.saveTimers = {
@@ -143,86 +184,111 @@ class OTTOAccurateInterface {
         this.processStateUpdateQueue();
     }
 
-    processStateUpdateQueue() {
+    async processStateUpdateQueue() {
         // Check if destroyed
         if (this.isDestroyed) return;
 
-        // Prevent concurrent processing
-        if (this.isProcessingStateUpdate) {
+        // Use atomic operation to prevent race conditions
+        if (this.stateUpdateInProgress) {
+            // Queue another process after current one completes
+            if (!this.stateUpdatePending) {
+                this.stateUpdatePending = true;
+                setTimeout(() => {
+                    this.stateUpdatePending = false;
+                    this.processStateUpdateQueue();
+                }, this.stateUpdateDelay * 2);
+            }
             return;
         }
 
         // Clear existing timer
         if (this.stateUpdateTimer) {
             clearTimeout(this.stateUpdateTimer);
+            this.stateUpdateTimer = null;
         }
 
         // Batch process updates after delay
-        this.stateUpdateTimer = setTimeout(() => {
+        this.stateUpdateTimer = setTimeout(async () => {
             // Check again if destroyed
             if (this.isDestroyed) {
                 this.stateUpdateTimer = null;
                 return;
             }
 
-            this.isProcessingStateUpdate = true;
+            // Acquire lock for state updates
+            this.stateUpdateInProgress = true;
 
-            // Process all queued updates
-            const updates = [...this.stateUpdateQueue];
-            this.stateUpdateQueue = [];
+            try {
+                // Process within atomic operation
+                await this.atomicStateUpdate('state-update', async (version) => {
+                    // Process all queued updates
+                    const updates = [...this.stateUpdateQueue];
+                    this.stateUpdateQueue = [];
 
-            // Group updates by type for efficiency
-            const playerUpdates = {};
-            const globalUpdates = {};
-            const callbacks = [];
+                    // Group updates by type for efficiency
+                    const playerUpdates = {};
+                    const globalUpdates = {};
+                    const callbacks = [];
 
-            updates.forEach(update => {
-                if (update.type === 'player') {
-                    if (!playerUpdates[update.playerNumber]) {
-                        playerUpdates[update.playerNumber] = {};
+                    updates.forEach(update => {
+                        // Skip updates from older versions if loading preset
+                        if (this.isLoadingPreset && update.version && update.version < this.loadingVersion) {
+                            console.log(`Skipping outdated update from version ${update.version}`);
+                            return;
+                        }
+
+                        if (update.type === 'player') {
+                            if (!playerUpdates[update.playerNumber]) {
+                                playerUpdates[update.playerNumber] = {};
+                            }
+                            Object.assign(playerUpdates[update.playerNumber], update.updates);
+                        } else if (update.type === 'global') {
+                            Object.assign(globalUpdates, update.updates);
+                        }
+
+                        if (update.callback) {
+                            callbacks.push(update.callback);
+                        }
+                    });
+
+                    // Apply player state updates
+                    for (const [playerNum, updates] of Object.entries(playerUpdates)) {
+                        if (this.isDestroyed) break;
+                        this.applyPlayerStateUpdates(parseInt(playerNum), updates);
                     }
-                    Object.assign(playerUpdates[update.playerNumber], update.updates);
-                } else if (update.type === 'global') {
-                    Object.assign(globalUpdates, update.updates);
+
+                    // Apply global state updates
+                    if (!this.isDestroyed) {
+                        this.applyGlobalStateUpdates(globalUpdates);
+                    }
+
+                    // Execute callbacks
+                    for (const cb of callbacks) {
+                        if (this.isDestroyed) break;
+                        try {
+                            await cb();
+                        } catch (e) {
+                            console.error('Error in state update callback:', e);
+                        }
+                    }
+
+                    // Trigger saves as needed
+                    if (!this.isDestroyed) {
+                        this.processPendingSaves();
+                    }
+
+                    return true;
+                });
+            } catch (error) {
+                console.error('Error processing state update queue:', error);
+            } finally {
+                this.stateUpdateInProgress = false;
+                this.stateUpdateTimer = null;
+
+                // Process any new updates that came in while we were processing
+                if (!this.isDestroyed && this.stateUpdateQueue.length > 0) {
+                    this.processStateUpdateQueue();
                 }
-
-                if (update.callback) {
-                    callbacks.push(update.callback);
-                }
-            });
-
-            // Apply player state updates
-            for (const [playerNum, updates] of Object.entries(playerUpdates)) {
-                if (this.isDestroyed) break;
-                this.applyPlayerStateUpdates(parseInt(playerNum), updates);
-            }
-
-            // Apply global state updates
-            if (!this.isDestroyed) {
-                this.applyGlobalStateUpdates(globalUpdates);
-            }
-
-            // Execute callbacks
-            callbacks.forEach(cb => {
-                if (this.isDestroyed) return;
-                try {
-                    cb();
-                } catch (e) {
-                    console.error('Error in state update callback:', e);
-                }
-            });
-
-            // Trigger saves as needed
-            if (!this.isDestroyed) {
-                this.processPendingSaves();
-            }
-
-            this.isProcessingStateUpdate = false;
-            this.stateUpdateTimer = null;
-
-            // Process any new updates that came in while we were processing
-            if (!this.isDestroyed && this.stateUpdateQueue.length > 0) {
-                this.processStateUpdateQueue();
             }
         }, this.stateUpdateDelay);
     }
@@ -482,61 +548,49 @@ class OTTOAccurateInterface {
     // Safe localStorage wrapper methods
     safeLocalStorageSet(key, value) {
         try {
-            // Check if localStorage is available
-            if (typeof(Storage) === "undefined") {
-                throw new Error('localStorage not supported');
+            // Validate data before saving
+            if (!this.validateStoredDataEnhanced(key, value)) {
+                console.error(`Invalid data structure for ${key}, cannot save`);
+                this.logStorageError(key, 'set', new Error('Validation failed'));
+                return false;
             }
 
-            // Try to serialize the value first
-            const serialized = JSON.stringify(value);
-
-            // Check approximate size (2 bytes per character for UTF-16)
-            const approxSize = serialized.length * 2;
-            const fiveMB = 5 * 1024 * 1024; // 5MB typical limit
-
-            if (approxSize > fiveMB) {
-                console.warn(`Data size (${(approxSize / 1024 / 1024).toFixed(2)}MB) may exceed localStorage limit`);
-                // Try to clear old data if needed
-                this.clearOldStorageData();
+            // Check if compression is beneficial
+            const originalSize = JSON.stringify(value).length;
+            let dataToSave = value;
+            
+            // Compress if data is large (over 100KB)
+            if (originalSize > 100000) {
+                console.log(`Compressing ${key} (${originalSize} bytes)`);
+                dataToSave = this.compressData(value);
+                dataToSave.compressed = true;
+                const compressedSize = JSON.stringify(dataToSave).length;
+                console.log(`Compressed to ${compressedSize} bytes (${Math.round((1 - compressedSize/originalSize) * 100)}% reduction)`);
             }
 
-            localStorage.setItem(key, serialized);
+            // Try to save
+            localStorage.setItem(key, JSON.stringify(dataToSave));
             return true;
 
-        } catch (e) {
-            // Handle different error types
-            let errorMessage = '';
-            let errorType = 'UNKNOWN';
+        } catch (error) {
+            this.logStorageError(key, 'set', error);
 
-            if (e.name === 'QuotaExceededError' ||
-                e.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-                (e.code && e.code === 22)) {
-                errorType = 'QUOTA_EXCEEDED';
-                errorMessage = 'Storage quota exceeded';
-
-                // Try to free up space
+            // Handle quota exceeded error
+            if (error.name === 'QuotaExceededError' || 
+                error.code === 22 || 
+                error.code === 1014) {
+                
+                console.log('Storage quota exceeded for', key);
+                
+                // Try to handle quota exceeded
                 if (this.handleQuotaExceeded(key, value)) {
-                    return true; // Successfully saved after cleanup
+                    return true;
                 }
-
-            } else if (e.message && e.message.includes('circular')) {
-                errorType = 'CIRCULAR_REFERENCE';
-                errorMessage = 'Data contains circular references';
-
-            } else if (e.name === 'SecurityError') {
-                errorType = 'SECURITY_ERROR';
-                errorMessage = 'localStorage access denied (private browsing?)';
-
-            } else {
-                errorMessage = e.message || 'Unknown storage error';
-            }
-
-            // Log the error
-            this.logStorageError(key, errorType, errorMessage);
-
-            // Show user notification for critical errors (only if method is available)
-            if ((errorType === 'QUOTA_EXCEEDED' || errorType === 'SECURITY_ERROR') && this.showNotification) {
-                this.showNotification(`Storage error: ${errorMessage}. Some settings may not be saved.`, 'error');
+                
+                // Show user notification
+                if (this.showNotification) {
+                    this.showNotification('Storage is full. Some data may not be saved.', 'error');
+                }
             }
 
             return false;
@@ -545,50 +599,47 @@ class OTTOAccurateInterface {
 
     safeLocalStorageGet(key, defaultValue = null) {
         try {
-            // Check if localStorage is available
-            if (typeof(Storage) === "undefined") {
-                console.warn('localStorage not supported');
+            const item = localStorage.getItem(key);
+            if (!item) {
                 return defaultValue;
             }
 
-            const stored = localStorage.getItem(key);
-            if (stored === null) {
-                return defaultValue;
-            }
-
-            // Try to parse the stored value
-            const parsed = JSON.parse(stored);
-
-            // Validate the parsed data isn't corrupted
-            if (this.validateStoredData(key, parsed)) {
-                return parsed;
-            } else {
-                console.warn(`Corrupted data detected for key: ${key}`);
+            const parsed = JSON.parse(item);
+            
+            // Use enhanced validation
+            if (!this.validateStoredDataEnhanced(key, parsed)) {
+                console.warn(`Invalid data structure for ${key}, attempting recovery`);
+                
                 // Try to recover or return default
-                return this.recoverCorruptedData(key, defaultValue);
+                const recovered = this.recoverCorruptedData(key, parsed);
+                if (recovered && this.validateStoredDataEnhanced(key, recovered)) {
+                    // Save the recovered data
+                    localStorage.setItem(key, JSON.stringify(recovered));
+                    return recovered;
+                }
+                
+                console.error(`Unable to recover ${key}, using default value`);
+                return defaultValue;
             }
 
-        } catch (e) {
-            // Handle JSON parse errors
-            if (e instanceof SyntaxError) {
-                console.error(`Failed to parse stored data for key: ${key}`, e);
-                this.logStorageError(key, 'PARSE_ERROR', 'Corrupted data in storage');
+            // Check if data needs decompression
+            if (parsed.compressed === true) {
+                return this.decompressData(parsed);
+            }
 
-                // Try to clear the corrupted data
+            return parsed;
+
+        } catch (error) {
+            this.logStorageError(key, 'get', error);
+
+            // Try to determine the type of error
+            if (error instanceof SyntaxError) {
+                console.error(`Corrupted JSON in ${key}, clearing and using default`);
                 try {
                     localStorage.removeItem(key);
-                    console.log(`Removed corrupted data for key: ${key}`);
                 } catch (removeError) {
-                    console.error('Failed to remove corrupted data:', removeError);
+                    console.error(`Unable to remove corrupted ${key}:`, removeError);
                 }
-
-                // Notify user if this is important data (only if method is available)
-                if ((key.includes('preset') || key.includes('state')) && this.showNotification) {
-                    this.showNotification('Some saved data was corrupted and has been reset.', 'warning');
-                }
-            } else {
-                console.error(`Storage error for key: ${key}`, e);
-                this.logStorageError(key, 'ACCESS_ERROR', e.message);
             }
 
             return defaultValue;
@@ -613,52 +664,470 @@ class OTTOAccurateInterface {
         return data !== null && data !== undefined;
     }
 
-    recoverCorruptedData(key, defaultValue) {
-        // Try to recover based on key type
-        console.log(`Attempting to recover data for key: ${key}`);
-
-        // For presets, try to at least save a default preset
-        if (key === 'otto_presets') {
-            const recovered = {
-                'default': this.createPresetFromCurrentState('Default')
-            };
-            this.safeLocalStorageSet(key, recovered);
-            return recovered;
+    // Enhanced data validation with deep structure checking
+    validateDataStructure(data, schema) {
+        // Recursive validation against a schema
+        if (!data || !schema) return false;
+        
+        for (const [key, rules] of Object.entries(schema)) {
+            const value = data[key];
+            
+            // Check required fields
+            if (rules.required && (value === undefined || value === null)) {
+                console.error(`Validation failed: Required field "${key}" is missing`);
+                return false;
+            }
+            
+            // Skip optional fields if not present
+            if (!rules.required && (value === undefined || value === null)) {
+                continue;
+            }
+            
+            // Type checking
+            if (rules.type) {
+                const actualType = Array.isArray(value) ? 'array' : typeof value;
+                if (actualType !== rules.type) {
+                    console.error(`Validation failed: Field "${key}" should be ${rules.type} but is ${actualType}`);
+                    return false;
+                }
+            }
+            
+            // Array validation
+            if (rules.type === 'array' && rules.itemType) {
+                for (const item of value) {
+                    const itemType = typeof item;
+                    if (itemType !== rules.itemType && rules.itemType !== 'any') {
+                        console.error(`Validation failed: Array "${key}" contains invalid item type ${itemType}`);
+                        return false;
+                    }
+                }
+            }
+            
+            // Nested object validation
+            if (rules.type === 'object' && rules.schema) {
+                if (!this.validateDataStructure(value, rules.schema)) {
+                    return false;
+                }
+            }
+            
+            // Custom validation function
+            if (rules.validate && !rules.validate(value)) {
+                console.error(`Validation failed: Custom validation for "${key}" failed`);
+                return false;
+            }
+            
+            // Range validation for numbers
+            if (rules.type === 'number') {
+                if (rules.min !== undefined && value < rules.min) {
+                    console.error(`Validation failed: "${key}" value ${value} is below minimum ${rules.min}`);
+                    return false;
+                }
+                if (rules.max !== undefined && value > rules.max) {
+                    console.error(`Validation failed: "${key}" value ${value} is above maximum ${rules.max}`);
+                    return false;
+                }
+            }
         }
+        
+        return true;
+    }
 
-        // For other data, return the default
-        return defaultValue;
+    // Define schemas for different data types
+    // Define schemas for different data types
+    getDataSchemas() {
+        return {
+            playerState: {
+                presetName: { type: 'string', required: true },
+                kitName: { type: 'string', required: true },
+                patternGroup: { type: 'string', required: true },
+                selectedPattern: { type: 'string', required: false },
+                kitMixerActive: { type: 'boolean', required: false },
+                muted: { type: 'boolean', required: false },
+                toggleStates: {
+                    type: 'object',
+                    required: true,
+                    schema: {
+                        none: { type: 'boolean', required: false },
+                        auto: { type: 'boolean', required: false },
+                        manual: { type: 'boolean', required: false },
+                        stick: { type: 'boolean', required: false },
+                        ride: { type: 'boolean', required: false },
+                        lock: { type: 'boolean', required: false }
+                    }
+                },
+                fillStates: {
+                    type: 'object',
+                    required: true,
+                    schema: {
+                        now: { type: 'boolean', required: false },
+                        4: { type: 'boolean', required: false },
+                        8: { type: 'boolean', required: false },
+                        16: { type: 'boolean', required: false },
+                        32: { type: 'boolean', required: false },
+                        solo: { type: 'boolean', required: false }
+                    }
+                },
+                sliderValues: {
+                    type: 'object',
+                    required: true,
+                    schema: {
+                        swing: { type: 'number', required: true, min: 0, max: 100 },
+                        energy: { type: 'number', required: true, min: 0, max: 100 },
+                        volume: { type: 'number', required: true, min: 0, max: 100 }
+                    }
+                }
+            },
+            preset: {
+                name: { type: 'string', required: true },
+                playerStates: { type: 'object', required: true },
+                tempo: { type: 'number', required: false, min: 40, max: 300 },
+                numberOfPlayers: { type: 'number', required: false, min: 1, max: 8 },
+                loopPosition: { type: 'number', required: false, min: 0, max: 100 },
+                isPlaying: { type: 'boolean', required: false },
+                linkStates: { type: 'object', required: false },
+                version: { type: 'string', required: false }
+            },
+            patternGroup: {
+                name: { type: 'string', required: true },
+                patterns: { 
+                    type: 'array', 
+                    required: true,
+                    validate: (arr) => {
+                        // Pattern groups MUST have exactly 16 patterns for the 4x4 grid
+                        // But allow fixing if not exactly 16
+                        return Array.isArray(arr);
+                    }
+                },
+                selectedPattern: { type: 'string', required: false }
+            },
+            appState: {
+                currentPreset: { type: 'string', required: true },
+                currentPlayer: { type: 'number', required: true, min: 1, max: 8 },
+                tempo: { type: 'number', required: true, min: 40, max: 300 },
+                numberOfPlayers: { type: 'number', required: true, min: 1, max: 8 },
+                isPlaying: { type: 'boolean', required: false },
+                version: { type: 'string', required: false }
+            }
+        };
+    }
+
+    // Enhanced validation with deep structure checking
+    validateStoredDataEnhanced(key, data) {
+        const schemas = this.getDataSchemas();
+        
+        // Basic validation
+        if (data === null || data === undefined) {
+            return false;
+        }
+        
+        // Schema-based validation for known keys
+        switch(key) {
+            case 'otto_presets':
+                if (typeof data !== 'object') return false;
+                // Validate each preset
+                for (const [presetKey, preset] of Object.entries(data)) {
+                    if (!this.validateDataStructure(preset, schemas.preset)) {
+                        console.error(`Invalid preset: ${presetKey}`);
+                        return false;
+                    }
+                    // Validate player states within preset
+                    for (const [playerNum, playerState] of Object.entries(preset.playerStates)) {
+                        if (!this.validateDataStructure(playerState, schemas.playerState)) {
+                            console.error(`Invalid player state in preset ${presetKey}, player ${playerNum}`);
+                            return false;
+                        }
+                    }
+                }
+                return true;
+                
+            case 'otto_app_state':
+                return this.validateDataStructure(data, schemas.appState);
+                
+            case 'ottoPatternGroups':
+                if (typeof data !== 'object') return false;
+                for (const [groupKey, group] of Object.entries(data)) {
+                    if (!this.validateDataStructure(group, schemas.patternGroup)) {
+                        console.error(`Invalid pattern group: ${groupKey}`);
+                        return false;
+                    }
+                }
+                return true;
+                
+            case 'ottoDrumkits':
+                // Basic validation for drumkits
+                return data && typeof data === 'object';
+                
+            case 'otto_preset_locks':
+                // Validate locks are boolean values
+                if (typeof data !== 'object') return false;
+                for (const value of Object.values(data)) {
+                    if (typeof value !== 'boolean') return false;
+                }
+                return true;
+                
+            default:
+                // Use original validation for unknown keys
+                return this.validateStoredData(key, data);
+        }
+    }
+
+    // Data migration system
+    migrateData(key, data, fromVersion, toVersion) {
+        console.log(`Migrating ${key} from version ${fromVersion} to ${toVersion}`);
+        
+        // Define migration paths
+        const migrations = {
+            'otto_presets': {
+                '1.0.0_to_1.1.0': (data) => {
+                    // Example: Add new field to all presets
+                    for (const preset of Object.values(data)) {
+                        if (!preset.version) {
+                            preset.version = '1.1.0';
+                        }
+                        // Ensure linkStates exist
+                        if (!preset.linkStates) {
+                            preset.linkStates = {
+                                swing: { master: null, slaves: [] },
+                                energy: { master: null, slaves: [] },
+                                volume: { master: null, slaves: [] }
+                            };
+                        }
+                    }
+                    return data;
+                }
+            },
+            'otto_app_state': {
+                '1.0.0_to_1.1.0': (data) => {
+                    // Add version field if missing
+                    if (!data.version) {
+                        data.version = '1.1.0';
+                    }
+                    return data;
+                }
+            },
+            'ottoPatternGroups': {
+                '1.0.0_to_1.1.0': (data) => {
+                    // Ensure all groups have 16 patterns
+                    for (const group of Object.values(data)) {
+                        if (!Array.isArray(group.patterns)) {
+                            group.patterns = Array(16).fill('');
+                        } else if (group.patterns.length < 16) {
+                            while (group.patterns.length < 16) {
+                                group.patterns.push('');
+                            }
+                        }
+                    }
+                    return data;
+                }
+            }
+        };
+        
+        // Apply migrations
+        if (migrations[key]) {
+            const migrationKey = `${fromVersion}_to_${toVersion}`;
+            if (migrations[key][migrationKey]) {
+                try {
+                    return migrations[key][migrationKey](data);
+                } catch (error) {
+                    console.error(`Migration failed for ${key}:`, error);
+                    return data; // Return unmigrated data on error
+                }
+            }
+        }
+        
+        return data; // No migration needed
+    }
+
+    // Compression utilities
+    compressData(data) {
+        // Remove unnecessary fields to save space
+        const compressed = JSON.parse(JSON.stringify(data)); // Deep clone
+        
+        // Remove timestamps if they exist
+        this.removeFieldRecursive(compressed, 'timestamp');
+        this.removeFieldRecursive(compressed, 'lastModified');
+        
+        // Convert boolean arrays to bit flags where possible
+        if (compressed.playerStates) {
+            for (const state of Object.values(compressed.playerStates)) {
+                // Compress toggle states to bit flags
+                if (state.toggleStates) {
+                    state.toggleFlags = this.booleanObjectToBitFlags(state.toggleStates);
+                    delete state.toggleStates;
+                }
+                // Compress fill states to bit flags
+                if (state.fillStates) {
+                    state.fillFlags = this.booleanObjectToBitFlags(state.fillStates);
+                    delete state.fillStates;
+                }
+            }
+        }
+        
+        return compressed;
+    }
+
+    decompressData(data) {
+        // Restore full format from compressed data
+        const decompressed = JSON.parse(JSON.stringify(data)); // Deep clone
+        
+        // Restore boolean states from bit flags
+        if (decompressed.playerStates) {
+            for (const state of Object.values(decompressed.playerStates)) {
+                // Restore toggle states
+                if (state.toggleFlags !== undefined) {
+                    state.toggleStates = this.bitFlagsToBooleanObject(state.toggleFlags, 
+                        ['none', 'auto', 'manual', 'stick', 'ride', 'lock']);
+                    delete state.toggleFlags;
+                }
+                // Restore fill states
+                if (state.fillFlags !== undefined) {
+                    state.fillStates = this.bitFlagsToBooleanObject(state.fillFlags,
+                        ['now', '4', '8', '16', '32', 'solo']);
+                    delete state.fillFlags;
+                }
+            }
+        }
+        
+        return decompressed;
+    }
+
+    booleanObjectToBitFlags(obj) {
+        const keys = Object.keys(obj);
+        let flags = 0;
+        keys.forEach((key, index) => {
+            if (obj[key]) {
+                flags |= (1 << index);
+            }
+        });
+        return flags;
+    }
+
+    bitFlagsToBooleanObject(flags, keys) {
+        const obj = {};
+        keys.forEach((key, index) => {
+            obj[key] = !!(flags & (1 << index));
+        });
+        return obj;
+    }
+
+    removeFieldRecursive(obj, fieldName) {
+        if (!obj || typeof obj !== 'object') return;
+        
+        if (Array.isArray(obj)) {
+            obj.forEach(item => this.removeFieldRecursive(item, fieldName));
+        } else {
+            delete obj[fieldName];
+            Object.values(obj).forEach(value => {
+                if (typeof value === 'object') {
+                    this.removeFieldRecursive(value, fieldName);
+                }
+            });
+        }
+    }
+
+    recoverCorruptedData(key, data) {
+        console.log(`Attempting to recover data for key: ${key}`);
+        
+        // Attempt to fix common data corruption issues
+        try {
+            if (key === 'ottoPatternGroups' && data) {
+                // Fix pattern groups that don't have exactly 16 patterns
+                const recovered = {};
+                for (const [groupKey, group] of Object.entries(data)) {
+                    // The "all" group is special and might have different structure
+                    if (groupKey === 'all') {
+                        // Skip or handle "all" group specially
+                        continue;
+                    }
+                    
+                    const fixedGroup = {
+                        name: group.name || groupKey,
+                        patterns: Array.isArray(group.patterns) ? group.patterns : [],
+                        selectedPattern: group.selectedPattern || null
+                    };
+                    
+                    // Ensure exactly 16 patterns for the 4x4 grid
+                    if (fixedGroup.patterns.length < 16) {
+                        // Pad with empty strings
+                        while (fixedGroup.patterns.length < 16) {
+                            fixedGroup.patterns.push('');
+                        }
+                    } else if (fixedGroup.patterns.length > 16) {
+                        // Trim to 16
+                        fixedGroup.patterns = fixedGroup.patterns.slice(0, 16);
+                    }
+                    
+                    recovered[groupKey] = fixedGroup;
+                }
+                
+                // Ensure at least the favorites group exists
+                if (!recovered.favorites) {
+                    recovered.favorites = {
+                        name: 'Favorites',
+                        patterns: Array(16).fill(''),
+                        selectedPattern: null
+                    };
+                }
+                
+                console.log('Pattern groups recovered successfully');
+                return recovered;
+            }
+            
+            // Add recovery for other data types as needed
+            
+        } catch (error) {
+            console.error('Recovery failed:', error);
+        }
+        
+        return null;
     }
 
     handleQuotaExceeded(key, value) {
-        console.log('Attempting to handle quota exceeded error...');
+        console.log('Storage quota exceeded, implementing advanced cleanup...');
 
-        // Try different strategies to free up space
+        // Enhanced storage cleanup strategy
+        const storageInfo = this.analyzeStorageUsage();
+        console.log('Storage analysis:', storageInfo);
 
-        // Strategy 1: Clear old error logs
-        this.storageErrors = [];
+        // Priority-based cleanup
+        const cleanupPriority = [
+            { key: 'otto_backup', description: 'backup data' },
+            { key: 'otto_history', description: 'history data' },
+            { key: 'otto_temp', description: 'temporary data' },
+            { key: 'otto_debug', description: 'debug logs' },
+            { key: 'otto_cache', description: 'cached data' }
+        ];
 
-        // Strategy 2: Remove old backup data if it exists
-        const backupKeys = ['otto_backup', 'otto_history', 'otto_temp'];
-        backupKeys.forEach(backupKey => {
+        // Clean up low-priority items first
+        for (const item of cleanupPriority) {
             try {
-                localStorage.removeItem(backupKey);
-                console.log(`Removed backup data: ${backupKey}`);
+                if (localStorage.getItem(item.key)) {
+                    localStorage.removeItem(item.key);
+                    console.log(`Removed ${item.description}: ${item.key}`);
+                    
+                    // Try to save again after each cleanup
+                    try {
+                        localStorage.setItem(key, JSON.stringify(value));
+                        console.log('Successfully saved after cleanup');
+                        return true;
+                    } catch (e) {
+                        // Continue cleaning if still not enough space
+                    }
+                }
             } catch (e) {
-                // Ignore errors when removing
+                console.error(`Error removing ${item.key}:`, e);
             }
-        });
+        }
 
-        // Strategy 3: Compress preset data by removing timestamps
-        if (key === 'otto_presets' && value) {
-            const compressed = {};
-            for (const [presetKey, preset] of Object.entries(value)) {
-                compressed[presetKey] = {
-                    ...preset,
-                    timestamp: undefined  // Remove timestamps to save space
-                };
-            }
-
+        // Compress the data more aggressively
+        if (value && typeof value === 'object') {
+            const compressed = this.compressData(value);
+            const originalSize = JSON.stringify(value).length;
+            const compressedSize = JSON.stringify(compressed).length;
+            const saved = originalSize - compressedSize;
+            
+            console.log(`Compression saved ${saved} bytes (${Math.round(saved/originalSize*100)}%)`);
+            
             try {
                 localStorage.setItem(key, JSON.stringify(compressed));
                 console.log('Successfully saved compressed data');
@@ -668,21 +1137,481 @@ class OTTOAccurateInterface {
             }
         }
 
-        // Strategy 4: As last resort, clear least important data
-        if (confirm('Storage is full. Clear pattern groups to make space? (Presets will be preserved)')) {
+        // Find and remove the largest non-essential items
+        const items = this.getStorageItemsSortedBySize();
+        const nonEssential = items.filter(item => 
+            !item.key.includes('preset') && 
+            !item.key.includes('app_state') &&
+            item.key !== key
+        );
+
+        if (nonEssential.length > 0) {
+            const toRemove = nonEssential[0]; // Remove largest non-essential item
+            console.log(`Removing largest non-essential item: ${toRemove.key} (${toRemove.size} bytes)`);
+            
             try {
-                localStorage.removeItem('ottoPatternGroups');
+                localStorage.removeItem(toRemove.key);
                 localStorage.setItem(key, JSON.stringify(value));
-                if (this.showNotification) {
-                    this.showNotification('Storage cleared. Pattern groups have been reset.', 'warning');
-                }
+                this.showNotification(`Storage optimized. Removed ${toRemove.key} to make space.`, 'warning');
                 return true;
             } catch (e) {
-                console.error('Unable to save even after clearing pattern groups:', e);
+                console.error('Unable to save even after removing largest item:', e);
+            }
+        }
+
+        // Last resort - user decision
+        if (confirm('Storage is critically full. Remove all non-preset data to make space?')) {
+            const preserveKeys = ['otto_presets', 'otto_app_state', 'otto_preset_locks'];
+            
+            Object.keys(localStorage).forEach(storageKey => {
+                if (!preserveKeys.includes(storageKey) && storageKey !== key) {
+                    try {
+                        localStorage.removeItem(storageKey);
+                    } catch (e) {
+                        // Ignore errors
+                    }
+                }
+            });
+            
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+                this.showNotification('Storage cleared. Only presets preserved.', 'warning');
+                return true;
+            } catch (e) {
+                console.error('Critical: Unable to save even after major cleanup:', e);
+                this.showNotification('Storage critically full. Unable to save.', 'error');
             }
         }
 
         return false;
+    }
+
+    analyzeStorageUsage() {
+        const usage = {};
+        let totalSize = 0;
+        
+        try {
+            for (let key in localStorage) {
+                try {
+                    const value = localStorage.getItem(key);
+                    if (value !== null && value !== undefined) {
+                        const size = value.length;
+                        usage[key] = size;
+                        totalSize += size;
+                    }
+                } catch (e) {
+                    // Skip items that can't be accessed
+                    console.warn(`Unable to analyze storage item ${key}:`, e);
+                }
+            }
+        } catch (e) {
+            console.error('Error analyzing storage:', e);
+        }
+        
+        return {
+            items: usage,
+            totalSize: totalSize,
+            itemCount: Object.keys(usage).length,
+            estimatedLimit: 5 * 1024 * 1024 // 5MB typical limit
+        };
+    }
+
+    getStorageItemsSortedBySize() {
+        const items = [];
+        
+        try {
+            for (let key in localStorage) {
+                try {
+                    const value = localStorage.getItem(key);
+                    if (value !== null && value !== undefined) {
+                        items.push({
+                            key: key,
+                            size: value.length
+                        });
+                    }
+                } catch (e) {
+                    // Skip items that can't be accessed
+                    console.warn(`Unable to get size of ${key}:`, e);
+                }
+            }
+        } catch (e) {
+            console.error('Error getting storage items:', e);
+        }
+        
+        return items.sort((a, b) => b.size - a.size);
+    }
+
+    // Storage abstraction layer with fallbacks
+    createStorageLayer() {
+        return {
+            primary: localStorage,
+            fallback: null,
+            memoryCache: new Map(),
+            
+            get(key) {
+                // Try memory cache first
+                if (this.memoryCache.has(key)) {
+                    return this.memoryCache.get(key);
+                }
+                
+                // Try primary storage
+                try {
+                    const value = this.primary.getItem(key);
+                    if (value !== null && value !== undefined && value !== '') {
+                        const parsed = JSON.parse(value);
+                        this.memoryCache.set(key, parsed);
+                        return parsed;
+                    }
+                } catch (e) {
+                    console.error(`Error reading ${key} from primary storage:`, e);
+                }
+                
+                // Try fallback storage
+                if (this.fallback) {
+                    try {
+                        return this.fallback.get(key);
+                    } catch (e) {
+                        console.error(`Error reading ${key} from fallback storage:`, e);
+                    }
+                }
+                
+                return null;
+            },
+            
+            set(key, value, options = {}) {
+                // Update memory cache
+                this.memoryCache.set(key, value);
+                
+                // Try to save to primary storage
+                try {
+                    const stringified = JSON.stringify(value);
+                    this.primary.setItem(key, stringified);
+                    return true;
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError') {
+                        // Try compression and cleanup
+                        const compressed = options.compress ? this.compress(value) : value;
+                        if (this.handleQuotaExceeded(key, compressed)) {
+                            return true;
+                        }
+                    }
+                    
+                    console.error(`Error saving ${key} to primary storage:`, e);
+                    
+                    // Try fallback storage
+                    if (this.fallback) {
+                        try {
+                            this.fallback.set(key, value);
+                            return true;
+                        } catch (fallbackError) {
+                            console.error(`Error saving ${key} to fallback storage:`, fallbackError);
+                        }
+                    }
+                }
+                
+                return false;
+            },
+            
+            remove(key) {
+                // Remove from all storage layers
+                this.memoryCache.delete(key);
+                
+                try {
+                    this.primary.removeItem(key);
+                } catch (e) {
+                    console.error(`Error removing ${key} from primary storage:`, e);
+                }
+                
+                if (this.fallback) {
+                    try {
+                        this.fallback.remove(key);
+                    } catch (e) {
+                        console.error(`Error removing ${key} from fallback storage:`, e);
+                    }
+                }
+            },
+            
+            clear(preserveKeys = []) {
+                // Clear memory cache except preserved keys
+                for (const key of this.memoryCache.keys()) {
+                    if (!preserveKeys.includes(key)) {
+                        this.memoryCache.delete(key);
+                    }
+                }
+                
+                // Clear primary storage except preserved keys
+                const keysToRemove = [];
+                try {
+                    for (let i = 0; i < this.primary.length; i++) {
+                        const key = this.primary.key(i);
+                        if (key && !preserveKeys.includes(key)) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error iterating storage keys:', e);
+                }
+                
+                keysToRemove.forEach(key => {
+                    try {
+                        this.primary.removeItem(key);
+                    } catch (e) {
+                        console.error(`Error removing ${key}:`, e);
+                    }
+                });
+                
+                // Clear fallback storage
+                if (this.fallback) {
+                    this.fallback.clear(preserveKeys);
+                }
+            },
+            
+            getSize() {
+                let totalSize = 0;
+                
+                try {
+                    for (let i = 0; i < this.primary.length; i++) {
+                        const key = this.primary.key(i);
+                        if (key) {
+                            try {
+                                const value = this.primary.getItem(key);
+                                if (value !== null && value !== undefined) {
+                                    totalSize += key.length + value.length;
+                                }
+                            } catch (e) {
+                                // Ignore items that can't be accessed
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error calculating storage size:', e);
+                }
+                
+                return totalSize;
+            },
+            
+            compress(data) {
+                // Implement compression logic from earlier
+                return data; // Simplified for now
+            },
+            
+            handleQuotaExceeded(key, value) {
+                // Delegate to main handler
+                return false; // Simplified for now
+            }
+        };
+    }
+
+    // Safe DOM manipulation helpers
+    safeQuerySelector(selector, parent = document) {
+        try {
+            const element = parent.querySelector(selector);
+            if (!element) {
+                console.debug(`Element not found: ${selector}`);
+            }
+            return element;
+        } catch (error) {
+            console.error(`Invalid selector: ${selector}`, error);
+            return null;
+        }
+    }
+
+    safeQuerySelectorAll(selector, parent = document) {
+        try {
+            return parent.querySelectorAll(selector) || [];
+        } catch (error) {
+            console.error(`Invalid selector: ${selector}`, error);
+            return [];
+        }
+    }
+
+    safeGetElementById(id) {
+        const element = document.getElementById(id);
+        if (!element) {
+            console.debug(`Element with ID not found: ${id}`);
+        }
+        return element;
+    }
+
+    safeSetTextContent(selector, text, parent = document) {
+        const element = typeof selector === 'string' ? 
+            this.safeQuerySelector(selector, parent) : selector;
+        
+        if (element && element.textContent !== undefined) {
+            element.textContent = text;
+            return true;
+        }
+        return false;
+    }
+
+    safeSetAttribute(selector, attribute, value, parent = document) {
+        const element = typeof selector === 'string' ? 
+            this.safeQuerySelector(selector, parent) : selector;
+        
+        if (element && typeof element.setAttribute === 'function') {
+            element.setAttribute(attribute, value);
+            return true;
+        }
+        return false;
+    }
+
+    safeAddClass(selector, className, parent = document) {
+        const element = typeof selector === 'string' ? 
+            this.safeQuerySelector(selector, parent) : selector;
+        
+        if (element && element.classList) {
+            element.classList.add(className);
+            return true;
+        }
+        return false;
+    }
+
+    safeRemoveClass(selector, className, parent = document) {
+        const element = typeof selector === 'string' ? 
+            this.safeQuerySelector(selector, parent) : selector;
+        
+        if (element && element.classList) {
+            element.classList.remove(className);
+            return true;
+        }
+        return false;
+    }
+
+    safeToggleClass(selector, className, condition, parent = document) {
+        const element = typeof selector === 'string' ? 
+            this.safeQuerySelector(selector, parent) : selector;
+        
+        if (element && element.classList) {
+            element.classList.toggle(className, condition);
+            return true;
+        }
+        return false;
+    }
+
+    // Batch DOM updates for efficiency
+    batchDOMUpdates(updates) {
+        // Use requestAnimationFrame for smoother updates
+        requestAnimationFrame(() => {
+            updates.forEach(update => {
+                try {
+                    update();
+                } catch (error) {
+                    console.error('Error in batch DOM update:', error);
+                }
+            });
+        });
+    }
+
+    // Differential DOM updates - only update what changed
+    differentialUpdate(selector, updates) {
+        const element = typeof selector === 'string' ? 
+            this.safeQuerySelector(selector) : selector;
+        
+        if (!element) return false;
+        
+        let hasChanges = false;
+        
+        // Check text content
+        if (updates.textContent !== undefined && element.textContent !== updates.textContent) {
+            element.textContent = updates.textContent;
+            hasChanges = true;
+        }
+        
+        // Check attributes
+        if (updates.attributes) {
+            for (const [attr, value] of Object.entries(updates.attributes)) {
+                if (element.getAttribute(attr) !== value) {
+                    element.setAttribute(attr, value);
+                    hasChanges = true;
+                }
+            }
+        }
+        
+        // Check classes to add
+        if (updates.addClass) {
+            const classes = Array.isArray(updates.addClass) ? updates.addClass : [updates.addClass];
+            classes.forEach(className => {
+                if (!element.classList.contains(className)) {
+                    element.classList.add(className);
+                    hasChanges = true;
+                }
+            });
+        }
+        
+        // Check classes to remove
+        if (updates.removeClass) {
+            const classes = Array.isArray(updates.removeClass) ? updates.removeClass : [updates.removeClass];
+            classes.forEach(className => {
+                if (element.classList.contains(className)) {
+                    element.classList.remove(className);
+                    hasChanges = true;
+                }
+            });
+        }
+        
+        // Check styles
+        if (updates.styles) {
+            for (const [prop, value] of Object.entries(updates.styles)) {
+                if (element.style[prop] !== value) {
+                    element.style[prop] = value;
+                    hasChanges = true;
+                }
+            }
+        }
+        
+        return hasChanges;
+    }
+
+    // Cache DOM queries for frequently accessed elements
+    initDOMCache() {
+        this.domCache = new Map();
+        
+        // Cache commonly used elements
+        const commonSelectors = [
+            '#tempo-display',
+            '#current-player-number',
+            '#kit-dropdown',
+            '#group-dropdown',
+            '#preset-dropdown',
+            '#mute-drummer-btn',
+            '#kit-mixer-btn',
+            '.pattern-grid',
+            '.player-tabs',
+            '.mute-overlay'
+        ];
+        
+        commonSelectors.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                this.domCache.set(selector, element);
+            }
+        });
+    }
+
+    // Get cached element or query if not cached
+    getCachedElement(selector) {
+        if (!this.domCache) {
+            this.initDOMCache();
+        }
+        
+        if (this.domCache.has(selector)) {
+            return this.domCache.get(selector);
+        }
+        
+        // Not in cache, query and cache if found
+        const element = document.querySelector(selector);
+        if (element) {
+            this.domCache.set(selector, element);
+        }
+        
+        return element;
+    }
+
+    // Clear DOM cache when major changes occur
+    clearDOMCache() {
+        if (this.domCache) {
+            this.domCache.clear();
+        }
     }
 
     clearOldStorageData() {
@@ -785,28 +1714,58 @@ class OTTOAccurateInterface {
     }
 
     initAppState() {
-        // Load saved app state or create default
-        const savedState = this.loadAppStateFromStorage();
-
-        if (savedState) {
-            // Restore saved application state
-            this.currentPreset = savedState.currentPreset || 'default';
-            this.isPlaying = savedState.isPlaying !== undefined ? savedState.isPlaying : true;
-            this.tempo = savedState.tempo || 120;
-            this.currentPlayer = savedState.currentPlayer || 1;
-            this.numberOfPlayers = savedState.numberOfPlayers || 4;
-            this.loopPosition = savedState.loopPosition || 0;
-
-            console.log('Restored app state:', {
-                preset: this.currentPreset,
-                playing: this.isPlaying,
-                tempo: this.tempo,
-                player: this.currentPlayer,
-                numPlayers: this.numberOfPlayers
-            });
+        console.log('Initializing app state with enhanced storage...');
+        
+        // Initialize storage layer
+        if (!this.storage) {
+            this.storage = this.createStorageLayer();
         }
-
-        // App state auto-save is handled by centralized system
+        
+        // Clean up old/invalid storage data first
+        this.clearOldStorageData();
+        
+        // Load app state with validation
+        const savedState = this.loadAppStateFromStorage();
+        
+        if (savedState) {
+            // Apply saved state with validation
+            if (savedState.currentPlayer && savedState.currentPlayer >= 1 && savedState.currentPlayer <= this.maxPlayers) {
+                this.currentPlayer = savedState.currentPlayer;
+            }
+            if (savedState.tempo && savedState.tempo >= 40 && savedState.tempo <= 300) {
+                this.tempo = savedState.tempo;
+            }
+            if (savedState.numberOfPlayers && savedState.numberOfPlayers >= 1 && savedState.numberOfPlayers <= this.maxPlayers) {
+                this.numberOfPlayers = savedState.numberOfPlayers;
+            }
+            if (savedState.currentPreset) {
+                this.currentPreset = savedState.currentPreset;
+            }
+            if (typeof savedState.isPlaying === 'boolean') {
+                this.isPlaying = savedState.isPlaying;
+            }
+            
+            console.log('App state restored from storage');
+        } else {
+            console.log('No saved app state found, using defaults');
+            // Save initial state
+            this.saveAppStateToStorage();
+        }
+        
+        // Analyze storage usage on startup
+        const storageInfo = this.analyzeStorageUsage();
+        console.log(`Storage usage: ${storageInfo.itemCount} items, ${Math.round(storageInfo.totalSize / 1024)}KB used`);
+        
+        // Warn if storage is getting full
+        const usagePercent = (storageInfo.totalSize / storageInfo.estimatedLimit) * 100;
+        if (usagePercent > 80) {
+            console.warn(`Storage is ${Math.round(usagePercent)}% full`);
+            if (this.showNotification) {
+                setTimeout(() => {
+                    this.showNotification(`Storage is ${Math.round(usagePercent)}% full. Consider cleaning up old data.`, 'warning');
+                }, 2000);
+            }
+        }
     }
 
 
@@ -841,8 +1800,8 @@ class OTTOAccurateInterface {
             linkStates: this.linkStates ? JSON.parse(JSON.stringify(this.linkStates)) : null,
             // Store global settings
             tempo: this.tempo,
-            numberOfPlayers: this.numberOfPlayers,
-            loopPosition: this.loopPosition
+            numberOfPlayers: this.numberOfPlayers
+            // NOTE: Do NOT save loopPosition - it's a real-time transport position
         };
     }
 
@@ -1196,22 +2155,26 @@ class OTTOAccurateInterface {
     }
 
     setupPatternPanelControls() {
-        // Add new group button
+        // Get button elements
         const addGroupBtn = document.getElementById('add-group-btn');
         const renameGroupBtn = document.getElementById('rename-group-btn');
 
-        // Remove existing listeners to avoid duplicates
-        if (this.addGroupHandler) {
-            addGroupBtn.removeEventListener('click', this.addGroupHandler);
-            this.addGroupHandler = null;
+        // Clean up existing handlers before adding new ones
+        if (this.specificHandlers.addGroup) {
+            if (addGroupBtn) {
+                this.removeEventListener(addGroupBtn, 'click', this.specificHandlers.addGroup, 'pattern');
+            }
+            this.specificHandlers.addGroup = null;
         }
-        if (this.renameGroupHandler) {
-            renameGroupBtn.removeEventListener('click', this.renameGroupHandler);
-            this.renameGroupHandler = null;
+        if (this.specificHandlers.renameGroup) {
+            if (renameGroupBtn) {
+                this.removeEventListener(renameGroupBtn, 'click', this.specificHandlers.renameGroup, 'pattern');
+            }
+            this.specificHandlers.renameGroup = null;
         }
 
         // Create new handlers
-        this.addGroupHandler = () => {
+        const addGroupHandler = () => {
             if (this.isDestroyed) return;
 
             const groupName = prompt('Enter new group name:');
@@ -1258,7 +2221,7 @@ class OTTOAccurateInterface {
             this.showNotification(`Group "${trimmedName}" created successfully`);
         };
 
-        this.renameGroupHandler = () => {
+        const renameGroupHandler = () => {
             if (this.isDestroyed) return;
 
             const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
@@ -1324,8 +2287,6 @@ class OTTOAccurateInterface {
                 }
             }
 
-            // Don't auto-save, just mark as dirty (already done above)
-
             // Update dropdown
             this.updatePatternGroupDropdown();
 
@@ -1336,15 +2297,17 @@ class OTTOAccurateInterface {
             this.showNotification(`Group renamed to "${trimmedName}"`);
         };
 
-        // Add the event listeners and track them
+        // Store handlers in specificHandlers for proper cleanup
+        this.specificHandlers.addGroup = addGroupHandler;
+        this.specificHandlers.renameGroup = renameGroupHandler;
+
+        // Add the event listeners using the enhanced method
         if (addGroupBtn) {
-            addGroupBtn.addEventListener('click', this.addGroupHandler);
-            this.eventListeners.push({ element: addGroupBtn, event: 'click', handler: this.addGroupHandler });
+            this.addEventListener(addGroupBtn, 'click', addGroupHandler, 'pattern');
         }
 
         if (renameGroupBtn) {
-            renameGroupBtn.addEventListener('click', this.renameGroupHandler);
-            this.eventListeners.push({ element: renameGroupBtn, event: 'click', handler: this.renameGroupHandler });
+            this.addEventListener(renameGroupBtn, 'click', renameGroupHandler, 'pattern');
         }
     }
 
@@ -2036,26 +2999,58 @@ class OTTOAccurateInterface {
     }
 
     updateMainPatternGrid(patterns) {
-        const patternButtons = document.querySelectorAll('.pattern-grid .pattern-btn');
+        if (!patterns || !Array.isArray(patterns)) {
+            console.error('Invalid patterns array provided to updateMainPatternGrid');
+            return;
+        }
 
+        const patternButtons = this.safeQuerySelectorAll('.pattern-grid .pattern-btn');
+        
+        if (patternButtons.length === 0) {
+            console.warn('No pattern buttons found in grid');
+            return;
+        }
+
+        // Batch DOM updates for better performance
+        const updates = [];
+        
         patternButtons.forEach((btn, index) => {
-            if (index < patterns.length && patterns[index]) {
-                // Only show first 8 characters on the button
-                btn.textContent = patterns[index].substring(0, 8);
-                btn.dataset.pattern = patterns[index].toLowerCase().replace(/\s+/g, '-');
-                btn.style.display = 'flex';
-            } else {
-                // Show empty button slot
-                btn.textContent = '';
-                btn.dataset.pattern = '';
-                btn.style.display = 'flex';  // Keep button visible but empty
-            }
+            if (!btn) return;
+            
+            updates.push(() => {
+                if (index < patterns.length && patterns[index]) {
+                    // Only show first 8 characters on the button
+                    btn.textContent = patterns[index].substring(0, 8);
+                    btn.dataset.pattern = patterns[index].toLowerCase().replace(/\s+/g, '-');
+                    btn.style.display = 'flex';
+                } else {
+                    // Show empty button slot
+                    btn.textContent = '';
+                    btn.dataset.pattern = '';
+                    btn.style.display = 'flex';  // Keep button visible but empty
+                }
+            });
         });
+        
+        this.batchDOMUpdates(updates);
     }
 
     updatePatternGroupDropdown() {
         const groupOptions = document.getElementById('group-options');
         if (!groupOptions) return;
+
+        // Remove all existing listeners before rebuilding
+        groupOptions.querySelectorAll('.dropdown-option').forEach(option => {
+            const handlers = this.elementHandlerMap.get(option);
+            if (handlers) {
+                Object.keys(handlers).forEach(eventType => {
+                    handlers[eventType].forEach(handler => {
+                        option.removeEventListener(eventType, handler);
+                    });
+                });
+                this.elementHandlerMap.delete(option);
+            }
+        });
 
         // Clear existing options
         groupOptions.innerHTML = '';
@@ -2070,7 +3065,13 @@ class OTTOAccurateInterface {
             option.dataset.value = key;
             option.textContent = this.patternGroups[key].name;
 
-            option.addEventListener('click', (e) => {
+            // Mark as selected if it's the current group
+            const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+            if (key === currentGroup) {
+                option.classList.add('selected');
+            }
+
+            const handler = (e) => {
                 e.stopPropagation();
                 const dropdown = document.getElementById('group-dropdown');
                 const selected = document.getElementById('group-selected');
@@ -2079,16 +3080,48 @@ class OTTOAccurateInterface {
                     selected.querySelector('.dropdown-text').textContent = option.textContent;
                 }
 
+                // Update selected state
+                groupOptions.querySelectorAll('.dropdown-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                option.classList.add('selected');
+
                 if (dropdown) {
                     dropdown.classList.remove('active');
+                    dropdown.classList.remove('open'); // Also try removing 'open' in case it was added
                 }
 
                 this.onPatternGroupChanged(this.currentPlayer, key);
                 this.setDirty('preset', true);
-            });
+                console.log(`Pattern group changed to ${key} for player ${this.currentPlayer}`);
+            };
+
+            // Use enhanced event listener management
+            this.addEventListener(option, 'click', handler, 'dropdown');
 
             groupOptions.appendChild(option);
         });
+    }
+
+    debugPatternGroupDropdown() {
+        console.log('=== Pattern Group Dropdown Debug ===');
+        console.log('Current player:', this.currentPlayer);
+        console.log('Current player state:', this.playerStates[this.currentPlayer]);
+        console.log('Pattern groups available:', Object.keys(this.patternGroups));
+        console.log('Current pattern group:', this.playerStates[this.currentPlayer]?.patternGroup);
+        
+        const dropdown = document.getElementById('group-dropdown');
+        const options = document.getElementById('group-options');
+        console.log('Dropdown element:', dropdown);
+        console.log('Options container:', options);
+        console.log('Options count:', options?.children.length);
+        
+        if (options) {
+            Array.from(options.children).forEach((opt, idx) => {
+                console.log(`Option ${idx}: value="${opt.dataset.value}", text="${opt.textContent}", hasHandler=${this.elementHandlerMap.has(opt)}`);
+            });
+        }
+        console.log('=== End Debug ===');
     }
 
     openPresetModal() {
@@ -2262,131 +3295,149 @@ class OTTOAccurateInterface {
         }
     }
 
-    loadPreset(key) {
-        const preset = this.presets[key];
-        if (!preset) {
-            console.error(`Preset "${key}" not found`);
-            return;
-        }
+    async loadPreset(key) {
+        // Use atomic operation to prevent race conditions
+        return this.atomicStateUpdate('preset-load', async (version) => {
+            const preset = this.presets[key];
+            if (!preset) {
+                console.error(`Preset "${key}" not found`);
+                return false;
+            }
 
-        console.log(`Loading preset: ${preset.name}`);
+            // Check if we can proceed
+            if (!this.canProceedWithOperation('preset-load')) {
+                console.warn('Cannot load preset - conflicting operation in progress');
+                return false;
+            }
 
-        // Disable dirty tracking during preset load
-        this.isLoadingPreset = true;
+            console.log(`Loading preset: ${preset.name} (version ${version})`);
 
-        // STEP 1: Complete state restoration
-        // Deep clone all player states to avoid reference issues
-        this.playerStates = JSON.parse(JSON.stringify(preset.playerStates));
+            // Disable dirty tracking during preset load
+            this.isLoadingPreset = true;
+            this.loadingVersion = version;
 
-        // Restore link states if they exist
-        if (preset.linkStates) {
-            this.linkStates = JSON.parse(JSON.stringify(preset.linkStates));
-            // Convert Sets back from arrays
-            if (this.linkStates) {
-                for (const param of ['swing', 'energy', 'volume']) {
-                    if (this.linkStates[param] && Array.isArray(this.linkStates[param].slaves)) {
-                        this.linkStates[param].slaves = new Set(this.linkStates[param].slaves);
+            try {
+                // STEP 1: Complete state restoration
+                // Deep clone all player states to avoid reference issues
+                this.playerStates = JSON.parse(JSON.stringify(preset.playerStates));
+
+                // Restore link states if they exist
+                if (preset.linkStates) {
+                    this.linkStates = JSON.parse(JSON.stringify(preset.linkStates));
+                    // Convert Sets back from arrays
+                    if (this.linkStates) {
+                        for (const param of ['swing', 'energy', 'volume']) {
+                            if (this.linkStates[param] && Array.isArray(this.linkStates[param].slaves)) {
+                                this.linkStates[param].slaves = new Set(this.linkStates[param].slaves);
+                            }
+                        }
+                    }
+                } else {
+                    // Initialize empty link states if not in preset
+                    this.linkStates = {
+                        swing: { master: null, slaves: new Set() },
+                        energy: { master: null, slaves: new Set() },
+                        volume: { master: null, slaves: new Set() }
+                    };
+                }
+
+                // Restore global settings
+                this.tempo = preset.tempo || 120;
+                this.numberOfPlayers = preset.numberOfPlayers || 4;
+                // NOTE: Do NOT restore loopPosition - it's a real-time transport position
+
+                // Update current preset reference
+                this.currentPreset = key;
+
+                // STEP 2: Complete UI refresh for ALL players
+                // First, update all player tab visual states (muted/unmuted)
+                for (let i = 1; i <= this.maxPlayers; i++) {
+                    const tab = document.querySelector(`.player-tab[data-player="${i}"]`);
+                    if (tab) {
+                        // Remove all state classes first
+                        tab.classList.remove('muted', 'active');
+
+                        // Add back appropriate states
+                        if (this.playerStates[i]) {
+                            if (this.playerStates[i].muted) {
+                                tab.classList.add('muted');
+                            }
+                        }
+
+                        // Mark current player as active
+                        if (i === this.currentPlayer) {
+                            tab.classList.add('active');
+                        }
                     }
                 }
+
+                // STEP 3: Force complete UI update for current player
+                // This updates all controls for the currently visible player
+                this.updateCompleteUIState();
+
+                // STEP 4: Update global UI elements
+                // Update number of players display
+                this.setNumberOfPlayers(this.numberOfPlayers);
+
+                // Update tempo
+                this.setTempo(this.tempo);
+
+                // NOTE: Do NOT update loop position - it's controlled by transport
+
+                // Update playing state if it's part of the preset
+                if (preset.isPlaying !== undefined) {
+                    this.isPlaying = preset.isPlaying;
+                    this.updatePlayPauseButton();
+                }
+
+                // STEP 5: Update preset dropdown
+                const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
+                if (dropdownText) {
+                    dropdownText.textContent = preset.name;
+                }
+
+                // Update the selected state in the dropdown options
+                const dropdownOptions = document.getElementById('preset-options');
+                if (dropdownOptions) {
+                    dropdownOptions.querySelectorAll('.dropdown-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                        if (opt.dataset.value === key) {
+                            opt.classList.add('selected');
+                        }
+                    });
+                }
+
+                // STEP 6: Update lock display
+                this.updatePresetLockDisplay();
+
+                // STEP 7: Update mute overlay based on CURRENT player's state
+                // This is critical - must check the current player's mute state
+                this.updateMuteOverlay();
+
+                // Save app state with new preset selection
+                this.scheduleSave('appState');
+
+                console.log(`Successfully loaded preset "${preset.name}" (version ${version})`);
+                this.showNotification(`Loaded preset "${preset.name}"`);
+
+                return true;
+            } catch (error) {
+                console.error('Error loading preset:', error);
+                this.showNotification('Failed to load preset', 'error');
+                throw error;
+            } finally {
+                // Re-enable dirty tracking
+                this.isLoadingPreset = false;
+                this.loadingVersion = null;
+
+                // Clear all dirty flags since we just loaded a preset
+                this.setDirty('preset', false);
+                this.setDirty('player', false);
+                this.setDirty('drumkit', false);
+                this.setDirty('patternGroup', false);
+                this.setDirty('pattern', false);
             }
-        } else {
-            // Initialize empty link states if not in preset
-            this.linkStates = {
-                swing: { master: null, slaves: new Set() },
-                energy: { master: null, slaves: new Set() },
-                volume: { master: null, slaves: new Set() }
-            };
-        }
-
-        // Restore global settings
-        this.tempo = preset.tempo || 120;
-        this.numberOfPlayers = preset.numberOfPlayers || 4;
-        this.loopPosition = preset.loopPosition || 0;
-
-        // Update current preset reference
-        this.currentPreset = key;
-
-        // STEP 2: Complete UI refresh for ALL players
-        // First, update all player tab visual states (muted/unmuted)
-        for (let i = 1; i <= this.maxPlayers; i++) {
-            const tab = document.querySelector(`.player-tab[data-player="${i}"]`);
-            if (tab) {
-                // Remove all state classes first
-                tab.classList.remove('muted', 'active');
-
-                // Add back appropriate states
-                if (this.playerStates[i]) {
-                    if (this.playerStates[i].muted) {
-                        tab.classList.add('muted');
-                    }
-                }
-
-                // Mark current player as active
-                if (i === this.currentPlayer) {
-                    tab.classList.add('active');
-                }
-            }
-        }
-
-        // STEP 3: Force complete UI update for current player
-        // This updates all controls for the currently visible player
-        this.updateCompleteUIState();
-
-        // STEP 4: Update global UI elements
-        // Update number of players display
-        this.setNumberOfPlayers(this.numberOfPlayers);
-
-        // Update tempo
-        this.setTempo(this.tempo);
-
-        // Update loop position
-        this.setLoopPosition(this.loopPosition);
-
-        // Update playing state if it's part of the preset
-        if (preset.isPlaying !== undefined) {
-            this.isPlaying = preset.isPlaying;
-            this.updatePlayPauseButton();
-        }
-
-        // STEP 5: Update preset dropdown
-        const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
-        if (dropdownText) {
-            dropdownText.textContent = preset.name;
-        }
-
-        // Update the selected state in the dropdown options
-        const dropdownOptions = document.getElementById('preset-options');
-        if (dropdownOptions) {
-            dropdownOptions.querySelectorAll('.dropdown-option').forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.dataset.value === key) {
-                    opt.classList.add('selected');
-                }
-            });
-        }
-
-        // STEP 6: Update lock display
-        this.updatePresetLockDisplay();
-
-        // STEP 7: Update mute overlay based on CURRENT player's state
-        // This is critical - must check the current player's mute state
-        this.updateMuteOverlay();
-
-        // Save app state with new preset selection
-        this.scheduleSave('appState');
-
-        console.log(`Successfully loaded preset "${preset.name}"`);
-        this.showNotification(`Loaded preset "${preset.name}"`);
-
-        // Re-enable dirty tracking
-        this.isLoadingPreset = false;
-
-        // Clear all dirty flags since we just loaded a preset
-        this.setDirty('preset', false);
-        this.setDirty('player', false);
-        this.setDirty('drumkit', false);
-        this.setDirty('patternGroup', false);
-        this.setDirty('pattern', false);
+        });
     }
 
     deletePreset(key) {
@@ -2778,15 +3829,30 @@ class OTTOAccurateInterface {
         if (!presetOptions) return;
 
         // Remove all existing listeners before rebuilding
+        // Use the elementHandlerMap to properly clean up
         presetOptions.querySelectorAll('.dropdown-option').forEach(option => {
-            const handler = option._clickHandler;
-            if (handler) {
-                option.removeEventListener('click', handler);
+            const handlers = this.elementHandlerMap.get(option);
+            if (handlers) {
+                Object.keys(handlers).forEach(eventType => {
+                    handlers[eventType].forEach(handler => {
+                        option.removeEventListener(eventType, handler);
+                    });
+                });
+                this.elementHandlerMap.delete(option);
+            }
+            
+            // Also clean up legacy _clickHandler if it exists
+            if (option._clickHandler) {
+                option.removeEventListener('click', option._clickHandler);
                 delete option._clickHandler;
             }
         });
 
+        // Clear the HTML
         presetOptions.innerHTML = '';
+
+        // Track all option handlers for this dropdown
+        const optionHandlers = [];
 
         for (const [key, preset] of Object.entries(this.presets)) {
             const option = document.createElement('div');
@@ -2799,7 +3865,7 @@ class OTTOAccurateInterface {
                 option.classList.add('selected');
             }
 
-            // Create handler and store reference on element
+            // Create handler
             const handler = (e) => {
                 if (this.isDestroyed) return;
 
@@ -2821,15 +3887,20 @@ class OTTOAccurateInterface {
                 this.loadPreset(key);
             };
 
-            // Store handler reference on element for cleanup
-            option._clickHandler = handler;
-            option.addEventListener('click', handler);
+            // Add listener using enhanced method
+            this.addEventListener(option, 'click', handler, 'dropdown');
+            
+            // Track for batch cleanup if needed
+            optionHandlers.push({ element: option, handler });
 
             presetOptions.appendChild(option);
         }
 
-        // Don't call setupPresetControls here as it rebuilds the dropdown structure
-        // The dropdown toggle handler should already be set up once during initialization
+        // Store reference to handlers for this specific dropdown (optional, for quick access)
+        if (!this.dropdownHandlers) {
+            this.dropdownHandlers = new Map();
+        }
+        this.dropdownHandlers.set('preset', optionHandlers);
     }
 
     savePresetsToStorage() {
@@ -2884,15 +3955,22 @@ class OTTOAccurateInterface {
             // Initialize UI for saved or default player
             this.updateUIForCurrentPlayer();
 
-        // Load the saved preset if it exists
-        if (this.currentPreset && this.presets[this.currentPreset]) {
-            this.loadPreset(this.currentPreset);
-        }
+            // Defer preset loading to avoid race condition
+            // Use setTimeout to allow initialization to complete first
+            if (this.currentPreset && this.presets[this.currentPreset]) {
+                setTimeout(() => {
+                    if (!this.isDestroyed) {
+                        this.loadPreset(this.currentPreset).catch(error => {
+                            console.error('Failed to load initial preset:', error);
+                        });
+                    }
+                }, 100); // Small delay to ensure everything is initialized
+            }
 
-        // Update play/pause button to match saved state
-        this.updatePlayPauseButton();
+            // Update play/pause button to match saved state
+            this.updatePlayPauseButton();
 
-        console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'active players (max:', this.maxPlayers, ')');
+            console.log('OTTO Accurate Interface initialized with', this.numberOfPlayers, 'active players (max:', this.maxPlayers, ')');
         } catch (error) {
             console.error('Error during initialization:', error);
             console.error('Stack trace:', error.stack);
@@ -3306,16 +4384,17 @@ class OTTOAccurateInterface {
             }
         });
 
-        // Update pattern group dropdown
+        // Update pattern group dropdown - FIXED to use actual group names
         const groupDropdownText = document.querySelector('#group-dropdown .dropdown-text');
         if (groupDropdownText && state.patternGroup) {
-            // Convert patternGroup value to display text
-            const groupDisplayNames = {
-                'favorites': 'Favorites',
-                'all': 'All Patterns',
-                'custom': 'Custom'
-            };
-            groupDropdownText.textContent = groupDisplayNames[state.patternGroup] || 'Favorites';
+            // Get the actual group name from patternGroups
+            if (this.patternGroups && this.patternGroups[state.patternGroup]) {
+                groupDropdownText.textContent = this.patternGroups[state.patternGroup].name;
+            } else {
+                // Fallback to default if group doesn't exist
+                console.warn(`Pattern group "${state.patternGroup}" not found, using Favorites`);
+                groupDropdownText.textContent = 'Favorites';
+            }
         }
 
         // Update selected state on group options
@@ -3419,173 +4498,178 @@ class OTTOAccurateInterface {
 
     // Complete UI state update - used when loading presets to ensure everything is in sync
     updateCompleteUIState() {
-        const state = this.playerStates[this.currentPlayer];
-
-        if (!state) {
+        // Validate current player state exists
+        if (!this.playerStates || !this.playerStates[this.currentPlayer]) {
             console.error(`No state found for player ${this.currentPlayer}`);
             return;
         }
 
-        console.log(`Updating complete UI for player ${this.currentPlayer}, muted: ${state.muted}`);
+        const state = this.playerStates[this.currentPlayer];
+        
+        // Batch all DOM updates for efficiency
+        const updates = [];
 
         // Update player number display
-        const playerNumberDisplay = document.getElementById('current-player-number');
-        if (playerNumberDisplay) {
-            playerNumberDisplay.textContent = this.currentPlayer;
-        }
+        updates.push(() => {
+            this.safeSetTextContent('#current-player-number', this.currentPlayer);
+        });
 
         // Update kit dropdown
-        const kitDropdownText = document.querySelector('#kit-dropdown .dropdown-text');
-        if (kitDropdownText) {
-            kitDropdownText.textContent = state.kitName || 'Acoustic';
-        }
+        updates.push(() => {
+            this.safeSetTextContent('#kit-dropdown .dropdown-text', state.kitName);
+        });
 
-        // Update kit dropdown options
-        const kitOptions = document.querySelectorAll('#kit-dropdown .dropdown-option');
+        // Update kit options selection
+        const kitOptions = this.safeQuerySelectorAll('#kit-dropdown .dropdown-option');
         kitOptions.forEach(option => {
-            option.classList.remove('selected');
-            const kitValue = (state.kitName || 'Acoustic').toLowerCase();
-            if (option.dataset.value === kitValue) {
-                option.classList.add('selected');
-            }
+            if (!option) return;
+            updates.push(() => {
+                this.safeRemoveClass(option, 'selected');
+                if (option.textContent === state.kitName) {
+                    this.safeAddClass(option, 'selected');
+                }
+            });
         });
 
         // Update pattern group dropdown
-        const groupDropdownText = document.querySelector('#group-dropdown .dropdown-text');
-        if (groupDropdownText) {
-            const groupDisplayNames = {
-                'favorites': 'Favorites',
-                'all': 'All Patterns',
-                'custom': 'Custom'
-            };
-            const groupValue = state.patternGroup || 'favorites';
-            groupDropdownText.textContent = groupDisplayNames[groupValue] || 'Favorites';
-        }
-
-        // Update pattern group options
-        const groupOptions = document.querySelectorAll('#group-dropdown .dropdown-option');
-        groupOptions.forEach(option => {
-            option.classList.remove('selected');
-            if (option.dataset.value === (state.patternGroup || 'favorites')) {
-                option.classList.add('selected');
+        updates.push(() => {
+            const groupText = this.safeQuerySelector('#group-dropdown .dropdown-text');
+            if (groupText && state.patternGroup && this.patternGroups) {
+                const group = this.patternGroups[state.patternGroup];
+                if (group) {
+                    groupText.textContent = group.name;
+                }
             }
         });
+
+        // Update pattern group options selection
+        const groupOptions = this.safeQuerySelectorAll('#group-dropdown .dropdown-option');
+        groupOptions.forEach(option => {
+            if (!option) return;
+            updates.push(() => {
+                this.safeRemoveClass(option, 'selected');
+                if (option.dataset.value === state.patternGroup) {
+                    this.safeAddClass(option, 'selected');
+                }
+            });
+        });
+
+        // Update pattern grid if group exists
+        if (state.patternGroup && this.patternGroups && this.patternGroups[state.patternGroup]) {
+            const patterns = this.patternGroups[state.patternGroup].patterns;
+            if (patterns) {
+                this.updateMainPatternGrid(patterns);
+            }
+        }
+
+        // Update toggle buttons
+        const toggleButtons = this.safeQuerySelectorAll('[data-toggle]');
+        toggleButtons.forEach(button => {
+            if (!button || !button.dataset.toggle) return;
+            updates.push(() => {
+                const toggleKey = button.dataset.toggle;
+                this.safeRemoveClass(button, 'active');
+                if (state.toggleStates && state.toggleStates[toggleKey]) {
+                    this.safeAddClass(button, 'active');
+                }
+            });
+        });
+
+        // Update fill buttons
+        const fillButtons = this.safeQuerySelectorAll('[data-fill]');
+        fillButtons.forEach(button => {
+            if (!button || !button.dataset.fill) return;
+            updates.push(() => {
+                const fillKey = button.dataset.fill;
+                this.safeRemoveClass(button, 'active');
+                if (state.fillStates && state.fillStates[fillKey]) {
+                    this.safeAddClass(button, 'active');
+                }
+            });
+        });
+
+        // Update pattern selection
+        const patternButtons = this.safeQuerySelectorAll('.pattern-btn');
+        patternButtons.forEach(btn => {
+            if (!btn) return;
+            updates.push(() => {
+                this.safeRemoveClass(btn, 'active');
+                if (state.selectedPattern) {
+                    const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, '-');
+                    if (btn.dataset.pattern === normalizedPattern || 
+                        (btn.textContent && btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase().substring(0, 8))) {
+                        this.safeAddClass(btn, 'active');
+                    }
+                }
+            });
+        });
+
+        // Update sliders
+        if (state.sliderValues) {
+            Object.keys(state.sliderValues).forEach(sliderKey => {
+                const slider = this.safeQuerySelector(`.custom-slider[data-param="${sliderKey}"]`);
+                if (slider) {
+                    updates.push(() => {
+                        const value = state.sliderValues[sliderKey];
+                        this.updateCustomSlider(slider, value);
+                    });
+                }
+            });
+        }
+
+        // Update mute button
+        const muteDrummerBtn = this.safeGetElementById('mute-drummer-btn');
+        if (muteDrummerBtn) {
+            updates.push(() => {
+                this.safeToggleClass(muteDrummerBtn, 'muted', state.muted || false);
+            });
+        }
 
         // Update kit mixer button
-        const kitMixerBtn = document.getElementById('kit-mixer-btn');
+        const kitMixerBtn = this.safeGetElementById('kit-mixer-btn');
         if (kitMixerBtn) {
-            kitMixerBtn.classList.remove('active');
-            if (state.kitMixerActive) {
-                kitMixerBtn.classList.add('active');
-            }
-        }
-
-        // Update mute drummer button - CRITICAL for the bug fix
-        const muteDrummerBtn = document.getElementById('mute-drummer-btn');
-        if (muteDrummerBtn) {
-            muteDrummerBtn.classList.remove('muted');
-            if (state.muted) {
-                muteDrummerBtn.classList.add('muted');
-            }
-        }
-
-        // Clear and update ALL toggle buttons
-        document.querySelectorAll('[data-toggle]').forEach(button => {
-            button.classList.remove('active');
-        });
-
-        if (state.toggleStates) {
-            Object.entries(state.toggleStates).forEach(([key, value]) => {
-                if (value) {
-                    const button = document.querySelector(`[data-toggle="${key}"]`);
-                    if (button) {
-                        button.classList.add('active');
-                    }
-                }
+            updates.push(() => {
+                this.safeToggleClass(kitMixerBtn, 'active', state.kitMixerActive || false);
             });
         }
 
-        // Clear and update ALL fill buttons
-        document.querySelectorAll('[data-fill]').forEach(button => {
-            button.classList.remove('active');
-        });
-
-        if (state.fillStates) {
-            Object.entries(state.fillStates).forEach(([key, value]) => {
-                if (value) {
-                    const button = document.querySelector(`[data-fill="${key}"]`);
-                    if (button) {
-                        button.classList.add('active');
-                    }
-                }
-            });
-        }
-
-        // Update pattern grid based on current group
-        if (this.patternGroups && state.patternGroup && this.patternGroups[state.patternGroup]) {
-            this.updateMainPatternGrid(this.patternGroups[state.patternGroup].patterns);
-        }
-
-        // Clear and update pattern selection - FIXED: match by data-pattern attribute
-        document.querySelectorAll('.pattern-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        if (state.selectedPattern) {
-            // Convert selectedPattern to the same format used in data-pattern attribute
-            const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, '-');
-
-            // Find and activate the matching pattern button
-            const selectedBtn = document.querySelector(`.pattern-btn[data-pattern="${normalizedPattern}"]`);
-            if (selectedBtn) {
-                selectedBtn.classList.add('active');
-            } else {
-                // Fallback: try to match by text content (first 8 chars)
-                document.querySelectorAll('.pattern-btn').forEach(btn => {
-                    if (btn.textContent &&
-                        (btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase().substring(0, 8) ||
-                         btn.textContent.toLowerCase() === state.selectedPattern.toLowerCase())) {
-                        btn.classList.add('active');
-                    }
+        // Update all player tabs' visual state
+        for (let i = 1; i <= this.maxPlayers; i++) {
+            const tab = this.safeQuerySelector(`.player-tab[data-player="${i}"]`);
+            if (tab && this.playerStates[i]) {
+                updates.push(() => {
+                    this.safeToggleClass(tab, 'muted', this.playerStates[i].muted || false);
+                    this.safeToggleClass(tab, 'active', i === this.currentPlayer);
                 });
             }
         }
 
-        // Update all sliders
-        if (state.sliderValues) {
-            ['swing', 'energy', 'volume'].forEach(param => {
-                const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
-                if (slider) {
-                    const value = state.sliderValues[param] || 0;
-                    this.updateCustomSlider(slider, value);
-                }
+        // Update tempo display
+        updates.push(() => {
+            this.safeSetTextContent('#tempo-display', this.tempo);
+        });
+
+        // Update loop position
+        if (this.loopPosition !== undefined) {
+            updates.push(() => {
+                this.updateLoopTimelineDisplay();
             });
         }
 
         // Update link states
         if (this.linkStates) {
-            this.updateLinkIconStates();
+            updates.push(() => {
+                this.updateLinkIconStates();
+            });
         }
 
-        // CRITICAL: Update mute overlay for current player
-        const overlay = document.querySelector('.mute-overlay');
-        if (overlay) {
-            overlay.classList.remove('active');
-            if (state.muted) {
-                overlay.classList.add('active');
-            }
-        }
+        // Update mute overlay
+        updates.push(() => {
+            this.updateMuteOverlay();
+        });
 
-        // Update ALL player tabs to show their muted states
-        for (let i = 1; i <= this.maxPlayers; i++) {
-            const tab = document.querySelector(`.player-tab[data-player="${i}"]`);
-            if (tab && this.playerStates[i]) {
-                tab.classList.remove('muted');
-                if (this.playerStates[i].muted) {
-                    tab.classList.add('muted');
-                }
-            }
-        }
+        // Execute all updates in a single batch
+        this.batchDOMUpdates(updates);
     }
 
     setupKitControls() {
@@ -3735,30 +4819,45 @@ class OTTOAccurateInterface {
     }
 
     navigateKit(direction) {
-        // these should eventually come from our INI storage system.
+        // Validate player state exists
+        if (!this.playerStates || !this.playerStates[this.currentPlayer]) {
+            console.error(`No player state for player ${this.currentPlayer}`);
+            return;
+        }
+
+        // These should eventually come from our INI storage system
         const kits = ['Acoustic', 'Electronic', 'Rock', 'Jazz', 'Pop', 'Funk', 'Latin', 'Vintage'];
         const state = this.playerStates[this.currentPlayer];
-        const currentIndex = kits.indexOf(state.kitName);
+        
+        // Validate current kit name
+        let currentIndex = kits.indexOf(state.kitName);
+        if (currentIndex === -1) {
+            console.warn(`Current kit "${state.kitName}" not in list, defaulting to first`);
+            currentIndex = 0;
+        }
+        
         let newIndex = currentIndex + direction;
 
+        // Wrap around navigation
         if (newIndex < 0) newIndex = kits.length - 1;
         if (newIndex >= kits.length) newIndex = 0;
 
         state.kitName = kits[newIndex];
+        
+        // Safe UI updates
         this.updateUIForCurrentPlayer();
 
-        // Update kit dropdown
-        const kitDropdownText = document.querySelector('#kit-dropdown .dropdown-text');
-        if (kitDropdownText) {
-            kitDropdownText.textContent = state.kitName;
-        }
+        // Update kit dropdown text safely
+        this.safeSetTextContent('#kit-dropdown .dropdown-text', state.kitName);
 
-        // Update selected state on kit options
-        const kitOptions = document.querySelectorAll('#kit-dropdown .dropdown-option');
+        // Update selected state on kit options safely
+        const kitOptions = this.safeQuerySelectorAll('#kit-dropdown .dropdown-option');
         kitOptions.forEach(option => {
-            option.classList.remove('selected');
+            if (!option) return;
+            
+            this.safeRemoveClass(option, 'selected');
             if (option.textContent === state.kitName) {
-                option.classList.add('selected');
+                this.safeAddClass(option, 'selected');
             }
         });
 
@@ -3772,46 +4871,52 @@ class OTTOAccurateInterface {
         const editPatternBtn = document.querySelector('.edit-pattern-btn');
 
         if (groupPrev) {
-            groupPrev.addEventListener('click', () => {
+            const prevHandler = () => {
                 this.navigatePatternGroup(-1);
-            });
+            };
+            this.addEventListener(groupPrev, 'click', prevHandler, 'element');
         }
 
         if (groupNext) {
-            groupNext.addEventListener('click', () => {
+            const nextHandler = () => {
                 this.navigatePatternGroup(1);
-            });
+            };
+            this.addEventListener(groupNext, 'click', nextHandler, 'element');
         }
 
         // Setup edit pattern button to toggle edit mode
         if (editPatternBtn) {
-            editPatternBtn.addEventListener('click', () => {
+            const editHandler = () => {
                 this.togglePatternEditMode();
-            });
+            };
+            this.addEventListener(editPatternBtn, 'click', editHandler, 'element');
         }
 
         // Setup panel close button
         const panelCloseBtn = document.getElementById('pattern-panel-close');
         if (panelCloseBtn) {
-            panelCloseBtn.addEventListener('click', () => {
+            const closeHandler = () => {
                 this.togglePatternEditMode();
-            });
+            };
+            this.addEventListener(panelCloseBtn, 'click', closeHandler, 'element');
         }
 
         // Setup delete button
         const deleteBtn = document.getElementById('group-delete-btn');
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => {
+            const deleteHandler = () => {
                 this.deleteCurrentPatternGroup();
-            });
+            };
+            this.addEventListener(deleteBtn, 'click', deleteHandler, 'element');
         }
 
         // Setup pattern search
         const searchInput = document.getElementById('pattern-search-input');
         if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
+            const searchHandler = (e) => {
                 this.filterPatterns(e.target.value);
-            });
+            };
+            this.addEventListener(searchInput, 'input', searchHandler, 'element');
         }
 
         // Setup group dropdown
@@ -3821,40 +4926,36 @@ class OTTOAccurateInterface {
 
         if (groupDropdown && groupSelected) {
             // Toggle dropdown on click
-            groupSelected.addEventListener('click', (e) => {
+            const toggleHandler = (e) => {
                 e.stopPropagation();
-                groupDropdown.classList.toggle('active');
-            });
-
-            // Handle option selection
-            if (groupOptions) {
-                groupOptions.querySelectorAll('.dropdown-option').forEach(option => {
-                    option.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const value = option.dataset.value;
-                        const text = option.textContent;
-
-                        // Update selected text
-                        groupSelected.querySelector('.dropdown-text').textContent = text;
-
-                        // Close dropdown
-                        groupDropdown.classList.remove('active');
-
-                        // Trigger callback
-                        this.onPatternGroupChanged(this.currentPlayer, value);
-                        this.setDirty('preset', true);  // Mark preset dirty when group changes
-                        console.log(`Player ${this.currentPlayer} pattern group: ${value}`);
-                    });
+                // Use consistent class name across all dropdowns
+                const isOpen = groupDropdown.classList.contains('active') || groupDropdown.classList.contains('open');
+                
+                // Close all other dropdowns first
+                document.querySelectorAll('.custom-dropdown').forEach(dd => {
+                    dd.classList.remove('active', 'open');
                 });
-            }
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!groupDropdown.contains(e.target)) {
+                
+                // Toggle this dropdown
+                if (!isOpen) {
+                    groupDropdown.classList.add('active');
+                } else {
                     groupDropdown.classList.remove('active');
                 }
-            });
+            };
+            this.addEventListener(groupSelected, 'click', toggleHandler, 'dropdown');
+
+            // Close dropdown when clicking outside
+            const outsideClickHandler = (e) => {
+                if (!groupDropdown.contains(e.target)) {
+                    groupDropdown.classList.remove('active', 'open');
+                }
+            };
+            this.addEventListener(document, 'click', outsideClickHandler, 'document');
         }
+
+        // Now populate the dropdown with current groups
+        this.updatePatternGroupDropdown();
     }
 
     navigatePatternGroup(direction) {
@@ -4022,6 +5123,14 @@ class OTTOAccurateInterface {
 
     setupSliders() {
         // Clean up existing slider listeners first
+        this.eventListenerRegistry.slider.forEach(({ element, event, handler }) => {
+            if (element) {
+                element.removeEventListener(event, handler);
+            }
+        });
+        this.eventListenerRegistry.slider = [];
+        
+        // Also clean legacy array
         this.sliderListeners.forEach(({ element, event, handler }) => {
             if (element) {
                 element.removeEventListener(event, handler);
@@ -4038,105 +5147,42 @@ class OTTOAccurateInterface {
             this.miniSliderDebounceTimer = null;
         }
 
-        // Custom vertical sliders
-        document.querySelectorAll('.custom-slider').forEach(slider => {
-            const track = slider.querySelector('.slider-track');
-            const fill = slider.querySelector('.slider-fill');
-            const thumb = slider.querySelector('.slider-thumb');
+        // Track dragging state globally for all sliders
+        const dragState = {
+            isDragging: false,
+            currentSlider: null,
+            currentParam: null,
+            startY: 0,
+            startValue: 0,
+            min: 0,
+            max: 100
+        };
 
-            // Get initial values from data attributes
-            let min = parseInt(slider.dataset.min) || 0;
-            let max = parseInt(slider.dataset.max) || 100;
-            let value = parseInt(slider.dataset.value) || 50;
-            const param = slider.dataset.param;
+        // Create single document-level handlers for all sliders
+        const documentMouseMoveHandler = (e) => {
+            if (!dragState.isDragging || this.isDestroyed) return;
 
-            // Initialize visual state
-            this.updateCustomSlider(slider, value);
+            const deltaY = dragState.startY - e.clientY;  // Inverted for vertical slider
+            const track = dragState.currentSlider.querySelector('.slider-track');
+            const trackHeight = track.offsetHeight;
+            const range = dragState.max - dragState.min;
+            const deltaValue = (deltaY / trackHeight) * range;
 
-            // Handle mouse down on thumb
-            let isDragging = false;
-            let startY = 0;
-            let startValue = 0;
+            let value = Math.max(dragState.min, Math.min(dragState.max, dragState.startValue + deltaValue));
+            value = Math.round(value);  // Round to integer
 
-            // Debounced update function
-            const debouncedUpdate = (newValue) => {
-                if (this.isDestroyed) return;
+            // Use debounced update
+            this.debouncedSliderUpdate(dragState.currentSlider, dragState.currentParam, value);
+        };
 
-                // Clear existing timer for this slider
-                const existingTimer = this.debounceTimers.get(param);
-                if (existingTimer) {
-                    clearTimeout(existingTimer);
-                }
-
-                // Update visual immediately for responsiveness
-                this.updateCustomSlider(slider, newValue);
-
-                // Debounce the actual state update and callbacks
-                const timer = setTimeout(() => {
-                    if (this.isDestroyed) return;
-
-                    // Update player state
-                    this.playerStates[this.currentPlayer].sliderValues[param] = newValue;
-                    this.onSliderChanged(this.currentPlayer, param, newValue);
-                    this.setDirty('preset', true);
-
-                    // Check if this player is a master and propagate value
-                    if (this.linkStates && this.linkStates[param]) {
-                        const linkState = this.linkStates[param];
-                        if (linkState.master === this.currentPlayer) {
-                            this.propagateSliderValue(param, newValue, this.currentPlayer);
-                        }
-                    }
-
-                    console.log(`Player ${this.currentPlayer} ${param} slider: ${newValue}`);
-
-                    // Remove timer from map after execution
-                    this.debounceTimers.delete(param);
-                }, 100); // 100ms debounce delay
-
-                this.debounceTimers.set(param, timer);
-            };
-
-            const startDrag = (e) => {
-                if (this.isDestroyed) return;
-
-                // Check if this slider is a slave
-                if (this.linkStates && this.linkStates[param]) {
-                    const linkState = this.linkStates[param];
-                    if (linkState.slaves.has(this.currentPlayer)) {
-                        console.log(`Slider ${param} is slave for player ${this.currentPlayer}, ignoring drag`);
-                        return; // Don't allow dragging for slave sliders
-                    }
-                }
-
-                isDragging = true;
-                slider.classList.add('dragging');
-                startY = e.clientY;
-                startValue = value;
-                e.preventDefault();
-            };
-
-            const doDrag = (e) => {
-                if (!isDragging || this.isDestroyed) return;
-
-                const deltaY = startY - e.clientY;  // Inverted for vertical slider
-                const trackHeight = track.offsetHeight;
-                const range = max - min;
-                const deltaValue = (deltaY / trackHeight) * range;
-
-                value = Math.max(min, Math.min(max, startValue + deltaValue));
-                value = Math.round(value);  // Round to integer
-
-                // Use debounced update
-                debouncedUpdate(value);
-            };
-
-            const endDrag = () => {
-                if (isDragging && !this.isDestroyed) {
-                    isDragging = false;
-                    slider.classList.remove('dragging');
+        const documentMouseUpHandler = () => {
+            if (dragState.isDragging && !this.isDestroyed) {
+                dragState.isDragging = false;
+                if (dragState.currentSlider) {
+                    dragState.currentSlider.classList.remove('dragging');
 
                     // Force final update when drag ends
+                    const param = dragState.currentParam;
                     const existingTimer = this.debounceTimers.get(param);
                     if (existingTimer) {
                         clearTimeout(existingTimer);
@@ -4144,6 +5190,7 @@ class OTTOAccurateInterface {
                     }
 
                     // Final update without debounce
+                    const value = parseInt(dragState.currentSlider.dataset.value);
                     this.playerStates[this.currentPlayer].sliderValues[param] = value;
                     this.onSliderChanged(this.currentPlayer, param, value);
                     this.setDirty('preset', true);
@@ -4156,6 +5203,121 @@ class OTTOAccurateInterface {
                         }
                     }
                 }
+                
+                dragState.currentSlider = null;
+                dragState.currentParam = null;
+            }
+        };
+
+        // Remove old document handlers if they exist
+        if (this.documentHandlers.has('mousemove')) {
+            this.documentHandlers.get('mousemove').forEach(handler => {
+                document.removeEventListener('mousemove', handler);
+            });
+        }
+        if (this.documentHandlers.has('mouseup')) {
+            this.documentHandlers.get('mouseup').forEach(handler => {
+                document.removeEventListener('mouseup', handler);
+            });
+        }
+
+        // Add new document handlers
+        document.addEventListener('mousemove', documentMouseMoveHandler);
+        document.addEventListener('mouseup', documentMouseUpHandler);
+        
+        // Track document handlers properly
+        if (!this.documentHandlers.has('mousemove')) {
+            this.documentHandlers.set('mousemove', []);
+        }
+        if (!this.documentHandlers.has('mouseup')) {
+            this.documentHandlers.set('mouseup', []);
+        }
+        this.documentHandlers.get('mousemove').push(documentMouseMoveHandler);
+        this.documentHandlers.get('mouseup').push(documentMouseUpHandler);
+        
+        // Also track in registry
+        this.eventListenerRegistry.document.push(
+            { element: document, event: 'mousemove', handler: documentMouseMoveHandler },
+            { element: document, event: 'mouseup', handler: documentMouseUpHandler }
+        );
+
+        // Debounced update function
+        this.debouncedSliderUpdate = (slider, param, value) => {
+            if (this.isDestroyed) return;
+
+            // Clear existing timer for this slider
+            const existingTimer = this.debounceTimers.get(param);
+            if (existingTimer) {
+                clearTimeout(existingTimer);
+            }
+
+            // Update visual immediately for responsiveness
+            this.updateCustomSlider(slider, value);
+            slider.dataset.value = value;
+
+            // Debounce the actual state update and callbacks
+            const timer = setTimeout(() => {
+                if (this.isDestroyed) return;
+
+                // Update player state
+                this.playerStates[this.currentPlayer].sliderValues[param] = value;
+                this.onSliderChanged(this.currentPlayer, param, value);
+                this.setDirty('preset', true);
+
+                // Check if this player is a master and propagate value
+                if (this.linkStates && this.linkStates[param]) {
+                    const linkState = this.linkStates[param];
+                    if (linkState.master === this.currentPlayer) {
+                        this.propagateSliderValue(param, value, this.currentPlayer);
+                    }
+                }
+
+                console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
+
+                // Remove timer from map after execution
+                this.debounceTimers.delete(param);
+            }, 100); // 100ms debounce delay
+
+            this.debounceTimers.set(param, timer);
+        };
+
+        // Setup individual sliders
+        document.querySelectorAll('.custom-slider').forEach(slider => {
+            const track = slider.querySelector('.slider-track');
+            const thumb = slider.querySelector('.slider-thumb');
+
+            // Get initial values from data attributes
+            let min = parseInt(slider.dataset.min) || 0;
+            let max = parseInt(slider.dataset.max) || 100;
+            let value = parseInt(slider.dataset.value) || 50;
+            const param = slider.dataset.param;
+
+            // Initialize visual state
+            this.updateCustomSlider(slider, value);
+
+            // Handle mouse down on thumb
+            const startDrag = (e) => {
+                if (this.isDestroyed) return;
+
+                // Check if this slider is a slave
+                if (this.linkStates && this.linkStates[param]) {
+                    const linkState = this.linkStates[param];
+                    if (linkState.slaves.has(this.currentPlayer)) {
+                        console.log(`Slider ${param} is slave for player ${this.currentPlayer}, ignoring drag`);
+                        return; // Don't allow dragging for slave sliders
+                    }
+                }
+
+                dragState.isDragging = true;
+                dragState.currentSlider = slider;
+                dragState.currentParam = param;
+                dragState.startY = e.clientY;
+                dragState.startValue = value;
+                dragState.min = min;
+                dragState.max = max;
+                
+                slider.classList.add('dragging');
+                e.preventDefault();
             };
 
             // Handle click on track
@@ -4180,6 +5342,7 @@ class OTTOAccurateInterface {
 
                 // Update visual state immediately
                 this.updateCustomSlider(slider, value);
+                slider.dataset.value = value;
 
                 // Update player state (no debounce for click)
                 this.playerStates[this.currentPlayer].sliderValues[param] = value;
@@ -4197,21 +5360,13 @@ class OTTOAccurateInterface {
                 console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
             };
 
-            // Attach drag event listeners with tracking
-            this.addEventListener(track, 'click', trackClickHandler, this.sliderListeners);
-            this.addEventListener(thumb, 'mousedown', startDrag, this.sliderListeners);
+            // Attach event listeners using enhanced method
+            this.addEventListener(track, 'click', trackClickHandler, 'slider');
+            this.addEventListener(thumb, 'mousedown', startDrag, 'slider');
 
-            // These need to be on document level for dragging
-            if (!slider.dataset.listenersAdded) {
-                this.addEventListener(document, 'mousemove', doDrag, this.sliderListeners);
-                this.addEventListener(document, 'mouseup', endDrag, this.sliderListeners);
-                slider.dataset.listenersAdded = 'true';
-            }
-
-            // Store value for updates
+            // Store current value on slider for reference
             slider.currentValue = value;
         });
-
     }
 
     updateCustomSlider(slider, value) {
@@ -4263,82 +5418,180 @@ class OTTOAccurateInterface {
         });
     }
 
-    handleLinkToggle(param, linkIcon) {
-        if (!this.linkStates) {
-            console.error('linkStates not initialized!');
-            return;
-        }
-
-        const currentPlayer = this.currentPlayer;
-        const linkState = this.linkStates[param];
-
-        console.log(`handleLinkToggle called for ${param}, player ${currentPlayer}`, linkState);
-
-        // Determine current state of this link icon
-        const isMaster = linkState.master === currentPlayer;
-        const isSlave = linkState.slaves.has(currentPlayer);
-
-        if (!isMaster && !isSlave) {
-            // Currently unlinked - make it master
-            // Clear any existing master
-            if (linkState.master !== null) {
-                // Convert existing master to slave
-                linkState.slaves.add(linkState.master);
+    async handleLinkToggle(param, linkIcon) {
+        // Use atomic operation to prevent race conditions in link state changes
+        return this.atomicStateUpdate('link-toggle', async (version) => {
+            if (!this.linkStates) {
+                console.error('linkStates not initialized!');
+                return false;
             }
 
-            linkState.master = currentPlayer;
-            linkIcon.classList.add('master');
-            linkIcon.classList.remove('linked');
+            const currentPlayer = this.currentPlayer;
+            const linkState = this.linkStates[param];
 
-            // Propagate this player's value to all other players
-            const masterValue = this.playerStates[currentPlayer].sliderValues[param];
-            this.propagateSliderValue(param, masterValue, currentPlayer);
+            console.log(`handleLinkToggle called for ${param}, player ${currentPlayer} (v${version})`, linkState);
 
-            // Update all other players to be slaves
-            for (let i = 1; i <= this.numberOfPlayers; i++) {
-                if (i !== currentPlayer) {
-                    linkState.slaves.add(i);
+            // Create a backup of current state for rollback if needed
+            const previousState = {
+                master: linkState.master,
+                slaves: new Set(linkState.slaves)
+            };
+
+            try {
+                // Determine current state of this link icon
+                const isMaster = linkState.master === currentPlayer;
+                const isSlave = linkState.slaves.has(currentPlayer);
+
+                if (!isMaster && !isSlave) {
+                    // Currently unlinked - make it master
+                    // Clear any existing master safely
+                    if (linkState.master !== null) {
+                        // Verify the master exists before converting
+                        if (this.playerStates[linkState.master]) {
+                            // Convert existing master to slave
+                            linkState.slaves.add(linkState.master);
+                        }
+                    }
+
+                    linkState.master = currentPlayer;
+                    linkIcon.classList.add('master');
+                    linkIcon.classList.remove('linked');
+
+                    // Propagate this player's value to all other players
+                    const masterValue = this.playerStates[currentPlayer].sliderValues[param];
+                    
+                    // Clear slaves set and rebuild to ensure consistency
+                    linkState.slaves.clear();
+                    
+                    // Add all other players as slaves
+                    for (let i = 1; i <= this.numberOfPlayers; i++) {
+                        if (i !== currentPlayer && this.playerStates[i]) {
+                            linkState.slaves.add(i);
+                        }
+                    }
+
+                    // Propagate value after setting up slaves
+                    await this.propagateSliderValue(param, masterValue, currentPlayer);
+
+                    console.log(`Player ${currentPlayer} is now master for ${param}, value: ${masterValue}`);
+
+                } else if (isMaster) {
+                    // Currently master - unlink all
+                    linkState.master = null;
+                    linkState.slaves.clear();
+                    linkIcon.classList.remove('master');
+
+                    console.log(`Player ${currentPlayer} unlinked ${param} (was master)`);
+
+                } else if (isSlave) {
+                    // Currently slave - check if master still exists
+                    if (!linkState.master || !this.playerStates[linkState.master]) {
+                        // Orphaned slave - clean up state
+                        console.warn(`Player ${currentPlayer} was orphaned slave for ${param}, cleaning up`);
+                        linkState.slaves.delete(currentPlayer);
+                        linkIcon.classList.remove('linked');
+                        
+                        // If no master and no other slaves, reset completely
+                        if (!linkState.master && linkState.slaves.size === 0) {
+                            linkState.master = null;
+                        }
+                    } else {
+                        // Valid slave - can't change
+                        console.log(`Player ${currentPlayer} is slave for ${param}, cannot change`);
+                        return false;
+                    }
+                }
+
+                // Validate the final state
+                if (linkState.master && linkState.slaves.has(linkState.master)) {
+                    // Master can't be its own slave - fix this
+                    console.error('Detected master as slave - fixing');
+                    linkState.slaves.delete(linkState.master);
+                }
+
+                // Update link icon states for all players when switching
+                this.updateLinkIconStates();
+                
+                // Mark as dirty for saving
+                this.setDirty('preset', true);
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error in handleLinkToggle, rolling back:', error);
+                // Rollback to previous state
+                linkState.master = previousState.master;
+                linkState.slaves = previousState.slaves;
+                this.updateLinkIconStates();
+                throw error;
+            }
+        });
+    }
+
+    async propagateSliderValue(param, value, sourcePlayer) {
+        // Ensure atomic propagation to prevent race conditions
+        return this.atomicStateUpdate('slider-propagate', async (version) => {
+            if (!this.linkStates || !this.linkStates[param]) {
+                console.warn('No link state for param:', param);
+                return false;
+            }
+
+            const linkState = this.linkStates[param];
+            
+            // Verify source player is the master
+            if (linkState.master !== sourcePlayer) {
+                console.warn(`Player ${sourcePlayer} is not master for ${param}, cannot propagate`);
+                return false;
+            }
+
+            console.log(`Propagating ${param} value ${value} from master player ${sourcePlayer} (v${version})`);
+
+            // Track successful updates
+            const updatedPlayers = [];
+            const failedPlayers = [];
+
+            // Update all slave players
+            for (const slavePlayer of linkState.slaves) {
+                try {
+                    // Verify slave player exists
+                    if (!this.playerStates[slavePlayer]) {
+                        console.warn(`Slave player ${slavePlayer} doesn't exist, removing from slaves`);
+                        linkState.slaves.delete(slavePlayer);
+                        continue;
+                    }
+
+                    // Update the slave's value
+                    this.playerStates[slavePlayer].sliderValues[param] = value;
+                    updatedPlayers.push(slavePlayer);
+
+                    // If this slave is currently visible, update its UI
+                    if (slavePlayer === this.currentPlayer) {
+                        const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
+                        if (slider) {
+                            this.updateCustomSlider(slider, value);
+                            slider.dataset.value = value;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Failed to update slave player ${slavePlayer}:`, error);
+                    failedPlayers.push(slavePlayer);
                 }
             }
 
-            console.log(`Player ${currentPlayer} is now master for ${param}, value: ${masterValue}`);
+            // Clean up failed players from slaves
+            failedPlayers.forEach(player => {
+                linkState.slaves.delete(player);
+            });
 
-        } else if (isMaster) {
-            // Currently master - unlink all
-            linkState.master = null;
-            linkState.slaves.clear();
-            linkIcon.classList.remove('master');
+            console.log(`Propagation complete: ${updatedPlayers.length} updated, ${failedPlayers.length} failed`);
 
-            console.log(`Player ${currentPlayer} unlinked ${param} (was master)`);
-
-        } else if (isSlave) {
-            // Currently slave - can't change, do nothing
-            console.log(`Player ${currentPlayer} is slave for ${param}, cannot change`);
-            return;
-        }
-
-        // Update link icon states for all players when switching
-        this.updateLinkIconStates();
-    }
-
-    propagateSliderValue(param, value, fromPlayer) {
-        const linkState = this.linkStates[param];
-
-        // Update all slave players
-        linkState.slaves.forEach(playerNum => {
-            if (playerNum !== fromPlayer) {
-                this.playerStates[playerNum].sliderValues[param] = value;
-                console.log(`Propagated ${param} value ${value} to Player ${playerNum}`);
+            // Mark as dirty if any updates succeeded
+            if (updatedPlayers.length > 0) {
+                this.setDirty('preset', true);
             }
+
+            return updatedPlayers.length > 0;
         });
-
-        // If we're currently viewing a slave player, update the UI
-        if (linkState.slaves.has(this.currentPlayer)) {
-            const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
-            if (slider) {
-                this.updateCustomSlider(slider, value);
-            }
-        }
     }
 
     updateLinkIconStates() {
@@ -4780,37 +6033,83 @@ class OTTOAccurateInterface {
     }
 
     onPatternGroupChanged(playerNumber, groupName) {
+        // Simplified version without async for immediate response
+        console.log(`Pattern group change requested: Player ${playerNumber} -> Group "${groupName}"`);
+        
+        // Validate inputs
+        if (!this.playerStates[playerNumber]) {
+            console.error(`Player ${playerNumber} doesn't exist`);
+            return;
+        }
+
+        // Verify the pattern group exists
+        if (!this.patternGroups || !this.patternGroups[groupName]) {
+            console.error(`Pattern group "${groupName}" doesn't exist`);
+            
+            // Try to recover by using default group
+            const defaultGroup = 'favorites';
+            if (this.patternGroups && this.patternGroups[defaultGroup]) {
+                console.warn(`Falling back to default group "${defaultGroup}"`);
+                groupName = defaultGroup;
+            } else {
+                // Critical error - can't proceed
+                return;
+            }
+        }
+
         // Save pattern group to player state
-        if (this.playerStates[playerNumber]) {
-            this.playerStates[playerNumber].patternGroup = groupName;
+        this.playerStates[playerNumber].patternGroup = groupName;
 
-            // Mark patternGroup as dirty (will cascade to player and preset)
-            this.setDirty('patternGroup', true);
+        // Mark patternGroup as dirty (will cascade to player and preset)
+        this.setDirty('patternGroup', true);
 
-            // Update the pattern grid if this is the current player
-            if (playerNumber === this.currentPlayer && this.patternGroups && this.patternGroups[groupName]) {
-                this.updateMainPatternGrid(this.patternGroups[groupName].patterns);
+        // Update the pattern grid if this is the current player
+        if (playerNumber === this.currentPlayer) {
+            const group = this.patternGroups[groupName];
+            
+            // Ensure patterns array exists and is valid
+            if (!group.patterns || !Array.isArray(group.patterns)) {
+                console.warn(`Invalid patterns array for group "${groupName}", initializing`);
+                group.patterns = Array(16).fill('');
+            }
+            
+            this.updateMainPatternGrid(group.patterns);
 
-                // Restore the selected pattern for this group
-                const selectedPattern = this.patternGroups[groupName].selectedPattern;
-                if (selectedPattern) {
-                    const patternButtons = document.querySelectorAll('.pattern-grid .pattern-btn');
-                    patternButtons.forEach(btn => {
-                        btn.classList.remove('active');
-                        // Check both full name and first 8 characters
-                        if (btn.textContent === selectedPattern ||
-                            btn.textContent === selectedPattern.substring(0, 8)) {
-                            btn.classList.add('active');
-                            this.playerStates[playerNumber].selectedPattern = selectedPattern;
-                        }
-                    });
+            // Restore the selected pattern for this group
+            const selectedPattern = group.selectedPattern;
+            if (selectedPattern) {
+                const patternButtons = document.querySelectorAll('.pattern-grid .pattern-btn');
+                let patternFound = false;
+                
+                patternButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    // Check both full name and first 8 characters
+                    if (btn.textContent === selectedPattern ||
+                        btn.textContent === selectedPattern.substring(0, 8)) {
+                        btn.classList.add('active');
+                        this.playerStates[playerNumber].selectedPattern = selectedPattern;
+                        patternFound = true;
+                    }
+                });
+                
+                // If pattern wasn't found, clear the selection
+                if (!patternFound) {
+                    console.warn(`Selected pattern "${selectedPattern}" not found in grid`);
+                    group.selectedPattern = null;
                 }
             }
         }
 
+        // Notify external system if available
         if (window.juce?.onPatternGroupChanged) {
-            window.juce.onPatternGroupChanged(playerNumber, groupName);
+            try {
+                window.juce.onPatternGroupChanged(playerNumber, groupName);
+            } catch (error) {
+                console.error('Error notifying juce of pattern group change:', error);
+            }
         }
+
+        console.log(`Pattern group changed to "${groupName}" for player ${playerNumber}`);
     }
 
     onToggleChanged(playerNumber, toggleType, isActive) {
@@ -5034,204 +6333,498 @@ class OTTOAccurateInterface {
     }
 
     destroy() {
-        // Set destroyed flag first to prevent any async operations
+        console.log('Destroying OTTO Interface...');
+        
+        // Set destroyed flag immediately to prevent any async operations
         this.isDestroyed = true;
 
-        // Cancel animation frame
+        // Clear all timers first (prevents any callbacks from firing during cleanup)
+        this.clearAllTimers();
+
+        // Stop any animations
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
 
-        // Clear all debounce timers
-        this.debounceTimers.forEach((timer) => clearTimeout(timer));
-        this.debounceTimers.clear();
-
-        if (this.miniSliderDebounceTimer) {
-            clearTimeout(this.miniSliderDebounceTimer);
-            this.miniSliderDebounceTimer = null;
+        // Process any pending saves before cleanup
+        try {
+            this.processPendingSaves();
+        } catch (error) {
+            console.error('Error processing pending saves during destroy:', error);
         }
 
-        // Clear notification timers
-        if (this.notificationTimers) {
-            this.notificationTimers.forEach(timer => clearTimeout(timer));
-            this.notificationTimers.clear();
-        }
+        // Clean up all event listeners using the enhanced cleanup
+        this.cleanupAllEventListeners();
 
-        // Clear all save timers
-        Object.values(this.saveTimers).forEach(timer => {
-            if (timer) clearTimeout(timer);
-        });
-        this.saveTimers = {};
-
-        // Clear state update timer and queue
-        if (this.stateUpdateTimer) {
-            clearTimeout(this.stateUpdateTimer);
-            this.stateUpdateTimer = null;
-        }
+        // Clear all state update operations
         this.stateUpdateQueue = [];
         this.isProcessingStateUpdate = false;
 
-        // Close all open modals
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            modal.style.display = 'none';
-            modal.classList.remove('open');
-        });
-
-        // Close all open dropdowns
-        const dropdowns = document.querySelectorAll('.custom-dropdown');
-        dropdowns.forEach(dropdown => {
-            dropdown.classList.remove('open');
-        });
-
-        // Remove any active notifications
-        document.querySelectorAll('.notification').forEach(notification => {
-            notification.remove();
-        });
-
-        // Process any pending saves immediately before cleanup
-        this.pendingSaves.forEach(saveType => {
-            try {
-                this.executeSave(saveType);
-            } catch (e) {
-                console.error(`Error saving ${saveType} during cleanup:`, e);
-            }
-        });
+        // Clear all pending saves
         this.pendingSaves.clear();
 
-        // Clean up all event listeners
-        this.cleanupAllEventListeners();
-
-        // Clear link states to avoid circular references
+        // Clear link states to break circular references
         if (this.linkStates) {
-            Object.values(this.linkStates).forEach(state => {
-                state.slaves.clear();
-                state.master = null;
+            Object.keys(this.linkStates).forEach(param => {
+                if (this.linkStates[param]) {
+                    this.linkStates[param].slaves.clear();
+                    this.linkStates[param].master = null;
+                }
             });
             this.linkStates = null;
         }
 
-        // Clear all references to prevent memory leaks
+        // Clear player states to free memory
         this.playerStates = null;
-        this.presets = null;
-        this.patternGroups = null;
-        this.drumkits = null;
-        this.stateUpdateQueue = null;
-        this.pendingSaves = null;
-        this.tapTimes = null;
-        this.storageErrors = null;
-        this.debounceTimers = null;
-        this.notificationTimers = null;
 
-        // Clear dirty flags
-        this.isDirty = null;
+        // Clear pattern groups
+        this.patternGroups = null;
+
+        // Clear drumkits
+        this.drumkits = null;
+
+        // Clear presets
+        this.presets = null;
+
+        // Clear preset history
+        if (this.presetHistory) {
+            this.presetHistory = [];
+        }
+
+        // Clear storage errors
+        this.storageErrors = [];
 
         // Clear any remaining references
-        this.currentPreset = null;
-        this.numberOfPlayers = null;
-        this.currentPlayer = null;
-        this.tempo = null;
-        this.loopPosition = null;
-        this.isPlaying = null;
-        this.isLoadingPreset = null;
+        this.elementHandlerMap = new WeakMap();
+        this.documentHandlers = new Map();
+        
+        if (this.dropdownHandlers) {
+            this.dropdownHandlers.clear();
+            this.dropdownHandlers = null;
+        }
 
-        console.log('OTTOAccurateInterface destroyed and cleaned up');
+        // Clear dirty flags
+        Object.keys(this.isDirty).forEach(key => {
+            this.isDirty[key] = false;
+        });
+
+        // Remove any notification elements
+        const notifications = document.querySelectorAll('.notification');
+        notifications.forEach(notification => {
+            notification.remove();
+        });
+
+        // Close any open modals
+        const modals = document.querySelectorAll('.slide-up-panel, .pattern-edit-panel');
+        modals.forEach(modal => {
+            modal.classList.remove('active', 'open');
+        });
+
+        // Hide splash screen if it's still showing
+        const splashScreen = document.getElementById('splash-screen');
+        if (splashScreen) {
+            splashScreen.style.display = 'none';
+        }
+
+        // Reset mute overlay
+        const muteOverlay = document.querySelector('.mute-overlay');
+        if (muteOverlay) {
+            muteOverlay.classList.remove('active');
+        }
+
+        console.log('OTTO Interface destroyed successfully');
     }
 
     cleanupAllEventListeners() {
-        // Remove all tracked event listeners
-        this.eventListeners.forEach(({ element, event, handler }) => {
-            if (element) {
-                element.removeEventListener(event, handler);
-            }
-        });
-        this.eventListeners = [];
+        // Enhanced cleanup with proper tracking
+        console.log('Starting comprehensive event listener cleanup...');
 
-        // Remove slider listeners
-        this.sliderListeners.forEach(({ element, event, handler }) => {
-            if (element) {
-                element.removeEventListener(event, handler);
-            }
+        // Clean up registry-based listeners
+        Object.keys(this.eventListenerRegistry).forEach(category => {
+            const listeners = this.eventListenerRegistry[category];
+            listeners.forEach(({ element, event, handler }) => {
+                if (element && handler) {
+                    element.removeEventListener(event, handler);
+                }
+            });
+            // Clear the array
+            this.eventListenerRegistry[category] = [];
         });
-        this.sliderListeners = [];
 
-        // Remove dropdown listeners
-        this.dropdownListeners.forEach(({ element, event, handler }) => {
-            if (element) {
-                element.removeEventListener(event, handler);
-            }
-        });
-        this.dropdownListeners = [];
+        // Clean up legacy arrays (for backward compatibility)
+        const legacyArrays = [
+            this.eventListeners,
+            this.sliderListeners,
+            this.dropdownListeners,
+            this.modalListeners,
+            this.documentListeners
+        ];
 
-        // Remove modal listeners
-        this.modalListeners.forEach(({ element, event, handler }) => {
-            if (element) {
-                element.removeEventListener(event, handler);
-            }
+        legacyArrays.forEach(array => {
+            array.forEach(({ element, event, handler }) => {
+                if (element && handler) {
+                    element.removeEventListener(event, handler);
+                }
+            });
+            array.length = 0; // Clear the array
         });
-        this.modalListeners = [];
-
-        // Remove document listeners
-        this.documentListeners.forEach(({ event, handler }) => {
-            document.removeEventListener(event, handler);
-        });
-        this.documentListeners = [];
 
         // Clean up specific handlers
-        if (this.presetDropdownCloseHandler) {
-            document.removeEventListener('click', this.presetDropdownCloseHandler);
-            this.presetDropdownCloseHandler = null;
-        }
-
-        if (this.addGroupHandler) {
-            const addGroupBtn = document.getElementById('add-group-btn');
-            if (addGroupBtn) {
-                addGroupBtn.removeEventListener('click', this.addGroupHandler);
+        Object.keys(this.specificHandlers).forEach(key => {
+            const handler = this.specificHandlers[key];
+            if (handler) {
+                // Determine where this handler was attached
+                switch(key) {
+                    case 'presetDropdownClose':
+                    case 'keyboardShortcut':
+                        document.removeEventListener('click', handler);
+                        document.removeEventListener('keydown', handler);
+                        break;
+                    case 'beforeUnload':
+                        window.removeEventListener('beforeunload', handler);
+                        break;
+                    case 'addGroup':
+                        const addBtn = document.getElementById('add-group-btn');
+                        if (addBtn) addBtn.removeEventListener('click', handler);
+                        break;
+                    case 'renameGroup':
+                        const renameBtn = document.getElementById('rename-group-btn');
+                        if (renameBtn) renameBtn.removeEventListener('click', handler);
+                        break;
+                }
+                this.specificHandlers[key] = null;
             }
-            this.addGroupHandler = null;
-        }
+        });
 
-        if (this.renameGroupHandler) {
-            const renameGroupBtn = document.getElementById('rename-group-btn');
-            if (renameGroupBtn) {
-                renameGroupBtn.removeEventListener('click', this.renameGroupHandler);
-            }
-            this.renameGroupHandler = null;
-        }
+        // Clean up document-level handlers
+        this.documentHandlers.forEach((handlers, eventType) => {
+            handlers.forEach(handler => {
+                document.removeEventListener(eventType, handler);
+            });
+        });
+        this.documentHandlers.clear();
 
-        // Clean up keyboard shortcut handler
-        if (this.keyboardShortcutHandler) {
-            document.removeEventListener('keydown', this.keyboardShortcutHandler);
-            this.keyboardShortcutHandler = null;
-        }
-
-        // Clean up any dropdown option handlers
+        // Clean up any dropdown option handlers (these are stored on DOM elements)
         document.querySelectorAll('.dropdown-option').forEach(option => {
             if (option._clickHandler) {
                 option.removeEventListener('click', option._clickHandler);
                 delete option._clickHandler;
             }
+            // Clean up any other handlers stored on elements
+            const handlers = this.elementHandlerMap.get(option);
+            if (handlers) {
+                Object.keys(handlers).forEach(eventType => {
+                    handlers[eventType].forEach(handler => {
+                        option.removeEventListener(eventType, handler);
+                    });
+                });
+                this.elementHandlerMap.delete(option);
+            }
         });
 
-        // Clean up drag-drop listeners
+        // Clean up slider data attributes
+        document.querySelectorAll('.custom-slider').forEach(slider => {
+            if (slider.dataset.listenersAdded) {
+                delete slider.dataset.listenersAdded;
+            }
+        });
+
+        // Clean up drag-drop listeners more safely
         const patternSlots = document.querySelectorAll('.pattern-slot');
         patternSlots.forEach(slot => {
-            // Remove all drag-drop event listeners
-            const newSlot = slot.cloneNode(true);
-            slot.parentNode.replaceChild(newSlot, slot);
+            // Get all handlers for this element
+            const handlers = this.elementHandlerMap.get(slot);
+            if (handlers) {
+                Object.keys(handlers).forEach(eventType => {
+                    handlers[eventType].forEach(handler => {
+                        slot.removeEventListener(eventType, handler);
+                    });
+                });
+                this.elementHandlerMap.delete(slot);
+            }
+        });
+
+        // Clear the WeakMap references (they'll be garbage collected)
+        this.elementHandlerMap = new WeakMap();
+
+        // Clear all timers
+        this.clearAllTimers();
+
+        console.log('Event listener cleanup completed');
+    }
+
+    addEventListener(element, event, handler, category = 'element') {
+        // Enhanced event listener management with proper tracking
+        if (!element || !handler || this.isDestroyed) return false;
+
+        // Check if this exact listener already exists to prevent duplicates
+        const existingHandlers = this.elementHandlerMap.get(element);
+        if (existingHandlers) {
+            const eventHandlers = existingHandlers[event];
+            if (eventHandlers && eventHandlers.includes(handler)) {
+                console.warn(`Duplicate listener prevented for ${event} on`, element);
+                return false; // Listener already exists
+            }
+        }
+
+        // Add the event listener
+        element.addEventListener(event, handler);
+
+        // Store in WeakMap for efficient lookup
+        if (!this.elementHandlerMap.has(element)) {
+            this.elementHandlerMap.set(element, {});
+        }
+        const elementHandlers = this.elementHandlerMap.get(element);
+        if (!elementHandlers[event]) {
+            elementHandlers[event] = [];
+        }
+        elementHandlers[event].push(handler);
+
+        // Store in registry by category
+        if (this.eventListenerRegistry[category]) {
+            this.eventListenerRegistry[category].push({ element, event, handler });
+        } else {
+            // Default to element category if invalid category provided
+            this.eventListenerRegistry.element.push({ element, event, handler });
+        }
+
+        // Also store in legacy arrays for backward compatibility
+        const legacyMap = {
+            'element': this.eventListeners,
+            'slider': this.sliderListeners,
+            'dropdown': this.dropdownListeners,
+            'modal': this.modalListeners,
+            'document': this.documentListeners,
+            'pattern': this.eventListeners
+        };
+        
+        const trackingArray = legacyMap[category] || this.eventListeners;
+        trackingArray.push({ element, event, handler });
+
+        return true; // Successfully added
+    }
+
+    removeEventListener(element, event, handler, category = 'element') {
+        // Enhanced event listener removal with proper cleanup
+        if (!element || !handler) return false;
+
+        // Remove the event listener
+        element.removeEventListener(event, handler);
+
+        // Remove from WeakMap
+        const elementHandlers = this.elementHandlerMap.get(element);
+        if (elementHandlers && elementHandlers[event]) {
+            const index = elementHandlers[event].indexOf(handler);
+            if (index > -1) {
+                elementHandlers[event].splice(index, 1);
+                // Clean up empty arrays
+                if (elementHandlers[event].length === 0) {
+                    delete elementHandlers[event];
+                }
+                // Clean up empty objects
+                if (Object.keys(elementHandlers).length === 0) {
+                    this.elementHandlerMap.delete(element);
+                }
+            }
+        }
+
+        // Remove from registry
+        if (this.eventListenerRegistry[category]) {
+            const registry = this.eventListenerRegistry[category];
+            const index = registry.findIndex(item => 
+                item.element === element && 
+                item.event === event && 
+                item.handler === handler
+            );
+            if (index > -1) {
+                registry.splice(index, 1);
+            }
+        }
+
+        // Remove from legacy arrays
+        const legacyMap = {
+            'element': this.eventListeners,
+            'slider': this.sliderListeners,
+            'dropdown': this.dropdownListeners,
+            'modal': this.modalListeners,
+            'document': this.documentListeners,
+            'pattern': this.eventListeners
+        };
+        
+        const trackingArray = legacyMap[category] || this.eventListeners;
+        const legacyIndex = trackingArray.findIndex(item => 
+            item.element === element && 
+            item.event === event && 
+            item.handler === handler
+        );
+        if (legacyIndex > -1) {
+            trackingArray.splice(legacyIndex, 1);
+        }
+
+        return true; // Successfully removed
+    }
+
+    clearAllTimers() {
+        // Clear all active timers
+        this.activeTimers.forEach(timer => clearTimeout(timer));
+        this.activeTimers.clear();
+
+        // Clear notification timers
+        this.notificationTimers.forEach(timer => clearTimeout(timer));
+        this.notificationTimers.clear();
+
+        // Clear debounce timers
+        this.debounceTimers.forEach(timer => clearTimeout(timer));
+        this.debounceTimers.clear();
+
+        // Clear specific timers
+        if (this.miniSliderDebounceTimer) {
+            clearTimeout(this.miniSliderDebounceTimer);
+            this.miniSliderDebounceTimer = null;
+        }
+
+        // Clear save timers
+        Object.keys(this.saveTimers).forEach(key => {
+            if (this.saveTimers[key]) {
+                clearTimeout(this.saveTimers[key]);
+                this.saveTimers[key] = null;
+            }
+        });
+
+        // Clear state update timer
+        if (this.stateUpdateTimer) {
+            clearTimeout(this.stateUpdateTimer);
+            this.stateUpdateTimer = null;
+        }
+
+        // Clear animation frame
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
+        }
+    }
+
+    // State Operation Management System
+    acquireStateLock(operation) {
+        // Create a mutex system for state operations
+        if (!this.stateLocks) {
+            this.stateLocks = new Map();
+            this.lockQueue = [];
+            this.activeLock = null;
+        }
+
+        return new Promise((resolve) => {
+            const lockRequest = {
+                operation,
+                resolve,
+                timestamp: Date.now(),
+                id: `${operation}_${Date.now()}_${Math.random()}`
+            };
+
+            // If no active lock, grant immediately
+            if (!this.activeLock) {
+                this.activeLock = lockRequest;
+                this.stateLocks.set(operation, lockRequest);
+                resolve(lockRequest);
+            } else {
+                // Queue the request
+                this.lockQueue.push(lockRequest);
+            }
         });
     }
 
-    addEventListener(element, event, handler, trackingArray = null) {
-        // Helper method to add event listeners with tracking
-        if (!element) return;
+    releaseStateLock(lockRequest) {
+        if (!lockRequest || !this.stateLocks) return;
 
-        element.addEventListener(event, handler);
+        // Only release if this is the active lock
+        if (this.activeLock && this.activeLock.id === lockRequest.id) {
+            this.stateLocks.delete(lockRequest.operation);
+            this.activeLock = null;
 
-        // Track the listener for cleanup
-        const tracker = trackingArray || this.eventListeners;
-        tracker.push({ element, event, handler });
+            // Process next in queue
+            if (this.lockQueue.length > 0) {
+                const next = this.lockQueue.shift();
+                this.activeLock = next;
+                this.stateLocks.set(next.operation, next);
+                next.resolve(next);
+            }
+        }
+    }
+
+    // Atomic state update with versioning
+    async atomicStateUpdate(operation, updateFn) {
+        if (this.isDestroyed) return false;
+
+        const lock = await this.acquireStateLock(operation);
+        
+        try {
+            // Increment state version
+            if (!this.stateVersion) {
+                this.stateVersion = 0;
+            }
+            this.stateVersion++;
+            
+            // Execute the update function
+            const result = await updateFn(this.stateVersion);
+            
+            // Mark successful update
+            if (!this.stateUpdateHistory) {
+                this.stateUpdateHistory = [];
+            }
+            this.stateUpdateHistory.push({
+                operation,
+                version: this.stateVersion,
+                timestamp: Date.now(),
+                success: true
+            });
+            
+            // Keep only last 100 updates in history
+            if (this.stateUpdateHistory.length > 100) {
+                this.stateUpdateHistory = this.stateUpdateHistory.slice(-100);
+            }
+            
+            return result;
+        } catch (error) {
+            console.error(`Atomic state update failed for ${operation}:`, error);
+            
+            // Log failed update
+            if (this.stateUpdateHistory) {
+                this.stateUpdateHistory.push({
+                    operation,
+                    version: this.stateVersion,
+                    timestamp: Date.now(),
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            throw error;
+        } finally {
+            this.releaseStateLock(lock);
+        }
+    }
+
+    // Check if operation can proceed
+    canProceedWithOperation(operation) {
+        if (this.isDestroyed) return false;
+        
+        // Check if there's a conflicting operation in progress
+        const conflictingOps = {
+            'preset-load': ['preset-save', 'preset-load', 'preset-delete'],
+            'preset-save': ['preset-load', 'preset-delete'],
+            'preset-delete': ['preset-load', 'preset-save'],
+            'player-switch': ['preset-load'],
+            'state-update': ['preset-load']
+        };
+        
+        const conflicts = conflictingOps[operation] || [];
+        
+        if (this.activeLock) {
+            return !conflicts.includes(this.activeLock.operation);
+        }
+        
+        return true;
     }
 }
 
