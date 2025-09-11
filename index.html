@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OTTO - Organic Timing Trigger Orchestrator</title>
+    <title>OTTO - Refactored (Phase 1 Test)</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,8 +17,21 @@
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 
     <link rel="stylesheet" href="styles.css" />
+    
+    <!-- Load new manager classes BEFORE main script -->
+    <script src="EventManager.js"></script>
+    <script src="TimerManager.js"></script>
+    <script src="StateManager.js"></script>
+    <script src="PlayerStateManager.js"></script>
+    <script src="PatternGroupManager.js"></script>
+    <script src="DrumkitManager.js"></script>
+    <script src="PresetManager.js"></script>
+    <script src="LinkManager.js"></script>
+    <script src="StorageManager.js"></script>
+    <script src="WindowManager.js"></script>
   </head>
   <body>
+    <!-- Copy exact same body content from original index.html -->
     <div class="interface-container">
       <!-- Splash Screen -->
       <div id="splash-screen" class="splash-screen">
@@ -286,11 +299,6 @@
 
           <!-- Area 2: Presets dropdown -->
           <div class="row1-area2">
-            <!-- Preset chevrons commented out to make room for save button
-                    <button class="preset-nav-btn preset-prev">
-                        <i class="ph-thin ph-caret-left"></i>
-                    </button>
-                    -->
             <div class="custom-dropdown" id="preset-dropdown">
               <div class="dropdown-selected" id="preset-selected">
                 <span class="dropdown-text">Default</span>
@@ -306,40 +314,8 @@
               </div>
               <div class="dropdown-options" id="preset-options">
                 <div class="dropdown-option" data-value="default">Default</div>
-                <div class="dropdown-option" data-value="rock-ballad">
-                  Rock Ballad
-                </div>
-                <div class="dropdown-option" data-value="jazz-combo">
-                  Jazz Combo
-                </div>
-                <div class="dropdown-option" data-value="funk-groove">
-                  Funk Groove
-                </div>
-                <div class="dropdown-option" data-value="latin-rhythm">
-                  Latin Rhythm
-                </div>
-                <div class="dropdown-option" data-value="electronic-pulse">
-                  Electronic Pulse
-                </div>
-                <div class="dropdown-option" data-value="acoustic-folk">
-                  Acoustic Folk
-                </div>
-                <div class="dropdown-option" data-value="blues-shuffle">
-                  Blues Shuffle
-                </div>
-                <div class="dropdown-option" data-value="pop-modern">
-                  Pop Modern
-                </div>
-                <div class="dropdown-option" data-value="world-fusion">
-                  World Fusion
-                </div>
               </div>
             </div>
-            <!-- Preset chevron commented out
-                    <button class="preset-nav-btn preset-next">
-                        <i class="ph-thin ph-caret-right"></i>
-                    </button>
-                    -->
             <button
               class="quick-save-btn preset-save-btn"
               id="preset-save-btn"
@@ -435,19 +411,12 @@
                 <span class="dropdown-text">Acoustic</span>
               </div>
               <div class="dropdown-options" id="kit-options">
-                <!-- This list should eventually come from our INI file storage system -->
                 <div class="dropdown-option" data-value="acoustic">
                   Acoustic
                 </div>
                 <div class="dropdown-option" data-value="electronic">
                   Electronic
                 </div>
-                <div class="dropdown-option" data-value="rock">Rock</div>
-                <div class="dropdown-option" data-value="jazz">Jazz</div>
-                <div class="dropdown-option" data-value="pop">Pop</div>
-                <div class="dropdown-option" data-value="funk">Funk</div>
-                <div class="dropdown-option" data-value="latin">Latin</div>
-                <div class="dropdown-option" data-value="vintage">Vintage</div>
               </div>
             </div>
             <button class="kit-nav-btn kit-next">
@@ -473,7 +442,6 @@
           <!-- Area 5: Mute/Unmute drummer icon (right-aligned) -->
           <div class="row3-area-5">
             <button class="mute-drummer-btn" id="mute-drummer-btn">
-              <!-- This incorrectly appears off screen on right  -->
               <!-- Using OTTO_Button_Glyph.png as background image -->
             </button>
           </div>
@@ -565,7 +533,6 @@
           <!-- Left Half (50%): 4x4 Pattern Grid -->
           <div class="row5-left">
             <div class="pattern-grid">
-              <!-- these names should eventually come from our MIDI filenames in the MIDI folder. -->
               <button class="pattern-btn" data-pattern="basic">Basic</button>
               <button class="pattern-btn" data-pattern="bassa">Bassa</button>
               <button class="pattern-btn" data-pattern="busybeat">
@@ -599,7 +566,6 @@
           <div class="row5-right">
             <!-- Right Area 1 (20%): Toggles -->
             <div class="row5-right-area1">
-              <!-- <div class="control-label">Toggles</div> -->
               <div class="toggles-column">
                 <button class="toggle-btn" data-toggle="none">None</button>
                 <button class="toggle-btn active" data-toggle="auto">
@@ -614,7 +580,6 @@
 
             <!-- Right Area 2 (20%): Fills -->
             <div class="row5-right-area2">
-              <!-- <div class="control-label">Fills</div> -->
               <div class="fills-column">
                 <button class="fill-btn" data-fill="now">Now</button>
                 <button class="fill-btn" data-fill="4">4</button>
@@ -627,7 +592,6 @@
 
             <!-- Right Area 3 (20%): Swing Slider -->
             <div class="row5-right-area3">
-              <!-- <div class="control-label">Swing</div> -->
               <div class="slider-container">
                 <div
                   class="custom-slider"
@@ -649,7 +613,6 @@
 
             <!-- Right Area 4 (20%): Energy Slider -->
             <div class="row5-right-area4">
-              <!-- <div class="control-label">Energy</div> -->
               <div class="slider-container">
                 <div
                   class="custom-slider"
@@ -671,7 +634,6 @@
 
             <!-- Right Area 5 (20%): Volume Slider -->
             <div class="row5-right-area5">
-              <!-- <div class="control-label">Volume</div> -->
               <div class="slider-container">
                 <div
                   class="custom-slider"
@@ -706,7 +668,63 @@
       </div>
     </div>
 
-    <script src="WindowManager.js"></script>
+    <!-- Load original script with new managers available -->
     <script src="script.js"></script>
+    
+    <!-- Debug panel for Phase 1 testing -->
+    <div id="debug-panel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; max-width: 300px; display: none;">
+      <h4 style="margin: 0 0 10px 0;">Phase 1 Debug Info</h4>
+      <div id="debug-content"></div>
+      <button onclick="toggleDebugMode()" style="margin-top: 10px; padding: 5px 10px;">Toggle Debug Mode</button>
+    </div>
+    
+    <script>
+      // Debug helper for Phase 1 testing
+      function updateDebugPanel() {
+        if (!window.OTTOApp) return;
+        
+        const debugContent = document.getElementById('debug-content');
+        const eventStats = window.OTTOApp.eventManager.getStats();
+        const timerStats = window.OTTOApp.timerManager.getStats();
+        const stateStats = window.OTTOApp.stateManager.getStats();
+        
+        debugContent.innerHTML = `
+          <strong>Event Manager:</strong><br>
+          Active: ${eventStats.activeCount}<br>
+          Added: ${eventStats.added}<br>
+          Removed: ${eventStats.removed}<br>
+          Potential Leaks: ${eventStats.leaked}<br>
+          <br>
+          <strong>Timer Manager:</strong><br>
+          Active: ${timerStats.active}<br>
+          Created: ${timerStats.created}<br>
+          Cleared: ${timerStats.cleared}<br>
+          Executed: ${timerStats.executed}<br>
+          <br>
+          <strong>State Manager:</strong><br>
+          Updates: ${stateStats.updates}<br>
+          Queue Size: ${stateStats.queueSize}<br>
+          Dirty Paths: ${stateStats.dirtyPaths}<br>
+          Listeners: ${stateStats.listeners}<br>
+        `;
+      }
+      
+      function toggleDebugMode() {
+        if (!window.OTTOApp) return;
+        
+        const isDebug = !window.OTTOApp.eventManager.debugMode;
+        window.OTTOApp.eventManager.setDebugMode(isDebug);
+        window.OTTOApp.timerManager.setDebugMode(isDebug);
+        window.OTTOApp.stateManager.setDebugMode(isDebug);
+        
+        console.log(`Debug mode ${isDebug ? 'enabled' : 'disabled'}`);
+      }
+      
+      // Show debug panel in development
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        document.getElementById('debug-panel').style.display = 'block';
+        setInterval(updateDebugPanel, 1000);
+      }
+    </script>
   </body>
 </html>

@@ -1,0 +1,800 @@
+/**
+ * DrumkitManager.js  
+ * Manages drumkits and their mixer presets
+ * Phase 2 Implementation
+ */
+
+class DrumkitManager {
+  constructor(storageManager) {
+    this.storageManager = storageManager;
+    
+    // Drumkit configuration
+    this.DEFAULT_MIXER_PRESET = 'default';
+    this.MAX_PRESET_NAME_LENGTH = 50;
+    
+    // Drumkit storage
+    this.drumkits = new Map();
+    
+    // Current kit tracking per player
+    this.playerKits = new Map();
+    
+    // Mixer channel definitions
+    this.mixerChannels = [
+      'kick', 'snare', 'hihat', 'tom1', 'tom2', 
+      'crash', 'ride', 'percussion', 'room', 'overhead'
+    ];
+    
+    // Listeners
+    this.listeners = new Map();
+    
+    // Initialize with defaults
+    this.initialize();
+  }
+  
+  /**
+   * Initialize with default kits
+   */
+  initialize() {
+    // Default acoustic kit
+    this.drumkits.set('acoustic', {
+      name: 'Acoustic',
+      displayName: 'Acoustic',
+      description: 'Natural acoustic drum kit',
+      selectedMixerPreset: 'default',
+      mixerPresets: {
+        default: this.createDefaultMixerPreset('Acoustic Default'),
+        live: this.createLiveMixerPreset('Acoustic Live'),
+        studio: this.createStudioMixerPreset('Acoustic Studio')
+      },
+      metadata: {
+        manufacturer: 'OTTO',
+        category: 'acoustic',
+        tags: ['acoustic', 'natural', 'live'],
+        createdAt: Date.now(),
+        modifiedAt: Date.now()
+      }
+    });
+    
+    // Default electronic kit
+    this.drumkits.set('electronic', {
+      name: 'Electronic',
+      displayName: 'Electronic',
+      description: 'Electronic drum kit with synthesized sounds',
+      selectedMixerPreset: 'default',
+      mixerPresets: {
+        default: this.createDefaultMixerPreset('Electronic Default'),
+        punchy: this.createPunchyMixerPreset('Electronic Punchy'),
+        ambient: this.createAmbientMixerPreset('Electronic Ambient')
+      },
+      metadata: {
+        manufacturer: 'OTTO',
+        category: 'electronic',
+        tags: ['electronic', 'synth', 'modern'],
+        createdAt: Date.now(),
+        modifiedAt: Date.now()
+      }
+    });
+    
+    // Additional default kits
+    this.addDefaultKits();
+    
+    // Load saved kits from storage
+    this.loadFromStorage();
+  }
+  
+  /**
+   * Add more default kits
+   */
+  addDefaultKits() {
+    const defaultKits = [
+      {
+        key: 'rock',
+        name: 'Rock',
+        description: 'Powerful rock drum kit',
+        category: 'acoustic',
+        tags: ['rock', 'powerful', 'loud']
+      },
+      {
+        key: 'jazz',
+        name: 'Jazz',
+        description: 'Warm jazz drum kit',
+        category: 'acoustic',
+        tags: ['jazz', 'warm', 'brushes']
+      },
+      {
+        key: 'pop',
+        name: 'Pop',
+        description: 'Modern pop drum kit',
+        category: 'hybrid',
+        tags: ['pop', 'modern', 'radio']
+      },
+      {
+        key: 'funk',
+        name: 'Funk',
+        description: 'Tight funk drum kit',
+        category: 'acoustic',
+        tags: ['funk', 'tight', 'groove']
+      },
+      {
+        key: 'latin',
+        name: 'Latin',
+        description: 'Latin percussion kit',
+        category: 'percussion',
+        tags: ['latin', 'percussion', 'world']
+      },
+      {
+        key: 'vintage',
+        name: 'Vintage',
+        description: 'Classic vintage drum kit',
+        category: 'acoustic',
+        tags: ['vintage', 'classic', 'retro']
+      }
+    ];
+    
+    defaultKits.forEach(kitInfo => {
+      this.drumkits.set(kitInfo.key, {
+        name: kitInfo.name,
+        displayName: kitInfo.name,
+        description: kitInfo.description,
+        selectedMixerPreset: 'default',
+        mixerPresets: {
+          default: this.createDefaultMixerPreset(`${kitInfo.name} Default`)
+        },
+        metadata: {
+          manufacturer: 'OTTO',
+          category: kitInfo.category,
+          tags: kitInfo.tags,
+          createdAt: Date.now(),
+          modifiedAt: Date.now()
+        }
+      });
+    });
+  }
+  
+  /**
+   * Create default mixer preset
+   */
+  createDefaultMixerPreset(name) {
+    return {
+      name: name,
+      levels: {
+        kick: 75,
+        snare: 70,
+        hihat: 65,
+        tom1: 70,
+        tom2: 70,
+        crash: 80,
+        ride: 75,
+        percussion: 60,
+        room: 30,
+        overhead: 40
+      },
+      panning: {
+        kick: 0,
+        snare: 0,
+        hihat: -20,
+        tom1: -30,
+        tom2: 30,
+        crash: -40,
+        ride: 40,
+        percussion: 0,
+        room: 0,
+        overhead: 0
+      },
+      effects: {
+        reverb: 20,
+        compression: 30,
+        eq: 'flat'
+      }
+    };
+  }
+  
+  /**
+   * Create live mixer preset
+   */
+  createLiveMixerPreset(name) {
+    return {
+      name: name,
+      levels: {
+        kick: 80,
+        snare: 75,
+        hihat: 60,
+        tom1: 72,
+        tom2: 72,
+        crash: 85,
+        ride: 70,
+        percussion: 55,
+        room: 40,
+        overhead: 50
+      },
+      panning: {
+        kick: 0,
+        snare: 0,
+        hihat: -25,
+        tom1: -35,
+        tom2: 35,
+        crash: -45,
+        ride: 45,
+        percussion: 0,
+        room: 0,
+        overhead: 0
+      },
+      effects: {
+        reverb: 35,
+        compression: 40,
+        eq: 'live'
+      }
+    };
+  }
+  
+  /**
+   * Create studio mixer preset
+   */
+  createStudioMixerPreset(name) {
+    return {
+      name: name,
+      levels: {
+        kick: 70,
+        snare: 68,
+        hihat: 62,
+        tom1: 68,
+        tom2: 68,
+        crash: 75,
+        ride: 72,
+        percussion: 58,
+        room: 25,
+        overhead: 35
+      },
+      panning: {
+        kick: 0,
+        snare: 0,
+        hihat: -15,
+        tom1: -25,
+        tom2: 25,
+        crash: -35,
+        ride: 35,
+        percussion: 0,
+        room: 0,
+        overhead: 0
+      },
+      effects: {
+        reverb: 15,
+        compression: 50,
+        eq: 'studio'
+      }
+    };
+  }
+  
+  /**
+   * Create punchy mixer preset
+   */
+  createPunchyMixerPreset(name) {
+    return {
+      name: name,
+      levels: {
+        kick: 85,
+        snare: 80,
+        hihat: 55,
+        tom1: 75,
+        tom2: 75,
+        crash: 82,
+        ride: 68,
+        percussion: 50,
+        room: 20,
+        overhead: 30
+      },
+      panning: {
+        kick: 0,
+        snare: 0,
+        hihat: -30,
+        tom1: -40,
+        tom2: 40,
+        crash: -50,
+        ride: 50,
+        percussion: 0,
+        room: 0,
+        overhead: 0
+      },
+      effects: {
+        reverb: 10,
+        compression: 70,
+        eq: 'punchy'
+      }
+    };
+  }
+  
+  /**
+   * Create ambient mixer preset
+   */
+  createAmbientMixerPreset(name) {
+    return {
+      name: name,
+      levels: {
+        kick: 60,
+        snare: 55,
+        hihat: 70,
+        tom1: 60,
+        tom2: 60,
+        crash: 90,
+        ride: 80,
+        percussion: 65,
+        room: 60,
+        overhead: 70
+      },
+      panning: {
+        kick: 0,
+        snare: 0,
+        hihat: -10,
+        tom1: -20,
+        tom2: 20,
+        crash: -60,
+        ride: 60,
+        percussion: 0,
+        room: 0,
+        overhead: 0
+      },
+      effects: {
+        reverb: 60,
+        compression: 20,
+        eq: 'ambient'
+      }
+    };
+  }
+  
+  /**
+   * Get drumkit
+   */
+  getDrumkit(kitKey) {
+    return this.drumkits.get(kitKey);
+  }
+  
+  /**
+   * Get all drumkits
+   */
+  getAllDrumkits() {
+    const kits = {};
+    this.drumkits.forEach((kit, key) => {
+      kits[key] = { ...kit };
+    });
+    return kits;
+  }
+  
+  /**
+   * Get drumkit list for UI
+   */
+  getDrumkitList() {
+    const list = [];
+    this.drumkits.forEach((kit, key) => {
+      list.push({
+        key: key,
+        name: kit.displayName || kit.name,
+        category: kit.metadata?.category || 'unknown'
+      });
+    });
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  
+  /**
+   * Get mixer preset for a kit
+   */
+  getMixerPreset(kitKey, presetName = null) {
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) return null;
+    
+    const presetKey = presetName || kit.selectedMixerPreset;
+    return kit.mixerPresets[presetKey];
+  }
+  
+  /**
+   * Set mixer preset for a kit
+   */
+  setMixerPreset(kitKey, presetName) {
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    if (!kit.mixerPresets[presetName]) {
+      throw new Error(`Mixer preset not found: ${presetName}`);
+    }
+    
+    kit.selectedMixerPreset = presetName;
+    kit.metadata.modifiedAt = Date.now();
+    
+    this.saveToStorage();
+    this.notifyListeners('mixer-preset-change', kitKey, presetName);
+    
+    return kit.mixerPresets[presetName];
+  }
+  
+  /**
+   * Create new mixer preset
+   */
+  createMixerPreset(kitKey, presetName, presetData = null) {
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    if (kit.mixerPresets[presetName]) {
+      throw new Error(`Mixer preset already exists: ${presetName}`);
+    }
+    
+    // Create preset with defaults or provided data
+    const preset = presetData || this.createDefaultMixerPreset(presetName);
+    preset.name = presetName;
+    preset.createdAt = Date.now();
+    
+    kit.mixerPresets[presetName] = preset;
+    kit.metadata.modifiedAt = Date.now();
+    
+    this.saveToStorage();
+    this.notifyListeners('mixer-preset-create', kitKey, preset);
+    
+    return preset;
+  }
+  
+  /**
+   * Update mixer preset
+   */
+  updateMixerPreset(kitKey, presetName, updates) {
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    const preset = kit.mixerPresets[presetName];
+    if (!preset) {
+      throw new Error(`Mixer preset not found: ${presetName}`);
+    }
+    
+    // Don't allow updating default preset
+    if (presetName === 'default' && kit.metadata.manufacturer === 'OTTO') {
+      throw new Error('Cannot modify default factory preset');
+    }
+    
+    // Apply updates
+    Object.assign(preset, updates);
+    preset.modifiedAt = Date.now();
+    kit.metadata.modifiedAt = Date.now();
+    
+    this.saveToStorage();
+    this.notifyListeners('mixer-preset-update', kitKey, preset);
+    
+    return preset;
+  }
+  
+  /**
+   * Delete mixer preset
+   */
+  deleteMixerPreset(kitKey, presetName) {
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    if (presetName === 'default') {
+      throw new Error('Cannot delete default preset');
+    }
+    
+    if (!kit.mixerPresets[presetName]) {
+      throw new Error(`Mixer preset not found: ${presetName}`);
+    }
+    
+    // If this is the selected preset, switch to default
+    if (kit.selectedMixerPreset === presetName) {
+      kit.selectedMixerPreset = 'default';
+    }
+    
+    delete kit.mixerPresets[presetName];
+    kit.metadata.modifiedAt = Date.now();
+    
+    this.saveToStorage();
+    this.notifyListeners('mixer-preset-delete', kitKey, presetName);
+    
+    return true;
+  }
+  
+  /**
+   * Update mixer channel level
+   */
+  updateChannelLevel(kitKey, presetName, channel, level) {
+    if (level < 0 || level > 100) {
+      throw new Error(`Invalid level: ${level}`);
+    }
+    
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    const preset = kit.mixerPresets[presetName];
+    if (!preset) {
+      throw new Error(`Mixer preset not found: ${presetName}`);
+    }
+    
+    if (!preset.levels) preset.levels = {};
+    preset.levels[channel] = level;
+    preset.modifiedAt = Date.now();
+    
+    this.saveToStorage();
+    this.notifyListeners('channel-level-change', kitKey, { preset: presetName, channel, level });
+    
+    return true;
+  }
+  
+  /**
+   * Update mixer channel panning
+   */
+  updateChannelPanning(kitKey, presetName, channel, panning) {
+    if (panning < -100 || panning > 100) {
+      throw new Error(`Invalid panning: ${panning}`);
+    }
+    
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    const preset = kit.mixerPresets[presetName];
+    if (!preset) {
+      throw new Error(`Mixer preset not found: ${presetName}`);
+    }
+    
+    if (!preset.panning) preset.panning = {};
+    preset.panning[channel] = panning;
+    preset.modifiedAt = Date.now();
+    
+    this.saveToStorage();
+    this.notifyListeners('channel-panning-change', kitKey, { preset: presetName, channel, panning });
+    
+    return true;
+  }
+  
+  /**
+   * Set player kit assignment
+   */
+  setPlayerKit(playerNum, kitKey) {
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    this.playerKits.set(playerNum, kitKey);
+    this.notifyListeners('player-kit-change', playerNum, kitKey);
+    
+    return kit;
+  }
+  
+  /**
+   * Get player kit
+   */
+  getPlayerKit(playerNum) {
+    const kitKey = this.playerKits.get(playerNum);
+    return kitKey ? this.drumkits.get(kitKey) : null;
+  }
+  
+  /**
+   * Import drumkit
+   */
+  importDrumkit(kitData) {
+    if (!kitData || !kitData.name) {
+      throw new Error('Invalid drumkit data');
+    }
+    
+    const key = this.generateKitKey(kitData.name);
+    
+    // Check if already exists
+    if (this.drumkits.has(key)) {
+      throw new Error(`Drumkit already exists: ${kitData.name}`);
+    }
+    
+    // Create kit structure
+    const kit = {
+      name: kitData.name,
+      displayName: kitData.displayName || kitData.name,
+      description: kitData.description || '',
+      selectedMixerPreset: kitData.selectedMixerPreset || 'default',
+      mixerPresets: kitData.mixerPresets || {
+        default: this.createDefaultMixerPreset(`${kitData.name} Default`)
+      },
+      metadata: {
+        ...kitData.metadata,
+        importedAt: Date.now(),
+        modifiedAt: Date.now()
+      }
+    };
+    
+    this.drumkits.set(key, kit);
+    this.saveToStorage();
+    this.notifyListeners('kit-import', key, kit);
+    
+    return key;
+  }
+  
+  /**
+   * Export drumkit
+   */
+  exportDrumkit(kitKey) {
+    const kit = this.drumkits.get(kitKey);
+    if (!kit) {
+      throw new Error(`Drumkit not found: ${kitKey}`);
+    }
+    
+    return {
+      ...kit,
+      exportDate: new Date().toISOString(),
+      version: '1.0.0'
+    };
+  }
+  
+  /**
+   * Generate kit key from name
+   */
+  generateKitKey(name) {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+  }
+  
+  /**
+   * Add listener
+   */
+  addListener(event, listener) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event).add(listener);
+    
+    return () => this.removeListener(event, listener);
+  }
+  
+  /**
+   * Remove listener
+   */
+  removeListener(event, listener) {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      eventListeners.delete(listener);
+    }
+  }
+  
+  /**
+   * Notify listeners
+   */
+  notifyListeners(event, ...args) {
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      eventListeners.forEach(listener => {
+        try {
+          listener(...args);
+        } catch (error) {
+          console.error(`Error in drumkit listener (${event}):`, error);
+        }
+      });
+    }
+    
+    // Notify wildcard listeners
+    const wildcardListeners = this.listeners.get('*');
+    if (wildcardListeners) {
+      wildcardListeners.forEach(listener => {
+        try {
+          listener(event, ...args);
+        } catch (error) {
+          console.error('Error in wildcard drumkit listener:', error);
+        }
+      });
+    }
+  }
+  
+  /**
+   * Load from storage
+   */
+  async loadFromStorage() {
+    if (!this.storageManager) return;
+    
+    try {
+      const data = await this.storageManager.load('drumkits');
+      if (data && data.kits) {
+        Object.entries(data.kits).forEach(([key, kit]) => {
+          // Don't overwrite factory defaults unless modified
+          if (this.drumkits.has(key) && kit.metadata?.manufacturer === 'OTTO' && !kit.metadata?.userModified) {
+            return;
+          }
+          
+          this.drumkits.set(key, {
+            ...kit,
+            metadata: {
+              ...kit.metadata,
+              loadedAt: Date.now()
+            }
+          });
+        });
+      }
+      
+      // Load player assignments
+      if (data && data.playerKits) {
+        Object.entries(data.playerKits).forEach(([player, kitKey]) => {
+          this.playerKits.set(parseInt(player), kitKey);
+        });
+      }
+    } catch (error) {
+      console.error('Error loading drumkits:', error);
+    }
+  }
+  
+  /**
+   * Save to storage
+   */
+  async saveToStorage() {
+    if (!this.storageManager) return;
+    
+    try {
+      const data = {
+        kits: {},
+        playerKits: {},
+        version: '1.0.0'
+      };
+      
+      this.drumkits.forEach((kit, key) => {
+        data.kits[key] = { ...kit };
+      });
+      
+      this.playerKits.forEach((kitKey, player) => {
+        data.playerKits[player] = kitKey;
+      });
+      
+      await this.storageManager.save('drumkits', data);
+    } catch (error) {
+      console.error('Error saving drumkits:', error);
+    }
+  }
+  
+  /**
+   * Get statistics
+   */
+  getStats() {
+    let totalPresets = 0;
+    let customPresets = 0;
+    
+    this.drumkits.forEach(kit => {
+      const presetCount = Object.keys(kit.mixerPresets).length;
+      totalPresets += presetCount;
+      customPresets += presetCount - 1; // Subtract default preset
+    });
+    
+    return {
+      kitCount: this.drumkits.size,
+      totalPresets,
+      customPresets,
+      playerAssignments: this.playerKits.size,
+      categories: this.getCategoryStats()
+    };
+  }
+  
+  /**
+   * Get category statistics
+   */
+  getCategoryStats() {
+    const categories = {};
+    
+    this.drumkits.forEach(kit => {
+      const category = kit.metadata?.category || 'unknown';
+      categories[category] = (categories[category] || 0) + 1;
+    });
+    
+    return categories;
+  }
+  
+  /**
+   * Destroy manager
+   */
+  destroy() {
+    this.drumkits.clear();
+    this.playerKits.clear();
+    this.listeners.clear();
+  }
+}
+
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = DrumkitManager;
+}
