@@ -4264,20 +4264,13 @@ class OTTOAccurateInterface {
           return;
         }
 
-        // Create sanitized key from name
-        const groupKey = groupName.toLowerCase().replace(/\s+/g, "-");
-
-        if (this.patternGroups[groupKey]) {
-          alert("A group with this name already exists");
+        // Use the new createGroup function
+        const groupKey = this.createGroup(groupName);
+        
+        if (!groupKey) {
+          alert("Could not create group. It may already exist.");
           return;
         }
-
-        // Create new group
-        this.patternGroups[groupKey] = {
-          name: groupName,
-          patterns: [],
-          selectedPattern: null,
-        };
 
         // Select the new group in editor
         this.switchEditorGroup(groupKey);
@@ -4300,25 +4293,22 @@ class OTTOAccurateInterface {
       deleteIconBtn.addEventListener("click", () => {
         const currentGroup = this.currentEditorGroup;
 
-        if (currentGroup === "favorites") {
-          alert("Cannot delete the Favorites group");
-          return;
-        }
-
         if (
           confirm(`Delete group "${this.patternGroups[currentGroup].name}"?`)
         ) {
-          delete this.patternGroups[currentGroup];
+          // Use the new deleteGroup function
+          const success = this.deleteGroup(currentGroup);
+          
+          if (success) {
+            // Switch to favorites
+            this.switchEditorGroup("favorites");
 
-          // Switch to favorites
-          this.switchEditorGroup("favorites");
-
-          // Mark as dirty but don't auto-save
-          this.setDirty("patternGroup", true);
-
-          // Update both dropdowns
-          this.updateEditorGroupDropdown();
-          this.updatePatternGroupDropdown();
+            // Update both dropdowns
+            this.updateEditorGroupDropdown();
+            this.updatePatternGroupDropdown();
+          } else {
+            alert("Cannot delete this group");
+          }
         }
       });
     }
