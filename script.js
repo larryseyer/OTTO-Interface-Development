@@ -7,6 +7,33 @@
  * Based on actual HISE interface screenshot with correct 6-row structure
  */
 
+// Debug logging system - set to false for production
+const DEBUG_MODE = false; // Can be controlled via environment variable or build process
+
+// Debug logging functions
+function debugLog(...args) {
+  if (DEBUG_MODE) {
+    debugLog('[OTTO Debug]', ...args);
+  }
+}
+
+function debugWarn(...args) {
+  if (DEBUG_MODE) {
+    debugWarn('[OTTO Warning]', ...args);
+  }
+}
+
+function debugError(...args) {
+  // Always log errors, but with consistent formatting
+  debugError('[OTTO Error]', ...args);
+}
+
+function debugInfo(...args) {
+  if (DEBUG_MODE) {
+    console.info('[OTTO Info]', ...args);
+  }
+}
+
 class OTTOAccurateInterface {
   constructor() {
     this.version = "1.0.0"; // Dynamic version number
@@ -159,17 +186,116 @@ class OTTOAccurateInterface {
       };
     }
 
-    // Set up periodic memory cleanup (every 5 minutes)
-    this.memoryCleanupInterval = setInterval(
-      () => {
-        if (!this.isDestroyed) {
-          this.cleanupMemory();
-        }
-      },
-      5 * 60 * 1000,
-    );
+    // Memory cleanup interval will be set after initialization
+    this.memoryCleanupInterval = null;
 
     this.init();
+  }
+  // Enhanced Timer Management System
+  createSafeTimeout(callback, delay, type = 'general') {
+    if (this.isDestroyed) return null;
+    
+    const wrappedCallback = () => {
+      if (this.isDestroyed) return;
+      
+      // Remove from tracking before executing
+      this.activeTimers.delete(timerId);
+      if (this.timerTypes && this.timerTypes[type]) {
+        this.timerTypes[type].delete(timerId);
+      }
+      
+      try {
+        callback();
+      } catch (error) {
+        debugError(`Error in timer callback (${type}):`, error);
+      }
+    };
+    
+    const timerId = setTimeout(wrappedCallback, delay);
+    
+    // Track the timer
+    this.activeTimers.add(timerId);
+    if (!this.timerTypes) {
+      this.timerTypes = {
+        save: new Set(),
+        animation: new Set(),
+        debounce: new Set(),
+        notification: new Set(),
+        general: new Set()
+      };
+    }
+    this.timerTypes[type] = this.timerTypes[type] || new Set();
+    this.timerTypes[type].add(timerId);
+    
+    return timerId;
+  }
+
+  createSafeInterval(callback, interval, type = 'general') {
+    if (this.isDestroyed) return null;
+    
+    const wrappedCallback = () => {
+      if (this.isDestroyed) {
+        clearInterval(intervalId);
+        return;
+      }
+      
+      try {
+        callback();
+      } catch (error) {
+        debugError(`Error in interval callback (${type}):`, error);
+        // On error, clear the interval to prevent continuous errors
+        clearInterval(intervalId);
+        this.activeTimers.delete(intervalId);
+        if (this.timerTypes && this.timerTypes[type]) {
+          this.timerTypes[type].delete(intervalId);
+        }
+      }
+    };
+    
+    const intervalId = setInterval(wrappedCallback, interval);
+    
+    // Track the interval
+    this.activeTimers.add(intervalId);
+    if (!this.timerTypes) {
+      this.timerTypes = {
+        save: new Set(),
+        animation: new Set(),
+        debounce: new Set(),
+        notification: new Set(),
+        general: new Set()
+      };
+    }
+    this.timerTypes[type] = this.timerTypes[type] || new Set();
+    this.timerTypes[type].add(intervalId);
+    
+    return intervalId;
+  }
+
+  clearSafeTimer(timerId, type = 'general') {
+    if (!timerId) return;
+    
+    clearTimeout(timerId);
+    clearInterval(timerId); // Safe to call both
+    
+    this.activeTimers.delete(timerId);
+    if (this.timerTypes && this.timerTypes[type]) {
+      this.timerTypes[type].delete(timerId);
+    }
+    
+    // Also check specific timer stores
+    Object.keys(this.saveTimers).forEach(key => {
+      if (this.saveTimers[key] === timerId) {
+        this.saveTimers[key] = null;
+      }
+    });
+    
+    if (this.miniSliderDebounceTimer === timerId) {
+      this.miniSliderDebounceTimer = null;
+    }
+    
+    if (this.stateUpdateTimer === timerId) {
+      this.stateUpdateTimer = null;
+    }
   }
 
   // Centralized State Management System
@@ -251,7 +377,7 @@ class OTTOAccurateInterface {
               update.version &&
               update.version < this.loadingVersion
             ) {
-              console.log(
+              debugLog(
                 `Skipping outdated update from version ${update.version}`,
               );
               return;
@@ -288,7 +414,7 @@ class OTTOAccurateInterface {
             try {
               await cb();
             } catch (e) {
-              console.error("Error in state update callback:", e);
+              debugError("Error in state update callback:", e);
             }
           }
 
@@ -300,7 +426,7 @@ class OTTOAccurateInterface {
           return true;
         });
       } catch (error) {
-        console.error("Error processing state update queue:", error);
+        debugError("Error processing state update queue:", error);
       } finally {
         this.stateUpdateInProgress = false;
         this.stateUpdateTimer = null;
@@ -315,7 +441,7 @@ class OTTOAccurateInterface {
 
   applyPlayerStateUpdates(playerNumber, updates) {
     if (!this.playerStates[playerNumber]) {
-      console.error(`Player ${playerNumber} does not exist`);
+      debugError(`Player ${playerNumber} does not exist`);
       return;
     }
 
@@ -388,7 +514,7 @@ class OTTOAccurateInterface {
       case "preset":
         if (!this.isPresetLocked(this.currentPreset)) {
           this.savePreset();
-          console.log(`Saved preset: ${this.currentPreset}`);
+          debugLog(`Saved preset: ${this.currentPreset}`);
           // Clear all dirty flags when saving preset (highest level)
           this.setDirty("preset", false);
           this.setDirty("player", false);
@@ -401,7 +527,7 @@ class OTTOAccurateInterface {
       case "player":
         // Save player state (part of preset)
         this.saveAppStateToStorage();
-        console.log("Saved player state");
+        debugLog("Saved player state");
         // Clear player and lower level dirty flags
         this.setDirty("player", false);
         this.setDirty("drumkit", false);
@@ -411,12 +537,12 @@ class OTTOAccurateInterface {
 
       case "appState":
         this.saveAppStateToStorage();
-        console.log("Saved app state");
+        debugLog("Saved app state");
         break;
 
       case "patternGroups":
         this.savePatternGroups();
-        console.log("Saved pattern groups");
+        debugLog("Saved pattern groups");
         // Clear pattern group and pattern dirty flags
         this.setDirty("patternGroup", false);
         this.setDirty("pattern", false);
@@ -424,19 +550,19 @@ class OTTOAccurateInterface {
 
       case "drumkits":
         this.saveDrumkits();
-        console.log("Saved drumkits");
+        debugLog("Saved drumkits");
         this.setDirty("drumkit", false);
         break;
 
       case "pattern":
         // Save pattern (part of pattern group)
         this.savePatternGroups();
-        console.log("Saved patterns");
+        debugLog("Saved patterns");
         this.setDirty("pattern", false);
         break;
 
       default:
-        console.warn(`Unknown save type: ${saveType}`);
+        debugWarn(`Unknown save type: ${saveType}`);
     }
   }
 
@@ -576,7 +702,7 @@ class OTTOAccurateInterface {
     try {
       // Validate data before saving
       if (!this.validateStoredDataEnhanced(key, value)) {
-        console.error(`Invalid data structure for ${key}, cannot save`);
+        debugError(`Invalid data structure for ${key}, cannot save`);
         this.logStorageError(key, "set", new Error("Validation failed"));
         return false;
       }
@@ -587,11 +713,11 @@ class OTTOAccurateInterface {
 
       // Compress if data is large (over 100KB)
       if (originalSize > 100000) {
-        console.log(`Compressing ${key} (${originalSize} bytes)`);
+        debugLog(`Compressing ${key} (${originalSize} bytes)`);
         dataToSave = this.compressData(value);
         dataToSave.compressed = true;
         const compressedSize = JSON.stringify(dataToSave).length;
-        console.log(
+        debugLog(
           `Compressed to ${compressedSize} bytes (${Math.round((1 - compressedSize / originalSize) * 100)}% reduction)`,
         );
       }
@@ -608,7 +734,7 @@ class OTTOAccurateInterface {
         error.code === 22 ||
         error.code === 1014
       ) {
-        console.log("Storage quota exceeded for", key);
+        debugLog("Storage quota exceeded for", key);
 
         // Try to handle quota exceeded
         if (this.handleQuotaExceeded(key, value)) {
@@ -639,7 +765,7 @@ class OTTOAccurateInterface {
 
       // Use enhanced validation
       if (!this.validateStoredDataEnhanced(key, parsed)) {
-        console.warn(`Invalid data structure for ${key}, attempting recovery`);
+        debugWarn(`Invalid data structure for ${key}, attempting recovery`);
 
         // Try to recover or return default
         const recovered = this.recoverCorruptedData(key, parsed);
@@ -649,7 +775,7 @@ class OTTOAccurateInterface {
           return recovered;
         }
 
-        console.error(`Unable to recover ${key}, using default value`);
+        debugError(`Unable to recover ${key}, using default value`);
         return defaultValue;
       }
 
@@ -664,11 +790,11 @@ class OTTOAccurateInterface {
 
       // Try to determine the type of error
       if (error instanceof SyntaxError) {
-        console.error(`Corrupted JSON in ${key}, clearing and using default`);
+        debugError(`Corrupted JSON in ${key}, clearing and using default`);
         try {
           localStorage.removeItem(key);
         } catch (removeError) {
-          console.error(`Unable to remove corrupted ${key}:`, removeError);
+          debugError(`Unable to remove corrupted ${key}:`, removeError);
         }
       }
 
@@ -707,7 +833,7 @@ class OTTOAccurateInterface {
 
       // Check required fields
       if (rules.required && (value === undefined || value === null)) {
-        console.error(`Validation failed: Required field "${key}" is missing`);
+        debugError(`Validation failed: Required field "${key}" is missing`);
         return false;
       }
 
@@ -720,7 +846,7 @@ class OTTOAccurateInterface {
       if (rules.type) {
         const actualType = Array.isArray(value) ? "array" : typeof value;
         if (actualType !== rules.type) {
-          console.error(
+          debugError(
             `Validation failed: Field "${key}" should be ${rules.type} but is ${actualType}`,
           );
           return false;
@@ -732,7 +858,7 @@ class OTTOAccurateInterface {
         for (const item of value) {
           const itemType = typeof item;
           if (itemType !== rules.itemType && rules.itemType !== "any") {
-            console.error(
+            debugError(
               `Validation failed: Array "${key}" contains invalid item type ${itemType}`,
             );
             return false;
@@ -749,7 +875,7 @@ class OTTOAccurateInterface {
 
       // Custom validation function
       if (rules.validate && !rules.validate(value)) {
-        console.error(
+        debugError(
           `Validation failed: Custom validation for "${key}" failed`,
         );
         return false;
@@ -758,13 +884,13 @@ class OTTOAccurateInterface {
       // Range validation for numbers
       if (rules.type === "number") {
         if (rules.min !== undefined && value < rules.min) {
-          console.error(
+          debugError(
             `Validation failed: "${key}" value ${value} is below minimum ${rules.min}`,
           );
           return false;
         }
         if (rules.max !== undefined && value > rules.max) {
-          console.error(
+          debugError(
             `Validation failed: "${key}" value ${value} is above maximum ${rules.max}`,
           );
           return false;
@@ -870,7 +996,7 @@ class OTTOAccurateInterface {
         // Validate each preset
         for (const [presetKey, preset] of Object.entries(data)) {
           if (!this.validateDataStructure(preset, schemas.preset)) {
-            console.error(`Invalid preset: ${presetKey}`);
+            debugError(`Invalid preset: ${presetKey}`);
             return false;
           }
           // Validate player states within preset
@@ -878,7 +1004,7 @@ class OTTOAccurateInterface {
             preset.playerStates,
           )) {
             if (!this.validateDataStructure(playerState, schemas.playerState)) {
-              console.error(
+              debugError(
                 `Invalid player state in preset ${presetKey}, player ${playerNum}`,
               );
               return false;
@@ -894,7 +1020,7 @@ class OTTOAccurateInterface {
         if (typeof data !== "object") return false;
         for (const [groupKey, group] of Object.entries(data)) {
           if (!this.validateDataStructure(group, schemas.patternGroup)) {
-            console.error(`Invalid pattern group: ${groupKey}`);
+            debugError(`Invalid pattern group: ${groupKey}`);
             return false;
           }
         }
@@ -920,7 +1046,7 @@ class OTTOAccurateInterface {
 
   // Data migration system
   migrateData(key, data, fromVersion, toVersion) {
-    console.log(`Migrating ${key} from version ${fromVersion} to ${toVersion}`);
+    debugLog(`Migrating ${key} from version ${fromVersion} to ${toVersion}`);
 
     // Define migration paths
     const migrations = {
@@ -976,7 +1102,7 @@ class OTTOAccurateInterface {
         try {
           return migrations[key][migrationKey](data);
         } catch (error) {
-          console.error(`Migration failed for ${key}:`, error);
+          debugError(`Migration failed for ${key}:`, error);
           return data; // Return unmigrated data on error
         }
       }
@@ -1085,7 +1211,7 @@ class OTTOAccurateInterface {
   }
 
   recoverCorruptedData(key, data) {
-    console.log(`Attempting to recover data for key: ${key}`);
+    debugLog(`Attempting to recover data for key: ${key}`);
 
     // Attempt to fix common data corruption issues
     try {
@@ -1128,24 +1254,24 @@ class OTTOAccurateInterface {
           };
         }
 
-        console.log("Pattern groups recovered successfully");
+        debugLog("Pattern groups recovered successfully");
         return recovered;
       }
 
       // Add recovery for other data types as needed
     } catch (error) {
-      console.error("Recovery failed:", error);
+      debugError("Recovery failed:", error);
     }
 
     return null;
   }
 
   handleQuotaExceeded(key, value) {
-    console.log("Storage quota exceeded, implementing advanced cleanup...");
+    debugLog("Storage quota exceeded, implementing advanced cleanup...");
 
     // Enhanced storage cleanup strategy
     const storageInfo = this.analyzeStorageUsage();
-    console.log("Storage analysis:", storageInfo);
+    debugLog("Storage analysis:", storageInfo);
 
     // Priority-based cleanup
     const cleanupPriority = [
@@ -1161,19 +1287,19 @@ class OTTOAccurateInterface {
       try {
         if (localStorage.getItem(item.key)) {
           localStorage.removeItem(item.key);
-          console.log(`Removed ${item.description}: ${item.key}`);
+          debugLog(`Removed ${item.description}: ${item.key}`);
 
           // Try to save again after each cleanup
           try {
             localStorage.setItem(key, JSON.stringify(value));
-            console.log("Successfully saved after cleanup");
+            debugLog("Successfully saved after cleanup");
             return true;
           } catch (e) {
             // Continue cleaning if still not enough space
           }
         }
       } catch (e) {
-        console.error(`Error removing ${item.key}:`, e);
+        debugError(`Error removing ${item.key}:`, e);
       }
     }
 
@@ -1184,16 +1310,16 @@ class OTTOAccurateInterface {
       const compressedSize = JSON.stringify(compressed).length;
       const saved = originalSize - compressedSize;
 
-      console.log(
+      debugLog(
         `Compression saved ${saved} bytes (${Math.round((saved / originalSize) * 100)}%)`,
       );
 
       try {
         localStorage.setItem(key, JSON.stringify(compressed));
-        console.log("Successfully saved compressed data");
+        debugLog("Successfully saved compressed data");
         return true;
       } catch (e) {
-        console.error("Still unable to save after compression:", e);
+        debugError("Still unable to save after compression:", e);
       }
     }
 
@@ -1208,7 +1334,7 @@ class OTTOAccurateInterface {
 
     if (nonEssential.length > 0) {
       const toRemove = nonEssential[0]; // Remove largest non-essential item
-      console.log(
+      debugLog(
         `Removing largest non-essential item: ${toRemove.key} (${toRemove.size} bytes)`,
       );
 
@@ -1221,7 +1347,7 @@ class OTTOAccurateInterface {
         );
         return true;
       } catch (e) {
-        console.error("Unable to save even after removing largest item:", e);
+        debugError("Unable to save even after removing largest item:", e);
       }
     }
 
@@ -1255,7 +1381,7 @@ class OTTOAccurateInterface {
         );
         return true;
       } catch (e) {
-        console.error("Critical: Unable to save even after major cleanup:", e);
+        debugError("Critical: Unable to save even after major cleanup:", e);
         this.showNotification(
           "Storage critically full. Unable to save.",
           "error",
@@ -1281,11 +1407,11 @@ class OTTOAccurateInterface {
           }
         } catch (e) {
           // Skip items that can't be accessed
-          console.warn(`Unable to analyze storage item ${key}:`, e);
+          debugWarn(`Unable to analyze storage item ${key}:`, e);
         }
       }
     } catch (e) {
-      console.error("Error analyzing storage:", e);
+      debugError("Error analyzing storage:", e);
     }
 
     return {
@@ -1311,11 +1437,11 @@ class OTTOAccurateInterface {
           }
         } catch (e) {
           // Skip items that can't be accessed
-          console.warn(`Unable to get size of ${key}:`, e);
+          debugWarn(`Unable to get size of ${key}:`, e);
         }
       }
     } catch (e) {
-      console.error("Error getting storage items:", e);
+      debugError("Error getting storage items:", e);
     }
 
     return items.sort((a, b) => b.size - a.size);
@@ -1343,7 +1469,7 @@ class OTTOAccurateInterface {
             return parsed;
           }
         } catch (e) {
-          console.error(`Error reading ${key} from primary storage:`, e);
+          debugError(`Error reading ${key} from primary storage:`, e);
         }
 
         // Try fallback storage
@@ -1351,7 +1477,7 @@ class OTTOAccurateInterface {
           try {
             return this.fallback.get(key);
           } catch (e) {
-            console.error(`Error reading ${key} from fallback storage:`, e);
+            debugError(`Error reading ${key} from fallback storage:`, e);
           }
         }
 
@@ -1376,7 +1502,7 @@ class OTTOAccurateInterface {
             }
           }
 
-          console.error(`Error saving ${key} to primary storage:`, e);
+          debugError(`Error saving ${key} to primary storage:`, e);
 
           // Try fallback storage
           if (this.fallback) {
@@ -1384,7 +1510,7 @@ class OTTOAccurateInterface {
               this.fallback.set(key, value);
               return true;
             } catch (fallbackError) {
-              console.error(
+              debugError(
                 `Error saving ${key} to fallback storage:`,
                 fallbackError,
               );
@@ -1402,14 +1528,14 @@ class OTTOAccurateInterface {
         try {
           this.primary.removeItem(key);
         } catch (e) {
-          console.error(`Error removing ${key} from primary storage:`, e);
+          debugError(`Error removing ${key} from primary storage:`, e);
         }
 
         if (this.fallback) {
           try {
             this.fallback.remove(key);
           } catch (e) {
-            console.error(`Error removing ${key} from fallback storage:`, e);
+            debugError(`Error removing ${key} from fallback storage:`, e);
           }
         }
       },
@@ -1432,14 +1558,14 @@ class OTTOAccurateInterface {
             }
           }
         } catch (e) {
-          console.error("Error iterating storage keys:", e);
+          debugError("Error iterating storage keys:", e);
         }
 
         keysToRemove.forEach((key) => {
           try {
             this.primary.removeItem(key);
           } catch (e) {
-            console.error(`Error removing ${key}:`, e);
+            debugError(`Error removing ${key}:`, e);
           }
         });
 
@@ -1467,7 +1593,7 @@ class OTTOAccurateInterface {
             }
           }
         } catch (e) {
-          console.error("Error calculating storage size:", e);
+          debugError("Error calculating storage size:", e);
         }
 
         return totalSize;
@@ -1494,7 +1620,7 @@ class OTTOAccurateInterface {
       }
       return element;
     } catch (error) {
-      console.error(`Invalid selector: ${selector}`, error);
+      debugError(`Invalid selector: ${selector}`, error);
       return null;
     }
   }
@@ -1503,7 +1629,7 @@ class OTTOAccurateInterface {
     try {
       return parent.querySelectorAll(selector) || [];
     } catch (error) {
-      console.error(`Invalid selector: ${selector}`, error);
+      debugError(`Invalid selector: ${selector}`, error);
       return [];
     }
   }
@@ -1589,7 +1715,7 @@ class OTTOAccurateInterface {
         try {
           update();
         } catch (error) {
-          console.error("Error in batch DOM update:", error);
+          debugError("Error in batch DOM update:", error);
         }
       });
     });
@@ -1725,7 +1851,7 @@ class OTTOAccurateInterface {
   setupGlobalErrorHandlers() {
     // Handle uncaught errors
     window.addEventListener("error", (event) => {
-      console.error("Uncaught error:", event.error);
+      debugError("Uncaught error:", event.error);
       this.handleGlobalError(
         event.error,
         event.filename,
@@ -1740,7 +1866,7 @@ class OTTOAccurateInterface {
 
     // Handle unhandled promise rejections
     window.addEventListener("unhandledrejection", (event) => {
-      console.error("Unhandled promise rejection:", event.reason);
+      debugError("Unhandled promise rejection:", event.reason);
       this.handleGlobalError(event.reason, "Promise", 0, 0);
       // Prevent default error handling in production
       if (!this.debugMode) {
@@ -1800,7 +1926,7 @@ class OTTOAccurateInterface {
       try {
         return handler.apply(this, args);
       } catch (error) {
-        console.error(`Error in event handler (${context}):`, error);
+        debugError(`Error in event handler (${context}):`, error);
         this.handleEventHandlerError(error, context);
         // Don't re-throw to prevent app crash
       }
@@ -1846,7 +1972,7 @@ class OTTOAccurateInterface {
     try {
       return await operation();
     } catch (error) {
-      console.error(`Error in ${context}:`, error);
+      debugError(`Error in ${context}:`, error);
 
       // Log async errors
       if (!this.asyncErrors) {
@@ -1871,14 +1997,14 @@ class OTTOAccurateInterface {
     try {
       return operation();
     } catch (error) {
-      console.error(`DOM operation error (${context}):`, error);
+      debugError(`DOM operation error (${context}):`, error);
 
       // Check if it's a common DOM error
       if (
         error.name === "NotFoundError" ||
         error.name === "HierarchyRequestError"
       ) {
-        console.warn("DOM structure may have changed, attempting recovery");
+        debugWarn("DOM structure may have changed, attempting recovery");
         // Could trigger a UI refresh here if needed
       }
 
@@ -1895,14 +2021,14 @@ class OTTOAccurateInterface {
     try {
       return window.juce[callback](...args);
     } catch (error) {
-      console.error(`Error in JUCE callback ${callback}:`, error);
+      debugError(`Error in JUCE callback ${callback}:`, error);
       // Don't show notification for JUCE errors as they're backend-related
     }
   }
 
   // Error recovery strategies
   attemptErrorRecovery(errorType) {
-    console.log(`Attempting recovery for ${errorType} error`);
+    debugLog(`Attempting recovery for ${errorType} error`);
 
     switch (errorType) {
       case "state-corruption":
@@ -1922,12 +2048,12 @@ class OTTOAccurateInterface {
         this.cleanupMemory();
         break;
       default:
-        console.warn(`No recovery strategy for ${errorType}`);
+        debugWarn(`No recovery strategy for ${errorType}`);
     }
   }
 
   resetToDefaultState() {
-    console.log("Resetting to default state");
+    debugLog("Resetting to default state");
     // Preserve critical data
     const currentPreset = this.currentPreset;
 
@@ -1939,7 +2065,7 @@ class OTTOAccurateInterface {
     // Try to reload current preset
     if (currentPreset && this.presets[currentPreset]) {
       this.loadPreset(currentPreset).catch((err) => {
-        console.error("Failed to reload preset after reset:", err);
+        debugError("Failed to reload preset after reset:", err);
       });
     }
 
@@ -1947,8 +2073,31 @@ class OTTOAccurateInterface {
   }
 
   clearOldStorageData() {
-    console.log("Clearing old storage data");
+    debugLog("Clearing old storage data");
     try {
+      // Clear temporary and backup keys first
+      const tempKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (
+          key &&
+          (key.includes("_temp") ||
+            key.includes("_old") ||
+            key.includes("_backup"))
+        ) {
+          tempKeys.push(key);
+        }
+      }
+
+      tempKeys.forEach((key) => {
+        try {
+          localStorage.removeItem(key);
+          debugLog(`Cleared temporary data: ${key}`);
+        } catch (e) {
+          debugError(`Failed to clear ${key}:`, e);
+        }
+      });
+
       // Get storage usage
       const usage = this.analyzeStorageUsage();
 
@@ -1974,12 +2123,12 @@ class OTTOAccurateInterface {
 
       this.showNotification("Cleared old data to free up storage", "info");
     } catch (error) {
-      console.error("Error clearing storage:", error);
+      debugError("Error clearing storage:", error);
     }
   }
 
   rebuildUI() {
-    console.log("Rebuilding UI components");
+    debugLog("Rebuilding UI components");
     try {
       // Re-setup critical UI components
       this.setupPlayerTabs();
@@ -1991,7 +2140,7 @@ class OTTOAccurateInterface {
 
       this.showNotification("UI has been rebuilt", "info");
     } catch (error) {
-      console.error("Error rebuilding UI:", error);
+      debugError("Error rebuilding UI:", error);
       this.showNotification(
         "Failed to rebuild UI. Please refresh the page.",
         "error",
@@ -2072,7 +2221,7 @@ class OTTOAccurateInterface {
         jsonString.includes("<script") ||
         jsonString.includes("javascript:")
       ) {
-        console.error("Potential XSS attempt detected in JSON");
+        debugError("Potential XSS attempt detected in JSON");
         return defaultValue;
       }
 
@@ -2085,7 +2234,7 @@ class OTTOAccurateInterface {
 
       return defaultValue;
     } catch (error) {
-      console.error("Safe JSON parse error:", error);
+      debugError("Safe JSON parse error:", error);
       return defaultValue;
     }
   }
@@ -2099,7 +2248,7 @@ class OTTOAccurateInterface {
     const checkObject = (obj) => {
       for (const key in obj) {
         if (dangerousKeys.includes(key)) {
-          console.error("Dangerous key detected in JSON:", key);
+          debugError("Dangerous key detected in JSON:", key);
           return false;
         }
         if (typeof obj[key] === "object" && obj[key] !== null) {
@@ -2118,7 +2267,7 @@ class OTTOAccurateInterface {
 
     // Remove any script or data URLs
     if (param.includes("javascript:") || param.includes("data:text/html")) {
-      console.error("Potential XSS in URL parameter");
+      debugError("Potential XSS in URL parameter");
       return "";
     }
 
@@ -2143,12 +2292,12 @@ class OTTOAccurateInterface {
         url.protocol !== "file:" &&
         url.hostname !== "localhost"
       ) {
-        console.error("Insecure iframe source rejected");
+        debugError("Insecure iframe source rejected");
         return null;
       }
       iframe.src = src;
     } catch (error) {
-      console.error("Invalid iframe URL:", error);
+      debugError("Invalid iframe URL:", error);
       return null;
     }
 
@@ -2169,13 +2318,13 @@ class OTTOAccurateInterface {
         const parentURL = new URL(parentLocation);
 
         if (!trustedDomains.includes(parentURL.hostname)) {
-          console.error("Untrusted parent frame detected");
+          debugError("Untrusted parent frame detected");
           document.body.style.display = "none";
           alert("This application cannot be embedded in untrusted frames");
         }
       } catch (error) {
         // Different origin - likely untrusted
-        console.error("Cross-origin parent frame detected");
+        debugError("Cross-origin parent frame detected");
         document.body.style.display = "none";
         alert("This application cannot be embedded in cross-origin frames");
       }
@@ -2207,7 +2356,7 @@ class OTTOAccurateInterface {
     current.count++;
 
     if (current.count > this.maxActionsPerWindow) {
-      console.warn(`Rate limit exceeded for action: ${action}`);
+      debugWarn(`Rate limit exceeded for action: ${action}`);
       this.showNotification("Please slow down - too many actions", "warning");
       return false;
     }
@@ -2370,31 +2519,6 @@ class OTTOAccurateInterface {
     }
   }
 
-  clearOldStorageData() {
-    // Clear old or temporary data to free up space
-    const tempKeys = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (
-        key &&
-        (key.includes("_temp") ||
-          key.includes("_old") ||
-          key.includes("_backup"))
-      ) {
-        tempKeys.push(key);
-      }
-    }
-
-    tempKeys.forEach((key) => {
-      try {
-        localStorage.removeItem(key);
-        console.log(`Cleared old data: ${key}`);
-      } catch (e) {
-        console.error(`Failed to clear ${key}:`, e);
-      }
-    });
-  }
-
   logStorageError(key, errorType, message) {
     if (this.isDestroyed) return;
 
@@ -2412,7 +2536,7 @@ class OTTOAccurateInterface {
       this.storageErrors.shift();
     }
 
-    console.error(`Storage Error [${errorType}] for key '${key}': ${message}`);
+    debugError(`Storage Error [${errorType}] for key '${key}': ${message}`);
   }
 
   getStorageStatus() {
@@ -2422,7 +2546,7 @@ class OTTOAccurateInterface {
         const percentUsed = ((estimate.usage / estimate.quota) * 100).toFixed(
           2,
         );
-        console.log(
+        debugLog(
           `Storage: ${percentUsed}% used (${estimate.usage} of ${estimate.quota} bytes)`,
         );
         return {
@@ -2479,7 +2603,7 @@ class OTTOAccurateInterface {
   }
 
   initAppState() {
-    console.log("Initializing app state with enhanced storage...");
+    debugLog("Initializing app state with enhanced storage...");
 
     // Initialize storage layer
     if (!this.storage) {
@@ -2522,16 +2646,16 @@ class OTTOAccurateInterface {
         this.isPlaying = savedState.isPlaying;
       }
 
-      console.log("App state restored from storage");
+      debugLog("App state restored from storage");
     } else {
-      console.log("No saved app state found, using defaults");
+      debugLog("No saved app state found, using defaults");
       // Save initial state
       this.saveAppStateToStorage();
     }
 
     // Analyze storage usage on startup
     const storageInfo = this.analyzeStorageUsage();
-    console.log(
+    debugLog(
       `Storage usage: ${storageInfo.itemCount} items, ${Math.round(storageInfo.totalSize / 1024)}KB used`,
     );
 
@@ -2539,7 +2663,7 @@ class OTTOAccurateInterface {
     const usagePercent =
       (storageInfo.totalSize / storageInfo.estimatedLimit) * 100;
     if (usagePercent > 80) {
-      console.warn(`Storage is ${Math.round(usagePercent)}% full`);
+      debugWarn(`Storage is ${Math.round(usagePercent)}% full`);
       if (this.showNotification) {
         setTimeout(() => {
           this.showNotification(
@@ -3090,7 +3214,7 @@ class OTTOAccurateInterface {
     groups[groupName].patterns[buttonIndex] = patternName;
     this.safeLocalStorageSet("ottoPatternGroups", groups);
 
-    console.log(
+    debugLog(
       `Saved pattern "${patternName}" to group "${groupName}" at position ${buttonIndex}`,
     );
   }
@@ -3881,7 +4005,7 @@ class OTTOAccurateInterface {
 
   updateMainPatternGrid(patterns) {
     if (!patterns || !Array.isArray(patterns)) {
-      console.error("Invalid patterns array provided to updateMainPatternGrid");
+      debugError("Invalid patterns array provided to updateMainPatternGrid");
       return;
     }
 
@@ -3890,7 +4014,7 @@ class OTTOAccurateInterface {
     );
 
     if (patternButtons.length === 0) {
-      console.warn("No pattern buttons found in grid");
+      debugWarn("No pattern buttons found in grid");
       return;
     }
 
@@ -3979,7 +4103,7 @@ class OTTOAccurateInterface {
 
         this.onPatternGroupChanged(this.currentPlayer, key);
         this.setDirty("preset", true);
-        console.log(
+        debugLog(
           `Pattern group changed to ${key} for player ${this.currentPlayer}`,
         );
       };
@@ -3992,29 +4116,29 @@ class OTTOAccurateInterface {
   }
 
   debugPatternGroupDropdown() {
-    console.log("=== Pattern Group Dropdown Debug ===");
-    console.log("Current player:", this.currentPlayer);
-    console.log("Current player state:", this.playerStates[this.currentPlayer]);
-    console.log("Pattern groups available:", Object.keys(this.patternGroups));
-    console.log(
+    debugLog("=== Pattern Group Dropdown Debug ===");
+    debugLog("Current player:", this.currentPlayer);
+    debugLog("Current player state:", this.playerStates[this.currentPlayer]);
+    debugLog("Pattern groups available:", Object.keys(this.patternGroups));
+    debugLog(
       "Current pattern group:",
       this.playerStates[this.currentPlayer]?.patternGroup,
     );
 
     const dropdown = document.getElementById("group-dropdown");
     const options = document.getElementById("group-options");
-    console.log("Dropdown element:", dropdown);
-    console.log("Options container:", options);
-    console.log("Options count:", options?.children.length);
+    debugLog("Dropdown element:", dropdown);
+    debugLog("Options container:", options);
+    debugLog("Options count:", options?.children.length);
 
     if (options) {
       Array.from(options.children).forEach((opt, idx) => {
-        console.log(
+        debugLog(
           `Option ${idx}: value="${opt.dataset.value}", text="${opt.textContent}", hasHandler=${this.elementHandlerMap.has(opt)}`,
         );
       });
     }
-    console.log("=== End Debug ===");
+    debugLog("=== End Debug ===");
   }
 
   openPresetModal() {
@@ -4170,17 +4294,17 @@ class OTTOAccurateInterface {
     return this.atomicStateUpdate("preset-load", async (version) => {
       const preset = this.presets[key];
       if (!preset) {
-        console.error(`Preset "${key}" not found`);
+        debugError(`Preset "${key}" not found`);
         return false;
       }
 
       // Check if we can proceed
       if (!this.canProceedWithOperation("preset-load")) {
-        console.warn("Cannot load preset - conflicting operation in progress");
+        debugWarn("Cannot load preset - conflicting operation in progress");
         return false;
       }
 
-      console.log(`Loading preset: ${preset.name} (version ${version})`);
+      debugLog(`Loading preset: ${preset.name} (version ${version})`);
 
       // Disable dirty tracking during preset load
       this.isLoadingPreset = true;
@@ -4296,14 +4420,14 @@ class OTTOAccurateInterface {
         // Save app state with new preset selection
         this.scheduleSave("appState");
 
-        console.log(
+        debugLog(
           `Successfully loaded preset "${preset.name}" (version ${version})`,
         );
         this.showNotification(`Loaded preset "${preset.name}"`);
 
         return true;
       } catch (error) {
-        console.error("Error loading preset:", error);
+        debugError("Error loading preset:", error);
         this.showNotification("Failed to load preset", "error");
         throw error;
       } finally {
@@ -4460,7 +4584,7 @@ class OTTOAccurateInterface {
     try {
       const preset = this.presets[key];
       if (!preset) {
-        console.error(`Preset ${key} not found for export`);
+        debugError(`Preset ${key} not found for export`);
         return;
       }
 
@@ -4483,7 +4607,7 @@ class OTTOAccurateInterface {
 
       this.showNotification(`Exported preset: "${preset.name}"`);
     } catch (error) {
-      console.error("Error exporting preset:", error);
+      debugError("Error exporting preset:", error);
       this.showNotification("Failed to export preset", "error");
     }
   }
@@ -4877,7 +5001,7 @@ class OTTOAccurateInterface {
         setTimeout(() => {
           if (!this.isDestroyed) {
             this.loadPreset(this.currentPreset).catch((error) => {
-              console.error("Failed to load initial preset:", error);
+              debugError("Failed to load initial preset:", error);
             });
           }
         }, 100); // Small delay to ensure everything is initialized
@@ -4886,7 +5010,14 @@ class OTTOAccurateInterface {
       // Update play/pause button to match saved state
       this.updatePlayPauseButton();
 
-      console.log(
+      // Set up periodic memory cleanup using safe interval
+      this.memoryCleanupInterval = this.createSafeInterval(
+        () => this.cleanupMemory(),
+        5 * 60 * 1000, // Every 5 minutes
+        'general'
+      );
+
+      debugLog(
         "OTTO Accurate Interface initialized with",
         this.numberOfPlayers,
         "active players (max:",
@@ -4894,8 +5025,8 @@ class OTTOAccurateInterface {
         ")",
       );
     } catch (error) {
-      console.error("Error during initialization:", error);
-      console.error("Stack trace:", error.stack);
+      debugError("Error during initialization:", error);
+      debugError("Stack trace:", error.stack);
 
       // Always try to hide splash screen even if there's an error
       const splashScreen = document.getElementById("splash-screen");
@@ -4943,9 +5074,9 @@ class OTTOAccurateInterface {
       }
 
       this.scheduleSave("appState"); // Save app state
-      console.log("Number of active players set to:", num);
+      debugLog("Number of active players set to:", num);
     } else {
-      console.error("Number of players must be between 4 and 8");
+      debugError("Number of players must be between 4 and 8");
     }
   }
 
@@ -4963,13 +5094,13 @@ class OTTOAccurateInterface {
 
     if (logoVersion) {
       logoVersion.addEventListener("click", () => {
-        console.log("Logo clicked - toggling store panel");
+        debugLog("Logo clicked - toggling store panel");
 
         // Use WindowManager to toggle the store panel
         this.windowManager.toggleWindow("panel", "store");
       });
     } else {
-      console.error("Logo element not found");
+      debugError("Logo element not found");
     }
   }
 
@@ -5071,7 +5202,7 @@ class OTTOAccurateInterface {
     }
 
     this.switchToPlayer(newPlayer);
-    console.log(`Navigated to Player ${newPlayer} via chevron`);
+    debugLog(`Navigated to Player ${newPlayer} via chevron`);
   }
 
   setupPresetControls() {
@@ -5214,7 +5345,7 @@ class OTTOAccurateInterface {
     // Load the new preset
     this.loadPreset(newPresetKey);
 
-    console.log(`Navigated to preset: ${this.presets[newPresetKey].name}`);
+    debugLog(`Navigated to preset: ${this.presets[newPresetKey].name}`);
   }
 
   switchToPlayer(playerNumber) {
@@ -5243,7 +5374,7 @@ class OTTOAccurateInterface {
     this.populateKitDropdown();
 
     this.scheduleSave("appState"); // Save app state
-    console.log(
+    debugLog(
       `Switched to Player ${playerNumber}, muted: ${this.playerStates[playerNumber]?.muted || false}`,
     );
   }
@@ -5254,7 +5385,7 @@ class OTTOAccurateInterface {
 
       // Ensure state exists
       if (!state) {
-        console.error(`No state found for player ${this.currentPlayer}`);
+        debugError(`No state found for player ${this.currentPlayer}`);
         return;
       }
 
@@ -5309,7 +5440,7 @@ class OTTOAccurateInterface {
             this.patternGroups[state.patternGroup].name;
         } else {
           // Fallback to default if group doesn't exist
-          console.warn(
+          debugWarn(
             `Pattern group "${state.patternGroup}" not found, using Favorites`,
           );
           groupDropdownText.textContent = "Favorites";
@@ -5425,7 +5556,7 @@ class OTTOAccurateInterface {
         }
       }
     } catch (error) {
-      console.error("Error updating UI for current player:", error);
+      debugError("Error updating UI for current player:", error);
       // Attempt recovery by rebuilding critical UI elements
       this.safeDOMOperation(() => {
         this.setupPlayerTabs();
@@ -5438,7 +5569,7 @@ class OTTOAccurateInterface {
   updateCompleteUIState() {
     // Validate current player state exists
     if (!this.playerStates || !this.playerStates[this.currentPlayer]) {
-      console.error(`No state found for player ${this.currentPlayer}`);
+      debugError(`No state found for player ${this.currentPlayer}`);
       return;
     }
 
@@ -5717,7 +5848,7 @@ class OTTOAccurateInterface {
         this.setDirty("preset", true); // Mark preset dirty when kit changes
         this.setDirty("drumkit", true); // Mark drumkit dirty too
 
-        console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
+        debugLog(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
       this.addEventListener(option, "click", optionHandler, "dropdown");
     });
@@ -5756,7 +5887,7 @@ class OTTOAccurateInterface {
         );
         // Don't set dirty flag - just opening/closing the mixer doesn't change any data
 
-        console.log(
+        debugLog(
           `Player ${this.currentPlayer} kit mixer: ${this.playerStates[this.currentPlayer].kitMixerActive}`,
         );
       };
@@ -5767,7 +5898,7 @@ class OTTOAccurateInterface {
     document.querySelectorAll(".edit-btn").forEach((editBtn) => {
       const editHandler = () => {
         this.onEditKit(this.currentPlayer);
-        console.log(`Edit kit for Player ${this.currentPlayer}`);
+        debugLog(`Edit kit for Player ${this.currentPlayer}`);
       };
       this.addEventListener(
         editBtn,
@@ -5841,7 +5972,7 @@ class OTTOAccurateInterface {
         this.setDirty("preset", true);
         this.setDirty("drumkit", true);
         
-        console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
+        debugLog(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
       
       option.addEventListener("click", optionHandler);
@@ -5852,7 +5983,7 @@ class OTTOAccurateInterface {
   navigateKit(direction) {
     // Validate player state exists
     if (!this.playerStates || !this.playerStates[this.currentPlayer]) {
-      console.error(`No player state for player ${this.currentPlayer}`);
+      debugError(`No player state for player ${this.currentPlayer}`);
       return;
     }
 
@@ -5872,7 +6003,7 @@ class OTTOAccurateInterface {
     // Validate current kit name
     let currentIndex = kits.indexOf(state.kitName);
     if (currentIndex === -1) {
-      console.warn(
+      debugWarn(
         `Current kit "${state.kitName}" not in list, defaulting to first`,
       );
       currentIndex = 0;
@@ -5906,7 +6037,7 @@ class OTTOAccurateInterface {
     });
 
     this.onKitChanged(this.currentPlayer, state.kitName);
-    console.log(`Player ${this.currentPlayer} kit: ${state.kitName}`);
+    debugLog(`Player ${this.currentPlayer} kit: ${state.kitName}`);
   }
 
   setupPatternGroupControls() {
@@ -6041,7 +6172,7 @@ class OTTOAccurateInterface {
     this.onPatternGroupChanged(this.currentPlayer, newGroupKey);
     this.setDirty("preset", true);
 
-    console.log(`Player ${this.currentPlayer} pattern group: ${newGroupKey}`);
+    debugLog(`Player ${this.currentPlayer} pattern group: ${newGroupKey}`);
   }
 
   setupPatternGrid() {
@@ -6058,7 +6189,7 @@ class OTTOAccurateInterface {
         if (patterns && patterns[buttonIndex]) {
           fullPatternName = patterns[buttonIndex];
         } else if (!fullPatternName) {
-          console.warn(
+          debugWarn(
             `No pattern at index ${buttonIndex} in group "${currentGroup}"`,
           );
           return; // Don't select empty patterns
@@ -6067,7 +6198,7 @@ class OTTOAccurateInterface {
 
       // Don't select empty patterns
       if (!fullPatternName || fullPatternName.trim() === "") {
-        console.log("Empty pattern slot clicked, ignoring");
+        debugLog("Empty pattern slot clicked, ignoring");
         return;
       }
 
@@ -6092,7 +6223,7 @@ class OTTOAccurateInterface {
       this.onPatternSelected(this.currentPlayer, fullPatternName);
       this.setDirty("preset", true); // Mark preset as dirty when pattern changes
 
-      console.log(
+      debugLog(
         `Player ${this.currentPlayer} selected pattern: ${fullPatternName}`,
       );
     }, 50); // 50ms debounce for rapid clicking
@@ -6109,7 +6240,7 @@ class OTTOAccurateInterface {
         const buttonIndex = allButtons.indexOf(patternBtn);
 
         if (buttonIndex === -1) {
-          console.error("Pattern button index not found");
+          debugError("Pattern button index not found");
           return;
         }
 
@@ -6190,7 +6321,7 @@ class OTTOAccurateInterface {
         state.toggleStates[toggleType],
       );
       this.setDirty("preset", true);
-      console.log(
+      debugLog(
         `Player ${this.currentPlayer} toggle ${toggleType}: ${state.toggleStates[toggleType]}`,
       );
     }, 100); // 100ms throttle for toggle buttons
@@ -6221,7 +6352,7 @@ class OTTOAccurateInterface {
           // Update UI and trigger callback after state is updated
           fillBtn.classList.toggle("active");
           this.onFillChanged(this.currentPlayer, fillType, !isActive);
-          console.log(
+          debugLog(
             `Player ${this.currentPlayer} fill ${fillType}: ${!isActive}`,
           );
         },
@@ -6401,7 +6532,7 @@ class OTTOAccurateInterface {
           }
         }
 
-        console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
+        debugLog(`Player ${this.currentPlayer} ${param} slider: ${value}`);
 
         // Remove timer from map after execution
         this.debounceTimers.delete(param);
@@ -6432,7 +6563,7 @@ class OTTOAccurateInterface {
         if (this.linkStates && this.linkStates[param]) {
           const linkState = this.linkStates[param];
           if (linkState.slaves.has(this.currentPlayer)) {
-            console.log(
+            debugLog(
               `Slider ${param} is slave for player ${this.currentPlayer}, ignoring drag`,
             );
             return; // Don't allow dragging for slave sliders
@@ -6460,7 +6591,7 @@ class OTTOAccurateInterface {
         if (this.linkStates && this.linkStates[param]) {
           const linkState = this.linkStates[param];
           if (linkState.slaves.has(this.currentPlayer)) {
-            console.log(
+            debugLog(
               `Slider ${param} is slave for player ${this.currentPlayer}, ignoring click`,
             );
             return; // Don't allow clicking for slave sliders
@@ -6490,7 +6621,7 @@ class OTTOAccurateInterface {
           }
         }
 
-        console.log(`Player ${this.currentPlayer} ${param} slider: ${value}`);
+        debugLog(`Player ${this.currentPlayer} ${param} slider: ${value}`);
       };
 
       // Attach event listeners using enhanced method
@@ -6531,7 +6662,7 @@ class OTTOAccurateInterface {
       };
     }
 
-    console.log("Setting up link icons, linkStates:", this.linkStates);
+    debugLog("Setting up link icons, linkStates:", this.linkStates);
 
     // Setup link icon click handlers
     document.querySelectorAll(".link-icon").forEach((linkIcon) => {
@@ -6541,7 +6672,7 @@ class OTTOAccurateInterface {
         if (this.isDestroyed) return;
         e.preventDefault();
         e.stopPropagation();
-        console.log(
+        debugLog(
           `Link icon clicked for ${param} by player ${this.currentPlayer}`,
         );
         this.handleLinkToggle(param, linkIcon);
@@ -6557,14 +6688,14 @@ class OTTOAccurateInterface {
     // Use atomic operation to prevent race conditions in link state changes
     return this.atomicStateUpdate("link-toggle", async (version) => {
       if (!this.linkStates) {
-        console.error("linkStates not initialized!");
+        debugError("linkStates not initialized!");
         return false;
       }
 
       const currentPlayer = this.currentPlayer;
       const linkState = this.linkStates[param];
 
-      console.log(
+      debugLog(
         `handleLinkToggle called for ${param}, player ${currentPlayer} (v${version})`,
         linkState,
       );
@@ -6612,7 +6743,7 @@ class OTTOAccurateInterface {
           // Propagate value after setting up slaves
           await this.propagateSliderValue(param, masterValue, currentPlayer);
 
-          console.log(
+          debugLog(
             `Player ${currentPlayer} is now master for ${param}, value: ${masterValue}`,
           );
         } else if (isMaster) {
@@ -6621,12 +6752,12 @@ class OTTOAccurateInterface {
           linkState.slaves.clear();
           linkIcon.classList.remove("master");
 
-          console.log(`Player ${currentPlayer} unlinked ${param} (was master)`);
+          debugLog(`Player ${currentPlayer} unlinked ${param} (was master)`);
         } else if (isSlave) {
           // Currently slave - check if master still exists
           if (!linkState.master || !this.playerStates[linkState.master]) {
             // Orphaned slave - clean up state
-            console.warn(
+            debugWarn(
               `Player ${currentPlayer} was orphaned slave for ${param}, cleaning up`,
             );
             linkState.slaves.delete(currentPlayer);
@@ -6638,7 +6769,7 @@ class OTTOAccurateInterface {
             }
           } else {
             // Valid slave - can't change
-            console.log(
+            debugLog(
               `Player ${currentPlayer} is slave for ${param}, cannot change`,
             );
             return false;
@@ -6648,7 +6779,7 @@ class OTTOAccurateInterface {
         // Validate the final state
         if (linkState.master && linkState.slaves.has(linkState.master)) {
           // Master can't be its own slave - fix this
-          console.error("Detected master as slave - fixing");
+          debugError("Detected master as slave - fixing");
           linkState.slaves.delete(linkState.master);
         }
 
@@ -6660,7 +6791,7 @@ class OTTOAccurateInterface {
 
         return true;
       } catch (error) {
-        console.error("Error in handleLinkToggle, rolling back:", error);
+        debugError("Error in handleLinkToggle, rolling back:", error);
         // Rollback to previous state
         linkState.master = previousState.master;
         linkState.slaves = previousState.slaves;
@@ -6674,7 +6805,7 @@ class OTTOAccurateInterface {
     // Ensure atomic propagation to prevent race conditions
     return this.atomicStateUpdate("slider-propagate", async (version) => {
       if (!this.linkStates || !this.linkStates[param]) {
-        console.warn("No link state for param:", param);
+        debugWarn("No link state for param:", param);
         return false;
       }
 
@@ -6682,13 +6813,13 @@ class OTTOAccurateInterface {
 
       // Verify source player is the master
       if (linkState.master !== sourcePlayer) {
-        console.warn(
+        debugWarn(
           `Player ${sourcePlayer} is not master for ${param}, cannot propagate`,
         );
         return false;
       }
 
-      console.log(
+      debugLog(
         `Propagating ${param} value ${value} from master player ${sourcePlayer} (v${version})`,
       );
 
@@ -6701,7 +6832,7 @@ class OTTOAccurateInterface {
         try {
           // Verify slave player exists
           if (!this.playerStates[slavePlayer]) {
-            console.warn(
+            debugWarn(
               `Slave player ${slavePlayer} doesn't exist, removing from slaves`,
             );
             linkState.slaves.delete(slavePlayer);
@@ -6723,7 +6854,7 @@ class OTTOAccurateInterface {
             }
           }
         } catch (error) {
-          console.error(`Failed to update slave player ${slavePlayer}:`, error);
+          debugError(`Failed to update slave player ${slavePlayer}:`, error);
           failedPlayers.push(slavePlayer);
         }
       }
@@ -6733,7 +6864,7 @@ class OTTOAccurateInterface {
         linkState.slaves.delete(player);
       });
 
-      console.log(
+      debugLog(
         `Propagation complete: ${updatedPlayers.length} updated, ${failedPlayers.length} failed`,
       );
 
@@ -6813,7 +6944,7 @@ class OTTOAccurateInterface {
   setPlayerMuteState(playerNumber, isMuted) {
     // Validate player number
     if (!this.playerStates[playerNumber]) {
-      console.error(`Invalid player number: ${playerNumber}`);
+      debugError(`Invalid player number: ${playerNumber}`);
       return false;
     }
 
@@ -6840,13 +6971,13 @@ class OTTOAccurateInterface {
     // Mark as dirty
     this.setDirty("preset", true);
 
-    console.log(`Player ${playerNumber} mute state set to: ${isMuted}`);
+    debugLog(`Player ${playerNumber} mute state set to: ${isMuted}`);
     return true;
   }
 
   togglePlayerMute(playerNumber) {
     if (!this.playerStates[playerNumber]) {
-      console.error(`Invalid player number: ${playerNumber}`);
+      debugError(`Invalid player number: ${playerNumber}`);
       return false;
     }
 
@@ -6918,7 +7049,7 @@ class OTTOAccurateInterface {
     if (uploadBtn) {
       const uploadHandler = () => {
         this.onUploadClicked();
-        console.log("Upload clicked");
+        debugLog("Upload clicked");
       };
       this.addEventListener(uploadBtn, "click", uploadHandler);
     }
@@ -6953,7 +7084,7 @@ class OTTOAccurateInterface {
             setTimeout(() => {
               tempoDisplay.classList.remove("tapped");
             }, 200);
-            console.log("Tap tempo triggered");
+            debugLog("Tap tempo triggered");
             clickCount = 0;
           }, 180); // Reduced to 180ms to allow fast tempo tapping up to 333 BPM
         } else if (clickCount === 2) {
@@ -7216,13 +7347,13 @@ class OTTOAccurateInterface {
       // Validate tempo range
       if (newTempo >= 60 && newTempo <= 200) {
         this.setTempo(newTempo);
-        console.log(
+        debugLog(
           `Tap tempo calculated: ${newTempo} BPM (${this.tapTimes.length} taps)`,
         );
       }
     }
 
-    console.log(`Tap registered (${this.tapTimes.length} taps)`);
+    debugLog(`Tap registered (${this.tapTimes.length} taps)`);
   }
 
   togglePlayPause() {
@@ -7258,7 +7389,7 @@ class OTTOAccurateInterface {
     }
 
     this.scheduleSave("appState"); // Save app state
-    console.log(`Playback ${this.isPlaying ? "started" : "paused"}`);
+    debugLog(`Playback ${this.isPlaying ? "started" : "paused"}`);
   }
 
   // JUCE Integration Callbacks
@@ -7280,12 +7411,12 @@ class OTTOAccurateInterface {
   onPatternSelected(playerNumber, patternName) {
     // Validate inputs
     if (!this.playerStates[playerNumber]) {
-      console.error(`Invalid player number: ${playerNumber}`);
+      debugError(`Invalid player number: ${playerNumber}`);
       return;
     }
 
     if (!patternName) {
-      console.warn("Empty pattern name selected");
+      debugWarn("Empty pattern name selected");
       return;
     }
 
@@ -7316,7 +7447,7 @@ class OTTOAccurateInterface {
       }
 
       if (!patternFound) {
-        console.warn(
+        debugWarn(
           `Pattern "${patternName}" not found in group "${currentGroup}"`,
         );
       }
@@ -7330,29 +7461,29 @@ class OTTOAccurateInterface {
       window.juce.onPatternSelected(playerNumber, patternName);
     }
 
-    console.log(`Player ${playerNumber} selected pattern: ${patternName}`);
+    debugLog(`Player ${playerNumber} selected pattern: ${patternName}`);
   }
 
   onPatternGroupChanged(playerNumber, groupName) {
     // Simplified version without async for immediate response
-    console.log(
+    debugLog(
       `Pattern group change requested: Player ${playerNumber} -> Group "${groupName}"`,
     );
 
     // Validate inputs
     if (!this.playerStates[playerNumber]) {
-      console.error(`Player ${playerNumber} doesn't exist`);
+      debugError(`Player ${playerNumber} doesn't exist`);
       return;
     }
 
     // Verify the pattern group exists
     if (!this.patternGroups || !this.patternGroups[groupName]) {
-      console.error(`Pattern group "${groupName}" doesn't exist`);
+      debugError(`Pattern group "${groupName}" doesn't exist`);
 
       // Try to recover by using default group
       const defaultGroup = "favorites";
       if (this.patternGroups && this.patternGroups[defaultGroup]) {
-        console.warn(`Falling back to default group "${defaultGroup}"`);
+        debugWarn(`Falling back to default group "${defaultGroup}"`);
         groupName = defaultGroup;
       } else {
         // Critical error - can't proceed
@@ -7372,7 +7503,7 @@ class OTTOAccurateInterface {
 
       // Ensure patterns array exists and is valid
       if (!group.patterns || !Array.isArray(group.patterns)) {
-        console.warn(
+        debugWarn(
           `Invalid patterns array for group "${groupName}", initializing`,
         );
         group.patterns = Array(16).fill("");
@@ -7403,7 +7534,7 @@ class OTTOAccurateInterface {
 
         // If pattern wasn't found, clear the selection
         if (!patternFound) {
-          console.warn(
+          debugWarn(
             `Selected pattern "${selectedPattern}" not found in grid`,
           );
           group.selectedPattern = null;
@@ -7416,11 +7547,11 @@ class OTTOAccurateInterface {
       try {
         window.juce.onPatternGroupChanged(playerNumber, groupName);
       } catch (error) {
-        console.error("Error notifying juce of pattern group change:", error);
+        debugError("Error notifying juce of pattern group change:", error);
       }
     }
 
-    console.log(
+    debugLog(
       `Pattern group changed to "${groupName}" for player ${playerNumber}`,
     );
   }
@@ -7636,7 +7767,7 @@ class OTTOAccurateInterface {
   }
 
   destroy() {
-    console.log("Destroying OTTO Interface...");
+    debugLog("Destroying OTTO Interface...");
 
     // Set destroyed flag immediately to prevent any async operations
     this.isDestroyed = true;
@@ -7660,7 +7791,7 @@ class OTTOAccurateInterface {
     try {
       this.processPendingSaves();
     } catch (error) {
-      console.error("Error processing pending saves during destroy:", error);
+      debugError("Error processing pending saves during destroy:", error);
     }
 
     // Clean up all event listeners using the enhanced cleanup
@@ -7744,12 +7875,12 @@ class OTTOAccurateInterface {
       muteOverlay.classList.remove("active");
     }
 
-    console.log("OTTO Interface destroyed successfully");
+    debugLog("OTTO Interface destroyed successfully");
   }
 
   cleanupAllEventListeners() {
     // Enhanced cleanup with proper tracking
-    console.log("Starting comprehensive event listener cleanup...");
+    debugLog("Starting comprehensive event listener cleanup...");
 
     // Clean up registry-based listeners
     Object.keys(this.eventListenerRegistry).forEach((category) => {
@@ -7862,7 +7993,7 @@ class OTTOAccurateInterface {
     // Clear all timers
     this.clearAllTimers();
 
-    console.log("Event listener cleanup completed");
+    debugLog("Event listener cleanup completed");
   }
 
   addEventListener(element, event, handler, category = "element") {
@@ -7874,7 +8005,7 @@ class OTTOAccurateInterface {
     if (existingHandlers) {
       const eventHandlers = existingHandlers[event];
       if (eventHandlers && eventHandlers.includes(handler)) {
-        console.warn(`Duplicate listener prevented for ${event} on`, element);
+        debugWarn(`Duplicate listener prevented for ${event} on`, element);
         return false; // Listener already exists
       }
     }
@@ -8105,7 +8236,7 @@ class OTTOAccurateInterface {
 
       return result;
     } catch (error) {
-      console.error(`Atomic state update failed for ${operation}:`, error);
+      debugError(`Atomic state update failed for ${operation}:`, error);
 
       // Log failed update
       if (this.stateUpdateHistory) {
@@ -8154,7 +8285,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Make interface available globally for JUCE integration
   window.OTTO = window.ottoInterface;
 
-  console.log("OTTO Accurate Web Interface (6-Row Layout) loaded successfully");
+  debugLog("OTTO Accurate Web Interface (6-Row Layout) loaded successfully");
 });
 
 // Clean up on page unload
