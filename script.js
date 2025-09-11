@@ -7,25 +7,25 @@
  * Based on actual HISE interface screenshot with correct 6-row structure
  */
 
-// Debug logging system - set to false for production
-const DEBUG_MODE = false; // Can be controlled via environment variable or build process
+// Debug logging system - set to true temporarily for debugging
+const DEBUG_MODE = true; // Can be controlled via environment variable or build process
 
 // Debug logging functions
 function debugLog(...args) {
   if (DEBUG_MODE) {
-    debugLog('[OTTO Debug]', ...args);
+    console.log('[OTTO Debug]', ...args);
   }
 }
 
 function debugWarn(...args) {
   if (DEBUG_MODE) {
-    debugWarn('[OTTO Warning]', ...args);
+    console.warn('[OTTO Warning]', ...args);
   }
 }
 
 function debugError(...args) {
   // Always log errors, but with consistent formatting
-  debugError('[OTTO Error]', ...args);
+  console.error('[OTTO Error]', ...args);
 }
 
 function debugInfo(...args) {
