@@ -13,24 +13,24 @@ const DEBUG_MODE = false; // Can be controlled via environment variable or build
 // Debug logging functions
 function debugLog(...args) {
   if (DEBUG_MODE) {
-    console.log('[OTTO Debug]', ...args);
+    console.log("[OTTO Debug]", ...args);
   }
 }
 
 function debugWarn(...args) {
   if (DEBUG_MODE) {
-    console.warn('[OTTO Warning]', ...args);
+    console.warn("[OTTO Warning]", ...args);
   }
 }
 
 function debugError(...args) {
   // Always log errors, but with consistent formatting
-  console.error('[OTTO Error]', ...args);
+  console.error("[OTTO Error]", ...args);
 }
 
 function debugInfo(...args) {
   if (DEBUG_MODE) {
-    console.info('[OTTO Info]', ...args);
+    console.info("[OTTO Info]", ...args);
   }
 }
 
@@ -199,27 +199,27 @@ class OTTOAccurateInterface {
     this.init();
   }
   // Enhanced Timer Management System
-  createSafeTimeout(callback, delay, type = 'general') {
+  createSafeTimeout(callback, delay, type = "general") {
     if (this.isDestroyed) return null;
-    
+
     const wrappedCallback = () => {
       if (this.isDestroyed) return;
-      
+
       // Remove from tracking before executing
       this.activeTimers.delete(timerId);
       if (this.timerTypes && this.timerTypes[type]) {
         this.timerTypes[type].delete(timerId);
       }
-      
+
       try {
         callback();
       } catch (error) {
         debugError(`Error in timer callback (${type}):`, error);
       }
     };
-    
+
     const timerId = setTimeout(wrappedCallback, delay);
-    
+
     // Track the timer
     this.activeTimers.add(timerId);
     if (!this.timerTypes) {
@@ -228,24 +228,24 @@ class OTTOAccurateInterface {
         animation: new Set(),
         debounce: new Set(),
         notification: new Set(),
-        general: new Set()
+        general: new Set(),
       };
     }
     this.timerTypes[type] = this.timerTypes[type] || new Set();
     this.timerTypes[type].add(timerId);
-    
+
     return timerId;
   }
 
-  createSafeInterval(callback, interval, type = 'general') {
+  createSafeInterval(callback, interval, type = "general") {
     if (this.isDestroyed) return null;
-    
+
     const wrappedCallback = () => {
       if (this.isDestroyed) {
         clearInterval(intervalId);
         return;
       }
-      
+
       try {
         callback();
       } catch (error) {
@@ -258,9 +258,9 @@ class OTTOAccurateInterface {
         }
       }
     };
-    
+
     const intervalId = setInterval(wrappedCallback, interval);
-    
+
     // Track the interval
     this.activeTimers.add(intervalId);
     if (!this.timerTypes) {
@@ -269,37 +269,37 @@ class OTTOAccurateInterface {
         animation: new Set(),
         debounce: new Set(),
         notification: new Set(),
-        general: new Set()
+        general: new Set(),
       };
     }
     this.timerTypes[type] = this.timerTypes[type] || new Set();
     this.timerTypes[type].add(intervalId);
-    
+
     return intervalId;
   }
 
-  clearSafeTimer(timerId, type = 'general') {
+  clearSafeTimer(timerId, type = "general") {
     if (!timerId) return;
-    
+
     clearTimeout(timerId);
     clearInterval(timerId); // Safe to call both
-    
+
     this.activeTimers.delete(timerId);
     if (this.timerTypes && this.timerTypes[type]) {
       this.timerTypes[type].delete(timerId);
     }
-    
+
     // Also check specific timer stores
-    Object.keys(this.saveTimers).forEach(key => {
+    Object.keys(this.saveTimers).forEach((key) => {
       if (this.saveTimers[key] === timerId) {
         this.saveTimers[key] = null;
       }
     });
-    
+
     if (this.miniSliderDebounceTimer === timerId) {
       this.miniSliderDebounceTimer = null;
     }
-    
+
     if (this.stateUpdateTimer === timerId) {
       this.stateUpdateTimer = null;
     }
@@ -495,7 +495,7 @@ class OTTOAccurateInterface {
 
     // Clear existing timer for this save type
     if (this.saveTimers[saveType]) {
-      this.clearSafeTimer(this.saveTimers[saveType], 'save');
+      this.clearSafeTimer(this.saveTimers[saveType], "save");
       this.saveTimers[saveType] = null;
     }
 
@@ -504,25 +504,31 @@ class OTTOAccurateInterface {
 
     // Use longer delays for better debouncing
     const enhancedDelays = {
-      preset: 1000,      // 1 second for preset changes (was 500ms)
-      appState: 2000,    // 2 seconds for app state (was 1s)
+      preset: 1000, // 1 second for preset changes (was 500ms)
+      appState: 2000, // 2 seconds for app state (was 1s)
       patternGroups: 500, // 500ms for pattern groups (was 300ms)
-      drumkits: 500,     // 500ms for drumkits (was 300ms)
+      drumkits: 500, // 500ms for drumkits (was 300ms)
     };
-    
-    const delay = forceImmediate ? 0 : (enhancedDelays[saveType] || this.saveDelays[saveType]);
+
+    const delay = forceImmediate
+      ? 0
+      : enhancedDelays[saveType] || this.saveDelays[saveType];
 
     // Schedule the save using safe timer
-    this.saveTimers[saveType] = this.createSafeTimeout(() => {
-      if (this.isDestroyed) {
-        this.saveTimers[saveType] = null;
-        return;
-      }
+    this.saveTimers[saveType] = this.createSafeTimeout(
+      () => {
+        if (this.isDestroyed) {
+          this.saveTimers[saveType] = null;
+          return;
+        }
 
-      this.executeSave(saveType);
-      this.pendingSaves.delete(saveType);
-      this.saveTimers[saveType] = null;
-    }, delay, 'save');
+        this.executeSave(saveType);
+        this.pendingSaves.delete(saveType);
+        this.saveTimers[saveType] = null;
+      },
+      delay,
+      "save",
+    );
   }
 
   executeSave(saveType) {
@@ -891,9 +897,7 @@ class OTTOAccurateInterface {
 
       // Custom validation function
       if (rules.validate && !rules.validate(value)) {
-        debugError(
-          `Validation failed: Custom validation for "${key}" failed`,
-        );
+        debugError(`Validation failed: Custom validation for "${key}" failed`);
         return false;
       }
 
@@ -1631,10 +1635,11 @@ class OTTOAccurateInterface {
   safeQuerySelector(selector, parent = document) {
     try {
       // Use DOM cache if querying from document
-      const element = (parent === document && this.domCache) 
-        ? this.domCache.get(selector)
-        : parent.querySelector(selector);
-      
+      const element =
+        parent === document && this.domCache
+          ? this.domCache.get(selector)
+          : parent.querySelector(selector);
+
       if (!element && DEBUG_MODE) {
         debugLog(`Element not found: ${selector}`);
       }
@@ -1648,7 +1653,7 @@ class OTTOAccurateInterface {
   safeQuerySelectorAll(selector, parent = document) {
     try {
       // Use DOM cache if querying from document
-      return (parent === document && this.domCache)
+      return parent === document && this.domCache
         ? this.domCache.getAll(selector)
         : parent.querySelectorAll(selector) || [];
     } catch (error) {
@@ -1659,7 +1664,9 @@ class OTTOAccurateInterface {
 
   safeGetElementById(id) {
     // Use DOM cache for better performance
-    const element = this.domCache ? this.domCache.getById(id) : document.getElementById(id);
+    const element = this.domCache
+      ? this.domCache.getById(id)
+      : document.getElementById(id);
     if (!element && DEBUG_MODE) {
       debugLog(`Element with ID not found: ${id}`);
     }
@@ -3458,7 +3465,7 @@ class OTTOAccurateInterface {
       // Save default drumkits
       this.saveDrumkits();
     }
-    
+
     // Populate the kit dropdown with all available kits
     this.populateKitDropdown();
   }
@@ -5038,7 +5045,7 @@ class OTTOAccurateInterface {
       this.memoryCleanupInterval = this.createSafeInterval(
         () => this.cleanupMemory(),
         5 * 60 * 1000, // Every 5 minutes
-        'general'
+        "general",
       );
 
       debugLog(
@@ -5393,7 +5400,7 @@ class OTTOAccurateInterface {
     if (this.linkStates) {
       this.updateLinkIconStates();
     }
-    
+
     // Populate kit dropdown with all available kits
     this.populateKitDropdown();
 
@@ -5604,7 +5611,7 @@ class OTTOAccurateInterface {
       tempo: false,
       loop: false,
       links: false,
-      playerTabs: false
+      playerTabs: false,
     };
   }
 
@@ -5619,20 +5626,20 @@ class OTTOAccurateInterface {
   }
 
   markAllDirty() {
-    Object.keys(this.dirtyFlags).forEach(key => {
+    Object.keys(this.dirtyFlags).forEach((key) => {
       this.dirtyFlags[key] = true;
     });
   }
 
   clearDirtyFlags() {
-    Object.keys(this.dirtyFlags).forEach(key => {
+    Object.keys(this.dirtyFlags).forEach((key) => {
       this.dirtyFlags[key] = false;
     });
   }
 
   scheduleUIUpdate() {
     if (this.updateScheduled || this.isDestroyed) return;
-    
+
     this.updateScheduled = true;
     requestAnimationFrame(() => {
       if (!this.isDestroyed) {
@@ -5662,7 +5669,9 @@ class OTTOAccurateInterface {
     if (this.dirtyFlags.kit) {
       updates.push(() => {
         this.safeSetTextContent("#kit-dropdown .dropdown-text", state.kitName);
-        const kitOptions = this.safeQuerySelectorAll("#kit-dropdown .dropdown-option");
+        const kitOptions = this.safeQuerySelectorAll(
+          "#kit-dropdown .dropdown-option",
+        );
         kitOptions.forEach((option) => {
           if (!option) return;
           this.safeRemoveClass(option, "selected");
@@ -5675,15 +5684,19 @@ class OTTOAccurateInterface {
 
     if (this.dirtyFlags.patternGroup) {
       updates.push(() => {
-        const groupText = this.safeQuerySelector("#group-dropdown .dropdown-text");
+        const groupText = this.safeQuerySelector(
+          "#group-dropdown .dropdown-text",
+        );
         if (groupText && state.patternGroup && this.patternGroups) {
           const group = this.patternGroups[state.patternGroup];
           if (group) {
             groupText.textContent = group.name;
           }
         }
-        
-        const groupOptions = this.safeQuerySelectorAll("#group-dropdown .dropdown-option");
+
+        const groupOptions = this.safeQuerySelectorAll(
+          "#group-dropdown .dropdown-option",
+        );
         groupOptions.forEach((option) => {
           if (!option) return;
           this.safeRemoveClass(option, "selected");
@@ -5694,7 +5707,11 @@ class OTTOAccurateInterface {
       });
 
       // Update pattern grid if group changed
-      if (state.patternGroup && this.patternGroups && this.patternGroups[state.patternGroup]) {
+      if (
+        state.patternGroup &&
+        this.patternGroups &&
+        this.patternGroups[state.patternGroup]
+      ) {
         const patterns = this.patternGroups[state.patternGroup].patterns;
         if (patterns) {
           this.updateMainPatternGrid(patterns);
@@ -5755,7 +5772,9 @@ class OTTOAccurateInterface {
 
     if (this.dirtyFlags.sliders && state.sliderValues) {
       Object.keys(state.sliderValues).forEach((sliderKey) => {
-        const slider = this.safeQuerySelector(`.custom-slider[data-param="${sliderKey}"]`);
+        const slider = this.safeQuerySelector(
+          `.custom-slider[data-param="${sliderKey}"]`,
+        );
         if (slider) {
           updates.push(() => {
             const value = state.sliderValues[sliderKey];
@@ -5771,12 +5790,16 @@ class OTTOAccurateInterface {
         if (muteDrummerBtn) {
           this.safeToggleClass(muteDrummerBtn, "muted", state.muted || false);
         }
-        
+
         const kitMixerBtn = this.safeGetElementById("kit-mixer-btn");
         if (kitMixerBtn) {
-          this.safeToggleClass(kitMixerBtn, "active", state.kitMixerActive || false);
+          this.safeToggleClass(
+            kitMixerBtn,
+            "active",
+            state.kitMixerActive || false,
+          );
         }
-        
+
         this.updateMuteOverlay();
       });
     }
@@ -5786,7 +5809,11 @@ class OTTOAccurateInterface {
         const tab = this.safeQuerySelector(`.player-tab[data-player="${i}"]`);
         if (tab && this.playerStates[i]) {
           updates.push(() => {
-            this.safeToggleClass(tab, "muted", this.playerStates[i].muted || false);
+            this.safeToggleClass(
+              tab,
+              "muted",
+              this.playerStates[i].muted || false,
+            );
             this.safeToggleClass(tab, "active", i === this.currentPlayer);
           });
         }
@@ -6191,44 +6218,48 @@ class OTTOAccurateInterface {
       option.className = "dropdown-option";
       option.dataset.value = kitKey.toLowerCase();
       option.textContent = kit.name;
-      
+
       // Set selected state if this is the current kit
       if (kit.name === this.playerStates[this.currentPlayer].kitName) {
         option.classList.add("selected");
       }
-      
+
       // Add click handler directly
       const optionHandler = (e) => {
         e.stopPropagation();
         const kitName = option.textContent;
-        
+
         // Update selected text
-        const dropdownText = document.querySelector("#kit-dropdown .dropdown-text");
+        const dropdownText = document.querySelector(
+          "#kit-dropdown .dropdown-text",
+        );
         if (dropdownText) {
           dropdownText.textContent = kitName;
         }
-        
+
         // Update selected state
-        document.querySelectorAll("#kit-options .dropdown-option").forEach((opt) => {
-          opt.classList.remove("selected");
-        });
+        document
+          .querySelectorAll("#kit-options .dropdown-option")
+          .forEach((opt) => {
+            opt.classList.remove("selected");
+          });
         option.classList.add("selected");
-        
+
         // Close dropdown
         const kitDropdown = document.getElementById("kit-dropdown");
         if (kitDropdown) {
           kitDropdown.classList.remove("open");
         }
-        
+
         // Update player state and trigger callback
         this.playerStates[this.currentPlayer].kitName = kitName;
         this.onKitChanged(this.currentPlayer, kitName);
         this.setDirty("preset", true);
         this.setDirty("drumkit", true);
-        
+
         debugLog(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
-      
+
       option.addEventListener("click", optionHandler);
       kitOptionsContainer.appendChild(option);
     }
@@ -7788,9 +7819,7 @@ class OTTOAccurateInterface {
 
         // If pattern wasn't found, clear the selection
         if (!patternFound) {
-          debugWarn(
-            `Selected pattern "${selectedPattern}" not found in grid`,
-          );
+          debugWarn(`Selected pattern "${selectedPattern}" not found in grid`);
           group.selectedPattern = null;
         }
       }

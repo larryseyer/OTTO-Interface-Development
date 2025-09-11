@@ -10,14 +10,20 @@
   --text-primary: #ffffff;
   --text-secondary: #cccccc;
   --text-muted: #999999;
-  --text-icon: #777777; /* Icon color */
-  --text-black: #111111; /* Black text color - was #000000 */
+  --text-icon: #777777;
+  /* Icon color */
+  --text-black: #111111;
+  /* Black text color - was #000000 */
 
   /* Global button text states */
-  --button-text-normal: #777777; /* Normal state */
-  --button-text-hover: #aaaaaa; /* Hover state */
-  --button-text-active: #ffffff; /* Active/selected state */
-  --border-color: #000000; /* Black borders between rows */
+  --button-text-normal: #777777;
+  /* Normal state */
+  --button-text-hover: #aaaaaa;
+  /* Hover state */
+  --button-text-active: #ffffff;
+  /* Active/selected state */
+  --border-color: #000000;
+  /* Black borders between rows */
 
   /* Button colors - 3D metallic style */
   --button-face: #888888;
@@ -27,8 +33,10 @@
   --button-active-highlight: #bbbbbb;
 
   /* Modal overlay settings */
-  --modal-overlay-opacity: 0.8; /* Global overlay darkness - adjust as needed */
-  --modal-animation-speed: 0.3s; /* Animation duration for modal transitions */
+  --modal-overlay-opacity: 0.8;
+  /* Global overlay darkness - adjust as needed */
+  --modal-animation-speed: 0.3s;
+  /* Animation duration for modal transitions */
 
   /* Interface dimensions */
   --interface-width: 1280px;
@@ -39,81 +47,122 @@
   --icon-size-small: 20px;
 
   /* Dropdown menu font size */
-  --dropdown-menu-font-size: 24px; /* Base font size for all dropdown menu items */
+  --dropdown-menu-font-size: 24px;
+  /* Base font size for all dropdown menu items */
 
   /* Row 1 Area Percentages - Must total 100% */
-  --row1-area1-width: 18%; /* Settings, Link, Preset Edit buttons - increased for 3 icons */
-  --row1-area2-width: 28%; /* Presets dropdown - needs space for text */
-  --row1-area3-width: 8%; /* Play/Pause button (centered) */
-  --row1-area4-width: 18%; /* Tempo Display - reduced to give area5 more space */
-  --row1-area5-width: 28%; /* Cloud, Logo and Version - increased for hover space */
+  --row1-area1-width: 18%;
+  /* Settings, Link, Preset Edit buttons - increased for 3 icons */
+  --row1-area2-width: 28%;
+  /* Presets dropdown - needs space for text */
+  --row1-area3-width: 8%;
+  /* Play/Pause button (centered) */
+  --row1-area4-width: 18%;
+  /* Tempo Display - reduced to give area5 more space */
+  --row1-area5-width: 28%;
+  /* Cloud, Logo and Version - increased for hover space */
   /* Total: 18% + 28% + 8% + 18% + 28% = 100% */
 
   /* Row 2 - Single area for player tabs */
-  --row2-area1-width: 100%; /* Player tabs full width */
+  --row2-area1-width: 100%;
+  /* Player tabs full width */
 
   /* Row 3 Area Percentages - 5 areas */
-  --row3-area1-width: 10%; /* Player number display */
-  --row3-area2-width: 15%; /* Kit edit icon */
-  --row3-area3-width: 50%; /* Kit selection center */
-  --row3-area4-width: 15%; /* Mixer icon */
-  --row3-area5-width: 10%; /* Mute drummer icon */
+  --row3-area1-width: 10%;
+  /* Player number display */
+  --row3-area2-width: 15%;
+  /* Kit edit icon */
+  --row3-area3-width: 50%;
+  /* Kit selection center */
+  --row3-area4-width: 15%;
+  /* Mixer icon */
+  --row3-area5-width: 10%;
+  /* Mute drummer icon */
 
   /* Row 4 - Main 50/50 split */
-  --row4-left-width: 50%; /* Left half */
-  --row4-right-width: 50%; /* Right half */
+  --row4-left-width: 50%;
+  /* Left half */
+  --row4-right-width: 50%;
+  /* Right half */
 
   /* Row 4 Left side - 3 areas */
-  --row4-left-area1-width: 20%; /* Edit button area */
-  --row4-left-area2-width: 60%; /* Pattern group selection */
-  --row4-left-area3-width: 20%; /* Navigation controls */
+  --row4-left-area1-width: 20%;
+  /* Edit button area */
+  --row4-left-area2-width: 60%;
+  /* Pattern group selection */
+  --row4-left-area3-width: 20%;
+  /* Navigation controls */
 
   /* Row 4 Right side - 5 areas */
-  --row4-right-area1-width: 23%; /* Right area 1 */
-  --row4-right-area2-width: 23%; /* Right area 2 */
-  --row4-right-area3-width: 18%; /* Right area 3 */
-  --row4-right-area4-width: 18%; /* Right area 4 */
-  --row4-right-area5-width: 18%; /* Right area 5 */
+  --row4-right-area1-width: 23%;
+  /* Right area 1 */
+  --row4-right-area2-width: 23%;
+  /* Right area 2 */
+  --row4-right-area3-width: 18%;
+  /* Right area 3 */
+  --row4-right-area4-width: 18%;
+  /* Right area 4 */
+  --row4-right-area5-width: 18%;
+  /* Right area 5 */
 
   /* Row 5 - Main 50/50 split */
-  --row5-left-width: 50%; /* Left half - Pattern matrix */
-  --row5-right-width: 50%; /* Right half - Controls */
+  --row5-left-width: 50%;
+  /* Left half - Pattern matrix */
+  --row5-right-width: 50%;
+  /* Right half - Controls */
 
   /* Row 5 Right side - 5 areas (same as Row 4 right) */
-  --row5-right-area1-width: 23%; /* Toggles area */
-  --row5-right-area2-width: 23%; /* Fills area */
-  --row5-right-area3-width: 18%; /* Sliders area 1 */
-  --row5-right-area4-width: 18%; /* Sliders area 2 */
-  --row5-right-area5-width: 18%; /* Sliders area 3 */
+  --row5-right-area1-width: 23%;
+  /* Toggles area */
+  --row5-right-area2-width: 23%;
+  /* Fills area */
+  --row5-right-area3-width: 18%;
+  /* Sliders area 1 */
+  --row5-right-area4-width: 18%;
+  /* Sliders area 2 */
+  --row5-right-area5-width: 18%;
+  /* Sliders area 3 */
 
   /* Row 6 - Single area for loop timeline */
-  --row6-area1-width: 100%; /* Full width loop timeline */
+  --row6-area1-width: 100%;
+  /* Full width loop timeline */
 
   /* Row Heights - Configurable percentages */
-  --row1-height: 10%; /* Top bar */
-  --row2-height: 8%; /* Player tabs */
-  --row3-height: 18%; /* Drum kit section */
-  --row4-height: 12%; /* Pattern groups */
-  --row5-height: 47%; /* Pattern matrix - largest section */
-  --row6-height: 5%; /* Loop section */
+  --row1-height: 10%;
+  /* Top bar */
+  --row2-height: 8%;
+  /* Player tabs */
+  --row3-height: 18%;
+  /* Drum kit section */
+  --row4-height: 12%;
+  /* Pattern groups */
+  --row5-height: 47%;
+  /* Pattern matrix - largest section */
+  --row6-height: 5%;
+  /* Loop section */
 
   /* Global hover zoom for row1 elements */
-  --row1-hover-scale: 1.2; /* 20% increase (was 1.05-1.1, now 1.2) */
+  --row1-hover-scale: 1.2;
+  /* 20% increase (was 1.05-1.1, now 1.2) */
 
   /* Dynamic player tab spacing */
-  --player-tab-gap: 5px; /* Default for 8 players */
+  --player-tab-gap: 5px;
+  /* Default for 8 players */
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  cursor: default; /* Default cursor for everything */
-  user-select: none; /* Prevent text selection globally */
+  cursor: default;
+  /* Default cursor for everything */
+  user-select: none;
+  /* Prevent text selection globally */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  outline: none !important; /* Remove ALL focus outlines globally */
+  outline: none !important;
+  /* Remove ALL focus outlines globally */
 }
 
 /* Remove focus outlines for all interactive elements */
@@ -174,24 +223,27 @@ body {
   background: var(--bg-primary);
   position: relative;
   border: 1px solid var(--border-color);
-  overflow: hidden; /* Clip panels when they're below the interface */
+  overflow: hidden;
+  /* Clip panels when they're below the interface */
 }
 
 /* Mute Overlay - covers rows 3-5 */
 .mute-overlay {
   position: absolute;
-  top: calc(
-    var(--row1-height) + var(--row2-height)
-  ); /* Start after row 1 and 2 */
+  top: calc(var(--row1-height) + var(--row2-height));
+  /* Start after row 1 and 2 */
   left: 0;
   width: 100%;
-  height: calc(
-    var(--row3-height) + var(--row4-height) + var(--row5-height)
-  ); /* Cover rows 3-5 */
-  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
-  pointer-events: none; /* Allow interaction with elements below */
-  z-index: 100; /* Above content but below modals */
-  display: none; /* Hidden by default */
+  height: calc(var(--row3-height) + var(--row4-height) + var(--row5-height));
+  /* Cover rows 3-5 */
+  background: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent black overlay */
+  pointer-events: none;
+  /* Allow interaction with elements below */
+  z-index: 100;
+  /* Above content but below modals */
+  display: none;
+  /* Hidden by default */
   transition: opacity 0.3s ease;
 }
 
@@ -227,7 +279,8 @@ body {
 
 /* Preset Management Modal - Specific overrides only */
 .preset-modal-content {
-  max-width: 700px; /* Slightly wider for preset list */
+  max-width: 700px;
+  /* Slightly wider for preset list */
 }
 
 .preset-modal-controls {
@@ -352,12 +405,14 @@ body {
 
 /* Lock button specific states */
 .preset-item-btn.locked {
-  color: var(--text-primary); /* White when locked */
+  color: var(--text-primary);
+  /* White when locked */
   border-color: var(--text-primary);
 }
 
 .preset-item-btn.unlocked {
-  color: var(--text-icon); /* Grey when unlocked */
+  color: var(--text-icon);
+  /* Grey when unlocked */
 }
 
 .preset-item-btn.delete:hover {
@@ -413,10 +468,13 @@ body {
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  justify-content: center; /* Center all areas */
-  padding: 0 20px; /* Fixed padding to match other rows */
+  justify-content: center;
+  /* Center all areas */
+  padding: 0 20px;
+  /* Fixed padding to match other rows */
   position: relative;
-  box-sizing: border-box; /* Include padding in width calculation */
+  box-sizing: border-box;
+  /* Include padding in width calculation */
 }
 
 /* Row 1 Area 1: Settings, Link, and Preset Edit buttons */
@@ -426,18 +484,25 @@ body {
   align-items: center;
   flex: 0 0 var(--row1-area1-width);
   justify-content: flex-start;
-  min-width: 150px; /* Minimum width to prevent crushing */
-  overflow: visible; /* Allow buttons to be fully clickable */
-  padding-right: 10px; /* Add space between area1 and area2 */
-  box-sizing: border-box; /* Include padding in width calculation */
+  min-width: 150px;
+  /* Minimum width to prevent crushing */
+  overflow: visible;
+  /* Allow buttons to be fully clickable */
+  padding-right: 10px;
+  /* Add space between area1 and area2 */
+  box-sizing: border-box;
+  /* Include padding in width calculation */
   position: relative;
-  z-index: 20; /* Higher z-index to ensure buttons are above dropdown */
-  flex-shrink: 0; /* Prevent shrinking */
+  z-index: 20;
+  /* Higher z-index to ensure buttons are above dropdown */
+  flex-shrink: 0;
+  /* Prevent shrinking */
 }
 
 .row1-area1 .icon-btn {
   position: relative;
-  z-index: 25; /* Ensure edit button is above dropdown */
+  z-index: 25;
+  /* Ensure edit button is above dropdown */
 }
 
 /* Row 1 Area 2: Chevrons and Presets dropdown */
@@ -445,29 +510,38 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1 1 var(--row1-area2-width); /* Allow shrinking and growing */
+  flex: 1 1 var(--row1-area2-width);
+  /* Allow shrinking and growing */
   justify-content: center;
-  position: relative; /* For dropdown arrow positioning */
-  overflow: visible; /* Allow dropdown menu to show */
-  padding: 0 10px; /* Add padding to keep content away from edges */
-  box-sizing: border-box; /* Include padding in width calculation */
-  z-index: 5; /* Lower than area1 buttons */
-  min-width: 0; /* Allow shrinking below content size */
+  position: relative;
+  /* For dropdown arrow positioning */
+  overflow: visible;
+  /* Allow dropdown menu to show */
+  padding: 0 10px;
+  /* Add padding to keep content away from edges */
+  box-sizing: border-box;
+  /* Include padding in width calculation */
+  z-index: 5;
+  /* Lower than area1 buttons */
+  min-width: 0;
+  /* Allow shrinking below content size */
 }
 
 /* Specific constraint for preset dropdown */
 #preset-dropdown {
-  width: 100%; /* Use full width of container */
-  max-width: 100%; /* Don't exceed container */
+  width: 100%;
+  /* Use full width of container */
+  max-width: 100%;
+  /* Don't exceed container */
   margin: 0 auto;
-  min-width: 0; /* Allow shrinking */
+  min-width: 0;
+  /* Allow shrinking */
 }
 
 /* Increase height for preset dropdown options to extend to bottom of row 5 */
 #preset-dropdown .dropdown-options {
-  max-height: calc(
-    85vh
-  ); /* Can extend through row 5 (10% + 8% + 18% + 12% + 47% = 95% - 10% for row1 = 85%) */
+  max-height: calc(85vh);
+  /* Can extend through row 5 (10% + 8% + 18% + 12% + 47% = 95% - 10% for row1 = 85%) */
 }
 
 /* Row 1 Area 3: Play/Pause Transport (centered) */
@@ -492,15 +566,20 @@ body {
   align-items: center;
   flex: 0 0 var(--row1-area5-width);
   justify-content: flex-end;
-  gap: 15px; /* Match other icon spacing */
-  min-width: 200px; /* Minimum width to prevent crushing */
-  position: relative; /* Create stacking context */
-  flex-shrink: 0; /* Prevent shrinking */
+  gap: 15px;
+  /* Match other icon spacing */
+  min-width: 200px;
+  /* Minimum width to prevent crushing */
+  position: relative;
+  /* Create stacking context */
+  flex-shrink: 0;
+  /* Prevent shrinking */
 }
 
 .row1-area5 .icon-btn {
   position: relative;
-  z-index: 100; /* Much higher z-index to ensure it stays on top */
+  z-index: 100;
+  /* Much higher z-index to ensure it stays on top */
 }
 
 .logo-version-container {
@@ -511,17 +590,20 @@ body {
   transition: all 0.2s ease;
   padding: 5px 10px;
   border-radius: 5px;
-  transform-origin: 100% center; /* Scale from far right edge only */
+  transform-origin: 100% center;
+  /* Scale from far right edge only */
 }
 
 .logo-version-container:hover {
-  transform: scale(1.1); /* Smaller scale to prevent overlap */
+  transform: scale(1.1);
+  /* Smaller scale to prevent overlap */
   position: relative;
 }
 
 .logo-version-container:active {
   transform: scale(0.98);
-  transform-origin: right center; /* Maintain right origin on active state */
+  transform-origin: right center;
+  /* Maintain right origin on active state */
 }
 
 /* Play/Pause button styling */
@@ -529,8 +611,10 @@ body {
   width: 60px;
   height: 60px;
   background: transparent;
-  border: none; /* Remove border */
-  cursor: pointer !important; /* Ensure pointer cursor */
+  border: none;
+  /* Remove border */
+  cursor: pointer !important;
+  /* Ensure pointer cursor */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -540,11 +624,13 @@ body {
 }
 
 .play-pause-btn:focus {
-  outline: none; /* Remove focus outline */
+  outline: none;
+  /* Remove focus outline */
 }
 
 .play-pause-btn:hover {
-  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale));
+  /* Use global hover scale */
 }
 
 .play-pause-btn:active {
@@ -552,7 +638,8 @@ body {
 }
 
 .play-pause-btn i {
-  font-size: 50px; /* Slightly larger since no border */
+  font-size: 50px;
+  /* Slightly larger since no border */
   line-height: 1;
   color: var(--text-icon);
   transition: color 0.2s ease;
@@ -570,20 +657,24 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0;
-  outline: none; /* Remove focus outline */
+  outline: none;
+  /* Remove focus outline */
 }
 
 .icon-btn:focus {
-  outline: none; /* Remove focus box */
+  outline: none;
+  /* Remove focus box */
 }
 
 .icon-btn:hover {
-  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale));
+  /* Use global hover scale */
 }
 
 .icon-btn:active,
 .icon-btn.active {
-  color: var(--text-primary); /* White color when clicked/active */
+  color: var(--text-primary);
+  /* White color when clicked/active */
   transform: scale(0.95);
 }
 
@@ -591,7 +682,8 @@ body {
   font-size: var(--icon-size-standard);
   line-height: 1;
   display: block;
-  color: inherit; /* Inherit color from parent button */
+  color: inherit;
+  /* Inherit color from parent button */
 }
 
 .icon-btn img {
@@ -616,11 +708,13 @@ body {
   padding: 0;
   outline: none;
   position: relative;
-  z-index: 30; /* Above dropdowns but below modals */
+  z-index: 30;
+  /* Above dropdowns but below modals */
 }
 
 .quick-save-btn i {
-  font-size: var(--icon-size-standard); /* Match other phosphor icons */
+  font-size: var(--icon-size-standard);
+  /* Match other phosphor icons */
   line-height: 1;
   display: block;
   color: inherit;
@@ -637,12 +731,15 @@ body {
 
 /* Specific styles for drumkit save button in row 3 */
 .drumkit-save-btn {
-  width: 75px !important; /* Match kit-mixer-btn size */
-  height: 75px !important; /* Match kit-mixer-btn size */
+  width: 75px !important;
+  /* Match kit-mixer-btn size */
+  height: 75px !important;
+  /* Match kit-mixer-btn size */
 }
 
 .drumkit-save-btn i {
-  font-size: 63px !important; /* Match kit-mixer-btn icon size */
+  font-size: 63px !important;
+  /* Match kit-mixer-btn icon size */
 }
 
 /* Remove absolute positioning from old center-program */
@@ -664,7 +761,8 @@ body {
 
 .preset-nav-btn:hover {
   color: var(--text-primary);
-  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale));
+  /* Use global hover scale */
 }
 
 .preset-nav-btn:active {
@@ -683,9 +781,11 @@ body {
 .custom-dropdown {
   position: relative;
   width: 100%;
-  max-width: 100%; /* Changed from 350px to prevent overflow */
+  max-width: 100%;
+  /* Changed from 350px to prevent overflow */
   font-family: "Playfair Display", serif;
-  user-select: none; /* Prevent text selection */
+  user-select: none;
+  /* Prevent text selection */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -702,35 +802,44 @@ body {
   align-items: center;
   justify-content: space-between;
   transition: all 0.2s ease;
-  user-select: none !important; /* Prevent text selection */
+  user-select: none !important;
+  /* Prevent text selection */
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
-  min-width: 0; /* Allow shrinking */
+  min-width: 0;
+  /* Allow shrinking */
 }
 
 .dropdown-selected:hover {
-  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale));
+  /* Use global hover scale */
 }
 
 .dropdown-text {
   flex: 1;
   text-align: center;
-  user-select: none !important; /* Prevent text selection */
+  user-select: none !important;
+  /* Prevent text selection */
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
-  white-space: nowrap; /* Prevent text wrapping */
-  overflow: hidden; /* Hide overflow */
-  text-overflow: ellipsis; /* Add ellipsis for truncated text */
+  white-space: nowrap;
+  /* Prevent text wrapping */
+  overflow: hidden;
+  /* Hide overflow */
+  text-overflow: ellipsis;
+  /* Add ellipsis for truncated text */
 }
 
 .dropdown-arrow {
-  display: none !important; /* Hide all dropdown arrows */
+  display: none !important;
+  /* Hide all dropdown arrows */
   font-size: 24px;
   color: var(--text-icon);
   transition: transform 0.3s ease;
-  user-select: none !important; /* Prevent text selection */
+  user-select: none !important;
+  /* Prevent text selection */
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
@@ -769,14 +878,16 @@ body {
   cursor: pointer !important;
   transition: all 0.2s ease;
   text-align: center;
-  user-select: none !important; /* Prevent text selection */
+  user-select: none !important;
+  /* Prevent text selection */
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
 }
 
 .dropdown-option:hover {
-  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale));
+  /* Use global hover scale */
 }
 
 .dropdown-option.selected {
@@ -803,33 +914,41 @@ body {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.02s ease; /* Near instantaneous transition */
+  transition: all 0.02s ease;
+  /* Near instantaneous transition */
   /*text-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
 }
 
 .tap-tempo-btn:hover {
-  background-position: 0 40%; /* WHITE button for hover */
+  background-position: 0 40%;
+  /* WHITE button for hover */
 }
 
 .tap-tempo-btn:active {
-  background-position: 0 20%; /* BLACK button for pressed */
+  background-position: 0 20%;
+  /* BLACK button for pressed */
 }
 
 .tempo-display {
   font-family: "Roboto", sans-serif;
-  font-size: 55px; /* Perfect size */
-  font-weight: 100; /* ExtraLight */
+  font-size: 55px;
+  /* Perfect size */
+  font-weight: 100;
+  /* ExtraLight */
   color: var(--text-icon);
-  min-width: 95px; /* Adjusted min-width */
+  min-width: 95px;
+  /* Adjusted min-width */
   text-align: center;
   letter-spacing: -2px;
   border: 2px solid transparent;
   border-radius: 8px;
   padding: 10px 20px;
   outline: none;
-  cursor: pointer; /* Pointer cursor for tap functionality */
+  cursor: pointer;
+  /* Pointer cursor for tap functionality */
   transition: all 0.2s ease;
-  user-select: none; /* Prevent text selection during tap */
+  user-select: none;
+  /* Prevent text selection during tap */
   -webkit-user-select: none;
   -moz-user-select: none;
   background: transparent;
@@ -842,23 +961,30 @@ body {
 }
 
 .tempo-display:hover {
-  transform: scale(var(--row1-hover-scale)); /* Use global hover scale */
+  transform: scale(var(--row1-hover-scale));
+  /* Use global hover scale */
 }
 
 .tempo-display:active {
-  transform: scale(0.98); /* Only scale, no color change */
+  transform: scale(0.98);
+  /* Only scale, no color change */
 }
 
 .tempo-display.editing {
-  border-color: transparent !important; /* No visible border when editing */
-  background-color: transparent !important; /* Force transparent background */
-  color: var(--text-primary) !important; /* White text when editing */
-  transform: scale(1.05); /* Slightly larger when editing */
+  border-color: transparent !important;
+  /* No visible border when editing */
+  background-color: transparent !important;
+  /* Force transparent background */
+  color: var(--text-primary) !important;
+  /* White text when editing */
+  transform: scale(1.05);
+  /* Slightly larger when editing */
   cursor: text;
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
-  outline: none !important; /* Remove any outline */
+  outline: none !important;
+  /* Remove any outline */
 }
 
 .tempo-display.tapped {
@@ -869,10 +995,12 @@ body {
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
     background-color: rgba(255, 255, 255, 0.1);
   }
+
   100% {
     transform: scale(1);
   }
@@ -896,15 +1024,20 @@ body {
   font-weight: 300;
   color: var(--text-muted);
   font-family: "Lato", sans-serif;
-  white-space: nowrap; /* Keep on same line */
+  white-space: nowrap;
+  /* Keep on same line */
   display: inline-block;
 }
 
 .version-text #version-number {
-  font-size: inherit; /* Same size as parent */
-  font-weight: inherit; /* Same weight as parent */
-  font-family: inherit; /* Same font as parent */
-  color: inherit; /* Same color as parent */
+  font-size: inherit;
+  /* Same size as parent */
+  font-weight: inherit;
+  /* Same weight as parent */
+  font-family: inherit;
+  /* Same font as parent */
+  color: inherit;
+  /* Same color as parent */
 }
 
 /* Row 2: Player Tabs  - 8 Player Selection */
@@ -915,20 +1048,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 20px; /* Add horizontal padding */
+  padding: 0 20px;
+  /* Add horizontal padding */
 }
 
 .player-tabs {
   display: flex;
-  gap: var(--player-tab-gap); /* Dynamic gap based on player count */
-  padding: 8px 0; /* Reduced horizontal padding since chevrons are closer */
+  gap: var(--player-tab-gap);
+  /* Dynamic gap based on player count */
+  padding: 8px 0;
+  /* Reduced horizontal padding since chevrons are closer */
   background: transparent;
-  margin: 0 15px; /* Space between tabs and chevrons */
+  margin: 0 15px;
+  /* Space between tabs and chevrons */
 }
 
 /* Player navigation chevrons - sized for row2 */
 .player-nav-btn {
-  width: 50px; /* Smaller than row3's 75px, appropriate for row2 */
+  width: 50px;
+  /* Smaller than row3's 75px, appropriate for row2 */
   height: 50px;
   background: transparent;
   border: none;
@@ -948,12 +1086,14 @@ body {
 
 .player-nav-btn:active,
 .player-nav-btn.active {
-  color: var(--text-primary); /* White color when clicked/active */
+  color: var(--text-primary);
+  /* White color when clicked/active */
   transform: scale(0.95);
 }
 
 .player-nav-btn i {
-  font-size: 50px; /* Sized appropriately for row2 */
+  font-size: 50px;
+  /* Sized appropriately for row2 */
   line-height: 1;
   display: block;
   color: inherit;
@@ -962,13 +1102,15 @@ body {
 }
 
 .player-tab {
-  padding: 15px 15px; /* Reduced horizontal padding to save space */
+  padding: 15px 15px;
+  /* Reduced horizontal padding to save space */
   background: transparent;
   border: none;
   color: var(--button-text-normal);
   font-family: "Playfair Display", serif;
   font-size: 24px !important;
-  font-weight: 400; /* Regular weight */
+  font-weight: 400;
+  /* Regular weight */
   cursor: pointer;
   transition: all 0.2s ease;
   letter-spacing: 0.5px;
@@ -977,7 +1119,8 @@ body {
   min-height: 60px;
   height: 60px;
   width: auto;
-  min-width: 120px; /* Reduced from 140px to save space */
+  min-width: 120px;
+  /* Reduced from 140px to save space */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1004,27 +1147,34 @@ body {
 
 .player-tab.active {
   color: var(--button-text-active);
-  font-weight: 400; /* Keep regular weight even when active */
+  font-weight: 400;
+  /* Keep regular weight even when active */
 }
 
 /* Muted player tab styling */
 .player-tab.muted {
-  color: var(--text-black); /* Black color for muted players */
-  opacity: 0.7; /* Slightly dimmed */
+  color: var(--text-black);
+  /* Black color for muted players */
+  opacity: 0.7;
+  /* Slightly dimmed */
 }
 
 .player-tab.muted.active {
-  color: var(--text-black); /* Stay black even when active and muted */
+  color: var(--text-black);
+  /* Stay black even when active and muted */
 }
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */
 .drum-kit-section {
   height: var(--row3-height);
   background: var(--bg-secondary);
-  /* border-bottom: 1px solid var(--border-color); */ /* Commented out - no border between row3 and row4 */
+  /* border-bottom: 1px solid var(--border-color); */
+  /* Commented out - no border between row3 and row4 */
   display: flex;
-  align-items: flex-start; /* Align items to top instead of center */
-  padding: 10px 20px 0 20px; /* Add small top padding for alignment */
+  align-items: flex-start;
+  /* Align items to top instead of center */
+  padding: 10px 20px 0 20px;
+  /* Add small top padding for alignment */
   /* gap removed to allow proper percentage-based layout */
 }
 
@@ -1034,8 +1184,10 @@ body {
 
 .player-number {
   font-family: "Roboto", sans-serif;
-  font-size: 75px; /* 25% larger than 60px */
-  font-weight: 100; /* ExtraLight */
+  font-size: 75px;
+  /* 25% larger than 60px */
+  font-weight: 100;
+  /* ExtraLight */
   color: var(--text-muted);
   opacity: 0.6;
   line-height: 1;
@@ -1052,8 +1204,10 @@ body {
 }
 
 .edit-btn {
-  width: 75px; /* 25% larger than 60px */
-  height: 75px; /* 25% larger than 60px */
+  width: 75px;
+  /* 25% larger than 60px */
+  height: 75px;
+  /* 25% larger than 60px */
   background: transparent;
   border: none;
   cursor: pointer;
@@ -1072,12 +1226,14 @@ body {
 
 .edit-btn:active,
 .edit-btn.active {
-  color: var(--text-primary); /* White color when clicked/active */
+  color: var(--text-primary);
+  /* White color when clicked/active */
   transform: scale(0.95);
 }
 
 .edit-btn i {
-  font-size: 63px; /* 25% larger than 50px, rounded */
+  font-size: 63px;
+  /* 25% larger than 50px, rounded */
   color: inherit;
   line-height: 1;
   margin: 0;
@@ -1085,8 +1241,10 @@ body {
 }
 
 .kit-nav-btn {
-  width: 75px; /* 25% larger than 60px */
-  height: 75px; /* 25% larger than 60px */
+  width: 75px;
+  /* 25% larger than 60px */
+  height: 75px;
+  /* 25% larger than 60px */
   background: transparent;
   border: none;
   color: var(--text-icon);
@@ -1104,12 +1262,14 @@ body {
 
 .kit-nav-btn:active,
 .kit-nav-btn.active {
-  color: var(--text-primary); /* White color when clicked/active */
+  color: var(--text-primary);
+  /* White color when clicked/active */
   transform: scale(0.95);
 }
 
 .kit-nav-btn i {
-  font-size: 75px; /* 25% larger than 60px */
+  font-size: 75px;
+  /* 25% larger than 60px */
   line-height: 1;
   display: block;
   color: inherit;
@@ -1121,7 +1281,8 @@ body {
 .kit-dropdown {
   position: relative;
   width: 100%;
-  max-width: 420px; /* 20% larger than presets (350px) */
+  max-width: 420px;
+  /* 20% larger than presets (350px) */
   font-family: "Playfair Display", serif;
   user-select: none;
   -webkit-user-select: none;
@@ -1132,7 +1293,8 @@ body {
 .kit-dropdown .dropdown-selected {
   background: transparent;
   color: var(--text-icon);
-  font-size: 58px; /* 20% larger than 48px */
+  font-size: 58px;
+  /* 20% larger than 48px */
   font-weight: 400;
   padding: 0 15px;
   cursor: pointer !important;
@@ -1151,7 +1313,8 @@ body {
 }
 
 .kit-dropdown .dropdown-arrow {
-  font-size: 29px; /* 20% larger than presets (24px) */
+  font-size: 29px;
+  /* 20% larger than presets (24px) */
   color: var(--text-icon);
   transition: transform 0.3s ease;
   user-select: none !important;
@@ -1175,7 +1338,8 @@ body {
   margin-top: 5px;
   /* Allow dropdown to extend through row 4 and row 5 */
   /* Row 4 (12%) + Row 5 (47%) = 59vh available */
-  max-height: calc(59vh - 20px); /* Subtract some padding */
+  max-height: calc(59vh - 20px);
+  /* Subtract some padding */
   overflow-y: auto;
   z-index: 1000;
   display: none;
@@ -1190,9 +1354,8 @@ body {
   padding: 12px 20px;
   color: var(--text-icon);
   font-family: "Playfair Display", serif;
-  font-size: var(
-    --dropdown-menu-font-size
-  ); /* Using global dropdown menu font size */
+  font-size: var(--dropdown-menu-font-size);
+  /* Using global dropdown menu font size */
   font-weight: 400;
   cursor: pointer !important;
   transition: all 0.2s ease;
@@ -1231,8 +1394,10 @@ body {
 }
 
 .kit-mixer-btn {
-  width: 75px !important; /* Standardized to 75px */
-  height: 75px !important; /* Standardized to 75px */
+  width: 75px !important;
+  /* Standardized to 75px */
+  height: 75px !important;
+  /* Standardized to 75px */
   background: transparent !important;
   border: none !important;
   cursor: pointer;
@@ -1246,7 +1411,8 @@ body {
 }
 
 .kit-mixer-btn i {
-  font-size: 63px; /* Adjusted to fit 75px button */
+  font-size: 63px;
+  /* Adjusted to fit 75px button */
   color: inherit;
   line-height: 1;
   margin: 0;
@@ -1258,7 +1424,8 @@ body {
 }
 
 .kit-mixer-btn:active {
-  color: var(--text-primary); /* White color while clicking */
+  color: var(--text-primary);
+  /* White color while clicking */
   transform: scale(0.95);
 }
 
@@ -1266,10 +1433,13 @@ body {
 .pattern-groups-section {
   height: var(--row4-height);
   background: var(--bg-secondary);
-  /* border-bottom: 1px solid var(--border-color); */ /* Commented out - no border between row4 and row5 */
+  /* border-bottom: 1px solid var(--border-color); */
+  /* Commented out - no border between row4 and row5 */
   display: flex;
-  align-items: flex-end; /* Align items to bottom */
-  padding: 0 20px 10px 20px; /* Add bottom padding */
+  align-items: flex-end;
+  /* Align items to bottom */
+  padding: 0 20px 10px 20px;
+  /* Add bottom padding */
 }
 
 .pattern-group-controls {
@@ -1279,8 +1449,10 @@ body {
 }
 
 .group-nav-btn {
-  width: 62px; /* 40% larger than 44px */
-  height: 62px; /* 40% larger than 44px */
+  width: 62px;
+  /* 40% larger than 44px */
+  height: 62px;
+  /* 40% larger than 44px */
   background: transparent;
   border: none;
   color: var(--text-icon);
@@ -1294,7 +1466,8 @@ body {
 }
 
 .group-nav-btn i {
-  font-size: 68px; /* 40% larger than 48.75px */
+  font-size: 68px;
+  /* 40% larger than 48.75px */
   color: var(--text-icon);
   display: flex;
   align-items: center;
@@ -1313,13 +1486,15 @@ body {
 /* Group dropdown - increased by 50% */
 .group-dropdown {
   position: relative;
-  min-width: 216px; /* 50% larger than 144px */
+  min-width: 216px;
+  /* 50% larger than 144px */
   margin: 0;
   padding: 0;
 }
 
 .group-dropdown .dropdown-selected {
-  padding: 0 18px 0 18px; /* Equal padding for true centering */
+  padding: 0 18px 0 18px;
+  /* Equal padding for true centering */
   background: transparent;
   border: none;
   border-radius: 4px;
@@ -1327,16 +1502,19 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 216px; /* Match the dropdown width */
+  max-width: 216px;
+  /* Match the dropdown width */
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
   position: relative;
   font-family: "Playfair Display", serif;
-  font-size: 38px; /* 40% larger than 27px */
+  font-size: 38px;
+  /* 40% larger than 27px */
   font-weight: 400;
-  color: var(--text-icon); /* Match preset and drumkit menu color */
+  color: var(--text-icon);
+  /* Match preset and drumkit menu color */
   white-space: nowrap;
   margin: 0;
   line-height: 1;
@@ -1347,8 +1525,10 @@ body {
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 36px; /* 40% larger than 26px */
-  color: var(--text-icon); /* Match preset and drumkit menu color */
+  font-size: 36px;
+  /* 40% larger than 26px */
+  color: var(--text-icon);
+  /* Match preset and drumkit menu color */
   transition: transform 0.3s ease;
   pointer-events: none;
 }
@@ -1377,21 +1557,24 @@ body {
 }
 
 .group-dropdown .dropdown-option {
-  padding: 12px 18px; /* 50% larger padding */
+  padding: 12px 18px;
+  /* 50% larger padding */
   cursor: pointer;
   transition: background 0.2s ease;
   font-family: "Playfair Display", serif;
-  font-size: var(
-    --dropdown-menu-font-size
-  ); /* Using global dropdown menu font size */
-  color: var(--text-icon); /* Match preset and drumkit menu color */
+  font-size: var(--dropdown-menu-font-size);
+  /* Using global dropdown menu font size */
+  color: var(--text-icon);
+  /* Match preset and drumkit menu color */
   white-space: nowrap;
-  text-align: center; /* Center the dropdown option text */
+  text-align: center;
+  /* Center the dropdown option text */
 }
 
 .group-dropdown .dropdown-option:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary); /* Brighten on hover */
+  color: var(--text-primary);
+  /* Brighten on hover */
 }
 
 .group-dropdown:hover .dropdown-selected {
@@ -1405,8 +1588,10 @@ body {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
-  padding: 0 20px; /* Match row4's horizontal padding */
-  gap: 0; /* Remove gap to maintain alignment */
+  padding: 0 20px;
+  /* Match row4's horizontal padding */
+  gap: 0;
+  /* Remove gap to maintain alignment */
 }
 
 /* Old left-half and right-half styles - removed as they're not used */
@@ -1418,48 +1603,60 @@ body {
   gap: 10px;
   width: 100%;
   max-width: 600px;
-  height: 100%; /* Fill available height */
+  height: 100%;
+  /* Fill available height */
 }
 
 .pattern-btn {
   background: transparent;
   background-image: url("Images/Button100.png");
-  background-size: 100% 600%; /* 6 states vertically */
-  background-position: 0 0%; /* Normal state - top segment */
+  background-size: 100% 600%;
+  /* 6 states vertically */
+  background-position: 0 0%;
+  /* Normal state - top segment */
   background-repeat: no-repeat;
   color: var(--text-black);
   border: none;
   font-family: "Playfair Display", serif;
-  font-size: 28.6px; /* 10% larger than 26px */
+  font-size: 28.6px;
+  /* 10% larger than 26px */
   font-weight: 300;
   cursor: pointer;
-  transition: all 0.02s ease; /* Near instantaneous transition */
+  transition: all 0.02s ease;
+  /* Near instantaneous transition */
   text-align: center;
   min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px;
-  padding-bottom: 11px; /* Add 5px more to bottom to push text up */
+  padding-bottom: 11px;
+  /* Add 5px more to bottom to push text up */
   letter-spacing: 0.5px;
-  white-space: nowrap; /* Prevent text from wrapping to new line */
+  white-space: nowrap;
+  /* Prevent text from wrapping to new line */
   /*text-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
   border-radius: 3px;
 }
 
 .pattern-btn:hover {
-  background-position: 0 40%; /* Third segment - WHITE button for hover */
-  color: var(--text-primary); /* White text on hover */
+  background-position: 0 40%;
+  /* Third segment - WHITE button for hover */
+  color: var(--text-primary);
+  /* White text on hover */
 }
 
 .pattern-btn:active,
 .pattern-btn.active {
-  background-position: 0 20%; /* Second segment - BLACK button for active/on */
+  background-position: 0 20%;
+  /* Second segment - BLACK button for active/on */
 }
 
 .pattern-btn.active:hover {
-  background-position: 0 60%; /* Fourth segment - hover while active */
-  color: var(--text-primary); /* White text on hover */
+  background-position: 0 60%;
+  /* Fourth segment - hover while active */
+  color: var(--text-primary);
+  /* White text on hover */
 }
 
 /* Top 20% - Control Labels */
@@ -1509,10 +1706,13 @@ body {
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Same gap for both */
+  gap: 8px;
+  /* Same gap for both */
   box-sizing: border-box;
-  height: 100%; /* Fill available height */
-  justify-content: space-between; /* Distribute buttons evenly */
+  height: 100%;
+  /* Fill available height */
+  justify-content: space-between;
+  /* Distribute buttons evenly */
 }
 
 .sliders-column {
@@ -1524,75 +1724,103 @@ body {
 
 .toggle-btn {
   background: transparent;
-  padding: 10px 12px; /* Reduced vertical padding for 6 buttons */
+  padding: 10px 12px;
+  /* Reduced vertical padding for 6 buttons */
   background-image: url("Images/Button080.png");
-  background-size: 100% 600%; /* 6 states vertically */
-  background-position: 0 0%; /* Normal state */
+  background-size: 100% 600%;
+  /* 6 states vertically */
+  background-position: 0 0%;
+  /* Normal state */
   background-repeat: no-repeat;
-  color: var(--text-black); /* Black text like matrix buttons */
+  color: var(--text-black);
+  /* Black text like matrix buttons */
   border: none;
   font-family: "Playfair Display", serif;
-  font-size: 23px; /* Reduced for 6 buttons */
-  font-weight: 300; /* Lighter weight for better readability */
+  font-size: 23px;
+  /* Reduced for 6 buttons */
+  font-weight: 300;
+  /* Lighter weight for better readability */
   cursor: pointer;
-  transition: all 0.02s ease; /* Near instantaneous transition */
+  transition: all 0.02s ease;
+  /* Near instantaneous transition */
   width: 100%;
-  flex: 1; /* Grow to fill available space - match fill buttons */
-  line-height: 0.9; /* Compensate for Playfair Display vs Roboto height */
+  flex: 1;
+  /* Grow to fill available space - match fill buttons */
+  line-height: 0.9;
+  /* Compensate for Playfair Display vs Roboto height */
   /* Removed text-shadow for better readability */
 }
 
 .toggle-btn:hover {
-  background-position: 0 40%; /* WHITE button for hover */
-  color: var(--text-primary); /* White text on hover */
+  background-position: 0 40%;
+  /* WHITE button for hover */
+  color: var(--text-primary);
+  /* White text on hover */
 }
 
 .toggle-btn.active {
-  background-position: 0 20%; /* BLACK button for active/on */
+  background-position: 0 20%;
+  /* BLACK button for active/on */
 }
 
 .toggle-btn.active:hover {
-  background-position: 0 60%; /* Fourth segment - hover while active */
-  color: var(--text-primary); /* White text on hover */
+  background-position: 0 60%;
+  /* Fourth segment - hover while active */
+  color: var(--text-primary);
+  /* White text on hover */
 }
 
 /* Lock button (last toggle) matches Solo button padding */
 .toggle-btn[data-toggle="lock"] {
-  padding-bottom: 12px; /* Reduced for 6 buttons */
+  padding-bottom: 12px;
+  /* Reduced for 6 buttons */
 }
 
 .fill-btn {
   background: transparent;
-  padding: 10px 12px; /* Reduced vertical padding for 6 buttons */
+  padding: 10px 12px;
+  /* Reduced vertical padding for 6 buttons */
   background-image: url("Images/Button080.png");
-  background-size: 100% 600%; /* 6 states vertically */
-  background-position: 0 0%; /* Normal state */
+  background-size: 100% 600%;
+  /* 6 states vertically */
+  background-position: 0 0%;
+  /* Normal state */
   background-repeat: no-repeat;
-  color: var(--text-black); /* Black text like matrix buttons */
+  color: var(--text-black);
+  /* Black text like matrix buttons */
   border: none;
   font-family: "Playfair Display", serif;
-  font-size: 23px; /* Reduced for 6 buttons */
+  font-size: 23px;
+  /* Reduced for 6 buttons */
   font-weight: 300;
   cursor: pointer;
-  transition: all 0.02s ease; /* Near instantaneous transition */
+  transition: all 0.02s ease;
+  /* Near instantaneous transition */
   width: 100%;
-  flex: 1; /* Grow to fill available space */
-  line-height: 0.9; /* Compensate for Playfair Display vs Roboto height - same as toggle buttons */
+  flex: 1;
+  /* Grow to fill available space */
+  line-height: 0.9;
+  /* Compensate for Playfair Display vs Roboto height - same as toggle buttons */
   /* Removed text-shadow for better readability */
 }
 
 .fill-btn:hover {
-  background-position: 0 40%; /* WHITE button for hover */
-  color: var(--text-primary); /* White text on hover */
+  background-position: 0 40%;
+  /* WHITE button for hover */
+  color: var(--text-primary);
+  /* White text on hover */
 }
 
 .fill-btn.active {
-  background-position: 0 20%; /* BLACK button for active/on */
+  background-position: 0 20%;
+  /* BLACK button for active/on */
 }
 
 .fill-btn.active:hover {
-  background-position: 0 60%; /* Fourth segment - hover while active */
-  color: var(--text-primary); /* White text on hover */
+  background-position: 0 60%;
+  /* Fourth segment - hover while active */
+  color: var(--text-primary);
+  /* White text on hover */
 }
 
 /* Numbered fills buttons (1-4) use Roboto */
@@ -1601,20 +1829,24 @@ body {
 .fill-btn[data-fill="16"],
 .fill-btn[data-fill="32"] {
   font-family: "Roboto", sans-serif;
-  font-weight: 400; /* Regular weight */
+  font-weight: 400;
+  /* Regular weight */
 }
 
 /* Now button and Solo button use Playfair Display */
 .fill-btn[data-fill="now"] {
   font-family: "Playfair Display", serif;
-  font-weight: 300; /* Match other Playfair buttons */
+  font-weight: 300;
+  /* Match other Playfair buttons */
 }
 
 /* Solo button keeps Playfair Display */
 .fill-btn.solo {
   font-family: "Playfair Display", serif;
-  font-weight: 300; /* Match other Playfair buttons */
-  padding-bottom: 12px; /* Reduced for 6 buttons */
+  font-weight: 300;
+  /* Match other Playfair buttons */
+  padding-bottom: 12px;
+  /* Reduced for 6 buttons */
 }
 
 .main-sliders {
@@ -1640,8 +1872,10 @@ body {
 /* Custom Vertical Sliders */
 .custom-slider {
   position: relative;
-  width: 32px; /* Width for click area */
-  height: calc(100vh * 0.55 * 0.6 - 40px); /* Same height as before */
+  width: 32px;
+  /* Width for click area */
+  height: calc(100vh * 0.55 * 0.6 - 40px);
+  /* Same height as before */
   min-height: 200px;
   max-height: 400px;
   display: flex;
@@ -1654,12 +1888,16 @@ body {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 6px; /* Slightly wider for visibility */
+  width: 6px;
+  /* Slightly wider for visibility */
   height: 100%;
-  background: #3a3a3a; /* Slightly lighter to ensure visibility */
+  background: #3a3a3a;
+  /* Slightly lighter to ensure visibility */
   border-radius: 2px;
-  z-index: 1; /* Base layer */
-  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3); /* Inner shadow for depth */
+  z-index: 1;
+  /* Base layer */
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3);
+  /* Inner shadow for depth */
 }
 
 .slider-fill {
@@ -1667,28 +1905,36 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 50%; /* Will be updated dynamically */
-  background: #777777; /* Light grey - filled portion (below thumb) */
-  border-radius: 0 0 2px 2px; /* Only round bottom corners */
-  transition: none; /* No transition for immediate response */
+  height: 50%;
+  /* Will be updated dynamically */
+  background: #777777;
+  /* Light grey - filled portion (below thumb) */
+  border-radius: 0 0 2px 2px;
+  /* Only round bottom corners */
+  transition: none;
+  /* No transition for immediate response */
 }
 
 .slider-thumb {
   position: absolute;
   left: 50%;
-  bottom: 50%; /* Will be updated dynamically */
+  bottom: 50%;
+  /* Will be updated dynamically */
   transform: translateX(-50%) translateY(50%);
   width: 32px;
   height: 24px;
-  background: #999999; /* Medium-light grey for thumb */
+  background: #999999;
+  /* Medium-light grey for thumb */
   border-radius: 7px;
   box-shadow:
     inset 1px 1px 2px rgba(255, 255, 255, 0.2),
     inset -1px -1px 2px rgba(0, 0, 0, 0.3),
     1px 1px 3px rgba(0, 0, 0, 0.2);
   cursor: grab;
-  z-index: 10; /* Higher z-index to ensure it's above track */
-  pointer-events: all; /* Ensure it receives mouse events */
+  z-index: 10;
+  /* Higher z-index to ensure it's above track */
+  pointer-events: all;
+  /* Ensure it receives mouse events */
 }
 
 .slider-thumb:active {
@@ -1704,32 +1950,47 @@ body {
   background: #bbbbbb;
 }
 
+/* Row 5 specific slider knob dimensions (Swing, Energy, Volume) */
+.row5-right-area3 .slider-thumb,
+.row5-right-area4 .slider-thumb,
+.row5-right-area5 .slider-thumb {
+  width: 44px;
+  height: 20px;
+}
+
 /* Slave slider states - visual feedback for linked sliders */
 .custom-slider.slave .slider-fill {
-  background: var(--text-black) !important; /* Black for slave sliders */
+  background: var(--text-black) !important;
+  /* Black for slave sliders */
 }
 
 .custom-slider.slave .slider-thumb {
-  background: var(--text-black) !important; /* Black thumb for slave sliders */
+  background: var(--text-black) !important;
+  /* Black thumb for slave sliders */
   cursor: not-allowed !important;
 }
 
 .custom-slider.slave .slider-track {
-  opacity: 0.7; /* Slightly dimmed track for slave sliders */
+  opacity: 0.7;
+  /* Slightly dimmed track for slave sliders */
 }
 
 /* Master slider states - optional visual enhancement */
 .custom-slider.master .slider-fill {
-  background: #999999; /* Slightly brighter for master */
+  background: #999999;
+  /* Slightly brighter for master */
 }
 
 .custom-slider.master .slider-thumb {
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* Subtle glow for master */
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  /* Subtle glow for master */
 }
 
 .link-icon {
-  width: 40px; /* Doubled from 20px */
-  height: 40px; /* Doubled from 20px */
+  width: 40px;
+  /* Doubled from 20px */
+  height: 40px;
+  /* Doubled from 20px */
   background: transparent;
   border: none;
   cursor: pointer;
@@ -1741,8 +2002,10 @@ body {
 }
 
 .link-icon i {
-  font-size: 32px; /* Doubled from 16px */
-  color: var(--text-icon); /* Default grey state - unlinked */
+  font-size: 32px;
+  /* Doubled from 16px */
+  color: var(--text-icon);
+  /* Default grey state - unlinked */
   transition:
     color 0.2s ease,
     transform 0.2s ease;
@@ -1752,17 +2015,20 @@ body {
 
 /* Unlinked state (default) */
 .link-icon:not(.linked):not(.master) i {
-  color: var(--text-icon); /* Grey */
+  color: var(--text-icon);
+  /* Grey */
 }
 
 /* Linked slave state */
 .link-icon.linked:not(.master) i {
-  color: var(--text-black); /* Black for slaves */
+  color: var(--text-black);
+  /* Black for slaves */
 }
 
 /* Master state */
 .link-icon.master i {
-  color: var(--text-primary); /* White for master */
+  color: var(--text-primary);
+  /* White for master */
 }
 
 /* Hover effects */
@@ -1771,16 +2037,20 @@ body {
 }
 
 .link-icon:hover:not(.linked):not(.master) i {
-  color: var(--text-secondary); /* Lighter grey on hover when unlinked */
+  color: var(--text-secondary);
+  /* Lighter grey on hover when unlinked */
 }
 
 .link-icon.linked:hover:not(.master) i {
-  color: var(--text-muted); /* Darker on hover when slave */
+  color: var(--text-muted);
+  /* Darker on hover when slave */
 }
 
 .link-icon.master:hover i {
-  color: var(--text-primary); /* Stay white on hover when master */
-  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)); /* Glow effect */
+  color: var(--text-primary);
+  /* Stay white on hover when master */
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+  /* Glow effect */
 }
 
 /* Row 6: Loop Section  - Timeline Controls */
@@ -1790,7 +2060,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 25px; /* Reduced from 50px to 25px */
+  padding: 0 25px;
+  /* Reduced from 50px to 25px */
   border-top: 1px solid var(--border-color);
 }
 
@@ -1798,7 +2069,8 @@ body {
 .loop-end-label {
   font-size: 18px;
   color: var(--text-muted);
-  font-weight: 300; /* Match pattern button weight */
+  font-weight: 300;
+  /* Match pattern button weight */
   letter-spacing: 1.2px;
   font-family: "Playfair Display", serif;
   min-width: 80px;
@@ -1807,7 +2079,8 @@ body {
 
 .loop-timeline {
   flex: 1;
-  margin: 0 25px; /* Reduced from 50px to 25px */
+  margin: 0 25px;
+  /* Reduced from 50px to 25px */
   height: 24px;
   display: flex;
   align-items: center;
@@ -1815,19 +2088,26 @@ body {
 
 .timeline-track {
   width: 100%;
-  height: 4px; /* Same thickness as vertical sliders */
-  background: #444444; /* Gray color to match vertical sliders */
+  height: 4px;
+  /* Same thickness as vertical sliders */
+  background: #444444;
+  /* Gray color to match vertical sliders */
   border-radius: 2px;
   position: relative;
-  border: none; /* Remove border for cleaner look */
-  opacity: 0.7; /* Subtle opacity like vertical sliders */
+  border: none;
+  /* Remove border for cleaner look */
+  opacity: 0.7;
+  /* Subtle opacity like vertical sliders */
 }
 
 .timeline-handle {
   width: 24px;
-  height: 32px; /* Taller to match vertical slider proportions */
-  background: var(--text-icon); /* Match vertical slider thumb color */
-  border-radius: 7px; /* Updated to match vertical sliders */
+  height: 32px;
+  /* Taller to match vertical slider proportions */
+  background: var(--text-icon);
+  /* Match vertical slider thumb color */
+  border-radius: 7px;
+  /* Updated to match vertical sliders */
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -1891,6 +2171,7 @@ body {
     opacity: 0;
     transform: translateY(5px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1902,6 +2183,7 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(-5px);
@@ -1955,89 +2237,116 @@ body {
 .row3-area-1 {
   flex: 0 0 var(--row3-area1-width);
   display: flex;
-  align-items: flex-start; /* Top-align player number */
-  justify-content: flex-start; /* Left-align player number */
-  padding-left: 20px; /* Match the container padding */
-  padding-top: 5px; /* Small top padding */
+  align-items: flex-start;
+  /* Top-align player number */
+  justify-content: flex-start;
+  /* Left-align player number */
+  padding-left: 20px;
+  /* Match the container padding */
+  padding-top: 5px;
+  /* Small top padding */
 }
 
 .row3-area-2 {
   flex: 0 0 var(--row3-area2-width);
   display: flex;
-  align-items: flex-start; /* Top-align edit button */
-  justify-content: flex-end; /* Right-align edit button */
-  padding-top: 5px; /* Small top padding */
+  align-items: flex-start;
+  /* Top-align edit button */
+  justify-content: flex-end;
+  /* Right-align edit button */
+  padding-top: 5px;
+  /* Small top padding */
 }
 
 .row3-area-3 {
   flex: 0 0 var(--row3-area3-width);
   display: flex;
-  align-items: flex-start; /* Top-align dropdown and chevrons */
+  align-items: flex-start;
+  /* Top-align dropdown and chevrons */
   justify-content: center;
   gap: 10px;
-  padding-top: 5px; /* Small top padding */
+  padding-top: 5px;
+  /* Small top padding */
 }
 
 .row3-area-4 {
   flex: 0 0 var(--row3-area4-width);
   display: flex;
-  align-items: center; /* Center vertically for both icons */
-  justify-content: flex-start; /* Left-align mixer icon */
-  gap: 10px; /* Space between mixer and save buttons */
+  align-items: center;
+  /* Center vertically for both icons */
+  justify-content: flex-start;
+  /* Left-align mixer icon */
+  gap: 10px;
+  /* Space between mixer and save buttons */
 }
 
 .row3-area-5 {
   flex: 0 0 var(--row3-area5-width);
   display: flex;
-  align-items: flex-start; /* Top-align mute button */
-  justify-content: flex-end; /* Right-align mute button */
-  padding-right: 20px; /* Match the container padding */
-  padding-top: 5px; /* Small top padding */
+  align-items: flex-start;
+  /* Top-align mute button */
+  justify-content: flex-end;
+  /* Right-align mute button */
+  padding-right: 20px;
+  /* Match the container padding */
+  padding-top: 5px;
+  /* Small top padding */
 }
 
 /* Row 4 Main Divisions */
 .row4-left {
   flex: 0 0 var(--row4-left-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
+  align-items: flex-end;
+  /* Align to bottom */
 }
 
 .row4-right {
   flex: 0 0 var(--row4-right-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
+  align-items: flex-end;
+  /* Align to bottom */
 }
 
 /* Row 4 Left Areas */
 .row4-left-area1 {
   flex: 0 0 var(--row4-left-area1-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
-  justify-content: flex-end; /* Right-align gear icon */
-  padding-right: 10px; /* Add some space from the edge */
+  align-items: flex-end;
+  /* Align to bottom */
+  justify-content: flex-end;
+  /* Right-align gear icon */
+  padding-right: 10px;
+  /* Add some space from the edge */
 }
 
 .row4-left-area2 {
   flex: 0 0 var(--row4-left-area2-width);
   display: flex;
-  align-items: center; /* Center vertically */
+  align-items: center;
+  /* Center vertically */
   justify-content: center;
-  gap: 10px; /* Reduced gap for tighter grouping */
+  gap: 10px;
+  /* Reduced gap for tighter grouping */
 }
 
 .row4-left-area3 {
   flex: 0 0 var(--row4-left-area3-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom like other row4 areas */
-  justify-content: flex-start; /* Align to left */
-  padding-left: 10px; /* Add spacing from area2 */
+  align-items: flex-end;
+  /* Align to bottom like other row4 areas */
+  justify-content: flex-start;
+  /* Align to left */
+  padding-left: 10px;
+  /* Add spacing from area2 */
 }
 
 /* Row 4 Right Areas - Labels */
 .row4-right-area1 {
   flex: 0 0 var(--row4-right-area1-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
+  align-items: flex-end;
+  /* Align to bottom */
   justify-content: center;
   height: 100%;
 }
@@ -2045,7 +2354,8 @@ body {
 .row4-right-area2 {
   flex: 0 0 var(--row4-right-area2-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
+  align-items: flex-end;
+  /* Align to bottom */
   justify-content: center;
   height: 100%;
 }
@@ -2053,7 +2363,8 @@ body {
 .row4-right-area3 {
   flex: 0 0 var(--row4-right-area3-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
+  align-items: flex-end;
+  /* Align to bottom */
   justify-content: center;
   height: 100%;
 }
@@ -2061,7 +2372,8 @@ body {
 .row4-right-area4 {
   flex: 0 0 var(--row4-right-area4-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
+  align-items: flex-end;
+  /* Align to bottom */
   justify-content: center;
   height: 100%;
 }
@@ -2069,15 +2381,18 @@ body {
 .row4-right-area5 {
   flex: 0 0 var(--row4-right-area5-width);
   display: flex;
-  align-items: flex-end; /* Align to bottom */
+  align-items: flex-end;
+  /* Align to bottom */
   justify-content: center;
   height: 100%;
 }
 
 .section-label {
   font-family: "Playfair Display", serif !important;
-  font-size: 29px; /* Reduced by 5% more from 31px */
-  color: var(--text-icon); /* Match preset and drumkit menu color */
+  font-size: 29px;
+  /* Reduced by 5% more from 31px */
+  color: var(--text-icon);
+  /* Match preset and drumkit menu color */
   text-transform: none;
   letter-spacing: 0.5px;
   font-weight: 300;
@@ -2087,9 +2402,11 @@ body {
 .row5-left {
   flex: 0 0 var(--row5-left-width);
   display: flex;
-  align-items: stretch; /* Stretch to full height */
+  align-items: stretch;
+  /* Stretch to full height */
   justify-content: center;
-  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  padding: 5px 10px 20px 10px;
+  /* Reduced top padding */
 }
 
 .row5-right {
@@ -2105,10 +2422,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: stretch;
-  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  padding: 5px 10px 20px 10px;
+  /* Reduced top padding */
   box-sizing: border-box;
   overflow: hidden;
-  height: 100%; /* Match row5 height */
+  height: 100%;
+  /* Match row5 height */
 }
 
 .row5-right-area2 {
@@ -2117,10 +2436,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: stretch;
-  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  padding: 5px 10px 20px 10px;
+  /* Reduced top padding */
   box-sizing: border-box;
   overflow: hidden;
-  height: 100%; /* Match row5 height */
+  height: 100%;
+  /* Match row5 height */
 }
 
 .row5-right-area3 {
@@ -2128,8 +2449,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end; /* Align sliders to bottom */
-  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  justify-content: flex-end;
+  /* Align sliders to bottom */
+  padding: 5px 10px 20px 10px;
+  /* Reduced top padding */
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -2139,8 +2462,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end; /* Align sliders to bottom */
-  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  justify-content: flex-end;
+  /* Align sliders to bottom */
+  padding: 5px 10px 20px 10px;
+  /* Reduced top padding */
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -2150,8 +2475,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end; /* Align sliders to bottom */
-  padding: 5px 10px 20px 10px; /* Reduced top padding */
+  justify-content: flex-end;
+  /* Align sliders to bottom */
+  padding: 5px 10px 20px 10px;
+  /* Reduced top padding */
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -2168,11 +2495,15 @@ body {
 
 /* Mute drummer button - using OTTO_Button_Glyph segmented icon */
 .mute-drummer-btn {
-  width: 75px !important; /* 25% larger than 60px */
-  height: 75px !important; /* 25% larger than 60px */
+  width: 75px !important;
+  /* 25% larger than 60px */
+  height: 75px !important;
+  /* 25% larger than 60px */
   background-image: url("Images/OTTO_Button_Glyph.png");
-  background-size: 100% 600% !important; /* 6 states vertically */
-  background-position: 0 20% !important; /* Normal state - shows unmuted drummer */
+  background-size: 100% 600% !important;
+  /* 6 states vertically */
+  background-position: 0 20% !important;
+  /* Normal state - shows unmuted drummer */
   background-color: transparent !important;
   border: none !important;
   cursor: pointer;
@@ -2184,28 +2515,34 @@ body {
 }
 
 .mute-drummer-btn:hover {
-  background-position: 0 40% !important; /* Hover state */
+  background-position: 0 40% !important;
+  /* Hover state */
   background-color: transparent !important;
 }
 
 .mute-drummer-btn.muted {
-  background-position: 0 0% !important; /* Muted state - shows crossed out */
+  background-position: 0 0% !important;
+  /* Muted state - shows crossed out */
   background-color: transparent !important;
 }
 
 .mute-drummer-btn.muted:hover {
-  background-position: 0 60% !important; /* Muted hover state */
+  background-position: 0 60% !important;
+  /* Muted hover state */
   background-color: transparent !important;
 }
 
 .mute-icon {
-  display: none; /* Hide the img tag - using background image instead */
+  display: none;
+  /* Hide the img tag - using background image instead */
 }
 
 /* Edit pattern button - increased by 50% from previous */
 .edit-pattern-btn {
-  width: 67px; /* 40% larger than 48px */
-  height: 67px; /* 40% larger than 48px */
+  width: 67px;
+  /* 40% larger than 48px */
+  height: 67px;
+  /* 40% larger than 48px */
   background: transparent;
   border: none;
   cursor: pointer;
@@ -2218,7 +2555,8 @@ body {
 }
 
 .edit-pattern-btn i {
-  font-size: 50px; /* 40% larger than 36px */
+  font-size: 50px;
+  /* 40% larger than 36px */
   color: var(--text-icon);
 }
 
@@ -2228,7 +2566,8 @@ body {
 
 .edit-pattern-btn:active i,
 .edit-pattern-btn.active i {
-  color: var(--text-primary); /* White icon when clicked/active */
+  color: var(--text-primary);
+  /* White icon when clicked/active */
 }
 
 /* Generic Modal Window Styles */
@@ -2364,14 +2703,13 @@ body {
 /* Pattern Edit Panel - Simple slide-out panel */
 .pattern-edit-panel {
   position: fixed;
-  right: -100%; /* Fully hidden off-screen initially */
-  top: calc(
-    var(--row1-height) + var(--row2-height) + var(--row3-height)
-  ); /* Start at row 4 */
+  right: -100%;
+  /* Fully hidden off-screen initially */
+  top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height));
+  /* Start at row 4 */
   width: 50%;
-  height: calc(
-    var(--row4-height) + var(--row5-height)
-  ); /* Cover rows 4 and 5 */
+  height: calc(var(--row4-height) + var(--row5-height));
+  /* Cover rows 4 and 5 */
   background: var(--bg-primary);
   border-left: 2px solid var(--border-color);
   box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
@@ -2383,7 +2721,8 @@ body {
 }
 
 .pattern-edit-panel.active {
-  right: 0; /* Slide in when active */
+  right: 0;
+  /* Slide in when active */
 }
 
 .panel-header {
@@ -2393,7 +2732,8 @@ body {
   padding: 15px 20px;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  height: 60px; /* Slightly taller for better visual hierarchy */
+  height: 60px;
+  /* Slightly taller for better visual hierarchy */
 }
 
 .panel-header-left {
@@ -2405,7 +2745,8 @@ body {
 .panel-header-divider {
   width: 1px;
   height: 30px;
-  background: #666666; /* Medium grey - visible but not too prominent */
+  background: #666666;
+  /* Medium grey - visible but not too prominent */
   margin: 0 20px;
 }
 
@@ -2483,8 +2824,10 @@ body {
 
 /* Delete button in row 4 area 3 */
 .row4-left-area3 .group-delete-btn {
-  width: 62px; /* Matched to chevron size */
-  height: 62px; /* Matched to chevron size */
+  width: 62px;
+  /* Matched to chevron size */
+  height: 62px;
+  /* Matched to chevron size */
   background: transparent;
   border: none;
   color: var(--text-muted);
@@ -2501,7 +2844,8 @@ body {
 }
 
 .row4-left-area3 .group-delete-btn i {
-  font-size: 68px; /* Matched to chevron icon size */
+  font-size: 68px;
+  /* Matched to chevron icon size */
 }
 
 /* Edit mode class for main interface */
@@ -2510,7 +2854,8 @@ body {
 }
 
 .main-interface.edit-mode .pattern-btn.drag-over {
-  background-position: 0 40%; /* Highlight on drag over */
+  background-position: 0 40%;
+  /* Highlight on drag over */
   transform: scale(1.05);
 }
 
@@ -2523,7 +2868,8 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  background: var(--bg-primary); /* Opaque background */
+  background: var(--bg-primary);
+  /* Opaque background */
 }
 
 .pattern-group-body {
@@ -2531,26 +2877,30 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: var(--bg-secondary); /* Match main interface background */
+  background: var(--bg-secondary);
+  /* Match main interface background */
 }
 
 .pattern-group-container {
   display: flex;
   flex: 1;
   height: 100%;
-  background: var(--bg-secondary); /* Ensure opaque background */
+  background: var(--bg-secondary);
+  /* Ensure opaque background */
 }
 
 /* Left side matches row5-left exactly */
 .pattern-group-left {
-  flex: 0 0 var(--row5-left-width); /* Use the actual variable! */
+  flex: 0 0 var(--row5-left-width);
+  /* Use the actual variable! */
   display: flex;
   flex-direction: column;
 }
 
 /* Right side for available patterns */
 .pattern-group-right {
-  flex: 0 0 var(--row5-right-width); /* Use the actual variable! */
+  flex: 0 0 var(--row5-right-width);
+  /* Use the actual variable! */
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border-color);
@@ -2570,9 +2920,11 @@ body {
 
 /* Pattern Group Selector Row - Using actual row 4 variables */
 .pattern-group-selector-row {
-  height: var(--row4-height); /* Use the actual row 4 height variable! */
+  height: var(--row4-height);
+  /* Use the actual row 4 height variable! */
   display: flex;
-  align-items: flex-end; /* Align to bottom like row 4 */
+  align-items: flex-end;
+  /* Align to bottom like row 4 */
   justify-content: center;
   padding: 0 20px 10px 20px;
   gap: 10px;
@@ -2715,29 +3067,36 @@ body {
 
 /* Pattern Grid Editor - Using row 5 variables */
 .pattern-grid-editor {
-  height: var(--row5-height); /* Use the actual row 5 height variable! */
+  height: var(--row5-height);
+  /* Use the actual row 5 height variable! */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 10px 20px 10px; /* Same padding as row5-left */
+  padding: 5px 10px 20px 10px;
+  /* Same padding as row5-left */
 }
 
 .pattern-edit-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 10px; /* Match main grid gap */
+  gap: 10px;
+  /* Match main grid gap */
   width: 100%;
-  max-width: 600px; /* Same as main pattern grid */
+  max-width: 600px;
+  /* Same as main pattern grid */
   height: 100%;
-  aspect-ratio: 1; /* Keep it square */
+  aspect-ratio: 1;
+  /* Keep it square */
 }
 
 .pattern-drop-zone {
   background: transparent;
   background-image: url("Images/Button100.png");
-  background-size: 100% 600%; /* 6 states vertically */
-  background-position: 0 0%; /* Normal state - top segment */
+  background-size: 100% 600%;
+  /* 6 states vertically */
+  background-position: 0 0%;
+  /* Normal state - top segment */
   background-repeat: no-repeat;
   border: none;
   border-radius: 3px;
@@ -2745,7 +3104,8 @@ body {
   align-items: center;
   justify-content: center;
   font-family: "Playfair Display", serif;
-  font-size: 28.6px; /* Exact same as pattern-btn */
+  font-size: 28.6px;
+  /* Exact same as pattern-btn */
   font-weight: 300;
   color: var(--text-black);
   cursor: pointer;
@@ -2753,19 +3113,22 @@ body {
   position: relative;
   min-height: 60px;
   padding: 6px;
-  padding-bottom: 11px; /* Push text up like main buttons */
+  padding-bottom: 11px;
+  /* Push text up like main buttons */
   letter-spacing: 0.5px;
   white-space: nowrap;
   text-align: center;
 }
 
 .pattern-drop-zone.has-pattern {
-  background-position: 0 20%; /* Second segment - BLACK button for filled */
+  background-position: 0 20%;
+  /* Second segment - BLACK button for filled */
   color: var(--text-black);
 }
 
 .pattern-drop-zone.drag-over {
-  background-position: 0 40%; /* Third segment - WHITE button for drag over */
+  background-position: 0 40%;
+  /* Third segment - WHITE button for drag over */
   color: var(--text-primary);
   transform: scale(1.02);
 }
@@ -2869,7 +3232,8 @@ body {
 .group-action-btn.done-compact {
   background: var(--accent-color);
   border-color: var(--accent-color);
-  margin-left: auto; /* Push to the right */
+  margin-left: auto;
+  /* Push to the right */
 }
 
 .group-action-btn.done-compact:hover {
@@ -2908,15 +3272,18 @@ body {
 }
 
 .pattern-btn.drag-over {
-  background-position: 0 40% !important; /* WHITE button for drag over */
+  background-position: 0 40% !important;
+  /* WHITE button for drag over */
   transform: scale(1.05);
   color: var(--text-primary) !important;
 }
 
 /* Delete button styling */
 .group-delete-btn {
-  width: 67px; /* Match edit-pattern-btn size */
-  height: 67px; /* Match edit-pattern-btn size */
+  width: 67px;
+  /* Match edit-pattern-btn size */
+  height: 67px;
+  /* Match edit-pattern-btn size */
   background: transparent;
   border: none;
   color: var(--text-icon);
@@ -2932,16 +3299,19 @@ body {
 }
 
 .group-delete-btn i {
-  font-size: 50px; /* Match edit-pattern-btn icon size */
+  font-size: 50px;
+  /* Match edit-pattern-btn icon size */
   color: var(--text-icon);
 }
 
 .group-delete-btn:hover i {
-  color: #ff4444; /* Red on hover */
+  color: #ff4444;
+  /* Red on hover */
 }
 
 .group-delete-btn:active i {
-  color: var(--text-primary); /* White when clicked */
+  color: var(--text-primary);
+  /* White when clicked */
   transform: scale(0.95);
 }
 
@@ -2979,12 +3349,14 @@ body {
   padding: 15px 20px;
   border-bottom: 1px solid var(--border-color);
 }
+
 /* ========================================
    Slide-up Panels - New implementation for modals
    ======================================== */
 
 .slide-up-panel {
-  position: absolute; /* Changed from fixed to absolute to be relative to interface-container */
+  position: absolute;
+  /* Changed from fixed to absolute to be relative to interface-container */
   left: 0;
   width: 100%;
   background: var(--bg-primary);
@@ -2998,35 +3370,35 @@ body {
 
 /* Full height panels (Settings, Presets, Link, Cloud) - from row 2 to row 6 */
 .slide-up-panel.full-height-panel {
-  top: calc(var(--row1-height)); /* Position at row 2 */
-  height: calc(100% - var(--row1-height)); /* Cover rows 2-6 */
-  transform: translateY(
-    calc(100% + 30px)
-  ); /* Move further down to hide shadow (20px shadow + 10px buffer) */
+  top: calc(var(--row1-height));
+  /* Position at row 2 */
+  height: calc(100% - var(--row1-height));
+  /* Cover rows 2-6 */
+  transform: translateY(calc(100% + 30px));
+  /* Move further down to hide shadow (20px shadow + 10px buffer) */
   transition: transform 0.3s ease;
 }
 
 /* Partial height panels (Drumkit, Mixer) - from row 4 to row 6 */
 .slide-up-panel.partial-height-panel {
-  top: calc(
-    var(--row1-height) + var(--row2-height) + var(--row3-height)
-  ); /* Position at row 4 */
-  height: calc(
-    100% - var(--row1-height) - var(--row2-height) - var(--row3-height)
-  ); /* Cover rows 4-6 */
-  transform: translateY(
-    calc(100% + 30px)
-  ); /* Move further down to hide shadow (20px shadow + 10px buffer) */
+  top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height));
+  /* Position at row 4 */
+  height: calc(100% - var(--row1-height) - var(--row2-height) - var(--row3-height));
+  /* Cover rows 4-6 */
+  transform: translateY(calc(100% + 30px));
+  /* Move further down to hide shadow (20px shadow + 10px buffer) */
   transition: transform 0.3s ease;
 }
 
 /* Active state - slide up into view */
 .slide-up-panel.full-height-panel.active {
-  transform: translateY(0); /* Slide up to normal position */
+  transform: translateY(0);
+  /* Slide up to normal position */
 }
 
 .slide-up-panel.partial-height-panel.active {
-  transform: translateY(0); /* Slide up to normal position */
+  transform: translateY(0);
+  /* Slide up to normal position */
 }
 
 /* Panel header styling */
@@ -3209,7 +3581,8 @@ body {
 /* Online Store panel styling */
 #store-panel .store-body {
   padding: 0;
-  height: calc(100% - 60px); /* Account for panel header */
+  height: calc(100% - 60px);
+  /* Account for panel header */
   display: flex;
   flex-direction: column;
   position: relative;
@@ -3232,12 +3605,14 @@ body {
   color: var(--text-secondary);
   font-size: 18px;
   z-index: 10;
-  pointer-events: none; /* Allow clicks through to iframe */
+  pointer-events: none;
+  /* Allow clicks through to iframe */
 }
 
 .store-error-message {
   color: var(--text-primary);
-  pointer-events: auto; /* Allow interaction with error message */
+  pointer-events: auto;
+  /* Allow interaction with error message */
 }
 
 .store-iframe {
@@ -3278,6 +3653,8 @@ body {
 .edit-btn.panel-active,
 .kit-mixer-btn.panel-active,
 .kit-edit-btn.panel-active {
-  background: transparent; /* NEVER change background */
-  color: var(--text-primary); /* Only change icon color to white */
+  background: transparent;
+  /* NEVER change background */
+  color: var(--text-primary);
+  /* Only change icon color to white */
 }
