@@ -10,6 +10,10 @@
 class OTTOAccurateInterface {
     constructor() {
         this.version = '1.0.0';  // Dynamic version number
+        
+        // Initialize Window Manager
+        this.windowManager = new WindowManager(this);
+        
         this.maxPlayers = 8;  // Maximum possible players
         this.numberOfPlayers = 4;  // Default active players (configurable 4-8)
         this.currentPlayer = 1;
@@ -1931,11 +1935,11 @@ class OTTOAccurateInterface {
             cspMeta.content = [
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline'", // Allow inline scripts (needed for some UI)
-                "style-src 'self' 'unsafe-inline'", // Allow inline styles
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com", // Allow inline styles and external fonts
                 "img-src 'self' data: blob:",
-                "font-src 'self' data:",
+                "font-src 'self' data: https://fonts.gstatic.com",
                 "connect-src 'self'",
-                "frame-src 'none'", // Prevent iframe embedding
+                "frame-src 'self' https://my-store-1008202.creator-spring.com https://LarrySeyer.com", // Allow store iframe
                 "object-src 'none'", // Prevent plugins
                 "base-uri 'self'",
                 "form-action 'self'"
@@ -2560,209 +2564,55 @@ class OTTOAccurateInterface {
     }
 
     setupSettingsWindow() {
-        const settingsPanel = document.getElementById('settings-panel');
-        const settingsPanelClose = document.getElementById('settings-panel-close');
+        // WindowManager handles panel open/close
+        // Just setup the factory reset button
         const settingsFactoryResetBtn = document.getElementById('settings-factory-reset-btn');
-
-        // Close settings panel
-        if (settingsPanelClose) {
-            settingsPanelClose.addEventListener('click', () => {
-                if (settingsPanel) {
-                    settingsPanel.classList.remove('active');
-                    // Remove button active state
-                    const btn = document.getElementById('settings-btn');
-                    if (btn) {
-                        btn.classList.remove('panel-active');
-                    }
-                }
-            });
-        }
 
         // Factory reset button in settings
         if (settingsFactoryResetBtn) {
             settingsFactoryResetBtn.addEventListener('click', () => {
                 this.resetToFactoryDefaults();
-                // Close settings panel after reset
-                if (settingsPanel) {
-                    settingsPanel.classList.remove('active');
-                    // Also remove panel-active from settings button
-                    const settingsBtn = document.getElementById('settings-btn');
-                    if (settingsBtn) {
-                        settingsBtn.classList.remove('panel-active');
-                    }
-                }
+                // Close settings panel after reset using WindowManager
+                this.windowManager.closeWindow('panel', 'settings');
             });
         }
     }
 
     setupAllModals() {
-        // Setup Link Modal
-        this.setupModalWindow('link-modal', 'link-modal-close');
-
-        // Setup Mixer Modal
-        this.setupModalWindow('mixer-modal', 'mixer-modal-close');
-
-        // Setup Kit Edit Modal
-        this.setupModalWindow('kit-edit-modal', 'kit-edit-modal-close');
-
-        // Setup Favorites Modal
-        this.setupModalWindow('favorites-modal', 'favorites-modal-close');
-
-        // Setup Cloud Modal
-        this.setupModalWindow('cloud-modal', 'cloud-modal-close');
-
-        // Setup Store Modal
-        this.setupModalWindow('store-modal', 'store-modal-close');
+        // WindowManager now handles all modal/panel setup
+        // This method is kept for compatibility but does nothing
+        // All window management is handled by WindowManager.init()
     }
 
     setupModalWindow(modalId) {
-        // Convert modal ID to panel ID
-        const panelId = modalId.replace('-modal', '-panel');
-        const panel = document.getElementById(panelId);
-        const closeBtn = panel?.querySelector('.panel-close-btn');
-
-        if (panel && closeBtn) {
-            // Close button click
-            const closeHandler = () => {
-                panel.classList.remove('active');
-
-                // Remove panel-active class from corresponding button
-                let btnId = null;
-                switch(panelId) {
-                    case 'link-panel':
-                        btnId = 'link-btn';
-                        break;
-                    case 'cloud-panel':
-                        btnId = 'upload-btn';
-                        break;
-                    case 'mixer-panel':
-                        btnId = 'kit-mixer-btn';
-                        break;
-                    case 'kit-edit-panel':
-                        btnId = null; // Multiple edit buttons, handled separately
-                        break;
-                    case 'settings-panel':
-                        btnId = 'settings-btn';
-                        break;
-                    case 'preset-panel':
-                        btnId = 'preset-edit-btn';
-                        break;
-                }
-
-                if (btnId) {
-                    const btn = document.getElementById(btnId);
-                    if (btn) {
-                        btn.classList.remove('panel-active');
-                    }
-                }
-
-                // For kit edit panel, remove active from all edit buttons
-                if (panelId === 'kit-edit-panel') {
-                    document.querySelectorAll('.kit-edit-btn').forEach(btn => {
-                        btn.classList.remove('panel-active');
-                    });
-                }
-            };
-            this.addEventListener(closeBtn, 'click', closeHandler, this.modalListeners);
-
-            // No click-outside-to-close for panels (they're more intentional)
-        }
+        // WindowManager now handles all modal/panel setup
+        // This method is kept for compatibility but does nothing
+        // All window management is handled by WindowManager.init()
     }
 
     openLinkModal() {
-        const panel = document.getElementById('link-panel');
-        const btn = document.getElementById('link-btn');
-
-        if (panel) {
-            panel.classList.toggle('active');
-
-            // Toggle button active state
-            if (btn) {
-                btn.classList.toggle('panel-active', panel.classList.contains('active'));
-            }
-        }
+        // Use WindowManager to toggle the link panel
+        this.windowManager.toggleWindow('panel', 'link');
     }
 
     openCloudModal() {
-        const panel = document.getElementById('cloud-panel');
-        const btn = document.getElementById('upload-btn');
-
-        if (panel) {
-            panel.classList.toggle('active');
-
-            // Toggle button active state
-            if (btn) {
-                btn.classList.toggle('panel-active', panel.classList.contains('active'));
-            }
-        }
+        // Use WindowManager to toggle the cloud panel
+        this.windowManager.toggleWindow('panel', 'cloud');
     }
 
     openMixerModal() {
-        const panel = document.getElementById('mixer-panel');
-        const btn = document.getElementById('kit-mixer-btn');
-
-        if (panel) {
-            // If opening, update the kit name
-            if (!panel.classList.contains('active')) {
-                const kitNameSpan = panel.querySelector('#mixer-kit-name');
-                if (kitNameSpan) {
-                    const currentPlayer = this.currentPlayer;
-                    const kitName = this.playerStates[currentPlayer]?.kitName || 'Acoustic';
-                    kitNameSpan.textContent = kitName;
-                }
-            }
-            panel.classList.toggle('active');
-
-            // Toggle button active state
-            if (btn) {
-                btn.classList.toggle('panel-active', panel.classList.contains('active'));
-            }
-        }
+        // Use WindowManager to toggle the mixer panel
+        this.windowManager.toggleWindow('panel', 'mixer');
     }
 
     openKitEditModal() {
-        const panel = document.getElementById('kit-edit-panel');
-        const btn = document.querySelector('.kit-edit-btn');
-
-        if (panel) {
-            panel.classList.toggle('active');
-
-            // Toggle button active state
-            if (btn) {
-                btn.classList.toggle('panel-active', panel.classList.contains('active'));
-            }
-        }
+        // Use WindowManager to toggle the kit edit panel
+        this.windowManager.toggleWindow('panel', 'kit-edit');
     }
 
     togglePatternEditMode() {
-        this.isEditMode = !this.isEditMode;
-        const panel = document.getElementById('pattern-edit-panel');
-        const deleteBtn = document.getElementById('group-delete-btn');
-        const editBtn = document.querySelector('.edit-pattern-btn');
-
-        if (this.isEditMode) {
-            // Enter edit mode
-            panel.classList.add('active');
-            deleteBtn.style.display = 'flex';
-            editBtn.classList.add('active');
-
-            // Load available patterns
-            this.loadAvailablePatterns();
-
-            // Setup drag and drop for existing pattern buttons
-            this.enablePatternEditDragDrop();
-
-            // Setup new group control buttons
-            this.setupPatternPanelControls();
-        } else {
-            // Exit edit mode
-            panel.classList.remove('active');
-            deleteBtn.style.display = 'none';
-            editBtn.classList.remove('active');
-
-            // Disable drag and drop
-            this.disablePatternEditDragDrop();
-        }
+        // Use WindowManager to toggle the pattern edit panel
+        this.windowManager.toggleWindow('panel', 'pattern-edit');
     }
 
     enablePatternEditDragDrop() {
@@ -3758,44 +3608,13 @@ class OTTOAccurateInterface {
     }
 
     openPresetModal() {
-        const panel = document.getElementById('preset-panel');
-        const btn = document.getElementById('preset-edit-btn');
-
-        if (panel) {
-            // Toggle the panel
-            panel.classList.toggle('active');
-
-            // Toggle button active state
-            if (btn) {
-                btn.classList.toggle('panel-active', panel.classList.contains('active'));
-            }
-
-            // If opening, render list and focus input
-            if (panel.classList.contains('active')) {
-                this.renderPresetList();
-
-                // Clear and focus the input field
-                const nameInput = document.getElementById('preset-name-input');
-                if (nameInput) {
-                    nameInput.value = '';
-                    setTimeout(() => nameInput.focus(), 100);
-                }
-            }
-        }
+        // Use WindowManager to toggle the preset panel
+        this.windowManager.toggleWindow('panel', 'preset');
     }
 
     closePresetModal() {
-        const panel = document.getElementById('preset-panel');
-        const btn = document.getElementById('preset-edit-btn');
-
-        if (panel) {
-            panel.classList.remove('active');
-        }
-
-        // Remove button active state
-        if (btn) {
-            btn.classList.remove('panel-active');
-        }
+        // Use WindowManager to close the preset panel
+        this.windowManager.closeWindow('panel', 'preset');
     }
 
     renderPresetList() {
@@ -4582,6 +4401,9 @@ class OTTOAccurateInterface {
             this.preventClickjacking();
             this.setupRateLimiting();
             
+            // Initialize Window Manager
+            this.windowManager.init();
+            
             this.initAppState();      // Initialize app state FIRST to restore saved values
             this.initPresetSystem();  // Initialize preset system second
             this.loadPatternGroups(); // Load pattern groups early
@@ -4689,71 +4511,16 @@ class OTTOAccurateInterface {
     setupLogoClick() {
         // Setup logo/version click to show online store
         const logoVersion = document.getElementById('logo-version');
-        const storePanel = document.getElementById('store-panel');
-        const storeIframe = document.getElementById('store-iframe');
-        const loadingMsg = document.getElementById('store-loading');
-        const errorMsg = document.getElementById('store-error');
 
-        if (logoVersion && storePanel) {
+        if (logoVersion) {
             logoVersion.addEventListener('click', () => {
                 console.log('Logo clicked - toggling store panel');
-
-                // Toggle store panel
-                storePanel.classList.toggle('active');
-
-                // Load store URL into iframe when opening
-                if (storePanel.classList.contains('active') && storeIframe) {
-                    console.log('Store panel is active, checking iframe...');
-                    console.log('Current iframe src:', storeIframe.src);
-                    console.log('Store URL to load:', this.storeURL);
-
-                    // Check if we need to load the URL
-                    if (!storeIframe.hasAttribute('data-loaded')) {
-                        console.log('Loading store URL for first time...');
-
-                        // Show loading message
-                        if (loadingMsg) loadingMsg.style.display = 'block';
-                        if (errorMsg) errorMsg.style.display = 'none';
-
-                        // Set a timeout to detect if iframe doesn't load
-                        const loadTimeout = setTimeout(() => {
-                            console.warn('Store iframe load timeout - site may block embedding');
-                            if (loadingMsg) loadingMsg.style.display = 'none';
-                            if (errorMsg) errorMsg.style.display = 'block';
-                        }, 5000); // 5 second timeout
-
-                        // Listen for successful load
-                        storeIframe.onload = () => {
-                            clearTimeout(loadTimeout);
-                            console.log('Store iframe loaded successfully');
-                            if (loadingMsg) loadingMsg.style.display = 'none';
-                            if (errorMsg) errorMsg.style.display = 'none';
-                            storeIframe.setAttribute('data-loaded', 'true');
-                        };
-
-                        // Listen for errors
-                        storeIframe.onerror = (error) => {
-                            clearTimeout(loadTimeout);
-                            console.error('Store iframe error:', error);
-                            if (loadingMsg) loadingMsg.style.display = 'none';
-                            if (errorMsg) errorMsg.style.display = 'block';
-                        };
-
-                        // Actually set the source
-                        console.log('Setting iframe src to:', this.storeURL);
-                        storeIframe.src = this.storeURL;
-
-                        // Double-check it was set
-                        console.log('Iframe src after setting:', storeIframe.src);
-                    } else {
-                        console.log('Store already loaded');
-                    }
-                } else {
-                    console.log('Store panel closed');
-                }
+                
+                // Use WindowManager to toggle the store panel
+                this.windowManager.toggleWindow('panel', 'store');
             });
         } else {
-            console.error('Logo or store panel elements not found');
+            console.error('Logo element not found');
         }
     }
 
@@ -6432,7 +6199,6 @@ class OTTOAccurateInterface {
         if (settingsBtn) {
             const settingsHandler = () => {
                 this.onSettingsClicked();
-                console.log('Settings clicked');
             };
             this.addEventListener(settingsBtn, 'click', settingsHandler);
         }
@@ -6442,7 +6208,6 @@ class OTTOAccurateInterface {
         if (linkBtn) {
             const linkHandler = () => {
                 this.onLinkClicked();
-                console.log('Link clicked');
             };
             this.addEventListener(linkBtn, 'click', linkHandler);
         }
@@ -6960,8 +6725,8 @@ class OTTOAccurateInterface {
     }
 
     onEditKit(playerNumber) {
-        // Open the Kit Edit modal
-        this.openKitEditModal();
+        // Use WindowManager to toggle the kit edit panel
+        this.windowManager.toggleWindow('panel', 'kit-edit');
 
         // Also call JUCE if available
         if (window.juce?.onEditKit) {
@@ -6970,8 +6735,8 @@ class OTTOAccurateInterface {
     }
 
     onKitMixerToggle(playerNumber, isActive) {
-        // Open the Mixer modal
-        this.openMixerModal();
+        // Use WindowManager to toggle the mixer panel
+        this.windowManager.toggleWindow('panel', 'mixer');
 
         // Also call JUCE if available
         if (window.juce?.onKitMixerToggle) {
@@ -6998,18 +6763,8 @@ class OTTOAccurateInterface {
     }
 
     onSettingsClicked() {
-        // Toggle the settings panel
-        const settingsPanel = document.getElementById('settings-panel');
-        const btn = document.getElementById('settings-btn');
-
-        if (settingsPanel) {
-            settingsPanel.classList.toggle('active');
-
-            // Toggle button active state
-            if (btn) {
-                btn.classList.toggle('panel-active', settingsPanel.classList.contains('active'));
-            }
-        }
+        // Use WindowManager to toggle the settings panel
+        this.windowManager.toggleWindow('panel', 'settings');
 
         // Also call JUCE if available
         if (window.juce?.onSettingsClicked) {
@@ -7018,8 +6773,8 @@ class OTTOAccurateInterface {
     }
 
     onLinkClicked() {
-        // Open the Link modal
-        this.openLinkModal();
+        // Use WindowManager to toggle the link panel
+        this.windowManager.toggleWindow('panel', 'link');
 
         // Also call JUCE if available
         if (window.juce?.onLinkClicked) {
@@ -7028,8 +6783,8 @@ class OTTOAccurateInterface {
     }
 
     onUploadClicked() {
-        // Open the cloud modal
-        this.openCloudModal();
+        // Use WindowManager to toggle the cloud panel
+        this.windowManager.toggleWindow('panel', 'cloud');
 
         // Also call JUCE backend if available
         if (window.juce?.onUploadClicked) {
@@ -7148,6 +6903,12 @@ class OTTOAccurateInterface {
         
         // Set destroyed flag immediately to prevent any async operations
         this.isDestroyed = true;
+
+        // Destroy WindowManager
+        if (this.windowManager) {
+            this.windowManager.destroy();
+            this.windowManager = null;
+        }
 
         // Clear all timers first (prevents any callbacks from firing during cleanup)
         this.clearAllTimers();
