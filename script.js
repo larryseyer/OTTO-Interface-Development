@@ -2102,7 +2102,7 @@ class OTTOAccurateInterface {
       const usage = this.analyzeStorageUsage();
 
       // Clear old presets (keep last 20)
-      if (Object.keys(this.presets).length > 20) {
+      if (this.presets && Object.keys(this.presets).length > 20) {
         const sortedPresets = Object.entries(this.presets)
           .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0))
           .slice(0, 20);
