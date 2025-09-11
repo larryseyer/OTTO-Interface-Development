@@ -155,14 +155,18 @@ class OTTOAccurateInterface {
     };
     this.isLoadingPreset = false; // Flag to prevent marking dirty during preset load
 
+    // MIDI File Registry - tracks which groups contain which MIDI files
+    this.midiFileRegistry = {}; // Will be populated on initialization
+    
     // Player state tracking for all possible players
     this.playerStates = {};
     for (let i = 1; i <= this.maxPlayers; i++) {
       this.playerStates[i] = {
         presetName: "Default",
-        kitName: "Acoustic",
-        patternGroup: "favorites",
-        selectedPattern: "basic",
+        midiFile: "Basic", // NEW: Direct MIDI file reference
+        kitName: "Acoustic", // This is the drumkit (SFZ + mixer)
+        patternGroup: "favorites", // Will be removed in later phase
+        selectedPattern: "basic", // Will be removed in later phase
         kitMixerActive: false,
         muted: false,
         toggleStates: {
@@ -3329,6 +3333,9 @@ class OTTOAccurateInterface {
   initializePatternGroupEditor() {
     // Load pattern groups from storage
     this.loadPatternGroups();
+    
+    // Initialize MIDI file registry
+    this.initializeMidiRegistry();
 
     // Load available MIDI patterns
     this.loadAvailablePatterns();
@@ -3379,6 +3386,59 @@ class OTTOAccurateInterface {
         },
       };
     }
+  }
+
+  // MIDI File Registry Management Methods
+  initializeMidiRegistry() {
+    // Load saved registry or create new one
+    const savedRegistry = this.safeLocalStorageGet("ottoMidiRegistry", null);
+    if (savedRegistry) {
+      this.midiFileRegistry = savedRegistry;
+    } else {
+      this.midiFileRegistry = {};
+    }
+    debugLog("MIDI Registry initialized:", this.midiFileRegistry);
+  }
+
+  saveMidiRegistry() {
+    // Save registry to localStorage
+    this.safeLocalStorageSet("ottoMidiRegistry", this.midiFileRegistry);
+    debugLog("MIDI Registry saved");
+  }
+
+  updateMidiRegistry(midiFile, groups) {
+    // Update which groups contain a MIDI file
+    if (!midiFile) return;
+    
+    if (!groups || groups.length === 0) {
+      // Ensure MIDI file has at least one group
+      groups = ["favorites"];
+    }
+    
+    this.midiFileRegistry[midiFile] = groups;
+    this.saveMidiRegistry();
+  }
+
+  getMidiFileGroups(midiFile) {
+    // Get all groups that contain a MIDI file
+    return this.midiFileRegistry[midiFile] || [];
+  }
+
+  getGroupMidiFiles(groupKey) {
+    // Get all MIDI files in a specific group
+    const midiFiles = [];
+    for (const [midiFile, groups] of Object.entries(this.midiFileRegistry)) {
+      if (groups.includes(groupKey)) {
+        midiFiles.push(midiFile);
+      }
+    }
+    return midiFiles;
+  }
+
+  isMidiFileInGroup(midiFile, groupKey) {
+    // Check if a MIDI file is in a specific group
+    const groups = this.getMidiFileGroups(midiFile);
+    return groups.includes(groupKey);
   }
 
   // Drumkit Management Methods
@@ -4833,9 +4893,10 @@ class OTTOAccurateInterface {
     for (let i = 1; i <= this.maxPlayers; i++) {
       freshPreset.playerStates[i] = {
         presetName: "Default",
-        kitName: "Acoustic",
-        patternGroup: "favorites", // Default pattern group
-        selectedPattern: "basic", // "Basic" pattern selected
+        midiFile: "Basic", // NEW: Direct MIDI file reference
+        kitName: "Acoustic", // Drumkit (SFZ + mixer)
+        patternGroup: "favorites", // Default pattern group (will be removed later)
+        selectedPattern: "basic", // "Basic" pattern selected (will be removed later)
         kitMixerActive: false,
         muted: false,
         toggleStates: {
@@ -4914,9 +4975,10 @@ class OTTOAccurateInterface {
     for (let i = 1; i <= this.maxPlayers; i++) {
       factoryDefault.playerStates[i] = {
         presetName: "Default",
-        kitName: "Acoustic",
-        patternGroup: "favorites",
-        selectedPattern: "basic",
+        midiFile: "Basic", // NEW: Direct MIDI file reference
+        kitName: "Acoustic", // Drumkit (SFZ + mixer)
+        patternGroup: "favorites", // Will be removed in later phase
+        selectedPattern: "basic", // Will be removed in later phase
         kitMixerActive: false,
         muted: false, // Ensure no players are muted
         toggleStates: {
@@ -5201,6 +5263,7 @@ class OTTOAccurateInterface {
       this.initAppState(); // Initialize app state FIRST to restore saved values
       this.initPresetSystem(); // Initialize preset system second
       this.loadPatternGroups(); // Load pattern groups early
+      this.initializeMidiRegistry(); // Initialize MIDI file registry
       this.loadDrumkits(); // Load drumkit manager
       this.setupVersion();
       this.setupSplashScreen();
