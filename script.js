@@ -3310,6 +3310,9 @@ class OTTOAccurateInterface {
       // Save default drumkits
       this.saveDrumkits();
     }
+    
+    // Populate the kit dropdown with all available kits
+    this.populateKitDropdown();
   }
 
   saveDrumkits() {
@@ -5235,12 +5238,14 @@ class OTTOAccurateInterface {
     if (this.linkStates) {
       this.updateLinkIconStates();
     }
+    
+    // Populate kit dropdown with all available kits
+    this.populateKitDropdown();
 
     this.scheduleSave("appState"); // Save app state
     console.log(
       `Switched to Player ${playerNumber}, muted: ${this.playerStates[playerNumber]?.muted || false}`,
     );
-    this.onPlayerChanged(playerNumber);
   }
 
   updateUIForCurrentPlayer() {
@@ -5784,6 +5789,63 @@ class OTTOAccurateInterface {
         muteHandler,
         this.dropdownListeners,
       );
+    }
+  }
+
+  populateKitDropdown() {
+    const kitOptionsContainer = document.getElementById("kit-options");
+    if (!kitOptionsContainer) return;
+
+    // Clear existing options
+    kitOptionsContainer.innerHTML = "";
+
+    // Add all available kits from this.drumkits
+    for (const kitKey in this.drumkits) {
+      const kit = this.drumkits[kitKey];
+      const option = document.createElement("div");
+      option.className = "dropdown-option";
+      option.dataset.value = kitKey.toLowerCase();
+      option.textContent = kit.name;
+      
+      // Set selected state if this is the current kit
+      if (kit.name === this.playerStates[this.currentPlayer].kitName) {
+        option.classList.add("selected");
+      }
+      
+      // Add click handler directly
+      const optionHandler = (e) => {
+        e.stopPropagation();
+        const kitName = option.textContent;
+        
+        // Update selected text
+        const dropdownText = document.querySelector("#kit-dropdown .dropdown-text");
+        if (dropdownText) {
+          dropdownText.textContent = kitName;
+        }
+        
+        // Update selected state
+        document.querySelectorAll("#kit-options .dropdown-option").forEach((opt) => {
+          opt.classList.remove("selected");
+        });
+        option.classList.add("selected");
+        
+        // Close dropdown
+        const kitDropdown = document.getElementById("kit-dropdown");
+        if (kitDropdown) {
+          kitDropdown.classList.remove("open");
+        }
+        
+        // Update player state and trigger callback
+        this.playerStates[this.currentPlayer].kitName = kitName;
+        this.onKitChanged(this.currentPlayer, kitName);
+        this.setDirty("preset", true);
+        this.setDirty("drumkit", true);
+        
+        console.log(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
+      };
+      
+      option.addEventListener("click", optionHandler);
+      kitOptionsContainer.appendChild(option);
     }
   }
 

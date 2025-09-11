@@ -1173,7 +1173,9 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-top: 5px;
-  max-height: 300px;
+  /* Allow dropdown to extend through row 4 and row 5 */
+  /* Row 4 (12%) + Row 5 (47%) = 59vh available */
+  max-height: calc(59vh - 20px); /* Subtract some padding */
   overflow-y: auto;
   z-index: 1000;
   display: none;
