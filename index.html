@@ -19,15 +19,24 @@
     <link rel="stylesheet" href="styles.css" />
     
     <!-- Load new manager classes BEFORE main script -->
+    <!-- Phase 1: Core Infrastructure -->
     <script src="EventManager.js"></script>
     <script src="TimerManager.js"></script>
     <script src="StateManager.js"></script>
+    
+    <!-- Phase 2: Manager Classes -->
     <script src="PlayerStateManager.js"></script>
     <script src="PatternGroupManager.js"></script>
     <script src="DrumkitManager.js"></script>
     <script src="PresetManager.js"></script>
     <script src="LinkManager.js"></script>
     <script src="StorageManager.js"></script>
+    
+    <!-- Phase 3: Data Integrity & Validation -->
+    <script src="DataValidator.js"></script>
+    <script src="InputSanitizer.js"></script>
+    
+    <!-- Window Manager -->
     <script src="WindowManager.js"></script>
   </head>
   <body>
