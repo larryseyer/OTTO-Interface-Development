@@ -4796,23 +4796,8 @@ class OTTOAccurateInterface {
         // Mute Drummer button
         if (muteDrummerBtn) {
             const muteHandler = () => {
-                // Get current player state
-                const currentState = this.playerStates[this.currentPlayer];
-
-                // Toggle mute state
-                currentState.muted = !currentState.muted;
-
-                // Update button visual state
-                muteDrummerBtn.classList.toggle('active', currentState.muted);
-
-                // Trigger mute callback
-                this.onMuteDrummer(this.currentPlayer, currentState.muted);
-                this.setDirty('preset', true);
-
-                // Update mute overlay
-                this.updateMuteOverlay();
-
-                console.log(`Player ${this.currentPlayer} muted: ${currentState.muted}`);
+                // Use centralized mute management
+                this.togglePlayerMute(this.currentPlayer);
             };
             this.addEventListener(muteDrummerBtn, 'click', muteHandler, this.dropdownListeners);
         }
@@ -4997,23 +4982,44 @@ class OTTOAccurateInterface {
     }
 
     setupPatternGrid() {
-        document.querySelectorAll('.pattern-btn').forEach(patternBtn => {
-            patternBtn.addEventListener('click', (e) => {
+        const patternButtons = document.querySelectorAll('.pattern-btn');
+        
+        patternButtons.forEach(patternBtn => {
+            const clickHandler = (e) => {
+                // Prevent if destroyed
+                if (this.isDestroyed) return;
+                
                 // Get the button index to find the full pattern name
-                const patternButtons = Array.from(document.querySelectorAll('.pattern-btn'));
-                const buttonIndex = patternButtons.indexOf(patternBtn);
+                const allButtons = Array.from(document.querySelectorAll('.pattern-btn'));
+                const buttonIndex = allButtons.indexOf(patternBtn);
+                
+                if (buttonIndex === -1) {
+                    console.error('Pattern button index not found');
+                    return;
+                }
 
                 // Get the full pattern name from the pattern group
                 const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
-                let fullPatternName = patternBtn.textContent; // Default to button text
+                let fullPatternName = patternBtn.textContent || ''; // Default to button text
 
-                if (this.patternGroups && this.patternGroups[currentGroup] &&
-                    this.patternGroups[currentGroup].patterns[buttonIndex]) {
-                    fullPatternName = this.patternGroups[currentGroup].patterns[buttonIndex];
+                if (this.patternGroups && this.patternGroups[currentGroup]) {
+                    const patterns = this.patternGroups[currentGroup].patterns;
+                    if (patterns && patterns[buttonIndex]) {
+                        fullPatternName = patterns[buttonIndex];
+                    } else if (!fullPatternName) {
+                        console.warn(`No pattern at index ${buttonIndex} in group "${currentGroup}"`);
+                        return; // Don't select empty patterns
+                    }
+                }
+                
+                // Don't select empty patterns
+                if (!fullPatternName || fullPatternName.trim() === '') {
+                    console.log('Empty pattern slot clicked, ignoring');
+                    return;
                 }
 
                 // Clear other pattern selections
-                document.querySelectorAll('.pattern-btn').forEach(btn => {
+                allButtons.forEach(btn => {
                     btn.classList.remove('active');
                 });
 
@@ -5027,14 +5033,16 @@ class OTTOAccurateInterface {
                 if (this.patternGroups && this.patternGroups[currentGroup]) {
                     this.patternGroups[currentGroup].selectedPattern = fullPatternName;
                     this.setDirty('patternGroup', true);
-                    // Don't auto-save, wait for user to click save button
                 }
 
                 this.onPatternSelected(this.currentPlayer, fullPatternName);
                 this.setDirty('preset', true);  // Mark preset as dirty when pattern changes
 
                 console.log(`Player ${this.currentPlayer} selected pattern: ${fullPatternName}`);
-            });
+            };
+            
+            // Use enhanced event listener management
+            this.addEventListener(patternBtn, 'click', clickHandler, 'element');
         });
     }
 
@@ -5635,7 +5643,91 @@ class OTTOAccurateInterface {
 
         if (overlay && state) {
             // Show overlay if current player is muted
-            overlay.classList.toggle('active', state.muted === true);
+            const shouldMute = state.muted === true;
+            overlay.classList.toggle('active', shouldMute);
+            
+            // Also update the mute button visual state to stay in sync
+            const muteDrummerBtn = document.getElementById('mute-drummer-btn');
+            if (muteDrummerBtn) {
+                muteDrummerBtn.classList.toggle('muted', shouldMute);
+                muteDrummerBtn.classList.toggle('active', shouldMute);
+            }
+            
+            // Update the player tab visual state
+            const playerTab = document.querySelector(`.player-tab[data-player="${this.currentPlayer}"]`);
+            if (playerTab) {
+                playerTab.classList.toggle('muted', shouldMute);
+            }
+        }
+    }
+
+    // Centralized mute state management
+    setPlayerMuteState(playerNumber, isMuted) {
+        // Validate player number
+        if (!this.playerStates[playerNumber]) {
+            console.error(`Invalid player number: ${playerNumber}`);
+            return false;
+        }
+        
+        // Update the player state
+        this.playerStates[playerNumber].muted = isMuted;
+        
+        // Update visual states if this is the current player
+        if (playerNumber === this.currentPlayer) {
+            // Update mute overlay
+            this.updateMuteOverlay();
+        }
+        
+        // Always update the player tab
+        const playerTab = document.querySelector(`.player-tab[data-player="${playerNumber}"]`);
+        if (playerTab) {
+            playerTab.classList.toggle('muted', isMuted);
+        }
+        
+        // Notify external system
+        this.onMuteDrummer(playerNumber, isMuted);
+        
+        // Mark as dirty
+        this.setDirty('preset', true);
+        
+        console.log(`Player ${playerNumber} mute state set to: ${isMuted}`);
+        return true;
+    }
+    
+    togglePlayerMute(playerNumber) {
+        if (!this.playerStates[playerNumber]) {
+            console.error(`Invalid player number: ${playerNumber}`);
+            return false;
+        }
+        
+        const newMuteState = !this.playerStates[playerNumber].muted;
+        return this.setPlayerMuteState(playerNumber, newMuteState);
+    }
+    
+    // Synchronize all mute UI elements for current player
+    syncMuteUIState() {
+        const state = this.playerStates[this.currentPlayer];
+        if (!state) return;
+        
+        const isMuted = state.muted === true;
+        
+        // Update mute overlay
+        const overlay = document.querySelector('.mute-overlay');
+        if (overlay) {
+            overlay.classList.toggle('active', isMuted);
+        }
+        
+        // Update mute button
+        const muteDrummerBtn = document.getElementById('mute-drummer-btn');
+        if (muteDrummerBtn) {
+            muteDrummerBtn.classList.toggle('muted', isMuted);
+            muteDrummerBtn.classList.toggle('active', isMuted);
+        }
+        
+        // Update player tab
+        const playerTab = document.querySelector(`.player-tab[data-player="${this.currentPlayer}"]`);
+        if (playerTab) {
+            playerTab.classList.toggle('muted', isMuted);
         }
     }
 
@@ -6011,25 +6103,54 @@ class OTTOAccurateInterface {
     }
 
     onPatternSelected(playerNumber, patternName) {
-        // Save selected pattern to current group
-        if (this.playerStates[playerNumber]) {
-            const currentGroup = this.playerStates[playerNumber].patternGroup;
-
-            // Save to player state
-            this.playerStates[playerNumber].selectedPattern = patternName;
-
-            // Save to pattern group if it exists
-            if (this.patternGroups && this.patternGroups[currentGroup]) {
-                this.patternGroups[currentGroup].selectedPattern = patternName;
-                // Mark pattern as dirty (will cascade up)
-                this.setDirty('pattern', true);
-                // Don't auto-save, wait for user to click save button
-            }
+        // Validate inputs
+        if (!this.playerStates[playerNumber]) {
+            console.error(`Invalid player number: ${playerNumber}`);
+            return;
+        }
+        
+        if (!patternName) {
+            console.warn('Empty pattern name selected');
+            return;
         }
 
+        const currentGroup = this.playerStates[playerNumber].patternGroup;
+
+        // Save to player state
+        this.playerStates[playerNumber].selectedPattern = patternName;
+
+        // Save to pattern group if it exists
+        if (this.patternGroups && this.patternGroups[currentGroup]) {
+            this.patternGroups[currentGroup].selectedPattern = patternName;
+            
+            // Ensure the pattern is actually in the group
+            const patterns = this.patternGroups[currentGroup].patterns;
+            let patternFound = false;
+            
+            // Check if pattern exists in the group (exact or substring match)
+            for (let i = 0; i < patterns.length; i++) {
+                if (patterns[i] === patternName || 
+                    patterns[i].toLowerCase() === patternName.toLowerCase() ||
+                    patterns[i].substring(0, 8).toLowerCase() === patternName.substring(0, 8).toLowerCase()) {
+                    patternFound = true;
+                    break;
+                }
+            }
+            
+            if (!patternFound) {
+                console.warn(`Pattern "${patternName}" not found in group "${currentGroup}"`);
+            }
+            
+            // Mark pattern as dirty (will cascade up)
+            this.setDirty('pattern', true);
+        }
+
+        // Notify external system
         if (window.juce?.onPatternSelected) {
             window.juce.onPatternSelected(playerNumber, patternName);
         }
+        
+        console.log(`Player ${playerNumber} selected pattern: ${patternName}`);
     }
 
     onPatternGroupChanged(playerNumber, groupName) {
