@@ -195,6 +195,7 @@ class OTTOAccurateInterface {
 
     // Memory cleanup interval will be set after initialization
     this.memoryCleanupInterval = null;
+    this.rateLimitCleanupInterval = null;
 
     this.init();
   }
@@ -2369,14 +2370,14 @@ class OTTOAccurateInterface {
     this.maxActionsPerWindow = 10; // Max actions per window
 
     // Clean up old entries periodically
-    setInterval(() => {
+    this.rateLimitCleanupInterval = this.createSafeInterval(() => {
       const now = Date.now();
       for (const [key, data] of this.actionCounts.entries()) {
         if (now - data.timestamp > this.rateLimitWindow) {
           this.actionCounts.delete(key);
         }
       }
-    }, 5000);
+    }, 5000, "rateLimitCleanup");
   }
 
   checkRateLimit(action) {
@@ -8548,6 +8549,12 @@ class OTTOAccurateInterface {
     if (this.memoryCleanupInterval) {
       clearInterval(this.memoryCleanupInterval);
       this.memoryCleanupInterval = null;
+    }
+
+    // Clear rate limit cleanup interval
+    if (this.rateLimitCleanupInterval) {
+      clearInterval(this.rateLimitCleanupInterval);
+      this.rateLimitCleanupInterval = null;
     }
 
     // Clear animation frame
