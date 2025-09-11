@@ -1884,6 +1884,247 @@ class OTTOAccurateInterface {
         }
     }
 
+    // Security: Input sanitization and validation
+    sanitizeInput(input) {
+        if (typeof input !== 'string') return input;
+        
+        // Remove any HTML tags and script content
+        const div = document.createElement('div');
+        div.textContent = input;
+        return div.innerHTML;
+    }
+
+    // Security: Validate and sanitize preset names
+    sanitizePresetName(name) {
+        if (typeof name !== 'string') return 'Untitled';
+        
+        // Remove dangerous characters, allow only alphanumeric, spaces, dashes, underscores
+        return name.replace(/[^a-zA-Z0-9\s\-_]/g, '').trim() || 'Untitled';
+    }
+
+    // Security: Validate and sanitize pattern names
+    sanitizePatternName(name) {
+        if (typeof name !== 'string') return '';
+        
+        // Allow alphanumeric, spaces, dashes, underscores, dots
+        return name.replace(/[^a-zA-Z0-9\s\-_.]/g, '').trim();
+    }
+
+    // Security: Safe element creation with text content
+    createSafeElement(tag, textContent, className = null) {
+        const element = document.createElement(tag);
+        if (textContent) {
+            element.textContent = textContent; // Using textContent prevents XSS
+        }
+        if (className) {
+            element.className = className;
+        }
+        return element;
+    }
+
+    // Security: Content Security Policy for dynamic content
+    applyContentSecurityPolicy() {
+        // Add CSP meta tag if not present
+        if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
+            const cspMeta = document.createElement('meta');
+            cspMeta.httpEquiv = 'Content-Security-Policy';
+            cspMeta.content = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline'", // Allow inline scripts (needed for some UI)
+                "style-src 'self' 'unsafe-inline'", // Allow inline styles
+                "img-src 'self' data: blob:",
+                "font-src 'self' data:",
+                "connect-src 'self'",
+                "frame-src 'none'", // Prevent iframe embedding
+                "object-src 'none'", // Prevent plugins
+                "base-uri 'self'",
+                "form-action 'self'"
+            ].join('; ');
+            document.head.appendChild(cspMeta);
+        }
+    }
+
+    // Security: Validate JSON data before parsing
+    safeJSONParse(jsonString, defaultValue = null) {
+        try {
+            // First, check if it's a string
+            if (typeof jsonString !== 'string') {
+                return defaultValue;
+            }
+            
+            // Check for obvious script injection attempts
+            if (jsonString.includes('<script') || jsonString.includes('javascript:')) {
+                console.error('Potential XSS attempt detected in JSON');
+                return defaultValue;
+            }
+            
+            const parsed = JSON.parse(jsonString);
+            
+            // Additional validation based on expected structure
+            if (this.validateParsedJSON(parsed)) {
+                return parsed;
+            }
+            
+            return defaultValue;
+        } catch (error) {
+            console.error('Safe JSON parse error:', error);
+            return defaultValue;
+        }
+    }
+
+    validateParsedJSON(data) {
+        // Basic structure validation
+        if (data === null || data === undefined) return false;
+        
+        // Check for dangerous properties
+        const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
+        const checkObject = (obj) => {
+            for (const key in obj) {
+                if (dangerousKeys.includes(key)) {
+                    console.error('Dangerous key detected in JSON:', key);
+                    return false;
+                }
+                if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    if (!checkObject(obj[key])) return false;
+                }
+            }
+            return true;
+        };
+        
+        return checkObject(data);
+    }
+
+    // Security: Sanitize URL parameters
+    sanitizeURLParam(param) {
+        if (typeof param !== 'string') return '';
+        
+        // Remove any script or data URLs
+        if (param.includes('javascript:') || param.includes('data:text/html')) {
+            console.error('Potential XSS in URL parameter');
+            return '';
+        }
+        
+        // URL encode to prevent injection
+        return encodeURIComponent(param);
+    }
+
+    // Security: Safe iframe handling (if needed in future)
+    createSafeIframe(src) {
+        const iframe = document.createElement('iframe');
+        
+        // Security attributes
+        iframe.sandbox = 'allow-scripts allow-same-origin'; // Minimal permissions
+        iframe.referrerPolicy = 'no-referrer';
+        
+        // Validate source
+        try {
+            const url = new URL(src);
+            // Only allow HTTPS or local sources
+            if (url.protocol !== 'https:' && url.protocol !== 'file:' && url.hostname !== 'localhost') {
+                console.error('Insecure iframe source rejected');
+                return null;
+            }
+            iframe.src = src;
+        } catch (error) {
+            console.error('Invalid iframe URL:', error);
+            return null;
+        }
+        
+        return iframe;
+    }
+
+    // Security: Prevent clickjacking
+    preventClickjacking() {
+        // Check if we're in an iframe
+        if (window.self !== window.top) {
+            // We're in an iframe - check if it's allowed
+            try {
+                // Try to access parent location (will throw if different origin)
+                const parentLocation = window.parent.location.href;
+                
+                // Check if parent is trusted (add your trusted domains here)
+                const trustedDomains = ['localhost', '127.0.0.1'];
+                const parentURL = new URL(parentLocation);
+                
+                if (!trustedDomains.includes(parentURL.hostname)) {
+                    console.error('Untrusted parent frame detected');
+                    document.body.style.display = 'none';
+                    alert('This application cannot be embedded in untrusted frames');
+                }
+            } catch (error) {
+                // Different origin - likely untrusted
+                console.error('Cross-origin parent frame detected');
+                document.body.style.display = 'none';
+                alert('This application cannot be embedded in cross-origin frames');
+            }
+        }
+    }
+
+    // Security: Rate limiting for user actions
+    setupRateLimiting() {
+        this.actionCounts = new Map();
+        this.rateLimitWindow = 1000; // 1 second window
+        this.maxActionsPerWindow = 10; // Max actions per window
+        
+        // Clean up old entries periodically
+        setInterval(() => {
+            const now = Date.now();
+            for (const [key, data] of this.actionCounts.entries()) {
+                if (now - data.timestamp > this.rateLimitWindow) {
+                    this.actionCounts.delete(key);
+                }
+            }
+        }, 5000);
+    }
+
+    checkRateLimit(action) {
+        const now = Date.now();
+        const key = `${action}_${Math.floor(now / this.rateLimitWindow)}`;
+        
+        const current = this.actionCounts.get(key) || { count: 0, timestamp: now };
+        current.count++;
+        
+        if (current.count > this.maxActionsPerWindow) {
+            console.warn(`Rate limit exceeded for action: ${action}`);
+            this.showNotification('Please slow down - too many actions', 'warning');
+            return false;
+        }
+        
+        this.actionCounts.set(key, current);
+        return true;
+    }
+
+    // Security: Validate file uploads (for future import features)
+    validateFileUpload(file) {
+        const maxSize = 5 * 1024 * 1024; // 5MB max
+        const allowedTypes = ['application/json', 'text/plain'];
+        const allowedExtensions = ['.json', '.txt', '.otto'];
+        
+        // Check file size
+        if (file.size > maxSize) {
+            this.showNotification('File too large (max 5MB)', 'error');
+            return false;
+        }
+        
+        // Check MIME type
+        if (!allowedTypes.includes(file.type)) {
+            // Check file extension as fallback
+            const extension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+            if (!allowedExtensions.includes(extension)) {
+                this.showNotification('Invalid file type', 'error');
+                return false;
+            }
+        }
+        
+        // Check filename for suspicious patterns
+        if (file.name.includes('../') || file.name.includes('..\\')) {
+            this.showNotification('Invalid filename', 'error');
+            return false;
+        }
+        
+        return true;
+    }
+
     // Differential DOM updates - only update what changed
     differentialUpdate(selector, updates) {
         const element = typeof selector === 'string' ? 
@@ -2288,6 +2529,16 @@ class OTTOAccurateInterface {
         if (factoryResetBtn) {
             const resetHandler = () => {
                 this.resetToFactoryDefaults();
+                // Close preset panel after reset
+                const presetPanel = document.getElementById('preset-panel');
+                if (presetPanel) {
+                    presetPanel.classList.remove('active');
+                }
+                // Also remove panel-active from preset edit button
+                const presetEditBtn = document.getElementById('preset-edit-btn');
+                if (presetEditBtn) {
+                    presetEditBtn.classList.remove('panel-active');
+                }
             };
             this.addEventListener(factoryResetBtn, 'click', resetHandler, this.modalListeners);
         }
@@ -3661,19 +3912,21 @@ class OTTOAccurateInterface {
     }
 
     savePresetAs(name) {
-        const key = name.toLowerCase().replace(/\s+/g, '-');
-        const preset = this.createPresetFromCurrentState(name);
+        // Sanitize the preset name for security
+        const sanitizedName = this.sanitizePresetName(name);
+        const key = sanitizedName.toLowerCase().replace(/\s+/g, '-');
+        const preset = this.createPresetFromCurrentState(sanitizedName);
         this.presets[key] = preset;
         this.currentPreset = key;
 
         this.savePresetsToStorage();
-        this.showNotification(`Preset "${name}" created`);
+        this.showNotification(`Preset "${sanitizedName}" created`);
         this.renderPresetList(); // This will also update the dropdown
 
         // Update the dropdown selected text to show the new preset
         const dropdownText = document.querySelector('#preset-dropdown .dropdown-text');
         if (dropdownText) {
-            dropdownText.textContent = name;
+            dropdownText.textContent = sanitizedName;
         }
     }
 
@@ -4323,6 +4576,11 @@ class OTTOAccurateInterface {
         try {
             // Set up global error handlers first
             this.setupGlobalErrorHandlers();
+            
+            // Set up security measures
+            this.applyContentSecurityPolicy();
+            this.preventClickjacking();
+            this.setupRateLimiting();
             
             this.initAppState();      // Initialize app state FIRST to restore saved values
             this.initPresetSystem();  // Initialize preset system second
