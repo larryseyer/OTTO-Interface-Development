@@ -4847,6 +4847,22 @@ class OTTOAccurateInterface {
         // STEP 1: Complete state restoration
         // Deep clone all player states to avoid reference issues
         this.playerStates = this.structuredClone(preset.playerStates);
+        
+        // MIGRATION: Handle old presets without midiFile field
+        for (let i = 1; i <= this.maxPlayers; i++) {
+          if (this.playerStates[i]) {
+            // If no midiFile but has selectedPattern, migrate it
+            if (!this.playerStates[i].midiFile && this.playerStates[i].selectedPattern) {
+              this.playerStates[i].midiFile = this.playerStates[i].selectedPattern;
+              debugLog(`Migrated player ${i} selectedPattern to midiFile: ${this.playerStates[i].midiFile}`);
+            }
+            // Ensure midiFile has a default if still missing
+            if (!this.playerStates[i].midiFile) {
+              this.playerStates[i].midiFile = "Basic";
+              debugLog(`Set default midiFile for player ${i}: Basic`);
+            }
+          }
+        }
 
         // Restore link states if they exist
         if (preset.linkStates) {
