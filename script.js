@@ -161,13 +161,13 @@ class OTTOAccurateInterface {
       this.playerStates[i] = {
         presetName: "Default",
         kitName: "Acoustic",
-        patternGroup: "favorites", // Default pattern group
-        selectedPattern: "basic", // Pattern 1 is "Basic"
+        patternGroup: "favorites",
+        selectedPattern: "basic",
         kitMixerActive: false,
-        muted: false, // Track mute state
+        muted: false,
         toggleStates: {
           none: false,
-          auto: true, // All players now start with Auto active
+          auto: true,
           manual: false,
           stick: false,
           ride: false,
@@ -177,12 +177,12 @@ class OTTOAccurateInterface {
           now: false,
           4: false,
           8: false,
-          16: true, // Fill 16 selected by default
+          16: true,
           32: false,
           solo: false,
         },
         sliderValues: {
-          swing: 10, // Changed from 25 to 10
+          swing: 10,
           energy: 50,
           volume: 75,
         },
@@ -207,6 +207,8 @@ class OTTOAccurateInterface {
 
     this.init();
   }
+  // Flag to track parent-level operations
+  isParentOperation = false;
   // Enhanced Timer Management System
   createSafeTimeout(callback, delay, type = "general") {
     if (this.isDestroyed) return null;
@@ -546,12 +548,8 @@ class OTTOAccurateInterface {
         if (!this.isPresetLocked(this.currentPreset)) {
           this.savePreset();
           debugLog(`Saved preset: ${this.currentPreset}`);
-          // Clear all dirty flags when saving preset (highest level)
+          // Only clear preset dirty flag - children maintain their state
           this.setDirty("preset", false);
-          this.setDirty("player", false);
-          this.setDirty("drumkit", false);
-          this.setDirty("patternGroup", false);
-          this.setDirty("pattern", false);
         }
         break;
 
@@ -559,11 +557,8 @@ class OTTOAccurateInterface {
         // Save player state (part of preset)
         this.saveAppStateToStorage();
         debugLog("Saved player state");
-        // Clear player and lower level dirty flags
+        // Only clear player dirty flag - children maintain their state
         this.setDirty("player", false);
-        this.setDirty("drumkit", false);
-        this.setDirty("patternGroup", false);
-        this.setDirty("pattern", false);
         break;
 
       case "appState":
@@ -574,8 +569,9 @@ class OTTOAccurateInterface {
       case "patternGroups":
         this.savePatternGroups();
         debugLog("Saved pattern groups");
-        // Clear pattern group and pattern dirty flags
+        // Clear pattern group dirty flag
         this.setDirty("patternGroup", false);
+        // Also clear pattern flag since patterns are saved with groups
         this.setDirty("pattern", false);
         break;
 
@@ -606,12 +602,12 @@ class OTTOAccurateInterface {
 
   // Dirty flag management
   setDirty(level, isDirty = true) {
-    // Don't mark dirty during preset loading
-    if (this.isLoadingPreset && isDirty) {
+    // Don't mark dirty during preset loading or parent operations
+    if ((this.isLoadingPreset || this.isParentOperation) && isDirty) {
       return;
     }
 
-    // Hierarchy levels:
+    // Hierarchy levels for upward cascading only:
     // 1. pattern -> 2. patternGroup -> 3. drumkit -> 4. player -> 5. preset
     const hierarchy = {
       pattern: ["patternGroup", "player", "preset"],
@@ -626,7 +622,8 @@ class OTTOAccurateInterface {
       this.isDirty[level] = isDirty;
       this.updateSaveButtonVisibility(level);
 
-      // If setting to dirty, cascade up the hierarchy
+      // If setting to dirty, cascade UP the hierarchy only
+      // Never cascade down to children
       if (isDirty && hierarchy[level]) {
         hierarchy[level].forEach((higherLevel) => {
           if (this.isDirty[higherLevel] !== true) {
@@ -789,7 +786,7 @@ class OTTOAccurateInterface {
   debouncedLocalStorageSet(key, value, delay = 500) {
     // Create a unique debounce key for this storage key
     const debounceKey = `storage_${key}`;
-    
+
     // Clear existing timer if any
     if (this.debounceTimers.has(debounceKey)) {
       const existingTimer = this.debounceTimers.get(debounceKey);
@@ -798,13 +795,13 @@ class OTTOAccurateInterface {
         this.debounceTimers.delete(debounceKey);
       }
     }
-    
+
     // Store the latest value to be saved
     if (!this.pendingStorageWrites) {
       this.pendingStorageWrites = new Map();
     }
     this.pendingStorageWrites.set(key, value);
-    
+
     // Create new debounced save
     const timer = this.createSafeTimeout(() => {
       // Get the latest value
@@ -815,7 +812,7 @@ class OTTOAccurateInterface {
       }
       this.debounceTimers.delete(debounceKey);
     }, delay, `debouncedStorage_${key}`);
-    
+
     this.debounceTimers.set(debounceKey, timer);
   }
 
@@ -851,7 +848,7 @@ class OTTOAccurateInterface {
   // Save player states with debouncing
   savePlayerStatesDebounced() {
     if (!this.playerStates) return;
-    
+
     // Convert Sets to arrays for storage
     const statesToStore = {};
     for (const [key, state] of Object.entries(this.playerStates)) {
@@ -867,7 +864,7 @@ class OTTOAccurateInterface {
       }
       statesToStore[key] = stateCopy;
     }
-    
+
     this.debouncedLocalStorageSet("otto_player_states", statesToStore, 500);
   }
 
@@ -1624,19 +1621,19 @@ class OTTOAccurateInterface {
         if (this.domCache.has(cacheKey)) {
           return this.domCache.get(cacheKey);
         }
-        
+
         const element = document.querySelector(selector);
         if (element) {
           this.domCache.set(cacheKey, element);
           this.refreshDomCacheTimer();
         }
-        
+
         if (!element && DEBUG_MODE) {
           debugLog(`Element not found: ${selector}`);
         }
         return element;
       }
-      
+
       // Non-cached query for non-document parents
       const element = parent.querySelector(selector);
       if (!element && DEBUG_MODE) {
@@ -1657,13 +1654,13 @@ class OTTOAccurateInterface {
         if (this.domCache.has(cacheKey)) {
           return this.domCache.get(cacheKey);
         }
-        
+
         const elements = Array.from(document.querySelectorAll(selector));
         this.domCache.set(cacheKey, elements);
         this.refreshDomCacheTimer();
         return elements;
       }
-      
+
       // Non-cached query for non-document parents
       return Array.from(parent.querySelectorAll(selector) || []);
     } catch (error) {
@@ -1679,19 +1676,19 @@ class OTTOAccurateInterface {
         if (this.domCache.has(cacheKey)) {
           return this.domCache.get(cacheKey);
         }
-        
+
         const element = document.getElementById(id);
         if (element) {
           this.domCache.set(cacheKey, element);
           this.refreshDomCacheTimer();
         }
-        
+
         if (!element && DEBUG_MODE) {
           debugLog(`Element with ID not found: ${id}`);
         }
         return element;
       }
-      
+
       return document.getElementById(id);
     } catch (error) {
       debugError(`Invalid ID: ${id}`, error);
@@ -1704,7 +1701,7 @@ class OTTOAccurateInterface {
     if (this.domCacheTimer) {
       clearTimeout(this.domCacheTimer);
     }
-    
+
     this.domCacheTimer = this.createSafeTimeout(() => {
       this.clearDomCache();
     }, this.domCacheTimeout, "domCache");
@@ -1716,7 +1713,7 @@ class OTTOAccurateInterface {
       debugLog("Clearing DOM cache");
       this.domCache.clear();
     }
-    
+
     if (this.domCacheTimer) {
       clearTimeout(this.domCacheTimer);
       this.domCacheTimer = null;
@@ -2757,19 +2754,21 @@ class OTTOAccurateInterface {
   }
 
   saveAppStateToStorage() {
-    const appState = {
-      currentPreset: this.currentPreset,
-      isPlaying: this.isPlaying,
-      tempo: this.tempo,
-      currentPlayer: this.currentPlayer,
-      numberOfPlayers: this.numberOfPlayers,
-      // NOTE: Do NOT save loopPosition - it's a real-time transport position
-      timestamp: Date.now(),
-      version: this.version,
-    };
-
-    // Use safe wrapper with error handling
-    this.safeLocalStorageSet("otto_app_state", appState);
+    // Set parent operation flag to prevent child dirty triggers
+    this.isParentOperation = true;
+    try {
+      const appState = {
+        currentPreset: this.currentPreset,
+        currentPlayer: this.currentPlayer,
+        tempo: this.tempo,
+        numberOfPlayers: this.numberOfPlayers,
+        version: this.version,
+      };
+      this.safeLocalStorageSet("ottoAppState", appState);
+    } finally {
+      // Always clear the flag
+      this.isParentOperation = false;
+    }
   }
 
   loadAppStateFromStorage() {
@@ -2985,12 +2984,12 @@ class OTTOAccurateInterface {
     // Import settings button
     const importBtn = document.getElementById("settings-import-btn");
     const importInput = document.getElementById("settings-import-input");
-    
+
     if (importBtn && importInput) {
       importBtn.addEventListener("click", () => {
         importInput.click();
       });
-      
+
       importInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -4362,12 +4361,19 @@ class OTTOAccurateInterface {
   }
 
   savePreset() {
-    const preset = this.createPresetFromCurrentState(
-      this.presets[this.currentPreset]?.name || "Untitled",
-    );
-    this.presets[this.currentPreset] = preset;
-    this.savePresetsToStorage();
-    return preset;
+    // Set parent operation flag to prevent child dirty triggers
+    this.isParentOperation = true;
+    try {
+      const preset = this.createPresetFromCurrentState(
+        this.presets[this.currentPreset]?.name || "Untitled",
+      );
+      this.presets[this.currentPreset] = preset;
+      this.savePresetsToStorage();
+      return preset;
+    } finally {
+      // Always clear the flag
+      this.isParentOperation = false;
+    }
   }
 
   saveCurrentPreset() {
@@ -4968,21 +4974,21 @@ class OTTOAccurateInterface {
 
       // Convert to JSON string
       const jsonString = JSON.stringify(exportData, null, 2);
-      
+
       // Create blob and download link
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
+
       // Create download link and trigger download
       const a = document.createElement('a');
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
       a.download = `otto-settings-${timestamp}.json`;
       a.href = url;
       a.click();
-      
+
       // Clean up
       URL.revokeObjectURL(url);
-      
+
       this.showNotification("Settings exported successfully");
     } catch (error) {
       console.error("Export failed:", error);
@@ -4995,22 +5001,22 @@ class OTTOAccurateInterface {
       // Read the file
       const text = await file.text();
       const importData = JSON.parse(text);
-      
+
       // Validate the import data
       if (!importData.version || !importData.presets) {
         throw new Error("Invalid settings file format");
       }
-      
+
       // Confirm with user before importing
       const confirmImport = confirm(
         `Import settings from ${file.name}?\n\nThis will replace all current settings and presets.`
       );
       if (!confirmImport) return;
-      
+
       // Import the data
       this.presets = importData.presets || {};
       this.currentPlayer = importData.currentPlayer || 1;
-      
+
       // Load the preset that was active at export time
       if (importData.currentPreset && this.presets[importData.currentPreset]) {
         this.loadPreset(importData.currentPreset);
@@ -5018,7 +5024,7 @@ class OTTOAccurateInterface {
         // Load default if the saved current preset doesn't exist
         this.loadPreset("default");
       }
-      
+
       // Apply app state if available
       if (importData.appState) {
         if (importData.appState.loopPosition !== undefined) {
@@ -5029,11 +5035,11 @@ class OTTOAccurateInterface {
           this.currentTempo = importData.appState.currentTempo;
         }
       }
-      
+
       // Update UI
       this.renderPresetList();
       this.savePresetsToStorage();
-      
+
       this.showNotification("Settings imported successfully");
     } catch (error) {
       console.error("Import failed:", error);
@@ -5891,7 +5897,7 @@ class OTTOAccurateInterface {
           if (state.selectedPattern) {
             const normalizedPattern = state.selectedPattern.toLowerCase().replace(/\s+/g, "-");
             if (btn.dataset.pattern === normalizedPattern ||
-                (btn.textContent && btn.textContent.toLowerCase() === 
+                (btn.textContent && btn.textContent.toLowerCase() ===
                  state.selectedPattern.toLowerCase().substring(0, 8))) {
               this.safeAddClass(btn, "active");
             }
@@ -5981,7 +5987,7 @@ class OTTOAccurateInterface {
 
   scheduleUIUpdate() {
     if (this.updateScheduled) return;
-    
+
     this.updateScheduled = true;
     requestAnimationFrame(() => {
       this.updateSelectiveUI();
