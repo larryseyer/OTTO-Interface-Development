@@ -1627,6 +1627,263 @@ class OTTOAccurateInterface {
         }
     }
 
+    // Global Error Boundary for uncaught errors
+    setupGlobalErrorHandlers() {
+        // Handle uncaught errors
+        window.addEventListener('error', (event) => {
+            console.error('Uncaught error:', event.error);
+            this.handleGlobalError(event.error, event.filename, event.lineno, event.colno);
+            // Prevent default error handling in production
+            if (!this.debugMode) {
+                event.preventDefault();
+            }
+        });
+
+        // Handle unhandled promise rejections
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            this.handleGlobalError(event.reason, 'Promise', 0, 0);
+            // Prevent default error handling in production
+            if (!this.debugMode) {
+                event.preventDefault();
+            }
+        });
+    }
+
+    handleGlobalError(error, source, line, column) {
+        // Log to error collection
+        const errorInfo = {
+            message: error?.message || String(error),
+            stack: error?.stack,
+            source,
+            line,
+            column,
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent
+        };
+
+        // Store error for debugging (limit to last 10 errors)
+        if (!this.globalErrors) {
+            this.globalErrors = [];
+        }
+        this.globalErrors.push(errorInfo);
+        if (this.globalErrors.length > 10) {
+            this.globalErrors.shift();
+        }
+
+        // Show user-friendly error notification for critical errors
+        if (this.isCriticalError(error)) {
+            this.showNotification('An error occurred. The app may not function correctly.', 'error');
+        }
+    }
+
+    isCriticalError(error) {
+        // Determine if error is critical enough to notify user
+        const criticalPatterns = [
+            /Cannot read prop/i,
+            /Cannot set prop/i,
+            /null is not an object/i,
+            /undefined is not/i,
+            /Maximum call stack/i,
+            /out of memory/i
+        ];
+
+        const errorString = String(error?.message || error);
+        return criticalPatterns.some(pattern => pattern.test(errorString));
+    }
+
+    // Wrap event handlers with error boundaries
+    safeEventHandler(handler, context = 'unknown') {
+        return (...args) => {
+            try {
+                return handler.apply(this, args);
+            } catch (error) {
+                console.error(`Error in event handler (${context}):`, error);
+                this.handleEventHandlerError(error, context);
+                // Don't re-throw to prevent app crash
+            }
+        };
+    }
+
+    handleEventHandlerError(error, context) {
+        // Log event handler errors
+        const errorInfo = {
+            context,
+            message: error?.message || String(error),
+            stack: error?.stack,
+            timestamp: Date.now()
+        };
+
+        // Store in a separate collection for event errors
+        if (!this.eventErrors) {
+            this.eventErrors = [];
+        }
+        this.eventErrors.push(errorInfo);
+        if (this.eventErrors.length > 20) {
+            this.eventErrors.shift();
+        }
+
+        // Only show notification for repeated errors
+        const recentErrors = this.eventErrors.filter(e => 
+            Date.now() - e.timestamp < 5000 && e.context === context
+        );
+        if (recentErrors.length >= 3) {
+            this.showNotification(`Multiple errors in ${context}. Please refresh if issues persist.`, 'warning');
+        }
+    }
+
+    // Safe async operation wrapper
+    async safeAsyncOperation(operation, context = 'async operation', fallback = null) {
+        try {
+            return await operation();
+        } catch (error) {
+            console.error(`Error in ${context}:`, error);
+            
+            // Log async errors
+            if (!this.asyncErrors) {
+                this.asyncErrors = [];
+            }
+            this.asyncErrors.push({
+                context,
+                error: error?.message || String(error),
+                timestamp: Date.now()
+            });
+            if (this.asyncErrors.length > 10) {
+                this.asyncErrors.shift();
+            }
+
+            // Return fallback value instead of crashing
+            return fallback;
+        }
+    }
+
+    // Safe DOM operation wrapper
+    safeDOMOperation(operation, context = 'DOM operation') {
+        try {
+            return operation();
+        } catch (error) {
+            console.error(`DOM operation error (${context}):`, error);
+            
+            // Check if it's a common DOM error
+            if (error.name === 'NotFoundError' || error.name === 'HierarchyRequestError') {
+                console.warn('DOM structure may have changed, attempting recovery');
+                // Could trigger a UI refresh here if needed
+            }
+            
+            return null;
+        }
+    }
+
+    // Enhanced JUCE callback wrapper with error handling
+    safeJUCECallback(callback, ...args) {
+        if (!window.juce || typeof window.juce[callback] !== 'function') {
+            return;
+        }
+
+        try {
+            return window.juce[callback](...args);
+        } catch (error) {
+            console.error(`Error in JUCE callback ${callback}:`, error);
+            // Don't show notification for JUCE errors as they're backend-related
+        }
+    }
+
+    // Error recovery strategies
+    attemptErrorRecovery(errorType) {
+        console.log(`Attempting recovery for ${errorType} error`);
+        
+        switch(errorType) {
+            case 'state-corruption':
+                // Reset to default state
+                this.resetToDefaultState();
+                break;
+            case 'storage-full':
+                // Clear old data
+                this.clearOldStorageData();
+                break;
+            case 'dom-missing':
+                // Rebuild UI
+                this.rebuildUI();
+                break;
+            case 'memory-leak':
+                // Force cleanup
+                this.cleanupMemory();
+                break;
+            default:
+                console.warn(`No recovery strategy for ${errorType}`);
+        }
+    }
+
+    resetToDefaultState() {
+        console.log('Resetting to default state');
+        // Preserve critical data
+        const currentPreset = this.currentPreset;
+        
+        // Reset player states
+        for (let i = 1; i <= this.maxPlayers; i++) {
+            this.playerStates[i] = this.createDefaultPlayerState(i);
+        }
+        
+        // Try to reload current preset
+        if (currentPreset && this.presets[currentPreset]) {
+            this.loadPreset(currentPreset).catch(err => {
+                console.error('Failed to reload preset after reset:', err);
+            });
+        }
+        
+        this.showNotification('State has been reset due to an error', 'info');
+    }
+
+    clearOldStorageData() {
+        console.log('Clearing old storage data');
+        try {
+            // Get storage usage
+            const usage = this.analyzeStorageUsage();
+            
+            // Clear old presets (keep last 20)
+            if (Object.keys(this.presets).length > 20) {
+                const sortedPresets = Object.entries(this.presets)
+                    .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0))
+                    .slice(0, 20);
+                
+                this.presets = Object.fromEntries(sortedPresets);
+                this.savePresetsToStorage();
+            }
+            
+            // Clear old pattern groups (keep last 10)
+            if (this.patternGroups && Object.keys(this.patternGroups).length > 10) {
+                const sortedGroups = Object.entries(this.patternGroups)
+                    .sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0))
+                    .slice(0, 10);
+                
+                this.patternGroups = Object.fromEntries(sortedGroups);
+                this.savePatternGroupsToStorage();
+            }
+            
+            this.showNotification('Cleared old data to free up storage', 'info');
+        } catch (error) {
+            console.error('Error clearing storage:', error);
+        }
+    }
+
+    rebuildUI() {
+        console.log('Rebuilding UI components');
+        try {
+            // Re-setup critical UI components
+            this.setupPlayerTabs();
+            this.setupPatternGrid();
+            this.setupToggleButtons();
+            this.setupFillButtons();
+            this.setupSliders();
+            this.updateUIForCurrentPlayer();
+            
+            this.showNotification('UI has been rebuilt', 'info');
+        } catch (error) {
+            console.error('Error rebuilding UI:', error);
+            this.showNotification('Failed to rebuild UI. Please refresh the page.', 'error');
+        }
+    }
+
     // Differential DOM updates - only update what changed
     differentialUpdate(selector, updates) {
         const element = typeof selector === 'string' ? 
@@ -3699,24 +3956,35 @@ class OTTOAccurateInterface {
     }
 
     exportPreset(key) {
-        const preset = this.presets[key];
-        if (!preset) return;
+        try {
+            const preset = this.presets[key];
+            if (!preset) {
+                console.error(`Preset ${key} not found for export`);
+                return;
+            }
 
-        // Create a blob with the preset data
-        const dataStr = JSON.stringify(preset, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            // Create a blob with the preset data
+            const dataStr = JSON.stringify(preset, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
 
-        // Create download link
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(dataBlob);
-        link.download = `otto-preset-${preset.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+            // Create download link
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `otto-preset-${preset.name.toLowerCase().replace(/\s+/g, '-')}.json`;
 
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the object URL
+            URL.revokeObjectURL(link.href);
 
-        this.showNotification(`Exported preset: "${preset.name}"`);
+            this.showNotification(`Exported preset: "${preset.name}"`);
+        } catch (error) {
+            console.error('Error exporting preset:', error);
+            this.showNotification('Failed to export preset', 'error');
+        }
     }
 
     saveToHistory() {
@@ -4053,6 +4321,9 @@ class OTTOAccurateInterface {
 
     init() {
         try {
+            // Set up global error handlers first
+            this.setupGlobalErrorHandlers();
+            
             this.initAppState();      // Initialize app state FIRST to restore saved values
             this.initPresetSystem();  // Initialize preset system second
             this.loadPatternGroups(); // Load pattern groups early
@@ -4467,13 +4738,14 @@ class OTTOAccurateInterface {
     }
 
     updateUIForCurrentPlayer() {
-        const state = this.playerStates[this.currentPlayer];
+        try {
+            const state = this.playerStates[this.currentPlayer];
 
-        // Ensure state exists
-        if (!state) {
-            console.error(`No state found for player ${this.currentPlayer}`);
-            return;
-        }
+            // Ensure state exists
+            if (!state) {
+                console.error(`No state found for player ${this.currentPlayer}`);
+                return;
+            }
 
         // Update player number display
         const playerNumberDisplay = document.getElementById('current-player-number');
@@ -4618,6 +4890,14 @@ class OTTOAccurateInterface {
             if (tab && this.playerStates[i]) {
                 tab.classList.toggle('muted', this.playerStates[i].muted || false);
             }
+        }
+        } catch (error) {
+            console.error('Error updating UI for current player:', error);
+            // Attempt recovery by rebuilding critical UI elements
+            this.safeDOMOperation(() => {
+                this.setupPlayerTabs();
+                this.setupPatternGrid();
+            }, 'UI recovery after error');
         }
     }
 
@@ -6032,6 +6312,10 @@ class OTTOAccurateInterface {
     setupLoopTimeline() {
         const timelineHandle = document.getElementById('timeline-handle');
         if (timelineHandle) {
+            // Initialize the handle position to 0
+            this.loopPosition = 0;
+            this.updateLoopTimelineDisplay();
+            
             let isDragging = false;
 
             timelineHandle.addEventListener('mousedown', (e) => {
