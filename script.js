@@ -3339,6 +3339,9 @@ class OTTOAccurateInterface {
 
     // Load available MIDI patterns
     this.loadAvailablePatterns();
+    
+    // Ensure all MIDI files are assigned to at least one group
+    this.ensureAllMidiFilesAssigned();
 
     // Setup drag and drop AFTER patterns are loaded
     setTimeout(() => {
@@ -3439,6 +3442,172 @@ class OTTOAccurateInterface {
     // Check if a MIDI file is in a specific group
     const groups = this.getMidiFileGroups(midiFile);
     return groups.includes(groupKey);
+  }
+
+  // MIDI File Auto-Assignment Functions
+  ensureAllMidiFilesAssigned() {
+    // Get all available MIDI files
+    const midiFiles = this.getAllMidiFiles();
+    
+    debugLog("Ensuring all MIDI files are assigned to groups...");
+    
+    let unassignedCount = 0;
+    let assignedCount = 0;
+    
+    // Check each MIDI file
+    for (const midiFile of midiFiles) {
+      const groups = this.getMidiFileGroups(midiFile);
+      
+      if (groups.length === 0) {
+        // File is not in any group - assign it
+        unassignedCount++;
+        const targetGroup = this.findOrCreateGroupForMidi(midiFile);
+        
+        if (targetGroup) {
+          // Add to the group's patterns list
+          if (!this.patternGroups[targetGroup].patterns) {
+            this.patternGroups[targetGroup].patterns = [];
+          }
+          
+          // Only add if not already in the group (shouldn't happen, but be safe)
+          if (!this.patternGroups[targetGroup].patterns.includes(midiFile)) {
+            this.patternGroups[targetGroup].patterns.push(midiFile);
+          }
+          
+          // Update registry
+          this.updateMidiRegistry(midiFile, [targetGroup]);
+          assignedCount++;
+          
+          debugLog(`Assigned "${midiFile}" to group "${targetGroup}"`);
+        }
+      }
+    }
+    
+    if (unassignedCount > 0) {
+      debugLog(`Auto-assigned ${assignedCount} of ${unassignedCount} unassigned MIDI files`);
+      this.savePatternGroups();
+      this.saveMidiRegistry();
+    } else {
+      debugLog("All MIDI files already assigned to groups");
+    }
+    
+    // Also rebuild registry from current groups (handles legacy data)
+    this.rebuildRegistryFromGroups();
+  }
+  
+  findOrCreateGroupForMidi(midiFile) {
+    // First, try to find a group with space
+    const groupWithSpace = this.findGroupWithSpace();
+    if (groupWithSpace) {
+      return groupWithSpace;
+    }
+    
+    // No groups with space - create a new one
+    return this.createAutoGroup();
+  }
+  
+  findGroupWithSpace() {
+    // Check all groups except 'all' (which is internal)
+    for (const [key, group] of Object.entries(this.patternGroups)) {
+      if (key === 'all') continue; // Skip internal 'all' group
+      
+      const patterns = group.patterns || [];
+      if (patterns.length < 16) {
+        // This group has space
+        return key;
+      }
+    }
+    
+    // No groups with space
+    return null;
+  }
+  
+  createAutoGroup() {
+    // Find the next available group number
+    let groupNum = 1;
+    while (this.patternGroups[`group-${groupNum}`]) {
+      groupNum++;
+    }
+    
+    const groupKey = `group-${groupNum}`;
+    const groupName = `Group ${groupNum}`;
+    
+    // Create the new group
+    this.patternGroups[groupKey] = {
+      name: groupName,
+      patterns: [],
+      deletable: true,
+      editable: true
+    };
+    
+    debugLog(`Created new auto-group: ${groupName}`);
+    return groupKey;
+  }
+  
+  getAllMidiFiles() {
+    // Returns the complete list of MIDI files
+    // In production, this would come from the server
+    return [
+      "Afro Cuban Pop", "Afro Fusion", "Ain't it Sad Country", "Alt Country", "Alt Rock",
+      "Bad News Country", "Badu Beat", "Basic House", "Basic Reggae", "Basic Swing",
+      "Basic", "Big Funk", "Boogie Disco", "Boogie Woogie", "Bossa Fusion",
+      "Bossa Straight", "Brazilian Ballad", "Brazilian Carnival", "British Ballad", "Busy Bossa",
+      "BusyBeat", "Buyoun", "ChaCha", "Chicago Blues", "Classic Country",
+      "Classic Motown", "Classic Soul", "Cool Jazz", "Country Ballad", "Country Rock",
+      "Country Shuffle", "Country Train", "Crescent City", "DC Funk", "Deep House",
+      "Detroit Funk", "Disco", "Dixieland", "Doo Wop", "Dream Pop",
+      "Dubstep", "Easy Swing", "Electro Pop", "Emo", "Ethereal",
+      "Funk", "Funk Rock", "Garage Rock", "Gospel", "Grunge",
+      "Hard Rock", "Hip Hop", "House", "Indie Pop", "Indie Rock",
+      "Island Reggae", "Jazz", "Jazz Fusion", "Just Hat", "Just Kick",
+      "Latin Jazz", "Latin Pop", "Light Funk", "Linear Funk", "Memphis Soul",
+      "Metal", "Modern Country", "Modern Jazz", "Modern RnB", "Motown",
+      "Neo Soul", "New Wave", "Old School Hip Hop", "Outlaw Country", "Polka",
+      "Pop Ballad", "Pop Punk", "Pop Rock", "Power Ballad", "Progressive Rock",
+      "Psychedelic Rock", "Punk", "Push", "Reggae", "Reggaeton",
+      "Retro", "RnB", "Rock Ballad", "Rockabilly", "Salsa",
+      "Samba", "Shuffle", "Ska", "Slow Blues", "Slow Jam",
+      "Smooth Jazz", "Soul", "Southern Rock", "Stadium Rock", "Surf",
+      "Swing", "Synth Pop", "Tech House", "Techno", "Trap",
+      "Trip Hop", "Waltz", "West Coast Jazz"
+    ];
+  }
+  
+  rebuildRegistryFromGroups() {
+    // Rebuild the registry based on current group contents
+    // This helps handle legacy data and ensures consistency
+    const newRegistry = {};
+    
+    for (const [groupKey, group] of Object.entries(this.patternGroups)) {
+      if (groupKey === 'all') continue; // Skip internal group
+      
+      const patterns = group.patterns || [];
+      for (const pattern of patterns) {
+        if (!newRegistry[pattern]) {
+          newRegistry[pattern] = [];
+        }
+        if (!newRegistry[pattern].includes(groupKey)) {
+          newRegistry[pattern].push(groupKey);
+        }
+      }
+    }
+    
+    // Merge with existing registry (preserves multi-group assignments)
+    for (const [midiFile, groups] of Object.entries(this.midiFileRegistry)) {
+      if (!newRegistry[midiFile]) {
+        newRegistry[midiFile] = groups;
+      } else {
+        // Merge groups
+        for (const group of groups) {
+          if (!newRegistry[midiFile].includes(group)) {
+            newRegistry[midiFile].push(group);
+          }
+        }
+      }
+    }
+    
+    this.midiFileRegistry = newRegistry;
+    this.saveMidiRegistry();
   }
 
   // Drumkit Management Methods
@@ -5264,6 +5433,7 @@ class OTTOAccurateInterface {
       this.initPresetSystem(); // Initialize preset system second
       this.loadPatternGroups(); // Load pattern groups early
       this.initializeMidiRegistry(); // Initialize MIDI file registry
+      this.ensureAllMidiFilesAssigned(); // Ensure all MIDI files have groups
       this.loadDrumkits(); // Load drumkit manager
       this.setupVersion();
       this.setupSplashScreen();
