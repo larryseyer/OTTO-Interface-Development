@@ -4763,6 +4763,9 @@ class OTTOAccurateInterface {
         // STEP 7: Update mute overlay based on CURRENT player's state
         // This is critical - must check the current player's mute state
         this.updateMuteOverlay();
+        
+        // STEP 8: Ensure current player's MIDI file is visible
+        this.onPlayerLoaded(this.currentPlayer);
 
         // Save app state with new preset selection
         this.scheduleSave("appState");
@@ -5835,11 +5838,110 @@ class OTTOAccurateInterface {
 
     // Populate kit dropdown with all available kits
     this.populateKitDropdown();
+    
+    // NEW: Ensure player's MIDI file is visible
+    this.onPlayerLoaded(playerNumber);
 
     this.scheduleSave("appState"); // Save app state
     debugLog(
       `Switched to Player ${playerNumber}, muted: ${this.playerStates[playerNumber]?.muted || false}`,
     );
+  }
+
+  onPlayerLoaded(playerNumber) {
+    // Called when a player is selected or preset loads
+    // Ensures the player's MIDI file is visible in a group
+    
+    if (!this.playerStates[playerNumber]) {
+      debugError(`Invalid player number: ${playerNumber}`);
+      return;
+    }
+    
+    const midiFile = this.playerStates[playerNumber].midiFile;
+    if (!midiFile) {
+      debugLog(`Player ${playerNumber} has no MIDI file set`);
+      return;
+    }
+    
+    // Get groups containing this MIDI file
+    const groups = this.getMidiFileGroups(midiFile);
+    
+    if (groups.length === 0) {
+      // MIDI file not in any group - assign it
+      debugWarn(`MIDI file "${midiFile}" not in any group, assigning...`);
+      
+      const targetGroup = this.findOrCreateGroupForMidi(midiFile);
+      if (targetGroup) {
+        // Add to group
+        if (!this.patternGroups[targetGroup].patterns) {
+          this.patternGroups[targetGroup].patterns = [];
+        }
+        this.patternGroups[targetGroup].patterns.push(midiFile);
+        
+        // Update registry
+        this.updateMidiRegistry(midiFile, [targetGroup]);
+        
+        // Save changes
+        this.savePatternGroups();
+        
+        // Switch to this group
+        this.switchToPatternGroup(targetGroup);
+        
+        debugLog(`Assigned "${midiFile}" to group "${targetGroup}" and switched to it`);
+      }
+    } else {
+      // Check if current displayed group contains this MIDI file
+      const currentGroup = this.getCurrentDisplayedGroup();
+      
+      if (currentGroup && !groups.includes(currentGroup)) {
+        // Current group doesn't have this file - switch to first group that does
+        this.switchToPatternGroup(groups[0]);
+        debugLog(`Switched to group "${groups[0]}" to show player's MIDI file "${midiFile}"`);
+      }
+    }
+  }
+  
+  getCurrentDisplayedGroup() {
+    // Get the currently displayed pattern group
+    // This depends on UI state - check dropdown or current editor group
+    
+    // Try pattern group editor first (if modal is open)
+    if (this.currentEditorGroup) {
+      return this.currentEditorGroup;
+    }
+    
+    // Otherwise check main UI pattern group
+    const currentPlayer = this.currentPlayer;
+    if (this.playerStates[currentPlayer]) {
+      return this.playerStates[currentPlayer].patternGroup;
+    }
+    
+    return "favorites"; // Default fallback
+  }
+  
+  switchToPatternGroup(groupKey) {
+    // Switch the displayed pattern group
+    if (!this.patternGroups[groupKey]) {
+      debugError(`Pattern group "${groupKey}" does not exist`);
+      return;
+    }
+    
+    // Update current player's pattern group (legacy - will be removed later)
+    if (this.playerStates[this.currentPlayer]) {
+      this.playerStates[this.currentPlayer].patternGroup = groupKey;
+    }
+    
+    // Update UI to show this group's patterns
+    const patterns = this.patternGroups[groupKey].patterns || [];
+    this.updateMainPatternGrid(patterns);
+    
+    // Update dropdown if it exists
+    const dropdownText = document.querySelector("#group-selected .dropdown-text");
+    if (dropdownText) {
+      dropdownText.textContent = this.patternGroups[groupKey].name;
+    }
+    
+    debugLog(`Switched to pattern group: ${groupKey}`);
   }
 
   updateUIForCurrentPlayer() {
@@ -7124,6 +7226,9 @@ class OTTOAccurateInterface {
 
       // Update player state with full pattern name
       this.playerStates[this.currentPlayer].selectedPattern = fullPatternName;
+      
+      // NEW: Also update the midiFile field
+      this.playerStates[this.currentPlayer].midiFile = fullPatternName;
 
       // Save selected pattern to the current pattern group
       if (this.patternGroups && this.patternGroups[currentGroup]) {
@@ -8331,48 +8436,26 @@ class OTTOAccurateInterface {
       return;
     }
 
-    const currentGroup = this.playerStates[playerNumber].patternGroup;
-
-    // Save to player state
+    // NEW: Update player's midiFile directly
+    this.playerStates[playerNumber].midiFile = patternName;
+    
+    // LEGACY: Keep updating old fields for now (will remove in Phase 4)
     this.playerStates[playerNumber].selectedPattern = patternName;
-
-    // Save to pattern group if it exists
+    const currentGroup = this.playerStates[playerNumber].patternGroup;
+    
     if (this.patternGroups && this.patternGroups[currentGroup]) {
       this.patternGroups[currentGroup].selectedPattern = patternName;
-
-      // Ensure the pattern is actually in the group
-      const patterns = this.patternGroups[currentGroup].patterns;
-      let patternFound = false;
-
-      // Check if pattern exists in the group (exact or substring match)
-      for (let i = 0; i < patterns.length; i++) {
-        if (
-          patterns[i] === patternName ||
-          patterns[i].toLowerCase() === patternName.toLowerCase() ||
-          patterns[i].substring(0, 8).toLowerCase() ===
-            patternName.substring(0, 8).toLowerCase()
-        ) {
-          patternFound = true;
-          break;
-        }
-      }
-
-      if (!patternFound) {
-        debugWarn(
-          `Pattern "${patternName}" not found in group "${currentGroup}"`,
-        );
-      }
-
-      // Mark pattern as dirty (will cascade up)
-      this.setDirty("pattern", true);
     }
+
+    // Mark as dirty
+    this.setDirty("player", true);
 
     // Notify external system
     if (window.juce?.onPatternSelected) {
       window.juce.onPatternSelected(playerNumber, patternName);
     }
 
-    debugLog(`Player ${playerNumber} selected pattern: ${patternName}`);
+    debugLog(`Player ${playerNumber} selected MIDI file: ${patternName}`);
   }
 
   onPatternGroupChanged(playerNumber, groupName) {
