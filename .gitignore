@@ -52,7 +52,8 @@ Working_Example_MIDI_Port/
 HISE_OTTO_Recent_Image.png
 
 # Assets from JUCE builds
-Assets/
+Assets/Docs/
+Assets/GUI
 
 # Serena
 .serena/

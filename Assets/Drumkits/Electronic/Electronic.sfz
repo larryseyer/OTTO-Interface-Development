@@ -1,0 +1,3 @@
+<region> sample=kick.wav key=36
+<region> sample=snare.wav key=38
+<region> sample=hihat.wav key=42

@@ -1,0 +1,34 @@
+Directory structure of /Users/larryseyer/AudioDevelopment/OTTO/Assets/Fonts:
+.
+|----Montserrat
+|----Open_Sans
+|----Orbitron
+|----Phosphor
+| |----bold
+| |----duotone
+| |----fill
+| |----light
+| |----regular
+| |----thin
+|----Playfair_Display
+|----Roboto
+|----Roboto_Condensed
+|----.DS_Store
+|----file_structure.txt
+| |----Montserrat-Italic-VariableFont_wght.ttf
+| |----Montserrat-VariableFont_wght.ttf
+| |----OpenSans-Italic-VariableFont_wdth,wght.ttf
+| |----OpenSans-VariableFont_wdth,wght.ttf
+| |----Orbitron-VariableFont_wght.ttf
+| | |----Phosphor-Bold.ttf
+| | |----Phosphor-Duotone.ttf
+| | |----Phosphor-Fill.ttf
+| | |----Phosphor-Light.ttf
+| | |----Phosphor.ttf
+| | |----Phosphor-Thin.ttf
+| |----PlayfairDisplay-Italic-VariableFont_wght.ttf
+| |----PlayfairDisplay-VariableFont_wght.ttf
+| |----RobotoCondensed-Italic-VariableFont_wght.ttf
+| |----RobotoCondensed-VariableFont_wght.ttf
+| |----Roboto-Italic-VariableFont_wdth,wght.ttf
+| |----Roboto-VariableFont_wdth,wght.ttf
