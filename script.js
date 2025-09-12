@@ -3477,21 +3477,40 @@ class OTTOAccurateInterface {
         const targetGroup = this.findOrCreateGroupForMidi(midiFile);
         
         if (targetGroup) {
-          // Add to the group's patterns list
+          // Ensure the group has a patterns array
           if (!this.patternGroups[targetGroup].patterns) {
             this.patternGroups[targetGroup].patterns = [];
           }
           
-          // Only add if not already in the group (shouldn't happen, but be safe)
-          if (!this.patternGroups[targetGroup].patterns.includes(midiFile)) {
-            this.patternGroups[targetGroup].patterns.push(midiFile);
+          const patterns = this.patternGroups[targetGroup].patterns;
+          
+          // For a 16-slot grid, ensure we have an array that can hold 16 items
+          // Find the first empty slot or append if less than 16 items
+          let added = false;
+          
+          // First, try to find an empty slot
+          for (let i = 0; i < Math.min(patterns.length, 16); i++) {
+            if (!patterns[i] || patterns[i] === '') {
+              patterns[i] = midiFile;
+              added = true;
+              break;
+            }
           }
           
-          // Update registry
-          this.updateMidiRegistry(midiFile, [targetGroup]);
-          assignedCount++;
+          // If no empty slot found and we have less than 16 patterns, append
+          if (!added && patterns.length < 16) {
+            patterns.push(midiFile);
+            added = true;
+          }
           
-          debugLog(`Assigned "${midiFile}" to group "${targetGroup}"`);
+          if (added) {
+            // Update registry
+            this.updateMidiRegistry(midiFile, [targetGroup]);
+            assignedCount++;
+            debugLog(`Assigned "${midiFile}" to group "${targetGroup}"`);
+          } else {
+            debugLog(`Could not assign "${midiFile}" - group "${targetGroup}" is full`);
+          }
         }
       }
     }
@@ -3525,7 +3544,9 @@ class OTTOAccurateInterface {
       if (key === 'all') continue; // Skip internal 'all' group
       
       const patterns = group.patterns || [];
-      if (patterns.length < 16) {
+      // Count non-empty patterns
+      const nonEmptyPatterns = patterns.filter(p => p && p.trim() !== '').length;
+      if (nonEmptyPatterns < 16) {
         // This group has space
         return key;
       }
@@ -5528,7 +5549,7 @@ class OTTOAccurateInterface {
         midiFile: "Basic",
         kitName: "Acoustic",
         patternGroup: "favorites",
-        selectedPattern: "basic",
+        selectedPattern: "Basic",  // Set Basic as the active pattern
         kitMixerActive: false,
         muted: false,
         toggleStates: {
@@ -5564,22 +5585,74 @@ class OTTOAccurateInterface {
     // Clear existing groups
     this.patternGroups = {};
     
-    // Create default groups
+    // Create default favorites group with the standard patterns
     this.patternGroups["favorites"] = {
       name: "Favorites",
-      patterns: Array(16).fill(""),
-      selectedPattern: null,
+      patterns: [
+        "Basic",
+        "Bassa", 
+        "BusyBeat",
+        "Buyoun",
+        "ChaCha",
+        "Funk",
+        "Jazz",
+        "Just Hat",
+        "Just Kick",
+        "Polka",
+        "Push",
+        "Shuffle",
+        "Ska",
+        "Surf",
+        "Swing",
+        "Waltz"
+      ],
       deletable: false,
+      editable: true
     };
     
     // Initialize MIDI registry
     this.initializeMidiRegistry();
     
-    // Load available patterns and auto-create groups
+    // Load available patterns and auto-create groups for remaining patterns
     this.loadAvailablePatterns();
     
-    // Ensure all MIDI files are assigned
-    this.ensureAllMidiFilesAssigned();
+    // Get all MIDI files and assign any that aren't in favorites to other groups
+    const allMidiFiles = this.getAllMidiFiles();
+    const favoritesPatterns = this.patternGroups["favorites"].patterns;
+    const unassignedFiles = allMidiFiles.filter(file => !favoritesPatterns.includes(file));
+    
+    // Create additional groups if needed for unassigned files
+    let currentGroupNum = 1;
+    let currentGroup = null;
+    let currentGroupPatterns = [];
+    
+    for (const file of unassignedFiles) {
+      if (currentGroupPatterns.length === 0 || currentGroupPatterns.length >= 16) {
+        // Need a new group
+        if (currentGroup && currentGroupPatterns.length > 0) {
+          // Save the previous group
+          this.patternGroups[currentGroup].patterns = currentGroupPatterns;
+        }
+        
+        // Create new group
+        currentGroup = `group-${currentGroupNum}`;
+        this.patternGroups[currentGroup] = {
+          name: `Group ${currentGroupNum}`,
+          patterns: [],
+          deletable: true,
+          editable: true
+        };
+        currentGroupPatterns = [];
+        currentGroupNum++;
+      }
+      
+      currentGroupPatterns.push(file);
+    }
+    
+    // Save the last group if it has patterns
+    if (currentGroup && currentGroupPatterns.length > 0) {
+      this.patternGroups[currentGroup].patterns = currentGroupPatterns;
+    }
     
     // Rebuild registry from groups
     this.rebuildRegistryFromGroups();
@@ -5629,8 +5702,25 @@ class OTTOAccurateInterface {
     this.renderPresetList();
     this.updatePatternGroupDropdown();
     this.updateEditorGroupDropdown();
+    
+    // Update the pattern grid with the favorites patterns
     this.updateMainPatternGrid(this.patternGroups["favorites"].patterns);
+    
     this.updatePresetLockDisplay();
+    
+    // Set Basic pattern as active in the UI
+    const patternBtns = document.querySelectorAll('.pattern-btn');
+    patternBtns.forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.pattern === 'basic') {
+        btn.classList.add('active');
+      }
+    });
+    
+    // Update the player state to reflect Basic as selected
+    if (this.playerStates && this.playerStates[this.currentPlayer]) {
+      this.playerStates[this.currentPlayer].selectedPattern = "Basic";
+    }
 
     // 10. Show success notification
     this.showNotification("System reset complete - all components restored to factory defaults");
