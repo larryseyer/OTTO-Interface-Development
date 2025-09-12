@@ -2239,10 +2239,10 @@ class OTTOAccurateInterface {
       cspMeta.httpEquiv = "Content-Security-Policy";
       cspMeta.content = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline'", // Allow inline scripts (needed for some UI)
+        "script-src 'self' 'unsafe-inline' https://unpkg.com", // Allow inline scripts and phosphor icons
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com", // Allow inline styles and external fonts
         "img-src 'self' data: blob:",
-        "font-src 'self' data: https://fonts.gstatic.com",
+        "font-src 'self' data: https://fonts.gstatic.com https://unpkg.com",
         "connect-src 'self'",
         "frame-src 'self' https://my-store-1008202.creator-spring.com https://LarrySeyer.com", // Allow store iframe
         "object-src 'none'", // Prevent plugins
@@ -5662,7 +5662,22 @@ class OTTOAccurateInterface {
     // Save pattern groups
     this.savePatternGroups();
 
-    // 3. Reset drumkits - clear cached list and rescan
+    // 3. Clear all storage first (but preserve drumkit cache for now)
+    debugLog("Clearing storage...");
+
+    // Clear all OTTO-related localStorage items EXCEPT drumkit cache
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("otto") && 
+          key !== "ottoDrumkitList" && 
+          key !== "ottoDrumkits") {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+    // 4. Reset drumkits - clear cached list and rescan
     debugLog("Resetting drumkits...");
     localStorage.removeItem("ottoDrumkitList");
     localStorage.removeItem("ottoDrumkits");
@@ -5671,25 +5686,12 @@ class OTTOAccurateInterface {
     // Re-scan for drumkits
     await this.loadDrumkits();
     
-    // Re-populate the dropdown
+    // Re-populate the dropdown after drumkits are loaded
     this.populateKitDropdown();
 
-    // 4. Reset mixer settings (future implementation)
+    // 5. Reset mixer settings (future implementation)
     // TODO: Reset mixer configurations
     // this.resetMixerSettings();
-
-    // 5. Clear all storage and save fresh data
-    debugLog("Clearing and rebuilding storage...");
-
-    // Clear all OTTO-related localStorage items
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("otto")) {
-        keysToRemove.push(key);
-      }
-    }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
 
     // Save fresh data
     this.savePresetsToStorage();
@@ -5703,9 +5705,12 @@ class OTTOAccurateInterface {
     // 7. Reset to Player 1
     this.currentPlayer = 1;
 
-    // 8. Load the default preset
-    this.loadPreset("default");
+    // 8. Load the default preset (must await since it's async)
+    await this.loadPreset("default");
     this.switchToPlayer(1);
+    
+    // Re-populate kit dropdown after preset is loaded to ensure proper state
+    this.populateKitDropdown();
 
     // 9. Update all UI elements
     this.updatePresetDropdown();
@@ -5727,10 +5732,25 @@ class OTTOAccurateInterface {
       }
     });
 
-    // Update the player state to reflect Basic as selected
-    if (this.playerStates && this.playerStates[this.currentPlayer]) {
-      this.playerStates[this.currentPlayer].selectedPattern = "Basic";
+    // Ensure all players have Basic pattern and Acoustic kit after reset
+    for (let i = 1; i <= this.maxPlayers; i++) {
+      if (this.playerStates && this.playerStates[i]) {
+        this.playerStates[i].selectedPattern = "Basic";
+        this.playerStates[i].midiFile = "Basic";
+        this.playerStates[i].kitName = "Acoustic";
+      }
     }
+
+    // Update the default preset in memory with the correct player states
+    if (this.presets["default"]) {
+      this.presets["default"].playerStates = this.structuredClone(this.playerStates);
+    }
+
+    // Save the preset again to ensure it persists with all correct values
+    this.savePresetsToStorage();
+    
+    // Save app state to remember current player
+    this.saveAppStateToStorage();
 
     // 10. Show success notification
     this.showNotification("System reset complete - all components restored to factory defaults");
@@ -6012,14 +6032,16 @@ class OTTOAccurateInterface {
       this.setupSaveButtons();
       this.startLoopAnimation();
 
-      // Initialize UI for saved or default player
-      this.updateUIForCurrentPlayer();
-
-      // Load the last used preset after all initialization is complete
+      // Load the last used preset first (which includes player states)
       // This ensures presets are loaded and UI is ready
       setTimeout(() => {
         if (!this.isDestroyed) {
           this.loadLastUsedPreset();
+          // After preset is loaded, switch to the saved player
+          setTimeout(() => {
+            // Switch to the saved player to properly update tabs and UI
+            this.switchToPlayer(this.currentPlayer);
+          }, 50);
         }
       }, 100); // Small delay to ensure everything is initialized
 
@@ -6388,6 +6410,9 @@ class OTTOAccurateInterface {
 
     // Populate kit dropdown with all available kits
     this.populateKitDropdown();
+    
+    // Re-setup kit controls to ensure event listeners are attached to new elements
+    this.setupKitControls();
 
     // NEW: Ensure player's MIDI file is visible
     this.onPlayerLoaded(playerNumber);
@@ -7491,26 +7516,7 @@ class OTTOAccurateInterface {
 
     debugLog("Populating kit dropdown with drumkits:", this.drumkits);
 
-    // Check if we actually need to repopulate (only if kits have changed)
-    const currentOptions = kitOptionsContainer.querySelectorAll(".dropdown-option");
-    const currentKitCount = currentOptions.length;
-    const newKitCount = Object.keys(this.drumkits || {}).length;
-    
-    // If the number of kits hasn't changed and we have options, just update selection
-    if (currentKitCount === newKitCount && currentKitCount > 0) {
-      // Just update the selected state
-      currentOptions.forEach((option) => {
-        const kitName = option.textContent;
-        if (kitName === this.playerStates[this.currentPlayer].kitName) {
-          option.classList.add("selected");
-        } else {
-          option.classList.remove("selected");
-        }
-      });
-      return;
-    }
-
-    // Clear existing options only if we need to rebuild
+    // Clear existing options
     kitOptionsContainer.innerHTML = "";
 
     // Add all available kits from this.drumkits
