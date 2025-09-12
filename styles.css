@@ -3840,7 +3840,7 @@ body {
 }
 
 .channel-fx-spacer {
-  height: 60px; /* Match height of 2x2 FX buttons grid with padding */
+  height: 50px; /* Adjusted to align FX return faders */
   margin-bottom: 10px; /* Match fx-section margin */
 }
 
@@ -3894,7 +3894,7 @@ body {
 }
 
 .channel-sends-spacer {
-  height: 100px; /* Match height of 2x2 send knobs grid with labels */
+  height: 80px; /* Adjusted to align FX return faders */
   margin-bottom: 10px; /* Match sends-section margin */
 }
 
@@ -4093,19 +4093,20 @@ body {
 
 .fader-value {
   margin-top: 8px;
-  padding: 4px 8px;
-  font-size: 10px;
+  padding: 8px 8px;
+  font-size: 11px;
   color: #fff;
   font-weight: 600;
   text-align: center;
   background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
   border: 1px solid #000;
   border-radius: 3px;
-  min-height: 20px;
+  min-height: 40px; /* Doubled height for track names */
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.5);
+  line-height: 1.2;
 }
 
 /* FX Windows */
