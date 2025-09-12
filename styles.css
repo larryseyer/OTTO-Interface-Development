@@ -1930,8 +1930,8 @@ body {
   transform: translateX(-50%) translateY(50%);
   width: 30px;
   height: 24px;
-  background: #999999;
-  /* Medium-light grey for thumb */
+  background: #777777;
+  /* Global grey for thumb */
   border-radius: 7px;
   box-shadow:
     inset 1px 1px 2px rgba(255, 255, 255, 0.2),
@@ -1950,7 +1950,7 @@ body {
 
 /* Hover effects */
 .custom-slider:hover .slider-thumb {
-  background: #aaaaaa;
+  background: #999999;
 }
 
 .custom-slider.dragging .slider-thumb {
@@ -4521,17 +4521,7 @@ body {
   transition: all 0.2s ease;
 }
 
-.slider-thumb {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: var(--bg-primary);
-  border: 2px solid var(--accent-color);
-  border-radius: 50%;
-  cursor: pointer;
-  transform: translateX(-50%);
-  transition: all 0.2s ease;
-}
+/* Duplicate slider-thumb removed - using definition from line 1925 */
 
 .slider-tick {
   position: absolute;
@@ -4548,6 +4538,7 @@ body {
 
 .slider.vertical .slider-thumb {
   transform: translateY(50%);
+  /* Color inherited from main .slider-thumb definition */
 }
 
 .slider.horizontal .slider-fill {
