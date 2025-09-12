@@ -2688,6 +2688,16 @@ body {
   transform: translateY(-1px);
 }
 
+.settings-btn.warning-btn {
+  background: #b8860b;
+  color: white;
+}
+
+.settings-btn.warning-btn:hover {
+  background: #daa520;
+  transform: translateY(-1px);
+}
+
 .settings-description {
   margin-top: 10px;
   color: var(--text-secondary);
@@ -2734,6 +2744,27 @@ body {
   border-bottom: 1px solid var(--border-color);
   height: 60px;
   /* Slightly taller for better visual hierarchy */
+}
+
+.panel-help-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 191, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 191, 0, 0.2);
+  color: #ffbf00;
+  font-size: 13px;
+}
+
+.panel-help-bar i {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.panel-help-bar span {
+  opacity: 0.9;
+  line-height: 1.4;
 }
 
 .panel-header-left {

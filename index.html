@@ -110,11 +110,15 @@
             <button class="panel-control-btn" id="rename-group-btn" title="Rename Current Group">
               <i class="ph-thin ph-pencil-simple"></i>
             </button>
-            <button class="panel-close-btn" id="pattern-panel-close">
+            <button class="panel-control-btn" id="pattern-panel-close">
               <i class="ph-thin ph-x"></i>
             </button>
           </div>
         </div>
+      </div>
+      <div class="panel-help-bar">
+        <i class="ph-thin ph-info"></i>
+        <span>Drag patterns from left to right to organize them into groups. Each group holds 16 patterns (4x4 grid).</span>
       </div>
       <div class="panel-search">
         <input type="text" id="pattern-search-input" class="pattern-search-input" placeholder="Search patterns..." />
@@ -135,13 +139,22 @@
         <div class="settings-section">
           <h3>Application Settings</h3>
           <div class="settings-item">
-            <button class="settings-btn danger-btn" id="settings-factory-reset-btn">
+            <button class="settings-btn danger-btn" id="settings-system-reset-btn">
               <i class="ph-thin ph-arrow-clockwise"></i>
-              <span>Reset Default Preset to Factory Settings</span>
+              <span>Reset System</span>
             </button>
             <p class="settings-description">
-              Restores the Default preset to original factory values. Use this
-              if your Default preset has become corrupted.
+              Complete system reset: Rebuilds MIDI groups, resets all presets to factory defaults, 
+              and reinitializes all system components. Use this for a complete fresh start.
+            </p>
+          </div>
+          <div class="settings-item">
+            <button class="settings-btn warning-btn" id="settings-preset-reset-btn">
+              <i class="ph-thin ph-arrow-counter-clockwise"></i>
+              <span>Reset Default Preset</span>
+            </button>
+            <p class="settings-description">
+              Restores only the Default preset to original factory values. Other presets remain unchanged.
             </p>
           </div>
           <div class="settings-item">

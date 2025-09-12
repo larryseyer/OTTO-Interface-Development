@@ -2920,15 +2920,26 @@ class OTTOAccurateInterface {
 
   setupSettingsWindow() {
     // WindowManager handles panel open/close
-    // Just setup the factory reset button
-    const settingsFactoryResetBtn = document.getElementById(
-      "settings-factory-reset-btn",
+    
+    // System reset button (complete reset)
+    const settingsSystemResetBtn = document.getElementById(
+      "settings-system-reset-btn",
     );
+    if (settingsSystemResetBtn) {
+      settingsSystemResetBtn.addEventListener("click", () => {
+        this.resetSystem();
+        // Close settings panel after reset using WindowManager
+        this.windowManager.closeWindow("panel", "settings");
+      });
+    }
 
-    // Factory reset button in settings
-    if (settingsFactoryResetBtn) {
-      settingsFactoryResetBtn.addEventListener("click", () => {
-        this.resetToFactoryDefaults();
+    // Preset reset button (just default preset)
+    const settingsPresetResetBtn = document.getElementById(
+      "settings-preset-reset-btn",
+    );
+    if (settingsPresetResetBtn) {
+      settingsPresetResetBtn.addEventListener("click", () => {
+        this.resetDefaultPreset();
         // Close settings panel after reset using WindowManager
         this.windowManager.closeWindow("panel", "settings");
       });
@@ -3248,23 +3259,56 @@ class OTTOAccurateInterface {
 
   deleteCurrentPatternGroup() {
     const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+    
+    // Don't allow deleting favorites
     if (currentGroup === "favorites") {
-      alert("Cannot delete the Favorites group");
+      this.showNotification("Cannot delete the Favorites group", "warning");
       return;
     }
 
-    if (confirm(`Delete pattern group "${currentGroup}"?`)) {
-      // Remove from storage using safe wrapper
-      const groups = this.safeLocalStorageGet("ottoPatternGroups", {});
-      delete groups[currentGroup];
-      this.safeLocalStorageSet("ottoPatternGroups", groups);
-
-      // Switch to favorites
-      this.playerStates[this.currentPlayer].patternGroup = "favorites";
-      this.updatePatternGrid();
-
-      // Exit edit mode
-      this.togglePatternEditMode();
+    if (confirm(`Delete pattern group "${this.patternGroups[currentGroup]?.name || currentGroup}"?`)) {
+      // Use the proper deleteGroup method
+      const success = this.deleteGroup(currentGroup);
+      
+      if (success) {
+        // Switch to favorites
+        this.playerStates[this.currentPlayer].patternGroup = "favorites";
+        
+        // Update the current editor group as well
+        this.currentEditorGroup = "favorites";
+        
+        // Update the pattern grid to show favorites
+        if (this.patternGroups["favorites"]) {
+          this.updateMainPatternGrid(this.patternGroups["favorites"].patterns);
+        }
+        
+        // Update both dropdowns immediately
+        this.updateEditorGroupDropdown();
+        this.updatePatternGroupDropdown();
+        
+        // Update the dropdown display text to show "Favorites"
+        const groupSelected = document.getElementById("group-selected");
+        if (groupSelected) {
+          const dropdownText = groupSelected.querySelector(".dropdown-text");
+          if (dropdownText) {
+            dropdownText.textContent = this.patternGroups["favorites"].name;
+          }
+        }
+        
+        // Also update the editor dropdown display text if it exists
+        const editorSelected = document.getElementById("editor-group-selected");
+        if (editorSelected) {
+          editorSelected.textContent = this.patternGroups["favorites"].name;
+        }
+        
+        // Show success notification
+        this.showNotification("Group deleted successfully");
+        
+        // Don't exit edit mode - let user continue editing
+        // this.togglePatternEditMode();
+      } else {
+        this.showNotification("Cannot delete this group", "warning");
+      }
     }
   }
 
@@ -3645,6 +3689,16 @@ class OTTOAccurateInterface {
     // Delete the group
     delete this.patternGroups[groupKey];
     this.savePatternGroups();
+    
+    // Update the UI immediately - refresh the pattern grid
+    const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
+    if (currentGroup && this.patternGroups[currentGroup]) {
+      this.updateMainPatternGrid(this.patternGroups[currentGroup].patterns);
+    }
+    
+    // Refresh the dropdowns to reflect the deletion
+    this.updatePatternGroupDropdown();
+    this.updateEditorGroupDropdown();
     
     debugLog(`Deleted group: ${groupKey}`);
     return true;
@@ -4248,31 +4302,8 @@ class OTTOAccurateInterface {
       });
     }
 
-    // Delete group button (now the trash icon)
-    const deleteIconBtn = document.getElementById("editor-group-delete-btn");
-    if (deleteIconBtn) {
-      deleteIconBtn.addEventListener("click", () => {
-        const currentGroup = this.currentEditorGroup;
-
-        if (
-          confirm(`Delete group "${this.patternGroups[currentGroup].name}"?`)
-        ) {
-          // Use the new deleteGroup function
-          const success = this.deleteGroup(currentGroup);
-          
-          if (success) {
-            // Switch to favorites
-            this.switchEditorGroup("favorites");
-
-            // Update both dropdowns
-            this.updateEditorGroupDropdown();
-            this.updatePatternGroupDropdown();
-          } else {
-            alert("Cannot delete this group");
-          }
-        }
-      });
-    }
+    // Note: The actual delete button is handled in setupPatternGroupControls
+    // using the group-delete-btn element and deleteCurrentPatternGroup method
 
     // Setup editor dropdown and navigation
     if (editorDropdown && editorSelected && editorOptions) {
@@ -5362,8 +5393,249 @@ class OTTOAccurateInterface {
       this.savePresetLocksToStorage();
       this.updatePresetLockDisplay();
     }
+    
+    // Rebuild the MIDI registry and ensure all MIDI files are assigned to groups
+    debugLog("Rebuilding MIDI registry after factory reset...");
+    
+    // Initialize/rebuild the MIDI registry
+    this.initializeMidiRegistry();
+    
+    // Ensure all MIDI files are assigned to appropriate groups
+    this.ensureAllMidiFilesAssigned();
+    
+    // Rebuild the registry from the current groups
+    this.rebuildRegistryFromGroups();
+    
+    // Save the updated groups
+    this.savePatternGroups();
+    
+    // Update the pattern group dropdowns to reflect any changes
+    this.updatePatternGroupDropdown();
+    this.updateEditorGroupDropdown();
+    
+    // Load available patterns to refresh the UI
+    this.loadAvailablePatterns();
+
+    this.showNotification("Default preset reset to factory settings and MIDI groups rebuilt");
+  }
+
+  resetDefaultPreset() {
+    // Simplified version - just reset the default preset
+    const confirmReset = confirm(
+      "This will reset the Default preset to factory settings. Any changes will be lost. Continue?",
+    );
+    if (!confirmReset) return;
+
+    // Create factory default preset
+    const factoryDefault = {
+      name: "Default",
+      timestamp: Date.now(),
+      playerStates: {},
+      linkStates: null,
+      tempo: 120,
+      numberOfPlayers: 4,
+      loopPosition: 0,
+    };
+
+    // Initialize all player states with factory defaults
+    for (let i = 1; i <= this.maxPlayers; i++) {
+      factoryDefault.playerStates[i] = {
+        presetName: "Default",
+        midiFile: "Basic",
+        kitName: "Acoustic",
+        patternGroup: "favorites",
+        selectedPattern: "basic",
+        kitMixerActive: false,
+        muted: false,
+        toggleStates: {
+          none: false,
+          auto: true,
+          manual: false,
+          stick: false,
+          ride: false,
+          lock: false,
+        },
+        fillStates: {
+          now: false,
+          4: false,
+          8: false,
+          16: true,
+          32: false,
+          solo: false,
+        },
+        sliderValues: {
+          swing: 10,
+          energy: 50,
+          volume: 75,
+        },
+      };
+    }
+
+    // Replace the default preset
+    this.presets["default"] = factoryDefault;
+
+    // If currently on default preset, reload it
+    if (this.currentPreset === "default") {
+      this.loadPreset("default");
+    }
+
+    // Update UI
+    this.updatePresetDropdown();
+    this.renderPresetList();
+    this.savePresetsToStorage();
+
+    // Clear any locks on default preset
+    if (this.presetLocks && this.presetLocks["default"]) {
+      delete this.presetLocks["default"];
+      this.savePresetLocksToStorage();
+      this.updatePresetLockDisplay();
+    }
 
     this.showNotification("Default preset reset to factory settings");
+  }
+
+  resetSystem() {
+    // Complete system reset
+    const confirmReset = confirm(
+      "This will perform a complete system reset:\n" +
+      "• All presets will be reset to factory defaults\n" +
+      "• MIDI groups will be rebuilt\n" +
+      "• All system components will be reinitialized\n\n" +
+      "This cannot be undone. Continue?",
+    );
+    if (!confirmReset) return;
+
+    debugLog("Starting complete system reset...");
+
+    // 1. Clear all presets and create fresh defaults
+    this.presets = {};
+    
+    // Create the default preset
+    const factoryDefault = {
+      name: "Default",
+      timestamp: Date.now(),
+      playerStates: {},
+      linkStates: null,
+      tempo: 120,
+      numberOfPlayers: 4,
+      loopPosition: 0,
+    };
+
+    // Initialize all player states with factory defaults
+    for (let i = 1; i <= this.maxPlayers; i++) {
+      factoryDefault.playerStates[i] = {
+        presetName: "Default",
+        midiFile: "Basic",
+        kitName: "Acoustic",
+        patternGroup: "favorites",
+        selectedPattern: "basic",
+        kitMixerActive: false,
+        muted: false,
+        toggleStates: {
+          none: false,
+          auto: true,
+          manual: false,
+          stick: false,
+          ride: false,
+          lock: false,
+        },
+        fillStates: {
+          now: false,
+          4: false,
+          8: false,
+          16: true,
+          32: false,
+          solo: false,
+        },
+        sliderValues: {
+          swing: 10,
+          energy: 50,
+          volume: 75,
+        },
+      };
+    }
+
+    this.presets["default"] = factoryDefault;
+    this.currentPreset = "default";
+
+    // 2. Clear all pattern groups and rebuild from scratch
+    debugLog("Rebuilding pattern groups...");
+    
+    // Clear existing groups
+    this.patternGroups = {};
+    
+    // Create default groups
+    this.patternGroups["favorites"] = {
+      name: "Favorites",
+      patterns: Array(16).fill(""),
+      selectedPattern: null,
+      deletable: false,
+    };
+    
+    // Initialize MIDI registry
+    this.initializeMidiRegistry();
+    
+    // Load available patterns and auto-create groups
+    this.loadAvailablePatterns();
+    
+    // Ensure all MIDI files are assigned
+    this.ensureAllMidiFilesAssigned();
+    
+    // Rebuild registry from groups
+    this.rebuildRegistryFromGroups();
+    
+    // Save pattern groups
+    this.savePatternGroups();
+
+    // 3. Reset drumkits (future implementation)
+    // TODO: Reset drumkit configurations
+    // this.resetDrumkits();
+
+    // 4. Reset mixer settings (future implementation)
+    // TODO: Reset mixer configurations
+    // this.resetMixerSettings();
+
+    // 5. Clear all storage and save fresh data
+    debugLog("Clearing and rebuilding storage...");
+    
+    // Clear all OTTO-related localStorage items
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("otto")) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+    // Save fresh data
+    this.savePresetsToStorage();
+    this.savePatternGroups();
+    this.saveMidiRegistry();
+
+    // 6. Clear all locks
+    this.presetLocks = {};
+    this.savePresetLocksToStorage();
+
+    // 7. Reset to Player 1
+    this.currentPlayer = 1;
+
+    // 8. Load the default preset
+    this.loadPreset("default");
+    this.switchToPlayer(1);
+
+    // 9. Update all UI elements
+    this.updatePresetDropdown();
+    this.renderPresetList();
+    this.updatePatternGroupDropdown();
+    this.updateEditorGroupDropdown();
+    this.updateMainPatternGrid(this.patternGroups["favorites"].patterns);
+    this.updatePresetLockDisplay();
+
+    // 10. Show success notification
+    this.showNotification("System reset complete - all components restored to factory defaults");
+    
+    debugLog("System reset completed successfully");
   }
 
   exportSettings() {
