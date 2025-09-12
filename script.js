@@ -9109,6 +9109,22 @@ class OTTOAccurateInterface {
 
       this.updateMainPatternGrid(group.patterns);
 
+      // Update data attribute for CSS-based hiding
+      document.body.setAttribute("data-current-group", groupName);
+      
+      // Hide/show delete button based on whether favorites is selected
+      const deleteBtn = document.getElementById("group-delete-btn");
+      if (deleteBtn) {
+        if (groupName === "favorites") {
+          deleteBtn.style.display = "none";
+        } else {
+          // Only show if in edit mode
+          const isEditMode = document.body.classList.contains("edit-mode") || 
+                            document.querySelector(".edit-mode");
+          deleteBtn.style.display = isEditMode ? "flex" : "none";
+        }
+      }
+
       // Restore the selected pattern for this group
       const selectedPattern = group.selectedPattern;
       if (selectedPattern) {

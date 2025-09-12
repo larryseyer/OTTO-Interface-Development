@@ -213,7 +213,15 @@ class WindowManager {
         // Enter edit mode
         this.otto.isEditMode = true;
         const deleteBtn = document.getElementById("group-delete-btn");
-        if (deleteBtn) deleteBtn.style.display = "flex";
+        if (deleteBtn) {
+          // Check if Favorites is currently selected
+          const currentGroup = this.otto.playerStates[this.otto.currentPlayer].patternGroup;
+          if (currentGroup === "favorites") {
+            deleteBtn.style.display = "none";
+          } else {
+            deleteBtn.style.display = "flex";
+          }
+        }
 
         // Load patterns and setup drag-drop
         if (this.otto.loadAvailablePatterns) {

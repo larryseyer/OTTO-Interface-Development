@@ -2886,7 +2886,7 @@ body {
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
 }
@@ -4406,8 +4406,14 @@ body {
   display: none;
 }
 
-.edit-mode .group-delete-btn {
+.edit-mode .group-delete-btn,
+.edit-mode .row4-left-area3 .group-delete-btn {
   display: flex;
+}
+
+/* Never show delete button when Favorites is selected */
+[data-current-group="favorites"] .group-delete-btn {
+  display: none !important;
 }
 
 /* Debug panel */
