@@ -2,6 +2,7 @@ class MixerComponent {
   constructor(otto) {
     this.otto = otto;
     this.currentKit = null;
+    this.presetManager = null;
     this.soloChannels = new Set();
     this.channelElements = {};
     this.fxWindows = {};
@@ -48,7 +49,36 @@ class MixerComponent {
   }
   
   initialize() {
+    // Initialize preset manager
+    if (this.otto.storageManager && this.otto.drumkitManager) {
+      this.presetManager = new MixerPresetManager(
+        this.otto.storageManager,
+        this.otto.drumkitManager
+      );
+      
+      // Listen for preset changes
+      this.presetManager.addListener('*', (event, data) => {
+        this.handlePresetEvent(event, data);
+      });
+    }
     // Don't create UI or load data immediately - wait for panel to open
+  }
+  
+  handlePresetEvent(event, data) {
+    switch(event) {
+      case 'global-preset-selected':
+      case 'preset-mode-changed':
+      case 'channel-updated':
+        // Reload the current mixer settings
+        this.loadCurrentKitMixer();
+        break;
+      case 'global-preset-created':
+      case 'global-preset-deleted':
+      case 'global-preset-updated':
+        // Update preset dropdown if it exists
+        this.updatePresetDropdown();
+        break;
+    }
   }
   
   createMixerUI() {
@@ -56,6 +86,10 @@ class MixerComponent {
     if (!container) return;
     
     container.innerHTML = '';
+    
+    // Create preset controls at the top
+    const presetControls = this.createPresetControls();
+    container.appendChild(presetControls);
     
     // Create mixer channels
     const channelsWrapper = document.createElement('div');
@@ -68,6 +102,338 @@ class MixerComponent {
     });
     
     container.appendChild(channelsWrapper);
+  }
+
+  createPresetControls() {
+    const container = document.createElement('div');
+    container.className = 'mixer-preset-controls';
+    container.style.cssText = 'padding: 10px; background: #2a2a2a; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px;';
+    
+    // Preset mode toggle
+    const modeToggle = document.createElement('div');
+    modeToggle.className = 'preset-mode-toggle';
+    modeToggle.style.cssText = 'display: flex; gap: 10px;';
+    modeToggle.innerHTML = `
+      <label style="color: #ccc; cursor: pointer;">
+        <input type="radio" name="preset-mode" value="kit" checked>
+        <span>Kit Presets</span>
+      </label>
+      <label style="color: #ccc; cursor: pointer;">
+        <input type="radio" name="preset-mode" value="global">
+        <span>Global Presets</span>
+      </label>
+    `;
+    
+    // Preset selector dropdown
+    const presetSelector = document.createElement('div');
+    presetSelector.className = 'preset-selector';
+    presetSelector.innerHTML = `
+      <select class="preset-dropdown" id="mixer-preset-dropdown" style="background: #1a1a1a; color: #ccc; border: 1px solid #444; padding: 5px; border-radius: 3px;">
+        <option value="">Select Preset...</option>
+      </select>
+    `;
+    
+    // Preset actions
+    const presetActions = document.createElement('div');
+    presetActions.className = 'preset-actions';
+    presetActions.style.cssText = 'display: flex; gap: 5px; margin-left: auto;';
+    presetActions.innerHTML = `
+      <button class="preset-btn" id="save-preset-btn" title="Save Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+        <span>💾 Save</span>
+      </button>
+      <button class="preset-btn" id="save-as-preset-btn" title="Save As..." style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+        <span>💾+ Save As</span>
+      </button>
+      <button class="preset-btn" id="rename-preset-btn" title="Rename Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+        <span>✏️ Rename</span>
+      </button>
+      <button class="preset-btn" id="delete-preset-btn" title="Delete Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+        <span>🗑️ Delete</span>
+      </button>
+    `;
+    
+    container.appendChild(modeToggle);
+    container.appendChild(presetSelector);
+    container.appendChild(presetActions);
+    
+    // Attach preset control events
+    this.attachPresetControlEvents(container);
+    
+    return container;
+  }
+  
+  attachPresetControlEvents(container) {
+    // Mode toggle
+    const modeRadios = container.querySelectorAll('input[name="preset-mode"]');
+    modeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (this.presetManager) {
+          this.presetManager.togglePresetMode(e.target.value === 'global');
+          this.updatePresetDropdown();
+          this.loadCurrentKitMixer();
+        }
+      });
+    });
+    
+    // Preset dropdown
+    const dropdown = container.querySelector('#mixer-preset-dropdown');
+    dropdown.addEventListener('change', (e) => {
+      if (e.target.value && this.presetManager) {
+        if (this.presetManager.useGlobalPresets) {
+          this.presetManager.setCurrentGlobalPreset(e.target.value);
+          this.loadCurrentKitMixer();
+        } else if (this.currentKit) {
+          // For kit presets, we switch to the selected preset
+          const drumkitManager = this.otto.drumkitManager;
+          const kit = drumkitManager.getDrumkit(this.currentKit);
+          if (kit) {
+            kit.selectedMixerPreset = e.target.value;
+            drumkitManager.saveToStorage();
+            this.loadCurrentKitMixer();
+          }
+        }
+      }
+    });
+    
+    // Save button
+    container.querySelector('#save-preset-btn').addEventListener('click', () => {
+      this.saveCurrentPreset();
+    });
+    
+    // Save As button
+    container.querySelector('#save-as-preset-btn').addEventListener('click', () => {
+      this.saveAsNewPreset();
+    });
+    
+    // Rename button
+    container.querySelector('#rename-preset-btn').addEventListener('click', () => {
+      this.renameCurrentPreset();
+    });
+    
+    // Delete button
+    container.querySelector('#delete-preset-btn').addEventListener('click', () => {
+      this.deleteCurrentPreset();
+    });
+  }
+  
+  updatePresetDropdown() {
+    const dropdown = document.querySelector('#mixer-preset-dropdown');
+    if (!dropdown || !this.presetManager) return;
+    
+    dropdown.innerHTML = '<option value="">Select Preset...</option>';
+    
+    if (this.presetManager.useGlobalPresets) {
+      // Show global presets
+      const globalPresets = this.presetManager.getAllGlobalPresets();
+      
+      // Add factory presets
+      const factoryPresets = globalPresets.filter(p => p.isFactory);
+      if (factoryPresets.length > 0) {
+        const factoryGroup = document.createElement('optgroup');
+        factoryGroup.label = 'Factory Presets';
+        factoryPresets.forEach(preset => {
+          const option = document.createElement('option');
+          option.value = preset.id;
+          option.textContent = preset.name;
+          if (preset.id === this.presetManager.currentGlobalPreset) {
+            option.selected = true;
+          }
+          factoryGroup.appendChild(option);
+        });
+        dropdown.appendChild(factoryGroup);
+      }
+      
+      // Add custom presets
+      const customPresets = globalPresets.filter(p => !p.isFactory);
+      if (customPresets.length > 0) {
+        const customGroup = document.createElement('optgroup');
+        customGroup.label = 'Custom Presets';
+        customPresets.forEach(preset => {
+          const option = document.createElement('option');
+          option.value = preset.id;
+          option.textContent = preset.name;
+          if (preset.id === this.presetManager.currentGlobalPreset) {
+            option.selected = true;
+          }
+          customGroup.appendChild(option);
+        });
+        dropdown.appendChild(customGroup);
+      }
+    } else if (this.currentKit) {
+      // Show kit-specific presets
+      const kit = this.otto.drumkitManager?.getDrumkit(this.currentKit);
+      if (kit && kit.mixerPresets) {
+        Object.keys(kit.mixerPresets).forEach(presetName => {
+          const option = document.createElement('option');
+          option.value = presetName;
+          option.textContent = kit.mixerPresets[presetName].name || presetName;
+          if (presetName === kit.selectedMixerPreset) {
+            option.selected = true;
+          }
+          dropdown.appendChild(option);
+        });
+      }
+    }
+  }
+  
+  saveCurrentPreset() {
+    if (!this.presetManager) return;
+    
+    if (this.presetManager.useGlobalPresets) {
+      const currentPreset = this.presetManager.getCurrentPreset();
+      if (currentPreset && !currentPreset.isFactory) {
+        // Get current mixer state
+        const mixerState = this.getCurrentMixerState();
+        this.presetManager.updateGlobalPreset(currentPreset.id, { channels: mixerState });
+        alert('Preset saved successfully!');
+      } else {
+        alert('Cannot overwrite factory presets. Use Save As instead.');
+      }
+    } else {
+      // Kit presets are automatically saved
+      alert('Kit presets are automatically saved with the drumkit.');
+    }
+  }
+  
+  saveAsNewPreset() {
+    const name = prompt('Enter preset name:');
+    if (!name) return;
+    
+    if (!this.presetManager) return;
+    
+    const mixerState = this.getCurrentMixerState();
+    
+    if (this.presetManager.useGlobalPresets) {
+      const newId = this.presetManager.createGlobalPreset(name);
+      this.presetManager.updateGlobalPreset(newId, { channels: mixerState });
+      this.presetManager.setCurrentGlobalPreset(newId);
+    } else if (this.currentKit) {
+      const presetData = this.presetManager.createPresetData(name);
+      presetData.channels = mixerState;
+      this.presetManager.createKitPreset(this.currentKit, name, presetData);
+    }
+    
+    this.updatePresetDropdown();
+    alert('Preset saved as "' + name + '"');
+  }
+  
+  renameCurrentPreset() {
+    if (!this.presetManager) return;
+    
+    if (this.presetManager.useGlobalPresets) {
+      const currentPreset = this.presetManager.getCurrentPreset();
+      if (!currentPreset) return;
+      
+      if (currentPreset.isFactory) {
+        alert('Cannot rename factory presets.');
+        return;
+      }
+      
+      const newName = prompt('Enter new name:', currentPreset.name);
+      if (newName) {
+        this.presetManager.renameGlobalPreset(currentPreset.id, newName);
+        this.updatePresetDropdown();
+      }
+    } else {
+      // For kit presets
+      if (this.currentKit && this.otto.drumkitManager) {
+        const kit = this.otto.drumkitManager.getDrumkit(this.currentKit);
+        if (kit && kit.selectedMixerPreset !== 'default') {
+          const currentPreset = kit.mixerPresets[kit.selectedMixerPreset];
+          if (currentPreset) {
+            const newName = prompt('Enter new name:', currentPreset.name);
+            if (newName) {
+              currentPreset.name = newName;
+              this.otto.drumkitManager.saveToStorage();
+              this.updatePresetDropdown();
+            }
+          }
+        } else {
+          alert('Cannot rename default preset.');
+        }
+      }
+    }
+  }
+  
+  deleteCurrentPreset() {
+    if (!this.presetManager) return;
+    
+    if (this.presetManager.useGlobalPresets) {
+      const currentPreset = this.presetManager.getCurrentPreset();
+      if (!currentPreset) return;
+      
+      if (currentPreset.isFactory) {
+        alert('Cannot delete factory presets.');
+        return;
+      }
+      
+      if (confirm('Delete preset "' + currentPreset.name + '"?')) {
+        this.presetManager.deleteGlobalPreset(currentPreset.id);
+        this.updatePresetDropdown();
+      }
+    } else {
+      // For kit presets
+      if (this.currentKit && this.otto.drumkitManager) {
+        const kit = this.otto.drumkitManager.getDrumkit(this.currentKit);
+        if (kit && kit.selectedMixerPreset !== 'default') {
+          if (confirm('Delete current kit preset?')) {
+            this.otto.drumkitManager.deleteMixerPreset(this.currentKit, kit.selectedMixerPreset);
+            this.updatePresetDropdown();
+            this.loadCurrentKitMixer();
+          }
+        } else {
+          alert('Cannot delete default preset.');
+        }
+      }
+    }
+  }
+  
+  getCurrentMixerState() {
+    const state = {};
+    
+    this.channelNames.forEach(channel => {
+      const strip = this.channelElements[channel];
+      if (!strip) return;
+      
+      state[channel] = {
+        level: parseFloat(strip.querySelector('.fader-value')?.textContent || 75),
+        pan: this.getPanValue(strip),
+        mute: strip.querySelector('.channel-mute-btn')?.classList.contains('active') || false,
+        solo: strip.querySelector('.channel-solo-btn')?.classList.contains('active') || false,
+        sends: this.getSendValues(strip),
+        fx: this.getFXStates(strip)
+      };
+    });
+    
+    return state;
+  }
+  
+  getPanValue(strip) {
+    const panValue = strip.querySelector('.pan-value')?.textContent;
+    if (!panValue) return 0;
+    if (panValue === 'C') return 0;
+    if (panValue.startsWith('L')) return -parseInt(panValue.slice(1));
+    if (panValue.startsWith('R')) return parseInt(panValue.slice(1));
+    return 0;
+  }
+  
+  getSendValues(strip) {
+    const sends = {};
+    ['room', 'reverb1', 'reverb2', 'delay'].forEach(send => {
+      const sendKnob = strip.querySelector(`.send-knob[data-send="${send}"]`);
+      const sendValue = sendKnob?.parentElement.querySelector('.send-value');
+      sends[send] = parseInt(sendValue?.textContent || 0);
+    });
+    return sends;
+  }
+  
+  getFXStates(strip) {
+    const fx = {};
+    this.fxTypes.forEach(fxType => {
+      const fxBtn = strip.querySelector(`.fx-insert-btn[data-fx="${fxType}"]`);
+      fx[fxType] = fxBtn?.classList.contains('active') || false;
+    });
+    return fx;
   }
   
   createChannelStrip(channelName) {
@@ -333,6 +699,9 @@ class MixerComponent {
       this.attachEventListeners();
     }
     
+    // Update preset dropdown
+    this.updatePresetDropdown();
+    
     const drumkitManager = this.otto.drumkitManager;
     if (!drumkitManager) {
       return;
@@ -342,18 +711,42 @@ class MixerComponent {
     const currentKitName = this.otto.playerStates?.[this.otto.currentPlayer]?.kitName || 'Acoustic';
     this.currentKit = currentKitName;
     
-    // Try to get mixer preset
-    const mixerPreset = drumkitManager.getMixerPreset(currentKitName, 'default');
+    let mixerPreset = null;
+    
+    // Get preset based on current mode
+    if (this.presetManager) {
+      if (this.presetManager.useGlobalPresets) {
+        // Use global preset
+        mixerPreset = this.presetManager.getCurrentPreset();
+      } else {
+        // Use kit-specific preset
+        mixerPreset = drumkitManager.getMixerPreset(currentKitName, null);
+        
+        if (!mixerPreset) {
+          // Create default preset if none exists
+          const defaultPreset = drumkitManager.createDefaultMixerPreset('default');
+          if (defaultPreset) {
+            drumkitManager.setMixerPreset(currentKitName, 'default', defaultPreset);
+            mixerPreset = defaultPreset;
+          }
+        }
+      }
+    } else {
+      // Fallback to drumkit manager
+      mixerPreset = drumkitManager.getMixerPreset(currentKitName, 'default');
+      
+      if (!mixerPreset) {
+        // Create default preset if none exists
+        const defaultPreset = drumkitManager.createDefaultMixerPreset('default');
+        if (defaultPreset) {
+          drumkitManager.setMixerPreset(currentKitName, 'default', defaultPreset);
+          mixerPreset = defaultPreset;
+        }
+      }
+    }
     
     if (mixerPreset && mixerPreset.channels) {
       this.updateMixerUI(mixerPreset.channels);
-    } else {
-      // Create default preset if none exists
-      const defaultPreset = drumkitManager.createDefaultMixerPreset('default');
-      if (defaultPreset && defaultPreset.channels) {
-        drumkitManager.setMixerPreset(currentKitName, 'default', defaultPreset);
-        this.updateMixerUI(defaultPreset.channels);
-      }
     }
   }
   
