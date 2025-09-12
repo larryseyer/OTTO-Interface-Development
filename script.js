@@ -144,14 +144,12 @@ class OTTOAccurateInterface {
     // Initialize drumkit manager
     this.drumkits = null; // Will be loaded from storage or initialized with defaults
 
-    // Dirty flags hierarchy:
-    // 1. Pattern -> 2. Pattern Group -> 3. Drumkit -> 4. Player -> 5. Preset
+    // Simplified dirty flags - only 2 levels now:
+    // 1. Player (tracks changes to current player's state)
+    // 2. Preset (tracks changes to all players/global settings)
     this.isDirty = {
-      pattern: false, // Level 1
-      patternGroup: false, // Level 2
-      drumkit: false, // Level 3
-      player: false, // Level 4
-      preset: false, // Level 5
+      player: false, // Player-specific changes (MIDI, drumkit, settings)
+      preset: false, // Preset-level changes (includes all players)
     };
     this.isLoadingPreset = false; // Flag to prevent marking dirty during preset load
 
@@ -611,14 +609,11 @@ class OTTOAccurateInterface {
       return;
     }
 
-    // Hierarchy levels for upward cascading only:
-    // 1. pattern -> 2. patternGroup -> 3. drumkit -> 4. player -> 5. preset
+    // Simplified hierarchy - only 2 levels:
+    // 1. player -> 2. preset
     const hierarchy = {
-      pattern: ["patternGroup", "player", "preset"],
-      patternGroup: ["player", "preset"],
-      drumkit: ["player", "preset"],
-      player: ["preset"],
-      preset: [],
+      player: ["preset"], // Player changes cascade to preset
+      preset: [],         // Preset is top level
     };
 
     // Set the dirty flag for the specified level
@@ -627,7 +622,6 @@ class OTTOAccurateInterface {
       this.updateSaveButtonVisibility(level);
 
       // If setting to dirty, cascade UP the hierarchy only
-      // Never cascade down to children
       if (isDirty && hierarchy[level]) {
         hierarchy[level].forEach((higherLevel) => {
           if (this.isDirty[higherLevel] !== true) {
