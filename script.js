@@ -643,16 +643,7 @@ class OTTOAccurateInterface {
       case "player":
         button = document.getElementById("player-save-btn");
         break;
-      // Old levels no longer used
-      case "drumkit":
-        button = document.getElementById("drumkit-save-btn");
-        break;
-      case "patternGroup":
-        button = document.getElementById("pattern-group-save-btn");
-        break;
-      case "pattern":
-        button = document.getElementById("pattern-save-btn");
-        break;
+      // Old levels removed - no longer used
     }
 
     if (button) {
@@ -692,22 +683,7 @@ class OTTOAccurateInterface {
       playerSaveBtn.style.display = "none";
     }
     
-    // Old save buttons - temporarily keep handlers to avoid errors
-    // These will be removed in Phase 4
-    const drumkitSaveBtn = document.getElementById("drumkit-save-btn");
-    if (drumkitSaveBtn) {
-      drumkitSaveBtn.style.display = "none";
-    }
-
-    const patternGroupSaveBtn = document.getElementById("pattern-group-save-btn");
-    if (patternGroupSaveBtn) {
-      patternGroupSaveBtn.style.display = "none";
-    }
-
-    const patternSaveBtn = document.getElementById("pattern-save-btn");
-    if (patternSaveBtn) {
-      patternSaveBtn.style.display = "none";
-    }
+    // Old save buttons removed - no longer in HTML
   }
 
   // Safe localStorage wrapper methods
