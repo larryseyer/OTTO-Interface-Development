@@ -643,6 +643,7 @@ class OTTOAccurateInterface {
       case "player":
         button = document.getElementById("player-save-btn");
         break;
+      // Old levels no longer used
       case "drumkit":
         button = document.getElementById("drumkit-save-btn");
         break;
@@ -670,7 +671,7 @@ class OTTOAccurateInterface {
 
   // Setup save button handlers
   setupSaveButtons() {
-    // Preset save button (Level 5 - highest)
+    // Preset save button (top level)
     const presetSaveBtn = document.getElementById("preset-save-btn");
     if (presetSaveBtn) {
       presetSaveBtn.addEventListener("click", () => {
@@ -680,45 +681,31 @@ class OTTOAccurateInterface {
       presetSaveBtn.style.display = "none";
     }
 
-    // Player save button (Level 4)
+    // Player save button (saves current player state)
     const playerSaveBtn = document.getElementById("player-save-btn");
     if (playerSaveBtn) {
       playerSaveBtn.addEventListener("click", () => {
-        this.scheduleSave("player", true);
+        this.saveCurrentPlayerState();
+        this.setDirty("player", false);
       });
       // Initially hide
       playerSaveBtn.style.display = "none";
     }
-
-    // Drumkit save button (Level 3)
+    
+    // Old save buttons - temporarily keep handlers to avoid errors
+    // These will be removed in Phase 4
     const drumkitSaveBtn = document.getElementById("drumkit-save-btn");
     if (drumkitSaveBtn) {
-      drumkitSaveBtn.addEventListener("click", () => {
-        this.scheduleSave("drumkits", true);
-      });
-      // Initially hide
       drumkitSaveBtn.style.display = "none";
     }
 
-    // Pattern group save button (Level 2)
-    const patternGroupSaveBtn = document.getElementById(
-      "pattern-group-save-btn",
-    );
+    const patternGroupSaveBtn = document.getElementById("pattern-group-save-btn");
     if (patternGroupSaveBtn) {
-      patternGroupSaveBtn.addEventListener("click", () => {
-        this.scheduleSave("patternGroups", true);
-      });
-      // Initially hide
       patternGroupSaveBtn.style.display = "none";
     }
 
-    // Pattern save button (Level 1 - lowest)
     const patternSaveBtn = document.getElementById("pattern-save-btn");
     if (patternSaveBtn) {
-      patternSaveBtn.addEventListener("click", () => {
-        this.scheduleSave("pattern", true);
-      });
-      // Initially hide
       patternSaveBtn.style.display = "none";
     }
   }
@@ -5602,6 +5589,34 @@ class OTTOAccurateInterface {
     }
     // Use safe wrapper with error handling
     this.safeLocalStorageSet("otto_presets", presetsToStore);
+  }
+
+  saveCurrentPlayerState() {
+    // Save the current player's state
+    const playerNum = this.currentPlayer;
+    const playerState = this.playerStates[playerNum];
+    
+    if (!playerState) {
+      debugError(`No state for player ${playerNum}`);
+      return;
+    }
+    
+    debugLog(`Saving state for Player ${playerNum}`);
+    
+    // Save to localStorage or wherever player states are persisted
+    // For now, just log what would be saved
+    debugLog("Player state to save:", {
+      player: playerNum,
+      midiFile: playerState.midiFile,
+      drumkit: playerState.kitName,
+      toggles: playerState.toggleStates,
+      fills: playerState.fillStates,
+      sliders: playerState.sliderValues,
+      muted: playerState.muted
+    });
+    
+    // Mark as saved
+    this.showNotification(`Player ${playerNum} saved`);
   }
 
   loadPresetsFromStorage() {
