@@ -134,14 +134,12 @@ class MixerComponent {
   createPresetControls() {
     const container = document.createElement('div');
     container.className = 'mixer-preset-controls';
-    container.style.cssText = 'padding: 10px; background: #2a2a2a; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px;';
     
     // Preset selector dropdown - made wider for longer names
     const presetSelector = document.createElement('div');
     presetSelector.className = 'preset-selector';
-    presetSelector.style.cssText = 'min-width: 250px;'; // Made wider for longer preset names
     presetSelector.innerHTML = `
-      <select class="preset-dropdown" id="mixer-preset-dropdown" style="background: #1a1a1a; color: #ccc; border: 1px solid #444; padding: 5px; border-radius: 3px; width: 100%;">
+      <select class="preset-dropdown" id="mixer-preset-dropdown">
         <option value="">Select Preset...</option>
       </select>
     `;
@@ -149,24 +147,23 @@ class MixerComponent {
     // Preset actions
     const presetActions = document.createElement('div');
     presetActions.className = 'preset-actions';
-    presetActions.style.cssText = 'display: flex; gap: 5px; margin-left: auto;';
     presetActions.innerHTML = `
-      <button class="preset-btn" id="save-preset-btn" title="Save Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+      <button class="preset-btn" id="save-preset-btn" title="Save Preset">
         <span>📾 Save</span>
       </button>
-      <button class="preset-btn" id="save-as-preset-btn" title="Save As..." style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+      <button class="preset-btn" id="save-as-preset-btn" title="Save As...">
         <span>📾+ Save As</span>
       </button>
-      <button class="preset-btn" id="rename-preset-btn" title="Rename Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+      <button class="preset-btn" id="rename-preset-btn" title="Rename Preset">
         <span>✏️ Rename</span>
       </button>
-      <button class="preset-btn" id="delete-preset-btn" title="Delete Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+      <button class="preset-btn" id="delete-preset-btn" title="Delete Preset">
         <span>🗑️ Delete</span>
       </button>
-      <button class="preset-btn" id="export-preset-btn" title="Export Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+      <button class="preset-btn" id="export-preset-btn" title="Export Preset">
         <span>📤 Export</span>
       </button>
-      <button class="preset-btn" id="import-preset-btn" title="Import Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+      <button class="preset-btn" id="import-preset-btn" title="Import Preset">
         <span>📥 Import</span>
       </button>
     `;

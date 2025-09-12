@@ -3699,6 +3699,57 @@ body {
 }
 
 /* Mixer Component Styles */
+
+/* Mixer Preset Controls */
+.mixer-preset-controls {
+  padding: 10px;
+  background: #2a2a2a;
+  border-bottom: 1px solid #444;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.preset-selector {
+  min-width: 250px;
+}
+
+.preset-dropdown {
+  background: #1a1a1a;
+  color: #ccc;
+  border: 1px solid #444;
+  padding: 5px;
+  border-radius: 3px;
+  width: 100%;
+}
+
+.preset-actions {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.preset-btn {
+  background: #333;
+  color: #ccc;
+  border: 1px solid #555;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: #444;
+  color: #fff;
+  border-color: #666;
+}
+
+.preset-btn:active {
+  background: #2a2a2a;
+  transform: translateY(1px);
+}
+
 #mixer-panel {
   position: fixed;
   top: 0;
