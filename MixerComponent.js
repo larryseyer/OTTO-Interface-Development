@@ -192,9 +192,15 @@ class MixerComponent {
     faderValue.className = 'fader-value';
     faderValue.textContent = '0.0';
     
+    // Bottom channel label (duplicate of top label)
+    const bottomLabel = document.createElement('div');
+    bottomLabel.className = 'channel-bottom-label';
+    bottomLabel.textContent = this.channelLabels[channelName];
+    
     faderTrack.appendChild(faderThumb);
     faderSection.appendChild(faderTrack);
     faderSection.appendChild(faderValue);
+    faderSection.appendChild(bottomLabel);
     strip.appendChild(faderSection);
     
     return strip;
