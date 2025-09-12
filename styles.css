@@ -3840,7 +3840,7 @@ body {
 }
 
 .channel-fx-spacer {
-  height: 50px; /* Adjusted to align FX return faders with regular channels */
+  height: 54px; /* Adjusted to align FX return faders with regular channels */
   margin-bottom: 10px; /* Match fx-section margin */
 }
 
@@ -3894,7 +3894,7 @@ body {
 }
 
 .channel-sends-spacer {
-  height: 85px; /* Adjusted to align FX return and master faders properly */
+  height: 92px; /* Adjusted to align FX return and master faders properly */
   margin-bottom: 10px; /* Match sends-section margin */
 }
 
