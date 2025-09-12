@@ -4602,7 +4602,7 @@ class OTTOAccurateInterface {
       };
 
       // Use enhanced event listener management
-      this.addEventListener(option, "click", handler, "dropdown");
+      this.addEventListener(option, "click", handler, this.dropdownListeners);
 
       groupOptions.appendChild(option);
     });
@@ -5944,7 +5944,7 @@ class OTTOAccurateInterface {
       };
 
       // Add listener using enhanced method
-      this.addEventListener(option, "click", handler, "dropdown");
+      this.addEventListener(option, "click", handler, this.dropdownListeners);
 
       // Track for batch cleanup if needed
       optionHandlers.push({ element: option, handler });
@@ -7407,14 +7407,14 @@ class OTTOAccurateInterface {
       const prevHandler = () => {
         this.navigateKit(-1);
       };
-      this.addEventListener(kitPrev, "click", prevHandler, "dropdown");
+      this.addEventListener(kitPrev, "click", prevHandler, this.dropdownListeners);
     }
 
     if (kitNext) {
       const nextHandler = () => {
         this.navigateKit(1);
       };
-      this.addEventListener(kitNext, "click", nextHandler, "dropdown");
+      this.addEventListener(kitNext, "click", nextHandler, this.dropdownListeners);
     }
 
     // Custom dropdown functionality
@@ -7430,7 +7430,7 @@ class OTTOAccurateInterface {
         kitDropdownSelected,
         "click",
         toggleHandler,
-        "dropdown",
+        this.dropdownListeners,
       );
     }
 
@@ -7460,7 +7460,7 @@ class OTTOAccurateInterface {
 
         debugLog(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
-      this.addEventListener(option, "click", optionHandler, "dropdown");
+      this.addEventListener(option, "click", optionHandler, this.dropdownListeners);
     });
 
     // Close kit dropdown when clicking outside
@@ -7501,7 +7501,7 @@ class OTTOAccurateInterface {
           `Player ${this.currentPlayer} kit mixer: ${this.playerStates[this.currentPlayer].kitMixerActive}`,
         );
       };
-      this.addEventListener(kitMixerBtn, "click", mixerHandler, "dropdown");
+      this.addEventListener(kitMixerBtn, "click", mixerHandler, this.dropdownListeners);
     }
 
     // Edit kit buttons
@@ -7595,7 +7595,7 @@ class OTTOAccurateInterface {
       };
 
       // Use the wrapper to properly track the listener
-      this.addEventListener(option, "click", optionHandler, "dropdown");
+      this.addEventListener(option, "click", optionHandler, this.dropdownListeners);
       kitOptionsContainer.appendChild(option);
     }
   }
@@ -7667,14 +7667,14 @@ class OTTOAccurateInterface {
       const prevHandler = () => {
         this.navigatePatternGroup(-1);
       };
-      this.addEventListener(groupPrev, "click", prevHandler, "element");
+      this.addEventListener(groupPrev, "click", prevHandler, this.dropdownListeners);
     }
 
     if (groupNext) {
       const nextHandler = () => {
         this.navigatePatternGroup(1);
       };
-      this.addEventListener(groupNext, "click", nextHandler, "element");
+      this.addEventListener(groupNext, "click", nextHandler, this.dropdownListeners);
     }
 
     // Setup edit pattern button to toggle edit mode
@@ -7682,7 +7682,7 @@ class OTTOAccurateInterface {
       const editHandler = () => {
         this.togglePatternEditMode();
       };
-      this.addEventListener(editPatternBtn, "click", editHandler, "element");
+      this.addEventListener(editPatternBtn, "click", editHandler, this.dropdownListeners);
     }
 
     // Setup panel close button
@@ -7691,7 +7691,7 @@ class OTTOAccurateInterface {
       const closeHandler = () => {
         this.togglePatternEditMode();
       };
-      this.addEventListener(panelCloseBtn, "click", closeHandler, "element");
+      this.addEventListener(panelCloseBtn, "click", closeHandler, this.dropdownListeners);
     }
 
     // Setup delete button
@@ -7700,7 +7700,7 @@ class OTTOAccurateInterface {
       const deleteHandler = () => {
         this.deleteCurrentPatternGroup();
       };
-      this.addEventListener(deleteBtn, "click", deleteHandler, "element");
+      this.addEventListener(deleteBtn, "click", deleteHandler, this.dropdownListeners);
     }
 
     // Setup pattern search
@@ -7709,7 +7709,7 @@ class OTTOAccurateInterface {
       const searchHandler = (e) => {
         this.filterPatterns(e.target.value);
       };
-      this.addEventListener(searchInput, "input", searchHandler, "element");
+      this.addEventListener(searchInput, "input", searchHandler, this.dropdownListeners);
     }
 
     // Setup group dropdown
@@ -7721,10 +7721,8 @@ class OTTOAccurateInterface {
       // Toggle dropdown on click
       const toggleHandler = (e) => {
         e.stopPropagation();
-        // Use consistent class name across all dropdowns
-        const isOpen =
-          groupDropdown.classList.contains("active") ||
-          groupDropdown.classList.contains("open");
+        // Use consistent class name across all dropdowns - change to "open"
+        const isOpen = groupDropdown.classList.contains("open");
 
         // Close all other dropdowns first
         document.querySelectorAll(".custom-dropdown").forEach((dd) => {
@@ -7733,12 +7731,12 @@ class OTTOAccurateInterface {
 
         // Toggle this dropdown
         if (!isOpen) {
-          groupDropdown.classList.add("active");
+          groupDropdown.classList.add("open");
         } else {
-          groupDropdown.classList.remove("active");
+          groupDropdown.classList.remove("open");
         }
       };
-      this.addEventListener(groupSelected, "click", toggleHandler, "dropdown");
+      this.addEventListener(groupSelected, "click", toggleHandler, this.dropdownListeners);
 
       // Close dropdown when clicking outside
       const outsideClickHandler = (e) => {
@@ -7746,7 +7744,7 @@ class OTTOAccurateInterface {
           groupDropdown.classList.remove("active", "open");
         }
       };
-      this.addEventListener(document, "click", outsideClickHandler, "document");
+      this.addEventListener(document, "click", outsideClickHandler, this.documentListeners);
     }
 
     // Now populate the dropdown with current groups
@@ -7866,7 +7864,7 @@ class OTTOAccurateInterface {
       };
 
       // Use enhanced event listener management
-      this.addEventListener(patternBtn, "click", clickHandler, "element");
+      this.addEventListener(patternBtn, "click", clickHandler, this.dropdownListeners);
     });
   }
 
@@ -7950,7 +7948,7 @@ class OTTOAccurateInterface {
       };
 
       // Use enhanced event listener management
-      this.addEventListener(toggleBtn, "click", clickHandler, "element");
+      this.addEventListener(toggleBtn, "click", clickHandler, this.dropdownListeners);
     });
   }
 
@@ -7983,7 +7981,7 @@ class OTTOAccurateInterface {
       };
 
       // Use enhanced event listener management
-      this.addEventListener(fillBtn, "click", clickHandler, "element");
+      this.addEventListener(fillBtn, "click", clickHandler, this.dropdownListeners);
     });
   }
 
