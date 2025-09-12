@@ -572,7 +572,7 @@ class OTTOAccurateInterface {
         this.savePatternGroups();
         debugLog("Saved pattern groups");
         // Clear pattern group dirty flag
-        this.// setDirty("patternGroup" - removed, groups have no state, false);
+        // this.setDirty("patternGroup", false); - removed, groups have no state
         // Also clear pattern flag since patterns are saved with groups
         this.setDirty("player", false);
         break;
@@ -3074,7 +3074,7 @@ class OTTOAccurateInterface {
       };
 
       // Mark as dirty but don't auto-save
-      this.// setDirty("patternGroup" - removed, groups have no state, true);
+      // this.setDirty("patternGroup", true); - removed, groups have no state
 
       // Update dropdown
       this.updatePatternGroupDropdown();
@@ -3149,7 +3149,7 @@ class OTTOAccurateInterface {
         });
 
         // Mark as dirty
-        this.// setDirty("patternGroup" - removed, groups have no state, true);
+        // this.setDirty("patternGroup", true); - removed, groups have no state
 
         // Update the dropdown selected text if this is the current group
         const groupSelected = document.getElementById("group-selected");
@@ -4240,7 +4240,7 @@ class OTTOAccurateInterface {
         newGroupInput.value = "";
 
         // Mark as dirty but don't auto-save
-        this.// setDirty("patternGroup" - removed, groups have no state, true);
+        // this.setDirty("patternGroup", true); - removed, groups have no state
 
         // Update both dropdowns
         this.updateEditorGroupDropdown();
@@ -4466,14 +4466,14 @@ class OTTOAccurateInterface {
       }
 
       // Mark as dirty but don't auto-save
-      this.// setDirty("patternGroup" - removed, groups have no state, true);
+      // this.setDirty("patternGroup", true); - removed, groups have no state
     }
   }
 
   savePatternGroups() {
     // Use safe wrapper with error handling
     this.safeLocalStorageSet("ottoPatternGroups", this.patternGroups);
-    this.// setDirty("patternGroup" - removed, groups have no state, false);
+    // this.setDirty("patternGroup", false); - removed, groups have no state
   }
 
   updateMainPatternGrid(patterns) {
@@ -4942,7 +4942,7 @@ class OTTOAccurateInterface {
         this.setDirty("preset", false);
         this.setDirty("player", false);
         this.setDirty("player", false);
-        this.// setDirty("patternGroup" - removed, groups have no state, false);
+        // this.setDirty("patternGroup", false); - removed, groups have no state
         this.setDirty("player", false);
       }
     });
@@ -8664,7 +8664,7 @@ class OTTOAccurateInterface {
     this.playerStates[playerNumber].patternGroup = groupName;
 
     // Mark patternGroup as dirty (will cascade to player and preset)
-    this.// setDirty("patternGroup" - removed, groups have no state, true);
+    // this.setDirty("patternGroup", true); - removed, groups have no state
 
     // Update the pattern grid if this is the current player
     if (playerNumber === this.currentPlayer) {
