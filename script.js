@@ -2118,8 +2118,10 @@ class OTTOAccurateInterface {
   }
 
   clearOldStorageData() {
-    debugLog("Clearing old storage data");
+    debugLog("Checking for old storage data to clear");
     try {
+      let dataCleared = false;
+      
       // Clear temporary and backup keys first
       const tempKeys = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -2134,14 +2136,17 @@ class OTTOAccurateInterface {
         }
       }
 
-      tempKeys.forEach((key) => {
-        try {
-          localStorage.removeItem(key);
-          debugLog(`Cleared temporary data: ${key}`);
-        } catch (e) {
-          debugError(`Failed to clear ${key}:`, e);
-        }
-      });
+      if (tempKeys.length > 0) {
+        tempKeys.forEach((key) => {
+          try {
+            localStorage.removeItem(key);
+            debugLog(`Cleared temporary data: ${key}`);
+            dataCleared = true;
+          } catch (e) {
+            debugError(`Failed to clear ${key}:`, e);
+          }
+        });
+      }
 
       // Get storage usage
       const usage = this.analyzeStorageUsage();
@@ -2154,6 +2159,7 @@ class OTTOAccurateInterface {
 
         this.presets = Object.fromEntries(sortedPresets);
         this.savePresetsToStorage();
+        dataCleared = true;
       }
 
       // Clear old pattern groups (keep last 10)
@@ -2164,9 +2170,13 @@ class OTTOAccurateInterface {
 
         this.patternGroups = Object.fromEntries(sortedGroups);
         this.savePatternGroupsToStorage();
+        dataCleared = true;
       }
 
-      this.showNotification("Cleared old data to free up storage", "info");
+      // Only show notification if we actually cleared something
+      if (dataCleared) {
+        this.showNotification("Cleared old data to free up storage", "info");
+      }
     } catch (error) {
       debugError("Error clearing storage:", error);
     }
@@ -6410,9 +6420,6 @@ class OTTOAccurateInterface {
 
     // Populate kit dropdown with all available kits
     this.populateKitDropdown();
-    
-    // Re-setup kit controls to ensure event listeners are attached to new elements
-    this.setupKitControls();
 
     // NEW: Ensure player's MIDI file is visible
     this.onPlayerLoaded(playerNumber);
@@ -7568,7 +7575,8 @@ class OTTOAccurateInterface {
         debugLog(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
 
-      option.addEventListener("click", optionHandler);
+      // Use the wrapper to properly track the listener
+      this.addEventListener(option, "click", optionHandler, "dropdown");
       kitOptionsContainer.appendChild(option);
     }
   }
@@ -9274,12 +9282,24 @@ class OTTOAccurateInterface {
   showNotification(message, type = "info") {
     if (this.isDestroyed) return;
 
+    // Track active notifications for positioning
+    if (!this.activeNotifications) {
+      this.activeNotifications = [];
+    }
+
+    // Clear out any null entries from removed notifications
+    this.activeNotifications = this.activeNotifications.filter(n => n && document.body.contains(n));
+
     const notification = document.createElement("div");
     notification.className = `notification ${type}`;
     notification.textContent = message;
+    
+    // Calculate position based on existing notifications
+    const topOffset = 20 + (this.activeNotifications.length * 60); // 60px spacing between notifications
+    
     notification.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: ${topOffset}px;
             right: 20px;
             padding: 12px 20px;
             background: var(--bg-secondary);
@@ -9293,12 +9313,18 @@ class OTTOAccurateInterface {
         `;
 
     document.body.appendChild(notification);
+    this.activeNotifications.push(notification);
 
     // Store timer reference for cleanup if needed
     const timer1 = setTimeout(() => {
       if (this.isDestroyed) {
         if (document.body.contains(notification)) {
           document.body.removeChild(notification);
+        }
+        // Remove from active notifications
+        const index = this.activeNotifications.indexOf(notification);
+        if (index > -1) {
+          this.activeNotifications.splice(index, 1);
         }
         return;
       }
@@ -9307,6 +9333,11 @@ class OTTOAccurateInterface {
       const timer2 = setTimeout(() => {
         if (document.body.contains(notification)) {
           document.body.removeChild(notification);
+        }
+        // Remove from active notifications
+        const index = this.activeNotifications.indexOf(notification);
+        if (index > -1) {
+          this.activeNotifications.splice(index, 1);
         }
       }, 300);
 
