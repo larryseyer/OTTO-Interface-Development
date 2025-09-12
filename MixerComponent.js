@@ -136,7 +136,8 @@ class MixerComponent {
     } else {
       // Add spacer for channels without sends
       const spacer = document.createElement('div');
-      spacer.className = 'channel-sends-spacer';
+      // Master channel needs different spacing than FX returns
+      spacer.className = channelName === 'master' ? 'master-sends-spacer' : 'channel-sends-spacer';
       strip.appendChild(spacer);
     }
     

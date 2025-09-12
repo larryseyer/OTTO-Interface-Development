@@ -3898,6 +3898,11 @@ body {
   margin-bottom: 10px; /* Match sends-section margin */
 }
 
+.master-sends-spacer {
+  height: 102px; /* Master channel needs slightly more spacing */
+  margin-bottom: 10px; /* Match sends-section margin */
+}
+
 /* Pan Control */
 .channel-pan-section {
   display: flex;
