@@ -3706,14 +3706,15 @@ body {
   width: 1280px;
   height: 720px;
   background: var(--bg-primary);
-  border: 3px solid #555; /* Light grey outer border */
-  box-shadow: inset 0 0 0 1px #222; /* Dark inner border */
+  border: none; /* Removed outer border */
+  box-shadow: none; /* Removed inner border shadow */
   box-sizing: border-box;
   z-index: 9999;
   transform: translateY(100%);
   transition: transform 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent any overflow */
 }
 
 #mixer-panel.active {
@@ -3763,12 +3764,17 @@ body {
 }
 
 .mixer-container {
+  position: absolute;
+  top: 62px; /* Start right after the header (60px) + border (2px) */
+  left: 0;
+  right: 0;
   width: 100%;
-  height: calc(720px - 60px - 4px); /* Account for panel border (2px top + 2px bottom) */
+  height: calc(720px - 64px); /* Total height minus header, border, and top spacing */
   overflow-x: auto;
   overflow-y: hidden;
   background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
-  padding: 15px 20px;
+  padding: 0 !important;
+  margin: 0 !important;
   box-sizing: border-box;
 }
 
@@ -3783,7 +3789,7 @@ body {
   display: flex;
   flex-direction: column;
   width: 85px;
-  height: 590px; /* Further reduced to ensure everything fits */
+  height: 585px; /* Reduced to fit within window */
   background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
   border: 1px solid #000;
   border-radius: 4px;
@@ -3840,7 +3846,7 @@ body {
 }
 
 .channel-fx-spacer {
-  height: 54px; /* Adjusted to align FX return faders with regular channels */
+  height: 48px; /* Reduced to raise FX starting point */
   margin-bottom: 10px; /* Match fx-section margin */
 }
 
@@ -3894,12 +3900,12 @@ body {
 }
 
 .channel-sends-spacer {
-  height: 92px; /* Adjusted to align FX return and master faders properly */
+  height: 82px; /* Reduced to raise FX starting point */
   margin-bottom: 10px; /* Match sends-section margin */
 }
 
 .master-sends-spacer {
-  height: 102px; /* Master channel needs slightly more spacing */
+  height: 82px; /* Same as channel-sends-spacer for alignment */
   margin-bottom: 10px; /* Match sends-section margin */
 }
 
@@ -3988,8 +3994,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 260px;
-  max-height: 280px;
+  min-height: 200px;
+  max-height: 400px;
   position: relative;
   padding: 10px 0 2px 0;
 }
@@ -4033,7 +4039,7 @@ body {
 
 .fader-track {
   width: 45px;
-  height: 340px; /* Increased to fill the gap near bottom */
+  height: 330px; /* Reduced to bring bottoms up */
   background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
   border: 1px solid #000;
   border-radius: 2px;
