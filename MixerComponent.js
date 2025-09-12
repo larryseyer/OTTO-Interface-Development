@@ -45,23 +45,44 @@ class MixerComponent {
       saturation: 'Tape'
     };
     
-    this.initialize();
+    // Initialize synchronously so presetManager is available immediately
+    this.initializePresetManager();
   }
   
-  initialize() {
-    // Initialize preset manager
+  initializePresetManager() {
+    // Initialize preset manager synchronously
     if (this.otto.storageManager && this.otto.drumkitManager) {
+      console.log('Initializing MixerPresetManager with:', {
+        storageManager: !!this.otto.storageManager,
+        drumkitManager: !!this.otto.drumkitManager
+      });
+      
       this.presetManager = new MixerPresetManager(
         this.otto.storageManager,
         this.otto.drumkitManager
       );
       
+      // Initialize asynchronously but don't wait
+      this.presetManager.initialize().then(() => {
+        console.log('MixerPresetManager initialized successfully');
+        // Update dropdown after initialization
+        if (document.querySelector('#mixer-preset-dropdown')) {
+          this.updatePresetDropdown();
+        }
+      }).catch(error => {
+        console.error('Error initializing MixerPresetManager:', error);
+      });
+      
       // Listen for preset changes
       this.presetManager.addListener('*', (event, data) => {
         this.handlePresetEvent(event, data);
       });
+    } else {
+      console.warn('Cannot initialize MixerPresetManager - missing dependencies:', {
+        storageManager: !!this.otto.storageManager,
+        drumkitManager: !!this.otto.drumkitManager
+      });
     }
-    // Don't create UI or load data immediately - wait for panel to open
   }
   
   handlePresetEvent(event, data) {
@@ -86,6 +107,12 @@ class MixerComponent {
     if (!container) return;
     
     container.innerHTML = '';
+    
+    // Try to initialize preset manager again if it wasn't initialized yet
+    if (!this.presetManager && this.otto.storageManager && this.otto.drumkitManager) {
+      console.log('Attempting to initialize presetManager in createMixerUI');
+      this.initializePresetManager();
+    }
     
     // Create preset controls at the top
     const presetControls = this.createPresetControls();
@@ -149,6 +176,12 @@ class MixerComponent {
       </button>
       <button class="preset-btn" id="delete-preset-btn" title="Delete Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
         <span>🗑️ Delete</span>
+      </button>
+      <button class="preset-btn" id="export-preset-btn" title="Export Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+        <span>📤 Export</span>
+      </button>
+      <button class="preset-btn" id="import-preset-btn" title="Import Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+        <span>📥 Import</span>
       </button>
     `;
     
@@ -214,17 +247,33 @@ class MixerComponent {
     container.querySelector('#delete-preset-btn').addEventListener('click', () => {
       this.deleteCurrentPreset();
     });
+    
+    // Export button
+    container.querySelector('#export-preset-btn').addEventListener('click', () => {
+      this.exportCurrentPreset();
+    });
+    
+    // Import button
+    container.querySelector('#import-preset-btn').addEventListener('click', () => {
+      this.importPreset();
+    });
   }
   
   updatePresetDropdown() {
     const dropdown = document.querySelector('#mixer-preset-dropdown');
-    if (!dropdown || !this.presetManager) return;
+    if (!dropdown || !this.presetManager) {
+      console.log('Dropdown or presetManager not found');
+      return;
+    }
     
     dropdown.innerHTML = '<option value="">Select Preset...</option>';
+    
+    console.log('Updating preset dropdown. Mode:', this.presetManager.useGlobalPresets ? 'global' : 'kit');
     
     if (this.presetManager.useGlobalPresets) {
       // Show global presets
       const globalPresets = this.presetManager.getAllGlobalPresets();
+      console.log('Global presets found:', globalPresets);
       
       // Add factory presets
       const factoryPresets = globalPresets.filter(p => p.isFactory);
@@ -262,7 +311,9 @@ class MixerComponent {
     } else if (this.currentKit) {
       // Show kit-specific presets
       const kit = this.otto.drumkitManager?.getDrumkit(this.currentKit);
+      console.log('Current kit:', this.currentKit, 'Kit data:', kit);
       if (kit && kit.mixerPresets) {
+        console.log('Kit mixer presets:', kit.mixerPresets);
         Object.keys(kit.mixerPresets).forEach(presetName => {
           const option = document.createElement('option');
           option.value = presetName;
@@ -295,26 +346,45 @@ class MixerComponent {
     }
   }
   
-  saveAsNewPreset() {
+  async saveAsNewPreset() {
     const name = prompt('Enter preset name:');
     if (!name) return;
     
-    if (!this.presetManager) return;
+    if (!this.presetManager) {
+      console.error('No preset manager available');
+      return;
+    }
     
     const mixerState = this.getCurrentMixerState();
+    console.log('Saving preset:', name, 'Mode:', this.presetManager.useGlobalPresets ? 'global' : 'kit');
     
     if (this.presetManager.useGlobalPresets) {
       const newId = this.presetManager.createGlobalPreset(name);
+      console.log('Created global preset with ID:', newId);
       this.presetManager.updateGlobalPreset(newId, { channels: mixerState });
       this.presetManager.setCurrentGlobalPreset(newId);
-    } else if (this.currentKit) {
+      // Force save to storage
+      await this.presetManager.saveToStorage();
+      console.log('Global presets after save:', this.presetManager.getAllGlobalPresets());
+    } else if (this.currentKit && this.otto.drumkitManager) {
       const presetData = this.presetManager.createPresetData(name);
       presetData.channels = mixerState;
+      // Create the preset and select it
       this.presetManager.createKitPreset(this.currentKit, name, presetData);
+      // Select the new preset
+      const kit = this.otto.drumkitManager.getDrumkit(this.currentKit);
+      if (kit) {
+        kit.selectedMixerPreset = name;
+        await this.otto.drumkitManager.saveToStorage();
+        console.log('Kit presets after save:', kit.mixerPresets);
+      }
     }
     
-    this.updatePresetDropdown();
-    alert('Preset saved as "' + name + '"');
+    // Small delay to ensure storage is complete
+    setTimeout(() => {
+      this.updatePresetDropdown();
+      alert('Preset saved as "' + name + '"');
+    }, 100);
   }
   
   renameCurrentPreset() {
@@ -386,6 +456,116 @@ class MixerComponent {
         }
       }
     }
+  }
+
+  
+  exportCurrentPreset() {
+    if (!this.presetManager) {
+      alert('Preset manager not initialized');
+      return;
+    }
+    
+    try {
+      let preset;
+      let filename;
+      
+      if (this.presetManager.useGlobalPresets) {
+        const currentPreset = this.presetManager.getCurrentPreset();
+        if (!currentPreset) {
+          alert('No preset selected to export');
+          return;
+        }
+        preset = this.presetManager.exportPreset(currentPreset.id, null);
+        filename = `${currentPreset.name}_global_mixer_preset.json`;
+      } else if (this.currentKit) {
+        const kit = this.otto.drumkitManager?.getDrumkit(this.currentKit);
+        if (!kit || !kit.selectedMixerPreset) {
+          alert('No kit preset selected to export');
+          return;
+        }
+        preset = this.presetManager.exportPreset(null, this.currentKit);
+        filename = `${this.currentKit}_${kit.selectedMixerPreset}_mixer_preset.json`;
+      } else {
+        alert('No preset available to export');
+        return;
+      }
+      
+      // Create download link
+      const dataStr = JSON.stringify(preset, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', filename);
+      linkElement.click();
+      
+      console.log('Exported preset:', filename);
+    } catch (error) {
+      console.error('Error exporting preset:', error);
+      alert('Error exporting preset: ' + error.message);
+    }
+  }
+  
+  importPreset() {
+    if (!this.presetManager) {
+      alert('Preset manager not initialized');
+      return;
+    }
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const presetData = JSON.parse(event.target.result);
+          
+          // Validate preset data
+          if (!presetData.name || !presetData.channels) {
+            throw new Error('Invalid preset file format');
+          }
+          
+          // Ask user how to import
+          const importMode = this.presetManager.useGlobalPresets ? 'global' : 'kit';
+          const confirmMsg = importMode === 'global' 
+            ? `Import "${presetData.name}" as a global preset?`
+            : `Import "${presetData.name}" as a kit preset for ${this.currentKit}?`;
+          
+          if (!confirm(confirmMsg)) return;
+          
+          if (importMode === 'global') {
+            // Import as global preset
+            const newId = await this.presetManager.importPreset(presetData, true);
+            await this.presetManager.saveToStorage();
+            console.log('Imported global preset with ID:', newId);
+          } else if (this.currentKit) {
+            // Import as kit preset
+            const uniqueName = presetData.name + '_imported_' + Date.now();
+            await this.presetManager.createKitPreset(this.currentKit, uniqueName, presetData);
+            console.log('Imported kit preset:', uniqueName);
+          }
+          
+          // Update dropdown
+          setTimeout(() => {
+            this.updatePresetDropdown();
+            alert('Preset imported successfully!');
+          }, 100);
+          
+        } catch (error) {
+          console.error('Error importing preset:', error);
+          alert('Error importing preset: ' + error.message);
+        }
+      };
+      
+      reader.readAsText(file);
+    };
+    
+    input.click();
   }
   
   getCurrentMixerState() {

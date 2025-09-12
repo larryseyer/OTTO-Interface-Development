@@ -3863,8 +3863,14 @@ class OTTOAccurateInterface {
 
   // Drumkit Management Methods
   async loadDrumkits() {
-    // Initialize the DrumkitManager
-    this.drumkitManager = new DrumkitManager();
+    // Initialize StorageManager first if not already initialized
+    if (!this.storageManager) {
+      this.storageManager = new StorageManager();
+      await this.storageManager.initialize();
+    }
+    
+    // Initialize the DrumkitManager with storage manager
+    this.drumkitManager = new DrumkitManager(this.storageManager);
     await this.drumkitManager.initialize();
     
     // Load saved drumkits from localStorage with error handling for backward compatibility
