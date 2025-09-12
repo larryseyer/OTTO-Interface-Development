@@ -136,26 +136,12 @@ class MixerComponent {
     container.className = 'mixer-preset-controls';
     container.style.cssText = 'padding: 10px; background: #2a2a2a; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px;';
     
-    // Preset mode toggle
-    const modeToggle = document.createElement('div');
-    modeToggle.className = 'preset-mode-toggle';
-    modeToggle.style.cssText = 'display: flex; gap: 10px;';
-    modeToggle.innerHTML = `
-      <label style="color: #ccc; cursor: pointer;">
-        <input type="radio" name="preset-mode" value="kit" checked>
-        <span>Kit Presets</span>
-      </label>
-      <label style="color: #ccc; cursor: pointer;">
-        <input type="radio" name="preset-mode" value="global">
-        <span>Global Presets</span>
-      </label>
-    `;
-    
-    // Preset selector dropdown
+    // Preset selector dropdown - made wider for longer names
     const presetSelector = document.createElement('div');
     presetSelector.className = 'preset-selector';
+    presetSelector.style.cssText = 'min-width: 250px;'; // Made wider for longer preset names
     presetSelector.innerHTML = `
-      <select class="preset-dropdown" id="mixer-preset-dropdown" style="background: #1a1a1a; color: #ccc; border: 1px solid #444; padding: 5px; border-radius: 3px;">
+      <select class="preset-dropdown" id="mixer-preset-dropdown" style="background: #1a1a1a; color: #ccc; border: 1px solid #444; padding: 5px; border-radius: 3px; width: 100%;">
         <option value="">Select Preset...</option>
       </select>
     `;
@@ -166,10 +152,10 @@ class MixerComponent {
     presetActions.style.cssText = 'display: flex; gap: 5px; margin-left: auto;';
     presetActions.innerHTML = `
       <button class="preset-btn" id="save-preset-btn" title="Save Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-        <span>💾 Save</span>
+        <span>📾 Save</span>
       </button>
       <button class="preset-btn" id="save-as-preset-btn" title="Save As..." style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-        <span>💾+ Save As</span>
+        <span>📾+ Save As</span>
       </button>
       <button class="preset-btn" id="rename-preset-btn" title="Rename Preset" style="background: #333; color: #ccc; border: 1px solid #555; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
         <span>✏️ Rename</span>
@@ -185,7 +171,6 @@ class MixerComponent {
       </button>
     `;
     
-    container.appendChild(modeToggle);
     container.appendChild(presetSelector);
     container.appendChild(presetActions);
     
@@ -196,31 +181,24 @@ class MixerComponent {
   }
   
   attachPresetControlEvents(container) {
-    // Mode toggle
-    const modeRadios = container.querySelectorAll('input[name="preset-mode"]');
-    modeRadios.forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        if (this.presetManager) {
-          this.presetManager.togglePresetMode(e.target.value === 'global');
-          this.updatePresetDropdown();
-          this.loadCurrentKitMixer();
-        }
-      });
-    });
-    
-    // Preset dropdown
+    // Preset dropdown - now handles both global and kit presets
     const dropdown = container.querySelector('#mixer-preset-dropdown');
     dropdown.addEventListener('change', (e) => {
       if (e.target.value && this.presetManager) {
-        if (this.presetManager.useGlobalPresets) {
-          this.presetManager.setCurrentGlobalPreset(e.target.value);
+        const [type, id] = e.target.value.split(':');
+        
+        if (type === 'global') {
+          // Handle global preset selection
+          this.presetManager.togglePresetMode(true); // Switch to global mode
+          this.presetManager.setCurrentGlobalPreset(id);
           this.loadCurrentKitMixer();
-        } else if (this.currentKit) {
-          // For kit presets, we switch to the selected preset
+        } else if (type === 'kit' && this.currentKit) {
+          // Handle kit preset selection
+          this.presetManager.togglePresetMode(false); // Switch to kit mode
           const drumkitManager = this.otto.drumkitManager;
           const kit = drumkitManager.getDrumkit(this.currentKit);
           if (kit) {
-            kit.selectedMixerPreset = e.target.value;
+            kit.selectedMixerPreset = id;
             drumkitManager.saveToStorage();
             this.loadCurrentKitMixer();
           }
@@ -268,62 +246,73 @@ class MixerComponent {
     
     dropdown.innerHTML = '<option value="">Select Preset...</option>';
     
-    console.log('Updating preset dropdown. Mode:', this.presetManager.useGlobalPresets ? 'global' : 'kit');
+    console.log('Updating unified preset dropdown');
     
-    if (this.presetManager.useGlobalPresets) {
-      // Show global presets
-      const globalPresets = this.presetManager.getAllGlobalPresets();
-      console.log('Global presets found:', globalPresets);
-      
-      // Add factory presets
-      const factoryPresets = globalPresets.filter(p => p.isFactory);
-      if (factoryPresets.length > 0) {
-        const factoryGroup = document.createElement('optgroup');
-        factoryGroup.label = 'Factory Presets';
-        factoryPresets.forEach(preset => {
-          const option = document.createElement('option');
-          option.value = preset.id;
-          option.textContent = preset.name;
-          if (preset.id === this.presetManager.currentGlobalPreset) {
-            option.selected = true;
-          }
-          factoryGroup.appendChild(option);
-        });
-        dropdown.appendChild(factoryGroup);
-      }
-      
-      // Add custom presets
-      const customPresets = globalPresets.filter(p => !p.isFactory);
-      if (customPresets.length > 0) {
-        const customGroup = document.createElement('optgroup');
-        customGroup.label = 'Custom Presets';
-        customPresets.forEach(preset => {
-          const option = document.createElement('option');
-          option.value = preset.id;
-          option.textContent = preset.name;
-          if (preset.id === this.presetManager.currentGlobalPreset) {
-            option.selected = true;
-          }
-          customGroup.appendChild(option);
-        });
-        dropdown.appendChild(customGroup);
-      }
-    } else if (this.currentKit) {
-      // Show kit-specific presets
+    // Get all global presets
+    const globalPresets = this.presetManager.getAllGlobalPresets();
+    console.log('Global presets found:', globalPresets);
+    
+    // Add factory global presets (App Presets)
+    const factoryPresets = globalPresets.filter(p => p.isFactory);
+    if (factoryPresets.length > 0) {
+      const factoryGroup = document.createElement('optgroup');
+      factoryGroup.label = '━━━ App Presets ━━━';
+      factoryPresets.forEach(preset => {
+        const option = document.createElement('option');
+        option.value = `global:${preset.id}`;
+        option.textContent = preset.name;
+        // Check if this is the selected preset
+        if (this.presetManager.useGlobalPresets && preset.id === this.presetManager.currentGlobalPreset) {
+          option.selected = true;
+        }
+        factoryGroup.appendChild(option);
+      });
+      dropdown.appendChild(factoryGroup);
+    }
+    
+    // Add custom global presets (User Presets)
+    const customGlobalPresets = globalPresets.filter(p => !p.isFactory);
+    if (customGlobalPresets.length > 0) {
+      const customGroup = document.createElement('optgroup');
+      customGroup.label = '━━━ User Presets ━━━';
+      customGlobalPresets.forEach(preset => {
+        const option = document.createElement('option');
+        option.value = `global:${preset.id}`;
+        option.textContent = preset.name;
+        // Check if this is the selected preset
+        if (this.presetManager.useGlobalPresets && preset.id === this.presetManager.currentGlobalPreset) {
+          option.selected = true;
+        }
+        customGroup.appendChild(option);
+      });
+      dropdown.appendChild(customGroup);
+    }
+    
+    // Add kit-specific presets
+    if (this.currentKit) {
       const kit = this.otto.drumkitManager?.getDrumkit(this.currentKit);
       console.log('Current kit:', this.currentKit, 'Kit data:', kit);
-      if (kit && kit.mixerPresets) {
-        console.log('Kit mixer presets:', kit.mixerPresets);
+      if (kit && kit.mixerPresets && Object.keys(kit.mixerPresets).length > 0) {
+        const kitGroup = document.createElement('optgroup');
+        kitGroup.label = `━━━ ${kit.name || this.currentKit} Kit Presets ━━━`;
         Object.keys(kit.mixerPresets).forEach(presetName => {
           const option = document.createElement('option');
-          option.value = presetName;
+          option.value = `kit:${presetName}`;
           option.textContent = kit.mixerPresets[presetName].name || presetName;
-          if (presetName === kit.selectedMixerPreset) {
+          // Check if this is the selected preset
+          if (!this.presetManager.useGlobalPresets && presetName === kit.selectedMixerPreset) {
             option.selected = true;
           }
-          dropdown.appendChild(option);
+          kitGroup.appendChild(option);
         });
+        dropdown.appendChild(kitGroup);
       }
+    }
+    
+    // If no preset is selected, check if we should auto-select one
+    if (dropdown.value === '' && factoryPresets.length > 0) {
+      // Default to the first factory preset if nothing is selected
+      dropdown.value = `global:${factoryPresets[0].id}`;
     }
   }
   
@@ -355,10 +344,23 @@ class MixerComponent {
       return;
     }
     
-    const mixerState = this.getCurrentMixerState();
-    console.log('Saving preset:', name, 'Mode:', this.presetManager.useGlobalPresets ? 'global' : 'kit');
+    // Ask user whether to save as User Preset (global) or Kit-specific preset
+    let saveAsGlobal = true; // Default to User Preset
     
-    if (this.presetManager.useGlobalPresets) {
+    if (this.currentKit) {
+      const choice = confirm(
+        'Save as User Preset (available for all kits)?\n\n' +
+        'OK = User Preset (Global)\n' +
+        'Cancel = Kit-specific Preset'
+      );
+      saveAsGlobal = choice;
+    }
+    
+    const mixerState = this.getCurrentMixerState();
+    console.log('Saving preset:', name, 'Type:', saveAsGlobal ? 'global' : 'kit');
+    
+    if (saveAsGlobal) {
+      // Save as global User Preset
       const newId = this.presetManager.createGlobalPreset(name);
       console.log('Created global preset with ID:', newId);
       this.presetManager.updateGlobalPreset(newId, { channels: mixerState });
@@ -367,6 +369,7 @@ class MixerComponent {
       await this.presetManager.saveToStorage();
       console.log('Global presets after save:', this.presetManager.getAllGlobalPresets());
     } else if (this.currentKit && this.otto.drumkitManager) {
+      // Save as kit-specific preset
       const presetData = this.presetManager.createPresetData(name);
       presetData.channels = mixerState;
       // Create the preset and select it
