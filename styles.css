@@ -3846,8 +3846,8 @@ body {
 }
 
 .channel-fx-spacer {
-  height: 48px; /* Reduced to raise FX starting point */
-  margin-bottom: 10px; /* Match fx-section margin */
+  height: 64px;
+  margin-bottom: 10px;
 }
 
 /* Send Controls */
@@ -3900,13 +3900,13 @@ body {
 }
 
 .channel-sends-spacer {
-  height: 82px; /* Reduced to raise FX starting point */
-  margin-bottom: 10px; /* Match sends-section margin */
+  height: 82px;
+  margin-bottom: 10px;
 }
 
 .master-sends-spacer {
-  height: 82px; /* Same as channel-sends-spacer for alignment */
-  margin-bottom: 10px; /* Match sends-section margin */
+  height: 104px;
+  margin-bottom: 10px;
 }
 
 /* Pan Control */
@@ -4052,10 +4052,10 @@ body {
   position: absolute;
   width: 2px;
   height: 100%;
-  background: linear-gradient(180deg, 
-    transparent 0%, 
-    #333 10%, 
-    #333 90%, 
+  background: linear-gradient(180deg,
+    transparent 0%,
+    #333 10%,
+    #333 90%,
     transparent 100%);
   left: 50%;
   transform: translateX(-50%);
