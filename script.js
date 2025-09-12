@@ -50,7 +50,7 @@ class OTTOAccurateInterface {
     this.animationFrame = null;
     this.tapTimes = [];
     this.maxTapTimes = 4;
-    this.isPlaying = true; // Start in playing state to show pause icon
+    this.isPlaying = false; // Start in pause state to show play icon
     this.currentPreset = "default"; // Track current preset
 
     // Online Store URL - easily configurable
@@ -155,7 +155,7 @@ class OTTOAccurateInterface {
 
     // MIDI File Registry - tracks which groups contain which MIDI files
     this.midiFileRegistry = {}; // Will be populated on initialization
-    
+
     // Player state tracking for all possible players
     this.playerStates = {};
     for (let i = 1; i <= this.maxPlayers; i++) {
@@ -682,7 +682,7 @@ class OTTOAccurateInterface {
       // Initially hide
       playerSaveBtn.style.display = "none";
     }
-    
+
     // Old save buttons removed - no longer in HTML
   }
 
@@ -2920,14 +2920,14 @@ class OTTOAccurateInterface {
 
   setupSettingsWindow() {
     // WindowManager handles panel open/close
-    
+
     // System reset button (complete reset)
     const settingsSystemResetBtn = document.getElementById(
       "settings-system-reset-btn",
     );
     if (settingsSystemResetBtn) {
-      settingsSystemResetBtn.addEventListener("click", () => {
-        this.resetSystem();
+      settingsSystemResetBtn.addEventListener("click", async () => {
+        await this.resetSystem();
         // Close settings panel after reset using WindowManager
         this.windowManager.closeWindow("panel", "settings");
       });
@@ -3259,7 +3259,7 @@ class OTTOAccurateInterface {
 
   deleteCurrentPatternGroup() {
     const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
-    
+
     // Don't allow deleting favorites
     if (currentGroup === "favorites") {
       this.showNotification("Cannot delete the Favorites group", "warning");
@@ -3269,23 +3269,23 @@ class OTTOAccurateInterface {
     if (confirm(`Delete pattern group "${this.patternGroups[currentGroup]?.name || currentGroup}"?`)) {
       // Use the proper deleteGroup method
       const success = this.deleteGroup(currentGroup);
-      
+
       if (success) {
         // Switch to favorites
         this.playerStates[this.currentPlayer].patternGroup = "favorites";
-        
+
         // Update the current editor group as well
         this.currentEditorGroup = "favorites";
-        
+
         // Update the pattern grid to show favorites
         if (this.patternGroups["favorites"]) {
           this.updateMainPatternGrid(this.patternGroups["favorites"].patterns);
         }
-        
+
         // Update both dropdowns immediately
         this.updateEditorGroupDropdown();
         this.updatePatternGroupDropdown();
-        
+
         // Update the dropdown display text to show "Favorites"
         const groupSelected = document.getElementById("group-selected");
         if (groupSelected) {
@@ -3294,16 +3294,16 @@ class OTTOAccurateInterface {
             dropdownText.textContent = this.patternGroups["favorites"].name;
           }
         }
-        
+
         // Also update the editor dropdown display text if it exists
         const editorSelected = document.getElementById("editor-group-selected");
         if (editorSelected) {
           editorSelected.textContent = this.patternGroups["favorites"].name;
         }
-        
+
         // Show success notification
         this.showNotification("Group deleted successfully");
-        
+
         // Don't exit edit mode - let user continue editing
         // this.togglePatternEditMode();
       } else {
@@ -3334,13 +3334,13 @@ class OTTOAccurateInterface {
   initializePatternGroupEditor() {
     // Load pattern groups from storage
     this.loadPatternGroups();
-    
+
     // Initialize MIDI file registry
     this.initializeMidiRegistry();
 
     // Load available MIDI patterns
     this.loadAvailablePatterns();
-    
+
     // Ensure all MIDI files are assigned to at least one group
     this.ensureAllMidiFilesAssigned();
 
@@ -3363,7 +3363,7 @@ class OTTOAccurateInterface {
     const savedGroups = this.safeLocalStorageGet("ottoPatternGroups", null);
     if (savedGroups) {
       this.patternGroups = savedGroups;
-      
+
       // Clean up legacy selectedPattern fields if they exist
       for (const key in this.patternGroups) {
         if (this.patternGroups[key].selectedPattern !== undefined) {
@@ -3425,12 +3425,12 @@ class OTTOAccurateInterface {
   updateMidiRegistry(midiFile, groups) {
     // Update which groups contain a MIDI file
     if (!midiFile) return;
-    
+
     if (!groups || groups.length === 0) {
       // Ensure MIDI file has at least one group
       groups = ["favorites"];
     }
-    
+
     this.midiFileRegistry[midiFile] = groups;
     this.saveMidiRegistry();
   }
@@ -3461,33 +3461,33 @@ class OTTOAccurateInterface {
   ensureAllMidiFilesAssigned() {
     // Get all available MIDI files
     const midiFiles = this.getAllMidiFiles();
-    
+
     debugLog("Ensuring all MIDI files are assigned to groups...");
-    
+
     let unassignedCount = 0;
     let assignedCount = 0;
-    
+
     // Check each MIDI file
     for (const midiFile of midiFiles) {
       const groups = this.getMidiFileGroups(midiFile);
-      
+
       if (groups.length === 0) {
         // File is not in any group - assign it
         unassignedCount++;
         const targetGroup = this.findOrCreateGroupForMidi(midiFile);
-        
+
         if (targetGroup) {
           // Ensure the group has a patterns array
           if (!this.patternGroups[targetGroup].patterns) {
             this.patternGroups[targetGroup].patterns = [];
           }
-          
+
           const patterns = this.patternGroups[targetGroup].patterns;
-          
+
           // For a 16-slot grid, ensure we have an array that can hold 16 items
           // Find the first empty slot or append if less than 16 items
           let added = false;
-          
+
           // First, try to find an empty slot
           for (let i = 0; i < Math.min(patterns.length, 16); i++) {
             if (!patterns[i] || patterns[i] === '') {
@@ -3496,13 +3496,13 @@ class OTTOAccurateInterface {
               break;
             }
           }
-          
+
           // If no empty slot found and we have less than 16 patterns, append
           if (!added && patterns.length < 16) {
             patterns.push(midiFile);
             added = true;
           }
-          
+
           if (added) {
             // Update registry
             this.updateMidiRegistry(midiFile, [targetGroup]);
@@ -3514,7 +3514,7 @@ class OTTOAccurateInterface {
         }
       }
     }
-    
+
     if (unassignedCount > 0) {
       debugLog(`Auto-assigned ${assignedCount} of ${unassignedCount} unassigned MIDI files`);
       this.savePatternGroups();
@@ -3522,27 +3522,27 @@ class OTTOAccurateInterface {
     } else {
       debugLog("All MIDI files already assigned to groups");
     }
-    
+
     // Also rebuild registry from current groups (handles legacy data)
     this.rebuildRegistryFromGroups();
   }
-  
+
   findOrCreateGroupForMidi(midiFile) {
     // First, try to find a group with space
     const groupWithSpace = this.findGroupWithSpace();
     if (groupWithSpace) {
       return groupWithSpace;
     }
-    
+
     // No groups with space - create a new one
     return this.createAutoGroup();
   }
-  
+
   findGroupWithSpace() {
     // Check all groups except 'all' (which is internal)
     for (const [key, group] of Object.entries(this.patternGroups)) {
       if (key === 'all') continue; // Skip internal 'all' group
-      
+
       const patterns = group.patterns || [];
       // Count non-empty patterns
       const nonEmptyPatterns = patterns.filter(p => p && p.trim() !== '').length;
@@ -3551,21 +3551,21 @@ class OTTOAccurateInterface {
         return key;
       }
     }
-    
+
     // No groups with space
     return null;
   }
-  
+
   createAutoGroup() {
     // Find the next available group number
     let groupNum = 1;
     while (this.patternGroups[`group-${groupNum}`]) {
       groupNum++;
     }
-    
+
     const groupKey = `group-${groupNum}`;
     const groupName = `Group ${groupNum}`;
-    
+
     // Create the new group
     this.patternGroups[groupKey] = {
       name: groupName,
@@ -3573,11 +3573,11 @@ class OTTOAccurateInterface {
       deletable: true,
       editable: true
     };
-    
+
     debugLog(`Created new auto-group: ${groupName}`);
     return groupKey;
   }
-  
+
   getAllMidiFiles() {
     // Returns the complete list of MIDI files
     // In production, this would come from the server
@@ -3606,15 +3606,15 @@ class OTTOAccurateInterface {
       "Trip Hop", "Waltz", "West Coast Jazz"
     ];
   }
-  
+
   rebuildRegistryFromGroups() {
     // Rebuild the registry based on current group contents
     // This helps handle legacy data and ensures consistency
     const newRegistry = {};
-    
+
     for (const [groupKey, group] of Object.entries(this.patternGroups)) {
       if (groupKey === 'all') continue; // Skip internal group
-      
+
       const patterns = group.patterns || [];
       for (const pattern of patterns) {
         if (!newRegistry[pattern]) {
@@ -3625,7 +3625,7 @@ class OTTOAccurateInterface {
         }
       }
     }
-    
+
     // Merge with existing registry (preserves multi-group assignments)
     for (const [midiFile, groups] of Object.entries(this.midiFileRegistry)) {
       if (!newRegistry[midiFile]) {
@@ -3639,7 +3639,7 @@ class OTTOAccurateInterface {
         }
       }
     }
-    
+
     this.midiFileRegistry = newRegistry;
     this.saveMidiRegistry();
   }
@@ -3651,16 +3651,16 @@ class OTTOAccurateInterface {
       debugError("Group name cannot be empty");
       return null;
     }
-    
+
     // Generate key from name
     const groupKey = name.toLowerCase().replace(/\s+/g, "-");
-    
+
     // Check if group already exists
     if (this.patternGroups[groupKey]) {
       debugWarn(`Group "${name}" already exists`);
       return null;
     }
-    
+
     // Create the group
     this.patternGroups[groupKey] = {
       name: name.trim(),
@@ -3668,31 +3668,31 @@ class OTTOAccurateInterface {
       deletable: true,
       editable: true
     };
-    
+
     this.savePatternGroups();
     debugLog(`Created group: ${name}`);
     return groupKey;
   }
-  
+
   deleteGroup(groupKey) {
     // Delete a group with safety checks
     if (!this.patternGroups[groupKey]) {
       debugError(`Group "${groupKey}" does not exist`);
       return false;
     }
-    
+
     // Cannot delete favorites
     if (groupKey === "favorites") {
       debugWarn("Cannot delete Favorites group");
       return false;
     }
-    
+
     const group = this.patternGroups[groupKey];
     if (group.deletable === false) {
       debugWarn(`Group "${group.name}" is not deletable`);
       return false;
     }
-    
+
     // Check if any patterns would become orphaned
     const patterns = group.patterns || [];
     for (const pattern of patterns) {
@@ -3706,295 +3706,224 @@ class OTTOAccurateInterface {
       const updatedGroups = groups.filter(g => g !== groupKey);
       this.updateMidiRegistry(pattern, updatedGroups);
     }
-    
+
     // Delete the group
     delete this.patternGroups[groupKey];
     this.savePatternGroups();
-    
+
     // Update the UI immediately - refresh the pattern grid
     const currentGroup = this.playerStates[this.currentPlayer].patternGroup;
     if (currentGroup && this.patternGroups[currentGroup]) {
       this.updateMainPatternGrid(this.patternGroups[currentGroup].patterns);
     }
-    
+
     // Refresh the dropdowns to reflect the deletion
     this.updatePatternGroupDropdown();
     this.updateEditorGroupDropdown();
-    
+
     debugLog(`Deleted group: ${groupKey}`);
     return true;
   }
-  
+
   renameGroup(groupKey, newName) {
     // Rename a group
     if (!this.patternGroups[groupKey]) {
       debugError(`Group "${groupKey}" does not exist`);
       return false;
     }
-    
+
     // Cannot rename favorites
     if (groupKey === "favorites") {
       debugWarn("Cannot rename Favorites group");
       return false;
     }
-    
+
     const group = this.patternGroups[groupKey];
     if (group.editable === false) {
       debugWarn(`Group "${group.name}" is not editable`);
       return false;
     }
-    
+
     if (!newName || newName.trim() === "") {
       debugError("New name cannot be empty");
       return false;
     }
-    
+
     // Update the name
     group.name = newName.trim();
     this.savePatternGroups();
-    
+
     debugLog(`Renamed group "${groupKey}" to "${newName}"`);
     return true;
   }
-  
+
   addPatternToGroup(midiFile, groupKey) {
     // Add a MIDI file to a group
     if (!this.patternGroups[groupKey]) {
       debugError(`Group "${groupKey}" does not exist`);
       return false;
     }
-    
+
     const group = this.patternGroups[groupKey];
     const patterns = group.patterns || [];
-    
+
     // Check if already in group
     if (patterns.includes(midiFile)) {
       debugLog(`Pattern "${midiFile}" already in group "${groupKey}"`);
       return true;
     }
-    
+
     // Check group capacity
     if (patterns.length >= 16) {
       debugWarn(`Group "${groupKey}" is full (16 patterns max)`);
       return false;
     }
-    
+
     // Add to group
     patterns.push(midiFile);
     group.patterns = patterns;
-    
+
     // Update registry
     const groups = this.getMidiFileGroups(midiFile);
     if (!groups.includes(groupKey)) {
       groups.push(groupKey);
       this.updateMidiRegistry(midiFile, groups);
     }
-    
+
     this.savePatternGroups();
     debugLog(`Added "${midiFile}" to group "${groupKey}"`);
     return true;
   }
-  
+
   removePatternFromGroup(midiFile, groupKey) {
     // Remove a MIDI file from a group
     if (!this.patternGroups[groupKey]) {
       debugError(`Group "${groupKey}" does not exist`);
       return false;
     }
-    
+
     const group = this.patternGroups[groupKey];
     const patterns = group.patterns || [];
-    
+
     // Check if in group
     const index = patterns.indexOf(midiFile);
     if (index === -1) {
       debugLog(`Pattern "${midiFile}" not in group "${groupKey}"`);
       return true;
     }
-    
+
     // Check if this is the last group
     const groups = this.getMidiFileGroups(midiFile);
     if (groups.length === 1 && groups[0] === groupKey) {
       debugWarn(`Cannot remove "${midiFile}" from last group. Reassigning to favorites.`);
       this.addPatternToGroup(midiFile, "favorites");
     }
-    
+
     // Remove from group
     patterns.splice(index, 1);
     group.patterns = patterns;
-    
+
     // Update registry
     const updatedGroups = groups.filter(g => g !== groupKey);
     this.updateMidiRegistry(midiFile, updatedGroups);
-    
+
     this.savePatternGroups();
     debugLog(`Removed "${midiFile}" from group "${groupKey}"`);
     return true;
   }
 
   // Drumkit Management Methods
-  loadDrumkits() {
+  async loadDrumkits() {
     // Load saved drumkits from localStorage with error handling
     const savedDrumkits = this.safeLocalStorageGet("ottoDrumkits", null);
     if (savedDrumkits) {
       this.drumkits = savedDrumkits;
     } else {
-      // Initialize with default drumkits and their mixer presets
-      this.drumkits = {
-        Acoustic: {
-          name: "Acoustic",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 75,
-                snare: 70,
-                hihat: 60,
-                tom: 65,
-                crash: 80,
-                ride: 70,
-              },
-            },
-            punchy: {
-              name: "Punchy",
-              levels: {
-                kick: 85,
-                snare: 80,
-                hihat: 55,
-                tom: 70,
-                crash: 75,
-                ride: 65,
-              },
-            },
-          },
-        },
-        Electronic: {
-          name: "Electronic",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 80,
-                snare: 75,
-                hihat: 70,
-                tom: 60,
-                crash: 85,
-                ride: 75,
-              },
-            },
-          },
-        },
-        Rock: {
-          name: "Rock",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 90,
-                snare: 85,
-                hihat: 65,
-                tom: 75,
-                crash: 90,
-                ride: 70,
-              },
-            },
-          },
-        },
-        Jazz: {
-          name: "Jazz",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 60,
-                snare: 65,
-                hihat: 75,
-                tom: 55,
-                crash: 70,
-                ride: 80,
-              },
-            },
-          },
-        },
-        Pop: {
-          name: "Pop",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 75,
-                snare: 80,
-                hihat: 70,
-                tom: 60,
-                crash: 75,
-                ride: 65,
-              },
-            },
-          },
-        },
-        Funk: {
-          name: "Funk",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 85,
-                snare: 90,
-                hihat: 80,
-                tom: 70,
-                crash: 75,
-                ride: 75,
-              },
-            },
-          },
-        },
-        Latin: {
-          name: "Latin",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 70,
-                snare: 75,
-                hihat: 85,
-                tom: 80,
-                crash: 70,
-                ride: 75,
-              },
-            },
-          },
-        },
-        Vintage: {
-          name: "Vintage",
-          selectedMixerPreset: "default",
-          mixerPresets: {
-            default: {
-              name: "Default",
-              levels: {
-                kick: 65,
-                snare: 70,
-                hihat: 60,
-                tom: 65,
-                crash: 75,
-                ride: 70,
-              },
-            },
-          },
-        },
-      };
-      // Save default drumkits
+      // Dynamically scan for SFZ files and initialize drumkits
+      this.drumkits = await this.scanForDrumkits();
+      // Save the discovered drumkits
       this.saveDrumkits();
     }
 
     // Populate the kit dropdown with all available kits
     this.populateKitDropdown();
+  }
+
+  async scanForDrumkits() {
+    // Check if we have a cached drumkit list in localStorage
+    const cachedDrumkitList = this.safeLocalStorageGet("ottoDrumkitList", null);
+    
+    if (cachedDrumkitList) {
+      // Use cached list if available
+      return this.buildDrumkitsFromList(cachedDrumkitList);
+    }
+    
+    // For now, use a predefined list of known drumkits
+    // This list would normally be generated during build process or provided by the backend
+    const sfzFiles = [
+      'Acoustic/Acoustic.sfz',
+      'Acoustic/Acoustic Room.sfz',
+      'Acoustic/Acoustic Dry.sfz',
+      'Acoustic/Acoustic Wet.sfz',
+      'Electronic/Electronic.sfz',
+      'Percussion/Percussion.sfz',
+      'Percussion/Percussion Congas.sfz',
+      'Percussion/Percussion Shakers.sfz',
+      'Percussion/Percussion Bongos.sfz',
+      'Percussion/Percussion Claps.sfz',
+      'Percussion/Percussion Claves.sfz'
+    ];
+    
+    // Cache the list for future use
+    this.safeLocalStorageSet("ottoDrumkitList", sfzFiles);
+    
+    return this.buildDrumkitsFromList(sfzFiles);
+  }
+  
+  buildDrumkitsFromList(sfzFiles) {
+    const drumkits = {};
+    
+    // Process each SFZ file
+    sfzFiles.forEach(filePath => {
+      // Extract the kit name from the file path
+      const pathParts = filePath.split('/');
+      const fileName = pathParts[pathParts.length - 1];
+      const kitName = fileName.replace('.sfz', '').trim();
+      
+      // Create a unique key for the drumkit
+      const kitKey = kitName.replace(/[^a-zA-Z0-9]/g, '');
+      
+      // Initialize drumkit with empty mixer settings as requested
+      drumkits[kitKey] = {
+        name: kitName,
+        path: `./Assets/Drumkits/${filePath}`,
+        selectedMixerPreset: "default",
+        mixerPresets: {
+          default: {
+            name: "Default",
+            levels: {}
+          }
+        }
+      };
+    });
+    
+    // Ensure we have at least one drumkit
+    if (Object.keys(drumkits).length === 0) {
+      // Fallback to a default Acoustic kit
+      drumkits.Acoustic = {
+        name: "Acoustic",
+        path: "./Assets/Drumkits/Acoustic/Acoustic.sfz",
+        selectedMixerPreset: "default",
+        mixerPresets: {
+          default: {
+            name: "Default",
+            levels: {}
+          }
+        }
+      };
+    }
+    
+    return drumkits;
   }
 
   saveDrumkits() {
@@ -4302,7 +4231,7 @@ class OTTOAccurateInterface {
 
         // Use the new createGroup function
         const groupKey = this.createGroup(groupName);
-        
+
         if (!groupKey) {
           alert("Could not create group. It may already exist.");
           return;
@@ -4850,7 +4779,7 @@ class OTTOAccurateInterface {
         // STEP 1: Complete state restoration
         // Deep clone all player states to avoid reference issues
         this.playerStates = this.structuredClone(preset.playerStates);
-        
+
         // MIGRATION: Handle old presets without midiFile field
         for (let i = 1; i <= this.maxPlayers; i++) {
           if (this.playerStates[i]) {
@@ -4968,7 +4897,7 @@ class OTTOAccurateInterface {
         // STEP 7: Update mute overlay based on CURRENT player's state
         // This is critical - must check the current player's mute state
         this.updateMuteOverlay();
-        
+
         // STEP 8: Ensure current player's MIDI file is visible
         this.onPlayerLoaded(this.currentPlayer);
 
@@ -5006,11 +4935,11 @@ class OTTOAccurateInterface {
     }
 
     const name = this.presets[key]?.name;
-    
+
     if (!this.presets[key]) {
       return;
     }
-    
+
     delete this.presets[key];
 
     // If we deleted the current preset, switch to default
@@ -5183,7 +5112,7 @@ class OTTOAccurateInterface {
       if (!this.maxHistorySize) {
         this.maxHistorySize = 10; // Default history size
       }
-      
+
       // Save current state to history
       const historyEntry = {
         presets: this.structuredClone(this.presets),
@@ -5414,26 +5343,26 @@ class OTTOAccurateInterface {
       this.savePresetLocksToStorage();
       this.updatePresetLockDisplay();
     }
-    
+
     // Rebuild the MIDI registry and ensure all MIDI files are assigned to groups
     debugLog("Rebuilding MIDI registry after factory reset...");
-    
+
     // Initialize/rebuild the MIDI registry
     this.initializeMidiRegistry();
-    
+
     // Ensure all MIDI files are assigned to appropriate groups
     this.ensureAllMidiFilesAssigned();
-    
+
     // Rebuild the registry from the current groups
     this.rebuildRegistryFromGroups();
-    
+
     // Save the updated groups
     this.savePatternGroups();
-    
+
     // Update the pattern group dropdowns to reflect any changes
     this.updatePatternGroupDropdown();
     this.updateEditorGroupDropdown();
-    
+
     // Load available patterns to refresh the UI
     this.loadAvailablePatterns();
 
@@ -5515,7 +5444,7 @@ class OTTOAccurateInterface {
     this.showNotification("Default preset reset to factory settings");
   }
 
-  resetSystem() {
+  async resetSystem() {
     // Complete system reset
     const confirmReset = confirm(
       "This will perform a complete system reset:\n" +
@@ -5530,7 +5459,7 @@ class OTTOAccurateInterface {
 
     // 1. Clear all presets and create fresh defaults
     this.presets = {};
-    
+
     // Create the default preset
     const factoryDefault = {
       name: "Default",
@@ -5581,16 +5510,16 @@ class OTTOAccurateInterface {
 
     // 2. Clear all pattern groups and rebuild from scratch
     debugLog("Rebuilding pattern groups...");
-    
+
     // Clear existing groups
     this.patternGroups = {};
-    
+
     // Create default favorites group with the standard patterns
     this.patternGroups["favorites"] = {
       name: "Favorites",
       patterns: [
         "Basic",
-        "Bassa", 
+        "Bassa",
         "BusyBeat",
         "Buyoun",
         "ChaCha",
@@ -5609,23 +5538,23 @@ class OTTOAccurateInterface {
       deletable: false,
       editable: true
     };
-    
+
     // Initialize MIDI registry
     this.initializeMidiRegistry();
-    
+
     // Load available patterns and auto-create groups for remaining patterns
     this.loadAvailablePatterns();
-    
+
     // Get all MIDI files and assign any that aren't in favorites to other groups
     const allMidiFiles = this.getAllMidiFiles();
     const favoritesPatterns = this.patternGroups["favorites"].patterns;
     const unassignedFiles = allMidiFiles.filter(file => !favoritesPatterns.includes(file));
-    
+
     // Create additional groups if needed for unassigned files
     let currentGroupNum = 1;
     let currentGroup = null;
     let currentGroupPatterns = [];
-    
+
     for (const file of unassignedFiles) {
       if (currentGroupPatterns.length === 0 || currentGroupPatterns.length >= 16) {
         // Need a new group
@@ -5633,7 +5562,7 @@ class OTTOAccurateInterface {
           // Save the previous group
           this.patternGroups[currentGroup].patterns = currentGroupPatterns;
         }
-        
+
         // Create new group
         currentGroup = `group-${currentGroupNum}`;
         this.patternGroups[currentGroup] = {
@@ -5645,24 +5574,32 @@ class OTTOAccurateInterface {
         currentGroupPatterns = [];
         currentGroupNum++;
       }
-      
+
       currentGroupPatterns.push(file);
     }
-    
+
     // Save the last group if it has patterns
     if (currentGroup && currentGroupPatterns.length > 0) {
       this.patternGroups[currentGroup].patterns = currentGroupPatterns;
     }
-    
+
     // Rebuild registry from groups
     this.rebuildRegistryFromGroups();
-    
+
     // Save pattern groups
     this.savePatternGroups();
 
-    // 3. Reset drumkits (future implementation)
-    // TODO: Reset drumkit configurations
-    // this.resetDrumkits();
+    // 3. Reset drumkits - clear cached list and rescan
+    debugLog("Resetting drumkits...");
+    localStorage.removeItem("ottoDrumkitList");
+    localStorage.removeItem("ottoDrumkits");
+    this.drumkits = null;
+    
+    // Re-scan for drumkits
+    await this.loadDrumkits();
+    
+    // Re-populate the dropdown
+    this.populateKitDropdown();
 
     // 4. Reset mixer settings (future implementation)
     // TODO: Reset mixer configurations
@@ -5670,7 +5607,7 @@ class OTTOAccurateInterface {
 
     // 5. Clear all storage and save fresh data
     debugLog("Clearing and rebuilding storage...");
-    
+
     // Clear all OTTO-related localStorage items
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
@@ -5702,12 +5639,12 @@ class OTTOAccurateInterface {
     this.renderPresetList();
     this.updatePatternGroupDropdown();
     this.updateEditorGroupDropdown();
-    
+
     // Update the pattern grid with the favorites patterns
     this.updateMainPatternGrid(this.patternGroups["favorites"].patterns);
-    
+
     this.updatePresetLockDisplay();
-    
+
     // Set Basic pattern as active in the UI
     const patternBtns = document.querySelectorAll('.pattern-btn');
     patternBtns.forEach(btn => {
@@ -5716,7 +5653,7 @@ class OTTOAccurateInterface {
         btn.classList.add('active');
       }
     });
-    
+
     // Update the player state to reflect Basic as selected
     if (this.playerStates && this.playerStates[this.currentPlayer]) {
       this.playerStates[this.currentPlayer].selectedPattern = "Basic";
@@ -5724,7 +5661,7 @@ class OTTOAccurateInterface {
 
     // 10. Show success notification
     this.showNotification("System reset complete - all components restored to factory defaults");
-    
+
     debugLog("System reset completed successfully");
   }
 
@@ -5933,14 +5870,14 @@ class OTTOAccurateInterface {
     // Save the current player's state
     const playerNum = this.currentPlayer;
     const playerState = this.playerStates[playerNum];
-    
+
     if (!playerState) {
       debugError(`No state for player ${playerNum}`);
       return;
     }
-    
+
     debugLog(`Saving state for Player ${playerNum}`);
-    
+
     // Save to localStorage or wherever player states are persisted
     // For now, just log what would be saved
     debugLog("Player state to save:", {
@@ -5952,7 +5889,7 @@ class OTTOAccurateInterface {
       sliders: playerState.sliderValues,
       muted: playerState.muted
     });
-    
+
     // Mark as saved
     this.showNotification(`Player ${playerNum} saved`);
   }
@@ -5962,7 +5899,7 @@ class OTTOAccurateInterface {
     return this.safeLocalStorageGet("otto_presets", null);
   }
 
-  init() {
+  async init() {
     try {
       // Set up global error handlers first
       this.setupGlobalErrorHandlers();
@@ -5980,7 +5917,7 @@ class OTTOAccurateInterface {
       this.loadPatternGroups(); // Load pattern groups early
       this.initializeMidiRegistry(); // Initialize MIDI file registry
       this.ensureAllMidiFilesAssigned(); // Ensure all MIDI files have groups
-      this.loadDrumkits(); // Load drumkit manager
+      await this.loadDrumkits(); // Load drumkit manager
       this.setupVersion();
       this.setupSplashScreen();
       this.setupPlayerTabs();
@@ -5988,6 +5925,7 @@ class OTTOAccurateInterface {
       this.setupSettingsWindow(); // Setup settings window
       this.setupAllModals(); // Setup all modal windows
       this.setupKitControls();
+      this.populateKitDropdown(); // Re-populate after controls are setup
       this.setupPatternGroupControls();
       this.setupPatternGrid();
       this.setupToggleButtons();
@@ -6381,7 +6319,7 @@ class OTTOAccurateInterface {
 
     // Populate kit dropdown with all available kits
     this.populateKitDropdown();
-    
+
     // NEW: Ensure player's MIDI file is visible
     this.onPlayerLoaded(playerNumber);
 
@@ -6394,25 +6332,25 @@ class OTTOAccurateInterface {
   onPlayerLoaded(playerNumber) {
     // Called when a player is selected or preset loads
     // Ensures the player's MIDI file is visible in a group
-    
+
     if (!this.playerStates[playerNumber]) {
       debugError(`Invalid player number: ${playerNumber}`);
       return;
     }
-    
+
     const midiFile = this.playerStates[playerNumber].midiFile;
     if (!midiFile) {
       debugLog(`Player ${playerNumber} has no MIDI file set`);
       return;
     }
-    
+
     // Get groups containing this MIDI file
     const groups = this.getMidiFileGroups(midiFile);
-    
+
     if (groups.length === 0) {
       // MIDI file not in any group - assign it
       debugWarn(`MIDI file "${midiFile}" not in any group, assigning...`);
-      
+
       const targetGroup = this.findOrCreateGroupForMidi(midiFile);
       if (targetGroup) {
         // Add to group
@@ -6420,22 +6358,22 @@ class OTTOAccurateInterface {
           this.patternGroups[targetGroup].patterns = [];
         }
         this.patternGroups[targetGroup].patterns.push(midiFile);
-        
+
         // Update registry
         this.updateMidiRegistry(midiFile, [targetGroup]);
-        
+
         // Save changes
         this.savePatternGroups();
-        
+
         // Switch to this group
         this.switchToPatternGroup(targetGroup);
-        
+
         debugLog(`Assigned "${midiFile}" to group "${targetGroup}" and switched to it`);
       }
     } else {
       // Check if current displayed group contains this MIDI file
       const currentGroup = this.getCurrentDisplayedGroup();
-      
+
       if (currentGroup && !groups.includes(currentGroup)) {
         // Current group doesn't have this file - switch to first group that does
         this.switchToPatternGroup(groups[0]);
@@ -6443,47 +6381,47 @@ class OTTOAccurateInterface {
       }
     }
   }
-  
+
   getCurrentDisplayedGroup() {
     // Get the currently displayed pattern group
     // This depends on UI state - check dropdown or current editor group
-    
+
     // Try pattern group editor first (if modal is open)
     if (this.currentEditorGroup) {
       return this.currentEditorGroup;
     }
-    
+
     // Otherwise check main UI pattern group
     const currentPlayer = this.currentPlayer;
     if (this.playerStates[currentPlayer]) {
       return this.playerStates[currentPlayer].patternGroup;
     }
-    
+
     return "favorites"; // Default fallback
   }
-  
+
   switchToPatternGroup(groupKey) {
     // Switch the displayed pattern group
     if (!this.patternGroups[groupKey]) {
       debugError(`Pattern group "${groupKey}" does not exist`);
       return;
     }
-    
+
     // Update current player's pattern group (legacy - will be removed later)
     if (this.playerStates[this.currentPlayer]) {
       this.playerStates[this.currentPlayer].patternGroup = groupKey;
     }
-    
+
     // Update UI to show this group's patterns
     const patterns = this.patternGroups[groupKey].patterns || [];
     this.updateMainPatternGrid(patterns);
-    
+
     // Update dropdown if it exists
     const dropdownText = document.querySelector("#group-selected .dropdown-text");
     if (dropdownText) {
       dropdownText.textContent = this.patternGroups[groupKey].name;
     }
-    
+
     debugLog(`Switched to pattern group: ${groupKey}`);
   }
 
@@ -7477,7 +7415,12 @@ class OTTOAccurateInterface {
 
   populateKitDropdown() {
     const kitOptionsContainer = document.getElementById("kit-options");
-    if (!kitOptionsContainer) return;
+    if (!kitOptionsContainer) {
+      debugError("Kit options container not found");
+      return;
+    }
+
+    debugLog("Populating kit dropdown with drumkits:", this.drumkits);
 
     // Clear existing options
     kitOptionsContainer.innerHTML = "";
@@ -7543,17 +7486,8 @@ class OTTOAccurateInterface {
       return;
     }
 
-    // These should eventually come from our INI storage system
-    const kits = [
-      "Acoustic",
-      "Electronic",
-      "Rock",
-      "Jazz",
-      "Pop",
-      "Funk",
-      "Latin",
-      "Vintage",
-    ];
+    // Get kits dynamically from the drumkits object
+    const kits = Object.values(this.drumkits).map(kit => kit.name).sort();
     const state = this.playerStates[this.currentPlayer];
 
     // Validate current kit name
@@ -7769,7 +7703,7 @@ class OTTOAccurateInterface {
 
       // Update player state with full pattern name
       this.playerStates[this.currentPlayer].selectedPattern = fullPatternName;
-      
+
       // NEW: Also update the midiFile field
       this.playerStates[this.currentPlayer].midiFile = fullPatternName;
 
@@ -8977,11 +8911,11 @@ class OTTOAccurateInterface {
 
     // NEW: Update player's midiFile directly
     this.playerStates[playerNumber].midiFile = patternName;
-    
+
     // LEGACY: Keep updating old fields for now (will remove in Phase 4)
     this.playerStates[playerNumber].selectedPattern = patternName;
     const currentGroup = this.playerStates[playerNumber].patternGroup;
-    
+
     // Groups no longer track selected pattern
 
     // Mark as dirty

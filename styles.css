@@ -70,11 +70,11 @@
   /* Row 3 Area Percentages - 5 areas */
   --row3-area1-width: 10%;
   /* Player number display */
-  --row3-area2-width: 15%;
+  --row3-area2-width: 10%;
   /* Kit edit icon */
-  --row3-area3-width: 50%;
+  --row3-area3-width: 60%;
   /* Kit selection center */
-  --row3-area4-width: 15%;
+  --row3-area4-width: 10%;
   /* Mixer icon */
   --row3-area5-width: 10%;
   /* Mute drummer icon */
@@ -822,6 +822,9 @@ body {
   user-select: none !important;
   /* Prevent text selection */
   -webkit-user-select: none !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
   white-space: nowrap;
@@ -1245,6 +1248,8 @@ body {
   /* 25% larger than 60px */
   height: 75px;
   /* 25% larger than 60px */
+  flex-shrink: 0;
+  /* Prevent shrinking */
   background: transparent;
   border: none;
   color: var(--text-icon);
@@ -1277,12 +1282,13 @@ body {
   padding: 0;
 }
 
-/* Kit dropdown - styled like presets dropdown but 20% larger */
+/* Kit dropdown - styled like presets dropdown but wider for longer names */
 .kit-dropdown {
   position: relative;
-  width: 100%;
-  max-width: 420px;
-  /* 20% larger than presets (350px) */
+  flex: 1;
+  /* Take available space between chevrons */
+  min-width: 0;
+  /* Allow shrinking if needed */
   font-family: "Playfair Display", serif;
   user-select: none;
   -webkit-user-select: none;
@@ -1296,11 +1302,12 @@ body {
   font-size: 58px;
   /* 20% larger than 48px */
   font-weight: 400;
-  padding: 0 15px;
+  padding: 0 5px;
+  /* Reduced padding to get text closer to chevrons */
   cursor: pointer !important;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   transition: all 0.2s ease;
   user-select: none !important;
   -webkit-user-select: none !important;
@@ -2261,12 +2268,13 @@ body {
 .row3-area-3 {
   flex: 0 0 var(--row3-area3-width);
   display: flex;
-  align-items: flex-start;
-  /* Top-align dropdown and chevrons */
+  align-items: center;
+  /* Center-align dropdown and chevrons vertically */
   justify-content: center;
-  gap: 10px;
-  padding-top: 5px;
-  /* Small top padding */
+  gap: 5px;
+  /* Reduced gap for tighter spacing */
+  overflow: hidden;
+  /* Prevent overflow */
 }
 
 .row3-area-4 {
