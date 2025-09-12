@@ -572,22 +572,22 @@ class OTTOAccurateInterface {
         this.savePatternGroups();
         debugLog("Saved pattern groups");
         // Clear pattern group dirty flag
-        this.setDirty("patternGroup", false);
+        this.// setDirty("patternGroup" - removed, groups have no state, false);
         // Also clear pattern flag since patterns are saved with groups
-        this.setDirty("pattern", false);
+        this.setDirty("player", false);
         break;
 
       case "drumkits":
         this.saveDrumkits();
         debugLog("Saved drumkits");
-        this.setDirty("drumkit", false);
+        this.setDirty("player", false);
         break;
 
       case "pattern":
         // Save pattern (part of pattern group)
         this.savePatternGroups();
         debugLog("Saved patterns");
-        this.setDirty("pattern", false);
+        this.setDirty("player", false);
         break;
 
       default:
@@ -3098,7 +3098,7 @@ class OTTOAccurateInterface {
       };
 
       // Mark as dirty but don't auto-save
-      this.setDirty("patternGroup", true);
+      this.// setDirty("patternGroup" - removed, groups have no state, true);
 
       // Update dropdown
       this.updatePatternGroupDropdown();
@@ -3173,7 +3173,7 @@ class OTTOAccurateInterface {
         });
 
         // Mark as dirty
-        this.setDirty("patternGroup", true);
+        this.// setDirty("patternGroup" - removed, groups have no state, true);
 
         // Update the dropdown selected text if this is the current group
         const groupSelected = document.getElementById("group-selected");
@@ -3255,7 +3255,7 @@ class OTTOAccurateInterface {
     e.currentTarget.dataset.pattern = patternKey;
 
     // Mark pattern as dirty (will cascade up to patternGroup, player, and preset)
-    this.setDirty("pattern", true);
+    this.setDirty("player", true);
   }
 
   filterPatterns(searchTerm) {
@@ -3949,7 +3949,7 @@ class OTTOAccurateInterface {
   saveDrumkits() {
     // Use safe wrapper with error handling
     this.safeLocalStorageSet("ottoDrumkits", this.drumkits);
-    this.setDirty("drumkit", false);
+    this.setDirty("player", false);
   }
 
   getDrumkitMixerPreset(kitName) {
@@ -3964,7 +3964,7 @@ class OTTOAccurateInterface {
   setDrumkitMixerPreset(kitName, presetName) {
     if (this.drumkits && this.drumkits[kitName]) {
       this.drumkits[kitName].selectedMixerPreset = presetName;
-      this.setDirty("drumkit", true);
+      this.setDirty("player", true);
       // Don't auto-save, wait for user to click save button
     }
   }
@@ -4264,7 +4264,7 @@ class OTTOAccurateInterface {
         newGroupInput.value = "";
 
         // Mark as dirty but don't auto-save
-        this.setDirty("patternGroup", true);
+        this.// setDirty("patternGroup" - removed, groups have no state, true);
 
         // Update both dropdowns
         this.updateEditorGroupDropdown();
@@ -4490,14 +4490,14 @@ class OTTOAccurateInterface {
       }
 
       // Mark as dirty but don't auto-save
-      this.setDirty("patternGroup", true);
+      this.// setDirty("patternGroup" - removed, groups have no state, true);
     }
   }
 
   savePatternGroups() {
     // Use safe wrapper with error handling
     this.safeLocalStorageSet("ottoPatternGroups", this.patternGroups);
-    this.setDirty("patternGroup", false);
+    this.// setDirty("patternGroup" - removed, groups have no state, false);
   }
 
   updateMainPatternGrid(patterns) {
@@ -4965,9 +4965,9 @@ class OTTOAccurateInterface {
         // Clear all dirty flags since we just loaded a preset
         this.setDirty("preset", false);
         this.setDirty("player", false);
-        this.setDirty("drumkit", false);
-        this.setDirty("patternGroup", false);
-        this.setDirty("pattern", false);
+        this.setDirty("player", false);
+        this.// setDirty("patternGroup" - removed, groups have no state, false);
+        this.setDirty("player", false);
       }
     });
   }
@@ -7060,7 +7060,7 @@ class OTTOAccurateInterface {
         this.playerStates[this.currentPlayer].kitName = kitName;
         this.onKitChanged(this.currentPlayer, kitName);
         this.setDirty("preset", true); // Mark preset dirty when kit changes
-        this.setDirty("drumkit", true); // Mark drumkit dirty too
+        this.setDirty("player", true); // Mark drumkit dirty too
 
         debugLog(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
@@ -7188,7 +7188,7 @@ class OTTOAccurateInterface {
         this.playerStates[this.currentPlayer].kitName = kitName;
         this.onKitChanged(this.currentPlayer, kitName);
         this.setDirty("preset", true);
-        this.setDirty("drumkit", true);
+        this.setDirty("player", true);
 
         debugLog(`Player ${this.currentPlayer} kit changed to: ${kitName}`);
       };
@@ -8618,7 +8618,7 @@ class OTTOAccurateInterface {
 
   onKitChanged(playerNumber, kitName) {
     // Mark drumkit as dirty (will cascade to player and preset)
-    this.setDirty("drumkit", true);
+    this.setDirty("player", true);
 
     if (window.juce?.onKitChanged) {
       window.juce.onKitChanged(playerNumber, kitName);
@@ -8688,7 +8688,7 @@ class OTTOAccurateInterface {
     this.playerStates[playerNumber].patternGroup = groupName;
 
     // Mark patternGroup as dirty (will cascade to player and preset)
-    this.setDirty("patternGroup", true);
+    this.// setDirty("patternGroup" - removed, groups have no state, true);
 
     // Update the pattern grid if this is the current player
     if (playerNumber === this.currentPlayer) {
