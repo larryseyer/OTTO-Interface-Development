@@ -43,7 +43,7 @@ class ResourcePool {
       reset: (elem) => {
         elem.className = "";
         elem.innerHTML = "";
-        elem.style.cssText = "";
+        elem.style.cssText = ""; // Clear all inline styles for reuse
         elem.onclick = null;
         elem.onmouseover = null;
         elem.onmouseout = null;

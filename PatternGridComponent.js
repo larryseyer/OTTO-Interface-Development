@@ -79,15 +79,13 @@ class PatternGridComponent extends UIComponent {
    * Render pattern grid
    */
   render() {
-    const gridStyle = `
-      grid-template-columns: repeat(${this.columns}, ${this.cellSize}px);
-      grid-template-rows: repeat(${this.rows}, ${this.cellSize}px);
-      gap: ${this.spacing}px;
-    `;
-
     return `
       <div class="pattern-grid-container" tabindex="0" role="grid">
-        <div class="pattern-grid" style="${gridStyle}">
+        <div class="pattern-grid" 
+             data-columns="${this.columns}" 
+             data-rows="${this.rows}"
+             data-cell-size="${this.cellSize}"
+             data-spacing="${this.spacing}">
           ${this.renderCells()}
         </div>
         ${this.showPreview ? this.renderPreview() : ""}

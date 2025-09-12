@@ -9328,20 +9328,8 @@ class OTTOAccurateInterface {
     // Calculate position based on existing notifications
     const topOffset = 20 + (this.activeNotifications.length * 60); // 60px spacing between notifications
     
-    notification.style.cssText = `
-            position: fixed;
-            top: ${topOffset}px;
-            right: 20px;
-            padding: 12px 20px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            z-index: 2000;
-            font-family: 'Playfair Display', serif;
-            animation: fadeIn 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        `;
+    // Set top position dynamically
+    notification.style.top = `${topOffset}px`;
 
     document.body.appendChild(notification);
     this.activeNotifications.push(notification);

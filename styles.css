@@ -4318,3 +4318,271 @@ body {
   font-size: 10px;
   font-weight: 600;
 }
+
+/* ===== Inline Styles Moved to CSS ===== */
+
+/* Hidden file input for settings import */
+.hidden-file-input {
+  display: none;
+}
+
+/* Store error message */
+.store-error-message {
+  display: none;
+}
+
+.store-error-message.visible {
+  display: block;
+}
+
+/* Store error button */
+.open-store-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Preset factory reset button */
+.preset-factory-reset-btn {
+  background-color: #8b0000;
+}
+
+/* Preset lock indicator */
+.preset-lock-indicator {
+  display: none;
+  margin-left: 8px;
+}
+
+.preset-lock-indicator.visible {
+  display: inline-block;
+}
+
+/* Play/Pause button icons */
+.play-icon {
+  display: none;
+}
+
+.pause-icon {
+  display: block;
+}
+
+.playing .play-icon {
+  display: block;
+}
+
+.playing .pause-icon {
+  display: none;
+}
+
+/* Player save button */
+.player-save-btn {
+  display: none;
+}
+
+.player-save-btn.visible {
+  display: flex;
+}
+
+/* Group delete button */
+.group-delete-btn {
+  display: none;
+}
+
+.edit-mode .group-delete-btn {
+  display: flex;
+}
+
+/* Debug panel */
+.debug-panel {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #00ff00;
+  padding: 15px;
+  color: #00ff00;
+  font-family: monospace;
+  font-size: 12px;
+  max-width: 300px;
+  z-index: 10000;
+  display: none;
+}
+
+.debug-panel.visible {
+  display: block;
+}
+
+.debug-panel h4 {
+  margin: 0 0 10px 0;
+}
+
+.debug-panel button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background: #333;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  cursor: pointer;
+}
+
+/* Notification styles */
+.notification {
+  position: fixed;
+  padding: 12px 20px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  z-index: 2000;
+  font-family: 'Playfair Display', serif;
+  animation: fadeIn 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  right: 20px;
+}
+
+.notification.success {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.notification.error {
+  border-color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.notification.warning {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+
+.notification.info {
+  border-color: #2196F3;
+  background: rgba(33, 150, 243, 0.1);
+}
+
+/* Pattern grid dynamic styles */
+.pattern-grid {
+  display: grid;
+}
+
+/* Dynamic grid sizing using CSS custom properties */
+.pattern-grid[data-columns="4"] {
+  grid-template-columns: repeat(4, var(--cell-size, 40px));
+}
+.pattern-grid[data-columns="8"] {
+  grid-template-columns: repeat(8, var(--cell-size, 40px));
+}
+.pattern-grid[data-columns="16"] {
+  grid-template-columns: repeat(16, var(--cell-size, 40px));
+}
+
+.pattern-grid[data-rows="4"] {
+  grid-template-rows: repeat(4, var(--cell-size, 40px));
+}
+.pattern-grid[data-rows="8"] {
+  grid-template-rows: repeat(8, var(--cell-size, 40px));
+}
+
+.pattern-grid[data-spacing="2"] {
+  gap: 2px;
+}
+.pattern-grid[data-spacing="4"] {
+  gap: 4px;
+}
+
+/* Slider dynamic styles */
+.slider-fill {
+  position: absolute;
+  background: var(--accent-color);
+  transition: all 0.2s ease;
+}
+
+.slider-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent-color);
+  border-radius: 50%;
+  cursor: pointer;
+  transform: translateX(-50%);
+  transition: all 0.2s ease;
+}
+
+.slider-tick {
+  position: absolute;
+  width: 1px;
+  height: 4px;
+  background: var(--border-color);
+}
+
+/* Vertical slider adjustments */
+.slider.vertical .slider-fill {
+  width: 100%;
+  bottom: 0;
+}
+
+.slider.vertical .slider-thumb {
+  transform: translateY(50%);
+}
+
+.slider.horizontal .slider-fill {
+  height: 100%;
+  left: 0;
+}
+
+/* Utility classes for dynamic show/hide */
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: block !important;
+}
+
+.flex-visible {
+  display: flex !important;
+}
+
+.inline-block-visible {
+  display: inline-block !important;
+}
+
+.pointer-events-none {
+  pointer-events: none !important;
+}
+
+.pointer-events-auto {
+  pointer-events: auto !important;
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}

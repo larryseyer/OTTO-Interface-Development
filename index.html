@@ -169,7 +169,7 @@
               <i class="ph-thin ph-upload"></i>
               <span>Import Settings from File</span>
             </button>
-            <input type="file" id="settings-import-input" accept=".json" style="display: none;">
+            <input type="file" id="settings-import-input" accept=".json" class="hidden-file-input">
             <p class="settings-description">
               Load settings and presets from a previously exported JSON file.
             </p>
@@ -221,18 +221,10 @@
           Loading store...
         </div>
         <iframe id="store-iframe" class="store-iframe" src="" title="OTTO Online Store"></iframe>
-        <div class="store-error-message" id="store-error" style="display: none">
+        <div class="store-error-message" id="store-error">
           <p>Unable to load the store in this window.</p>
           <p>The store will open in a new tab instead.</p>
-          <button class="open-store-btn" onclick="window.open('https://LarrySeyer.com', '_blank')" style="
-                margin-top: 20px;
-                padding: 10px 20px;
-                background: var(--button-face);
-                color: var(--text-primary);
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-              ">
+          <button class="open-store-btn" onclick="window.open('https://LarrySeyer.com', '_blank')">
             Open Store in New Tab
           </button>
         </div>
@@ -257,7 +249,7 @@
             <i class="ph-thin ph-arrow-counter-clockwise"></i>
             <span>Undo</span>
           </button>
-          <button class="preset-action-btn" id="preset-factory-reset-btn" style="background-color: #8b0000">
+          <button class="preset-action-btn preset-factory-reset-btn" id="preset-factory-reset-btn">
             <i class="ph-thin ph-arrow-clockwise"></i>
             <span>Reset Default</span>
           </button>
@@ -291,11 +283,7 @@
           <div class="custom-dropdown" id="preset-dropdown">
             <div class="dropdown-selected" id="preset-selected">
               <span class="dropdown-text">Default</span>
-              <i class="ph-thin ph-lock preset-lock-indicator" id="preset-lock-indicator" style="
-                    display: none;
-                    margin-left: 8px;
-                    color: var(--text-icon);
-                  "></i>
+              <i class="ph-thin ph-lock preset-lock-indicator" id="preset-lock-indicator"></i>
             </div>
             <div class="dropdown-options" id="preset-options">
               <div class="dropdown-option" data-value="default">Default</div>
@@ -308,7 +296,7 @@
         <!-- Area 3: Play/Pause Transport (centered) -->
         <div class="row1-area3">
           <button class="play-pause-btn" id="play-pause-btn">
-            <i class="ph-thin ph-play play-icon" style="display: none"></i>
+            <i class="ph-thin ph-play play-icon"></i>
             <i class="ph-thin ph-pause pause-icon"></i>
           </button>
         </div>
@@ -390,7 +378,7 @@
           <button class="kit-mixer-btn" id="kit-mixer-btn">
             <i class="ph-thin ph-faders"></i>
           </button>
-          <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player" style="display: none">
+          <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player">
             <i class="ph-thin ph-floppy-disk"></i>
           </button>
         </div>
@@ -433,7 +421,7 @@
           </div>
           <!-- Left Area 3: Delete button (only shows in edit mode) -->
           <div class="row4-left-area3">
-            <button class="group-delete-btn" id="group-delete-btn" style="display: none">
+            <button class="group-delete-btn" id="group-delete-btn">
               <i class="ph-thin ph-trash"></i>
             </button>
           </div>
@@ -580,22 +568,10 @@
   <!-- Load original script with new managers available -->
   <script src="script.js"></script>
   <!-- Debug panel for Phase 1 testing -->
-  <div id="debug-panel" style="
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 10px;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 11px;
-        max-width: 300px;
-        display: none;
-      ">
-    <h4 style="margin: 0 0 10px 0">Phase 1 Debug Info</h4>
+  <div id="debug-panel" class="debug-panel">
+    <h4>Phase 1 Debug Info</h4>
     <div id="debug-content"></div>
-    <button onclick="toggleDebugMode()" style="margin-top: 10px; padding: 5px 10px">
+    <button onclick="toggleDebugMode()">
       Toggle Debug Mode
     </button>
   </div>
