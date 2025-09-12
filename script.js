@@ -1,9 +1,15 @@
 /**
  * OTTO - Organic Timing Trigger Orchestrator
- * Accurate Web Interface JavaScript (6-Row Layout)
+ * UI/UX Template for JUCE 8 Native Implementation
  * (c) Automagic Art Inc.
  * Larry Seyer - https://LarrySeyer.com
  *
+ * IMPORTANT: This is a UI TEMPLATE ONLY
+ * - This does NOT connect to JUCE or any backend
+ * - This is a standalone web prototype for UI/UX design
+ * - The actual OTTO app will be built natively in JUCE 8
+ * - This serves as a visual and behavioral reference for JUCE developers
+ * 
  * Based on actual HISE interface screenshot with correct 6-row structure
  */
 
@@ -2656,6 +2662,8 @@ class OTTOAccurateInterface {
     const savedState = this.loadAppStateFromStorage();
 
     if (savedState) {
+      debugLog("Found saved state:", savedState);
+      
       // Apply saved state with validation
       if (
         savedState.currentPlayer &&
@@ -2680,9 +2688,13 @@ class OTTOAccurateInterface {
       }
       if (savedState.currentPreset) {
         this.currentPreset = savedState.currentPreset;
+        debugLog("Restored currentPreset:", this.currentPreset);
       }
       if (typeof savedState.isPlaying === "boolean") {
         this.isPlaying = savedState.isPlaying;
+      }
+      if (typeof savedState.loopPosition === "number") {
+        this.loopPosition = savedState.loopPosition;
       }
 
       debugLog("App state restored from storage");
@@ -2723,9 +2735,12 @@ class OTTOAccurateInterface {
         currentPlayer: this.currentPlayer,
         tempo: this.tempo,
         numberOfPlayers: this.numberOfPlayers,
+        isPlaying: this.isPlaying,  // ADD: Save play/pause state
+        loopPosition: this.loopPosition,  // ADD: Save loop position
         version: this.version,
       };
       this.safeLocalStorageSet("ottoAppState", appState);
+      debugLog("App state saved:", appState);
     } finally {
       // Always clear the flag
       this.isParentOperation = false;
@@ -2734,7 +2749,8 @@ class OTTOAccurateInterface {
 
   loadAppStateFromStorage() {
     // Use safe wrapper with error handling and validation
-    return this.safeLocalStorageGet("otto_app_state", null);
+    // FIX: Use the same key as saveAppStateToStorage uses
+    return this.safeLocalStorageGet("ottoAppState", null);
   }
 
   createPresetFromCurrentState(name) {
@@ -4929,6 +4945,63 @@ class OTTOAccurateInterface {
     });
   }
 
+  /**
+   * Load the last used preset on startup
+   * This is called after all initialization is complete
+   */
+  loadLastUsedPreset() {
+    debugLog("loadLastUsedPreset called");
+    debugLog("Current preset:", this.currentPreset);
+    debugLog("Available presets:", Object.keys(this.presets || {}));
+    
+    // Set a flag to bypass lock checking during initial preset load
+    this.bypassLockCheck = true;
+    
+    // Check if we have a saved current preset
+    if (this.currentPreset && this.presets && this.presets[this.currentPreset]) {
+      debugLog(`Loading last used preset: ${this.currentPreset}`);
+      
+      // Load the preset
+      this.loadPreset(this.currentPreset)
+        .then(() => {
+          debugLog(`Successfully loaded preset: ${this.currentPreset}`);
+          this.bypassLockCheck = false;
+        })
+        .catch((error) => {
+          debugError("Failed to load last used preset:", error);
+          this.bypassLockCheck = false;
+          // If loading fails, try to load the default preset
+          if (this.currentPreset !== 'default' && this.presets['default']) {
+            debugLog("Falling back to default preset");
+            this.bypassLockCheck = true;
+            this.loadPreset('default')
+              .then(() => {
+                this.bypassLockCheck = false;
+              })
+              .catch((err) => {
+                debugError("Failed to load default preset:", err);
+                this.bypassLockCheck = false;
+              });
+          }
+        });
+    } else if (this.presets && this.presets['default']) {
+      // No saved preset, load default
+      debugLog("No saved preset found, loading default");
+      this.loadPreset('default')
+        .then(() => {
+          debugLog("Successfully loaded default preset");
+          this.bypassLockCheck = false;
+        })
+        .catch((error) => {
+          debugError("Failed to load default preset:", error);
+          this.bypassLockCheck = false;
+        });
+    } else {
+      debugWarn("No presets available to load");
+      this.bypassLockCheck = false;
+    }
+  }
+
   deletePreset(key) {
     if (key === "default") {
       return; // Can't delete default
@@ -5942,17 +6015,13 @@ class OTTOAccurateInterface {
       // Initialize UI for saved or default player
       this.updateUIForCurrentPlayer();
 
-      // Defer preset loading to avoid race condition
-      // Use setTimeout to allow initialization to complete first
-      if (this.currentPreset && this.presets[this.currentPreset]) {
-        setTimeout(() => {
-          if (!this.isDestroyed) {
-            this.loadPreset(this.currentPreset).catch((error) => {
-              debugError("Failed to load initial preset:", error);
-            });
-          }
-        }, 100); // Small delay to ensure everything is initialized
-      }
+      // Load the last used preset after all initialization is complete
+      // This ensures presets are loaded and UI is ready
+      setTimeout(() => {
+        if (!this.isDestroyed) {
+          this.loadLastUsedPreset();
+        }
+      }, 100); // Small delay to ensure everything is initialized
 
       // Update play/pause button to match saved state
       this.updatePlayPauseButton();
@@ -7422,7 +7491,26 @@ class OTTOAccurateInterface {
 
     debugLog("Populating kit dropdown with drumkits:", this.drumkits);
 
-    // Clear existing options
+    // Check if we actually need to repopulate (only if kits have changed)
+    const currentOptions = kitOptionsContainer.querySelectorAll(".dropdown-option");
+    const currentKitCount = currentOptions.length;
+    const newKitCount = Object.keys(this.drumkits || {}).length;
+    
+    // If the number of kits hasn't changed and we have options, just update selection
+    if (currentKitCount === newKitCount && currentKitCount > 0) {
+      // Just update the selected state
+      currentOptions.forEach((option) => {
+        const kitName = option.textContent;
+        if (kitName === this.playerStates[this.currentPlayer].kitName) {
+          option.classList.add("selected");
+        } else {
+          option.classList.remove("selected");
+        }
+      });
+      return;
+    }
+
+    // Clear existing options only if we need to rebuild
     kitOptionsContainer.innerHTML = "";
 
     // Add all available kits from this.drumkits
@@ -9716,6 +9804,11 @@ class OTTOAccurateInterface {
   // Check if operation can proceed
   canProceedWithOperation(operation) {
     if (this.isDestroyed) return false;
+    
+    // Allow bypassing lock check during initial preset load
+    if (this.bypassLockCheck && operation === "preset-load") {
+      return true;
+    }
 
     // Check if there's a conflicting operation in progress
     const conflictingOps = {
