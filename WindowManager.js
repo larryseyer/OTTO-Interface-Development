@@ -247,7 +247,8 @@ class WindowManager {
       },
     });
 
-    // Dropdowns
+    // Dropdowns - DISABLED: Conflicts with manual event handling in script.js
+    /*
     this.registerWindow("dropdown", "preset", {
       element: "preset-dropdown",
       triggerButton: "preset-selected",
@@ -274,6 +275,7 @@ class WindowManager {
       activeClass: "open",
       clickOutsideClose: true,
     });
+    */
 
     // Special overlays
     this.registerWindow("overlay", "splash", {
