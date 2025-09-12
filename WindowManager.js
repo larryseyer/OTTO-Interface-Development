@@ -163,13 +163,13 @@ class WindowManager {
       },
     });
 
-    // Partial-height panels
+    // Full-screen mixer panel
     this.registerWindow("panel", "mixer", {
       element: "mixer-panel",
       triggerButton: "kit-mixer-btn",
       closeButton: "mixer-panel-close",
-      mutexGroup: "partialHeightPanels",
-      cssClass: "slide-up-panel partial-height-panel",
+      mutexGroup: "fullHeightPanels",
+      cssClass: "slide-up-panel full-height-panel",
       activeClass: "active",
       buttonActiveClass: "panel-active",
       onOpen: () => {
@@ -180,6 +180,11 @@ class WindowManager {
         );
         if (kitName && selectedKit) {
           kitName.textContent = selectedKit.textContent;
+        }
+        
+        // Load current kit mixer settings
+        if (this.otto.mixerComponent) {
+          this.otto.mixerComponent.loadCurrentKitMixer();
         }
       },
     });
@@ -723,8 +728,9 @@ class WindowManager {
    * Initialize the WindowManager
    */
   init() {
-    // Don't setup button click listeners - OTTO interface handles those
-    // But do setup ESC key handler for closing windows
+    // Setup event listeners for close buttons and other window controls
+    this.setupEventListeners();
+    // Also setup ESC key handler for closing windows
     this.setupEscapeKey();
     console.log(
       "WindowManager initialized with",

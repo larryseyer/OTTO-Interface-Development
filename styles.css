@@ -3697,3 +3697,556 @@ body {
   color: var(--text-primary);
   /* Only change icon color to white */
 }
+
+/* Mixer Component Styles */
+#mixer-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  background: var(--bg-primary);
+  border: 3px solid #555; /* Light grey outer border */
+  box-shadow: inset 0 0 0 1px #222; /* Dark inner border */
+  box-sizing: border-box;
+  z-index: 9999;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+#mixer-panel.active {
+  transform: translateY(0);
+}
+
+#mixer-panel .panel-header {
+  position: relative;
+  height: 60px;
+  min-height: 60px;
+  background: linear-gradient(180deg, #444 0%, #333 100%);
+  border-bottom: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+#mixer-panel .panel-header h2 {
+  color: #fff;
+  font-size: 18px;
+  margin: 0;
+}
+
+#mixer-panel .panel-close-btn {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+#mixer-panel .panel-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.mixer-container {
+  width: 100%;
+  height: calc(720px - 60px - 4px); /* Account for panel border (2px top + 2px bottom) */
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
+  padding: 15px 20px;
+  box-sizing: border-box;
+}
+
+.mixer-channels-wrapper {
+  display: flex;
+  gap: 10px;
+  min-width: max-content;
+  height: 100%;
+}
+
+.mixer-channel-strip {
+  display: flex;
+  flex-direction: column;
+  width: 85px;
+  height: 590px; /* Further reduced to ensure everything fits */
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 8px 5px;
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.mixer-channel-strip.implicit-mute {
+  opacity: 0.5;
+}
+
+.channel-label {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* FX Insert Section */
+.channel-fx-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+
+.fx-insert-btn {
+  background: linear-gradient(180deg, #555 0%, #333 100%);
+  border: 1px solid #000;
+  border-radius: 2px;
+  color: #777;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 4px 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fx-insert-btn:hover {
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  color: #999;
+}
+
+.fx-insert-btn.active {
+  background: linear-gradient(180deg, #4a90e2 0%, #2a70c2 100%);
+  color: #fff;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+.channel-fx-spacer {
+  height: 60px; /* Match height of 2x2 FX buttons grid with padding */
+  margin-bottom: 10px; /* Match fx-section margin */
+}
+
+/* Send Controls */
+.channel-sends-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+
+.send-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.send-label {
+  font-size: 9px;
+  color: #777;
+  margin-bottom: 2px;
+}
+
+.send-knob {
+  width: 24px;
+  height: 24px;
+  background: radial-gradient(circle at 30% 30%, #666, #333);
+  border: 1px solid #000;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.send-knob::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 10px;
+  background: #fff;
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.send-value {
+  font-size: 8px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.channel-sends-spacer {
+  height: 100px; /* Match height of 2x2 send knobs grid with labels */
+  margin-bottom: 10px; /* Match sends-section margin */
+}
+
+/* Pan Control */
+.channel-pan-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pan-knob {
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle at 30% 30%, #777, #444);
+  border: 2px solid #222;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 -1px 2px rgba(0,0,0,0.5);
+}
+
+.pan-knob::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(180deg, #fff 0%, #ccc 100%);
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.pan-value {
+  font-size: 10px;
+  color: #aaa;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+/* Solo/Mute Buttons */
+.channel-buttons-section {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.channel-solo-btn,
+.channel-mute-btn {
+  flex: 1;
+  padding: 5px;
+  background: linear-gradient(180deg, #555 0%, #333 100%);
+  border: 1px solid #000;
+  border-radius: 3px;
+  color: #777;
+  font-weight: bold;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.channel-solo-btn:hover,
+.channel-mute-btn:hover {
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  color: #999;
+}
+
+.channel-solo-btn.active {
+  background: linear-gradient(180deg, #f39c12 0%, #e67e22 100%);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(243, 156, 18, 0.6);
+}
+
+.channel-mute-btn.active {
+  background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+  color: #fff;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+/* Fader Section */
+.channel-fader-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  max-height: 280px;
+  position: relative;
+  padding: 10px 0;
+}
+
+/* Fader top plate */
+.channel-fader-section::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55px;
+  height: 8px;
+  background: linear-gradient(180deg, #666 0%, #444 100%);
+  border: 1px solid #000;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 -1px 3px rgba(0,0,0,0.5);
+}
+
+/* Fader bottom plate */
+.channel-fader-section::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55px;
+  height: 8px;
+  background: linear-gradient(180deg, #444 0%, #666 100%);
+  border: 1px solid #000;
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.fader-track {
+  width: 45px;
+  height: 240px; /* Increased to fill available space */
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 1px solid #000;
+  border-radius: 2px;
+  position: relative;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+}
+
+.fader-track::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    #333 10%, 
+    #333 90%, 
+    transparent 100%);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Fader bottom plate */
+.fader-track::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: -5px;
+  right: -5px;
+  height: 8px;
+  background: linear-gradient(180deg, #555 0%, #333 100%);
+  border: 1px solid #000;
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.fader-thumb {
+  position: absolute;
+  width: 41px;
+  height: 24px;
+  background: linear-gradient(180deg, #aaa 0%, #666 50%, #555 100%);
+  border: 1px solid #000;
+  border-radius: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  cursor: grab;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.fader-thumb:active {
+  cursor: grabbing;
+  background: linear-gradient(180deg, #bbb 0%, #777 50%, #666 100%);
+}
+
+.fader-thumb::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 1px;
+  background: #333;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 0 #333, 0 -2px 0 #333;
+}
+
+.fader-value {
+  margin-top: 8px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+  border: 1px solid #000;
+  border-radius: 3px;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* FX Windows */
+.fx-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
+  border: 2px solid #000;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  display: none;
+  z-index: 10000;
+}
+
+.fx-window.active {
+  display: block;
+}
+
+.fx-window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: linear-gradient(180deg, #444 0%, #333 100%);
+  border-bottom: 1px solid #000;
+  border-radius: 8px 8px 0 0;
+  cursor: move;
+}
+
+.fx-window-header h3 {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.fx-window-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fx-window-close:hover {
+  color: #fff;
+}
+
+.fx-window-body {
+  padding: 20px;
+}
+
+/* FX Control Layouts */
+.fx-eq-controls,
+.fx-gate-controls,
+.fx-comp-controls,
+.fx-sat-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.fx-eq-controls {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.eq-band,
+.fx-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.eq-band label,
+.fx-control label {
+  color: #aaa;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.eq-slider,
+.gate-slider,
+.comp-slider,
+.sat-slider {
+  width: 60px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 100px;
+  background: transparent;
+  outline: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+.fx-control input[type="range"] {
+  width: 200px;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #222;
+  outline: none;
+  border-radius: 3px;
+}
+
+.fx-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle at 30% 30%, #888, #555);
+  border: 1px solid #000;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.fx-control input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle at 30% 30%, #888, #555);
+  border: 1px solid #000;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.eq-band span,
+.fx-control span {
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}

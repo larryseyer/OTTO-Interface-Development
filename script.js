@@ -46,6 +46,9 @@ class OTTOAccurateInterface {
 
     // Initialize Window Manager
     this.windowManager = new WindowManager(this);
+    
+    // Initialize Mixer Component
+    this.mixerComponent = null; // Will be initialized after drumkit manager
 
     this.maxPlayers = 8; // Maximum possible players
     this.numberOfPlayers = 4; // Default active players (configurable 4-8)
@@ -3860,7 +3863,11 @@ class OTTOAccurateInterface {
 
   // Drumkit Management Methods
   async loadDrumkits() {
-    // Load saved drumkits from localStorage with error handling
+    // Initialize the DrumkitManager
+    this.drumkitManager = new DrumkitManager();
+    await this.drumkitManager.initialize();
+    
+    // Load saved drumkits from localStorage with error handling for backward compatibility
     const savedDrumkits = this.safeLocalStorageGet("ottoDrumkits", null);
     if (savedDrumkits) {
       this.drumkits = savedDrumkits;
@@ -6021,6 +6028,12 @@ class OTTOAccurateInterface {
       this.initializeMidiRegistry(); // Initialize MIDI file registry
       this.ensureAllMidiFilesAssigned(); // Ensure all MIDI files have groups
       await this.loadDrumkits(); // Load drumkit manager
+      
+      // Initialize Mixer Component after drumkit manager is loaded
+      if (this.drumkitManager) {
+        this.mixerComponent = new MixerComponent(this);
+      }
+      
       this.setupVersion();
       this.setupSplashScreen();
       this.setupPlayerTabs();
@@ -7588,8 +7601,15 @@ class OTTOAccurateInterface {
       return;
     }
 
-    // Get kits dynamically from the drumkits object
-    const kits = Object.values(this.drumkits).map(kit => kit.name).sort();
+    // Get kits dynamically from the drumkits object or use defaults
+    let kits = [];
+    if (this.drumkits && Object.keys(this.drumkits).length > 0) {
+      kits = Object.values(this.drumkits).map(kit => kit.name).sort();
+    } else {
+      // Fallback to default kit names
+      kits = ['Acoustic', 'Electronic', 'Vintage', 'Modern', 'Jazz', 'Rock'];
+    }
+    
     const state = this.playerStates[this.currentPlayer];
 
     // Validate current kit name
@@ -8114,6 +8134,11 @@ class OTTOAccurateInterface {
         this.playerStates[this.currentPlayer].sliderValues[param] = value;
         this.onSliderChanged(this.currentPlayer, param, value);
         this.setDirty("preset", true);
+        
+        // Update mixer master fader if this is the volume slider
+        if (param === 'volume' && this.mixerComponent) {
+          this.mixerComponent.updateMixerMasterFromMainVolume(value);
+        }
 
         // Check if this player is a master and propagate value
         if (this.linkStates && this.linkStates[param]) {
@@ -9410,6 +9435,12 @@ class OTTOAccurateInterface {
 
     // Clear drumkits
     this.drumkits = null;
+    
+    // Destroy mixer component
+    if (this.mixerComponent) {
+      this.mixerComponent.destroy();
+      this.mixerComponent = null;
+    }
 
     // Clear presets
     this.presets = null;

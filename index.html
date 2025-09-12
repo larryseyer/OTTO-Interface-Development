@@ -21,6 +21,7 @@
   <script src="PlayerStateManager.js"></script>
   <script src="PatternGroupManager.js"></script>
   <script src="DrumkitManager.js"></script>
+  <script src="MixerComponent.js"></script>
   <script src="PresetManager.js"></script>
   <script src="LinkManager.js"></script>
   <script src="StorageManager.js"></script>
@@ -67,7 +68,7 @@
       </div>
     </div>
     <!-- Mixer Panel - Slides up from bottom (rows 4-6) -->
-    <div id="mixer-panel" class="slide-up-panel partial-height-panel">
+    <div id="mixer-panel" class="slide-up-panel full-height-panel">
       <div class="panel-header">
         <h2>Kit Mixer: <span id="mixer-kit-name">Acoustic</span></h2>
         <button class="panel-close-btn" id="mixer-panel-close">
@@ -75,9 +76,9 @@
         </button>
       </div>
       <div class="panel-body">
-        <p class="panel-placeholder">
-          Mixer controls will be available here.
-        </p>
+        <div id="mixer-container" class="mixer-container">
+          <!-- Mixer channels will be dynamically inserted here -->
+        </div>
       </div>
     </div>
     <!-- Drum Kit Edit Panel - Slides up from bottom (rows 4-6) -->
