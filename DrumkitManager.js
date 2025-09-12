@@ -171,160 +171,160 @@ class DrumkitManager {
           pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 10, reverb1: 5, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: true, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         snare: {
-          level: 70,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 20, reverb1: 10, reverb2: 5, delay: 0 },
-          fx: { eq: true, gate: true, compressor: true, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         sideStick: {
-          level: 65,
-          pan: -10,
+          level: 75,
+          pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 15, reverb1: 8, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         hiHat: {
-          level: 65,
-          pan: -20,
+          level: 75,
+          pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 10, reverb1: 5, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         tom1: {
-          level: 70,
-          pan: -30,
+          level: 75,
+          pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 15, reverb1: 8, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: true, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         tom2: {
-          level: 70,
-          pan: -15,
+          level: 75,
+          pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 15, reverb1: 8, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: true, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         tom3: {
-          level: 70,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 15, reverb1: 8, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: true, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         tom4: {
-          level: 70,
-          pan: 15,
-          mute: false,
-          solo: false,
-          sends: { room: 15, reverb1: 8, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: true, compressor: false, saturation: false }
-        },
-        tom5: {
-          level: 70,
-          pan: 30,
-          mute: false,
-          solo: false,
-          sends: { room: 15, reverb1: 8, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: true, compressor: false, saturation: false }
-        },
-        crash1: {
-          level: 80,
-          pan: -40,
-          mute: false,
-          solo: false,
-          sends: { room: 25, reverb1: 15, reverb2: 10, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
-        },
-        crash2: {
-          level: 80,
-          pan: 40,
-          mute: false,
-          solo: false,
-          sends: { room: 25, reverb1: 15, reverb2: 10, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
-        },
-        crash3: {
-          level: 80,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 25, reverb1: 15, reverb2: 10, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
+        },
+        tom5: {
+          level: 75,
+          pan: 0,
+          mute: false,
+          solo: false,
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
+        },
+        crash1: {
+          level: 75,
+          pan: 0,
+          mute: false,
+          solo: false,
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
+        },
+        crash2: {
+          level: 75,
+          pan: 0,
+          mute: false,
+          solo: false,
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
+        },
+        crash3: {
+          level: 75,
+          pan: 0,
+          mute: false,
+          solo: false,
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         ride: {
           level: 75,
-          pan: 40,
+          pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 20, reverb1: 10, reverb2: 5, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         bell: {
-          level: 70,
-          pan: 35,
+          level: 75,
+          pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 15, reverb1: 20, reverb2: 10, delay: 5 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         splash: {
           level: 75,
-          pan: -25,
+          pan: 0,
           mute: false,
           solo: false,
-          sends: { room: 20, reverb1: 15, reverb2: 8, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         room: {
-          level: 30,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: true, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         reverb1: {
-          level: 40,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         reverb2: {
-          level: 35,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         delay: {
-          level: 30,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         },
         master: {
-          level: 85,
+          level: 75,
           pan: 0,
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: true, gate: false, compressor: true, saturation: true }
+          fx: { eq: false, gate: false, compressor: false, saturation: false }
         }
       }
     };
@@ -335,33 +335,33 @@ class DrumkitManager {
    */
   createLiveMixerPreset(name) {
     const preset = this.createDefaultMixerPreset(name);
-    
+
     // Adjust for live performance - more punch, presence, and room
-    preset.channels.kick.level = 85;
-    preset.channels.kick.fx.compressor = true;
-    preset.channels.kick.fx.gate = true;
-    
-    preset.channels.snare.level = 80;
-    preset.channels.snare.sends.room = 30;
-    preset.channels.snare.fx.compressor = true;
-    
-    preset.channels.hiHat.level = 60;
-    preset.channels.tom1.level = 75;
-    preset.channels.tom2.level = 75;
-    preset.channels.tom3.level = 75;
-    preset.channels.tom4.level = 75;
-    preset.channels.tom5.level = 75;
-    
-    preset.channels.crash1.level = 85;
-    preset.channels.crash2.level = 85;
-    preset.channels.crash3.level = 85;
-    preset.channels.ride.level = 70;
-    
-    preset.channels.room.level = 45;
-    preset.channels.reverb1.level = 35;
-    preset.channels.master.level = 90;
-    preset.channels.master.fx.compressor = true;
-    
+    // preset.channels.kick.level = 75;
+    // preset.channels.kick.fx.compressor = false;
+    // preset.channels.kick.fx.gate = false;
+
+    // preset.channels.snare.level = 80;
+    // preset.channels.snare.sends.room = 30;
+    // preset.channels.snare.fx.compressor = true;
+
+    // preset.channels.hiHat.level = 60;
+    // preset.channels.tom1.level = 75;
+    // preset.channels.tom2.level = 75;
+    // preset.channels.tom3.level = 75;
+    // preset.channels.tom4.level = 75;
+    // preset.channels.tom5.level = 75;
+
+    // preset.channels.crash1.level = 85;
+    // preset.channels.crash2.level = 85;
+    // preset.channels.crash3.level = 85;
+    // preset.channels.ride.level = 70;
+
+    // preset.channels.room.level = 45;
+    // preset.channels.reverb1.level = 35;
+    // preset.channels.master.level = 90;
+    // preset.channels.master.fx.compressor = true;
+
     return preset;
   }
 
@@ -370,37 +370,37 @@ class DrumkitManager {
    */
   createStudioMixerPreset(name) {
     const preset = this.createDefaultMixerPreset(name);
-    
+
     // Studio settings - balanced, clean, with subtle effects
-    preset.channels.kick.level = 72;
-    preset.channels.kick.sends.room = 5;
-    
-    preset.channels.snare.level = 68;
-    preset.channels.snare.sends.reverb1 = 15;
-    preset.channels.snare.fx.saturation = true;
-    
-    preset.channels.hiHat.level = 58;
-    preset.channels.hiHat.pan = -25;
-    
-    preset.channels.tom1.pan = -35;
-    preset.channels.tom2.pan = -20;
-    preset.channels.tom3.pan = 0;
-    preset.channels.tom4.pan = 20;
-    preset.channels.tom5.pan = 35;
-    
-    preset.channels.crash1.level = 75;
-    preset.channels.crash2.level = 75;
-    preset.channels.ride.level = 70;
-    preset.channels.ride.pan = 45;
-    
-    preset.channels.room.level = 25;
-    preset.channels.reverb1.level = 45;
-    preset.channels.reverb2.level = 30;
-    preset.channels.delay.level = 20;
-    
-    preset.channels.master.level = 80;
-    preset.channels.master.fx.saturation = true;
-    
+    // preset.channels.kick.level = 72;
+    // preset.channels.kick.sends.room = 5;
+
+    // preset.channels.snare.level = 68;
+    // preset.channels.snare.sends.reverb1 = 15;
+    // preset.channels.snare.fx.saturation = true;
+
+    // preset.channels.hiHat.level = 58;
+    // preset.channels.hiHat.pan = -25;
+
+    // preset.channels.tom1.pan = -35;
+    // preset.channels.tom2.pan = -20;
+    // preset.channels.tom3.pan = 0;
+    // preset.channels.tom4.pan = 20;
+    // preset.channels.tom5.pan = 35;
+
+    // preset.channels.crash1.level = 75;
+    // preset.channels.crash2.level = 75;
+    // preset.channels.ride.level = 70;
+    // preset.channels.ride.pan = 45;
+
+    // preset.channels.room.level = 25;
+    // preset.channels.reverb1.level = 45;
+    // preset.channels.reverb2.level = 30;
+    // preset.channels.delay.level = 20;
+
+    // preset.channels.master.level = 80;
+    // preset.channels.master.fx.saturation = true;
+
     return preset;
   }
 
@@ -409,39 +409,39 @@ class DrumkitManager {
    */
   createPunchyMixerPreset(name) {
     const preset = this.createDefaultMixerPreset(name);
-    
+
     // Punchy settings - aggressive compression, gating, and saturation
-    preset.channels.kick.level = 90;
-    preset.channels.kick.fx.compressor = true;
-    preset.channels.kick.fx.gate = true;
-    preset.channels.kick.fx.saturation = true;
-    preset.channels.kick.sends.room = 5;
-    
-    preset.channels.snare.level = 85;
-    preset.channels.snare.fx.compressor = true;
-    preset.channels.snare.fx.gate = true;
-    preset.channels.snare.fx.saturation = true;
-    preset.channels.snare.sends.room = 15;
-    
-    preset.channels.hiHat.level = 55;
-    preset.channels.hiHat.fx.compressor = true;
-    
-    // Toms with heavy processing
-    Object.keys(preset.channels).forEach(key => {
-      if (key.startsWith('tom')) {
-        preset.channels[key].level = 80;
-        preset.channels[key].fx.gate = true;
-        preset.channels[key].fx.compressor = true;
-        preset.channels[key].sends.room = 10;
-      }
-    });
-    
-    preset.channels.room.level = 20;
-    preset.channels.reverb1.level = 25;
-    preset.channels.master.level = 88;
-    preset.channels.master.fx.compressor = true;
-    preset.channels.master.fx.saturation = true;
-    
+    // preset.channels.kick.level = 90;
+    // preset.channels.kick.fx.compressor = true;
+    // preset.channels.kick.fx.gate = true;
+    // preset.channels.kick.fx.saturation = true;
+    // preset.channels.kick.sends.room = 5;
+
+    // preset.channels.snare.level = 85;
+    // preset.channels.snare.fx.compressor = true;
+    // preset.channels.snare.fx.gate = true;
+    // preset.channels.snare.fx.saturation = true;
+    // preset.channels.snare.sends.room = 15;
+
+    // preset.channels.hiHat.level = 55;
+    // preset.channels.hiHat.fx.compressor = true;
+
+    // // Toms with heavy processing
+    // Object.keys(preset.channels).forEach(key => {
+    //   if (key.startsWith('tom')) {
+    //     preset.channels[key].level = 80;
+    //     preset.channels[key].fx.gate = true;
+    //     preset.channels[key].fx.compressor = true;
+    //     preset.channels[key].sends.room = 10;
+    //   }
+    // });
+
+    // preset.channels.room.level = 20;
+    // preset.channels.reverb1.level = 25;
+    // preset.channels.master.level = 88;
+    // preset.channels.master.fx.compressor = true;
+    // preset.channels.master.fx.saturation = true;
+
     return preset;
   }
 
@@ -450,46 +450,46 @@ class DrumkitManager {
    */
   createAmbientMixerPreset(name) {
     const preset = this.createDefaultMixerPreset(name);
-    
+
     // Ambient settings - spacious, reverb-heavy, soft dynamics
-    preset.channels.kick.level = 65;
-    preset.channels.kick.sends.reverb2 = 20;
-    preset.channels.kick.fx.compressor = false;
-    
-    preset.channels.snare.level = 60;
-    preset.channels.snare.sends.reverb1 = 30;
-    preset.channels.snare.sends.reverb2 = 25;
-    preset.channels.snare.sends.delay = 15;
-    preset.channels.snare.fx.gate = false;
-    
-    preset.channels.hiHat.level = 50;
-    preset.channels.hiHat.sends.delay = 10;
-    preset.channels.hiHat.pan = -30;
-    
-    // Soft toms with lots of space
-    Object.keys(preset.channels).forEach(key => {
-      if (key.startsWith('tom')) {
-        preset.channels[key].level = 65;
-        preset.channels[key].sends.reverb1 = 20;
-        preset.channels[key].sends.reverb2 = 15;
-        preset.channels[key].fx.gate = false;
-      }
-    });
-    
-    // Cymbals with heavy reverb and delay
-    preset.channels.crash1.sends.reverb2 = 35;
-    preset.channels.crash1.sends.delay = 20;
-    preset.channels.crash2.sends.reverb2 = 35;
-    preset.channels.crash2.sends.delay = 20;
-    preset.channels.ride.sends.reverb1 = 25;
-    preset.channels.ride.sends.delay = 15;
-    
-    preset.channels.room.level = 50;
-    preset.channels.reverb1.level = 55;
-    preset.channels.reverb2.level = 60;
-    preset.channels.delay.level = 45;
-    preset.channels.master.level = 75;
-    
+    // preset.channels.kick.level = 65;
+    // preset.channels.kick.sends.reverb2 = 20;
+    // preset.channels.kick.fx.compressor = false;
+
+    // preset.channels.snare.level = 60;
+    // preset.channels.snare.sends.reverb1 = 30;
+    // preset.channels.snare.sends.reverb2 = 25;
+    // preset.channels.snare.sends.delay = 15;
+    // preset.channels.snare.fx.gate = false;
+
+    // preset.channels.hiHat.level = 50;
+    // preset.channels.hiHat.sends.delay = 10;
+    // preset.channels.hiHat.pan = -30;
+
+    // // Soft toms with lots of space
+    // Object.keys(preset.channels).forEach(key => {
+    //   if (key.startsWith('tom')) {
+    //     preset.channels[key].level = 65;
+    //     preset.channels[key].sends.reverb1 = 20;
+    //     preset.channels[key].sends.reverb2 = 15;
+    //     preset.channels[key].fx.gate = false;
+    //   }
+    // });
+
+    // // Cymbals with heavy reverb and delay
+    // preset.channels.crash1.sends.reverb2 = 35;
+    // preset.channels.crash1.sends.delay = 20;
+    // preset.channels.crash2.sends.reverb2 = 35;
+    // preset.channels.crash2.sends.delay = 20;
+    // preset.channels.ride.sends.reverb1 = 25;
+    // preset.channels.ride.sends.delay = 15;
+
+    // preset.channels.room.level = 50;
+    // preset.channels.reverb1.level = 55;
+    // preset.channels.reverb2.level = 60;
+    // preset.channels.delay.level = 45;
+    // preset.channels.master.level = 75;
+
     return preset;
   }
 
@@ -558,9 +558,9 @@ class DrumkitManager {
         selectedMixerPreset: presetName
       });
     }
-    
+
     const kit = this.drumkits.get(kitKey);
-    
+
     // If presetData is provided, set/update the preset
     if (presetData) {
       kit.mixerPresets[presetName] = presetData;
