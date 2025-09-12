@@ -2501,43 +2501,57 @@ body {
   letter-spacing: 1px;
 }
 
-/* Mute drummer button - using OTTO_Button_Glyph segmented icon */
+/* Mute drummer button - using Phosphor icons */
 .mute-drummer-btn {
   width: 75px !important;
-  /* 25% larger than 60px */
   height: 75px !important;
-  /* 25% larger than 60px */
-  background-image: url("Images/OTTO_Button_Glyph.png");
-  background-size: 100% 600% !important;
-  /* 6 states vertically */
-  background-position: 0 20% !important;
-  /* Normal state - shows unmuted drummer */
-  background-color: transparent !important;
+  background: transparent !important;
   border: none !important;
   cursor: pointer;
-  transition: background-position 0.05s ease;
+  transition: all 0.2s ease;
   padding: 0 !important;
   margin: 0 !important;
-  display: block !important;
-  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--text-icon);
+  position: relative;
+}
+
+.mute-drummer-btn i {
+  font-size: 63px;
+  color: inherit;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  transition: opacity 0.2s ease;
+}
+
+.mute-drummer-btn .mute-icon-unmuted {
+  opacity: 1;
+}
+
+.mute-drummer-btn .mute-icon-muted {
+  opacity: 0;
+}
+
+.mute-drummer-btn.muted .mute-icon-unmuted {
+  opacity: 0;
+}
+
+.mute-drummer-btn.muted .mute-icon-muted {
+  opacity: 1;
+  color: #ff4444;
 }
 
 .mute-drummer-btn:hover {
-  background-position: 0 40% !important;
-  /* Hover state */
-  background-color: transparent !important;
+  transform: scale(var(--row1-hover-scale));
 }
 
-.mute-drummer-btn.muted {
-  background-position: 0 0% !important;
-  /* Muted state - shows crossed out */
-  background-color: transparent !important;
-}
-
-.mute-drummer-btn.muted:hover {
-  background-position: 0 60% !important;
-  /* Muted hover state */
-  background-color: transparent !important;
+.mute-drummer-btn:active {
+  color: var(--text-primary);
+  transform: scale(0.95);
 }
 
 .mute-icon {
