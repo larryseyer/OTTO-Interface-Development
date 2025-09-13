@@ -3360,9 +3360,9 @@ class OTTOAccurateInterface {
     );
   }
 
-  initializePatternGroupEditor() {
+  async initializePatternGroupEditor() {
     // Load pattern groups from storage
-    this.loadPatternGroups();
+    await this.loadPatternGroups();
 
     // Initialize MIDI file registry
     this.initializeMidiRegistry();
@@ -3387,46 +3387,43 @@ class OTTOAccurateInterface {
     );
   }
 
-  loadPatternGroups() {
-    // Load saved pattern groups from localStorage with error handling
+  async loadPatternGroups() {
+    console.log('=== Loading Pattern Groups ===');
+    
+    // First, scan for all MIDI files to know what's available
+    console.log('Scanning for MIDI files...');
+    const dynamicGroups = await this.scanForMidiFiles();
+    
+    // Load saved pattern groups from localStorage 
     const savedGroups = this.safeLocalStorageGet("ottoPatternGroups", null);
+    
     if (savedGroups) {
+      // Use saved groups (user's custom organization)
       this.patternGroups = savedGroups;
-
-      // Clean up legacy selectedPattern fields if they exist
+      
+      // Clean up any legacy fields
       for (const key in this.patternGroups) {
         if (this.patternGroups[key].selectedPattern !== undefined) {
           delete this.patternGroups[key].selectedPattern;
         }
       }
     } else {
-      // Initialize with default groups (no selectedPattern)
-      this.patternGroups = {
-        favorites: {
-          name: "Favorites",
-          patterns: [
-            "Basic",
-            "Bassa",
-            "BusyBeat",
-            "Buyoun",
-            "ChaCha",
-            "Funk",
-            "Jazz",
-            "Just Hat",
-            "Just Kick",
-            "Polka",
-            "Push",
-            "Shuffle",
-            "Ska",
-            "Surf",
-            "Swing",
-            "Waltz",
-          ],
-          deletable: false,  // Favorites cannot be deleted
-          editable: true      // But contents can be edited
-        },
+      // No saved groups, use the dynamic scan result (just Favorites with some patterns)
+      this.patternGroups = dynamicGroups;
+    }
+    
+    // Make sure Favorites group always exists
+    if (!this.patternGroups.favorites) {
+      this.patternGroups.favorites = {
+        name: "Favorites",
+        patterns: [],
+        deletable: false,
+        editable: true
       };
     }
+    
+    console.log('Pattern groups loaded:', this.patternGroups);
+    console.log('=== Pattern Groups Load Complete ===');
   }
 
   // MIDI File Registry Management Methods
@@ -3863,6 +3860,8 @@ class OTTOAccurateInterface {
 
   // Drumkit Management Methods
   async loadDrumkits() {
+    console.log('=== Starting loadDrumkits ===');
+    
     // Initialize StorageManager first if not already initialized
     if (!this.storageManager) {
       this.storageManager = new StorageManager();
@@ -3873,66 +3872,241 @@ class OTTOAccurateInterface {
     this.drumkitManager = new DrumkitManager(this.storageManager);
     await this.drumkitManager.initialize();
     
-    // Load saved drumkits from localStorage with error handling for backward compatibility
-    const savedDrumkits = this.safeLocalStorageGet("ottoDrumkits", null);
-    if (savedDrumkits) {
-      this.drumkits = savedDrumkits;
-    } else {
-      // Dynamically scan for SFZ files and initialize drumkits
-      this.drumkits = await this.scanForDrumkits();
-      // Save the discovered drumkits
-      this.saveDrumkits();
+    // ALWAYS clear ALL drumkit cache to ensure fresh load
+    console.log('Clearing ALL drumkit cache...');
+    this.clearDrumkitCache();
+    
+    // Also clear the drumkitManager's internal map to prevent conflicts
+    if (this.drumkitManager && this.drumkitManager.drumkits) {
+      this.drumkitManager.drumkits.clear();
+      console.log('Cleared DrumkitManager internal storage');
     }
-
+    
+    // Clear our local drumkits object
+    this.drumkits = {};
+    
+    // Dynamically scan for SFZ files and initialize drumkits
+    console.log('Scanning for drumkits...');
+    this.drumkits = await this.scanForDrumkits();
+    
+    console.log('Loaded drumkits:', this.drumkits);
+    
+    // Don't save to localStorage - we want fresh load every time
+    // this.saveDrumkits(); // COMMENTED OUT - no caching
+    
     // Populate the kit dropdown with all available kits
+    console.log('Populating dropdown...');
     this.populateKitDropdown();
+    
+    console.log('=== loadDrumkits complete ===');
   }
 
   async scanForDrumkits() {
-    // Check if we have a cached drumkit list in localStorage
-    const cachedDrumkitList = this.safeLocalStorageGet("ottoDrumkitList", null);
+    // Dynamically fetch the drumkit files
+    const sfzFiles = await this.fetchDrumkitFiles();
     
-    if (cachedDrumkitList) {
-      // Use cached list if available
-      return this.buildDrumkitsFromList(cachedDrumkitList);
+    // Build drumkit objects from the file list
+    return this.buildDrumkitsFromList(sfzFiles);
+  }
+
+  async fetchDrumkitFiles() {
+    const sfzFiles = [];
+    const basePath = './Assets/Drumkits/';
+    
+    // Define the subdirectories to scan
+    const directories = ['Acoustic', 'Electronic', 'Percussion'];
+    
+    console.log('Starting drumkit file scan...');
+    
+    for (const dir of directories) {
+      try {
+        // Try to fetch the directory listing
+        const response = await fetch(`${basePath}${dir}/`);
+        
+        if (response.ok) {
+          const text = await response.text();
+          console.log(`Checking directory ${dir}...`);
+          
+          // Parse the HTML response to extract .sfz files
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          
+          // Look for links to .sfz files
+          const links = doc.querySelectorAll('a');
+          let foundInDir = 0;
+          links.forEach(link => {
+            const href = link.getAttribute('href');
+            
+            if (href && href.endsWith('.sfz')) {
+              // Clean up the filename and add to our list
+              const fileName = decodeURIComponent(href.replace(/^\.\//, '').replace(/^\//, ''));
+              console.log(`  Found: ${fileName}`);
+              sfzFiles.push(`${dir}/${fileName}`);
+              foundInDir++;
+            }
+          });
+          
+          if (foundInDir === 0) {
+            console.log(`  No SFZ files found in ${dir}`);
+          }
+        }
+      } catch (error) {
+        console.warn(`Could not fetch directory listing for ${dir}:`, error);
+      }
     }
     
-    // For now, use a predefined list of known drumkits
-    // This list would normally be generated during build process or provided by the backend
-    const sfzFiles = [
-      'Acoustic/Acoustic.sfz',
-      'Acoustic/Acoustic Room.sfz',
-      'Acoustic/Acoustic Dry.sfz',
-      'Acoustic/Acoustic Wet.sfz',
-      'Electronic/Electronic.sfz',
-      'Percussion/Percussion.sfz',
-      'Percussion/Percussion Congas.sfz',
-      'Percussion/Percussion Shakers.sfz',
-      'Percussion/Percussion Bongos.sfz',
-      'Percussion/Percussion Claps.sfz',
-      'Percussion/Percussion Claves.sfz'
-    ];
+    // If directory listing doesn't work, try checking for known common filenames
+    if (sfzFiles.length === 0) {
+      console.log('Directory listing failed or empty, checking for common SFZ files...');
+      const commonFiles = [
+        'Acoustic/Acoustic.sfz',
+        'Electronic/Electronic.sfz',
+        'Percussion/Percussion.sfz'
+      ];
+      
+      // Check which files actually exist
+      for (const file of commonFiles) {
+        try {
+          const response = await fetch(`${basePath}${file}`);
+          if (response.ok) {
+            console.log(`  Found: ${file}`);
+            sfzFiles.push(file);
+          }
+        } catch (e) {
+          // File doesn't exist, continue
+        }
+      }
+    }
     
-    // Cache the list for future use
-    this.safeLocalStorageSet("ottoDrumkitList", sfzFiles);
+    if (sfzFiles.length === 0) {
+      console.warn('No SFZ files found in any drumkit directories');
+    } else {
+      console.log(`Found ${sfzFiles.length} SFZ files total`);
+    }
     
-    return this.buildDrumkitsFromList(sfzFiles);
+    console.log('Final discovered SFZ files:', sfzFiles);
+    return sfzFiles;
+  }
+
+  async fetchMidiFiles() {
+    const midiFiles = [];
+    const basePath = './Assets/MidiFiles/';
+    
+    // Define the subdirectories to scan
+    const directories = ['Grooves', 'Fills', 'Intros', 'Endings'];
+    
+    console.log('Starting MIDI file scan...');
+    
+    for (const dir of directories) {
+      try {
+        // Try to fetch the directory listing
+        const response = await fetch(`${basePath}${dir}/`);
+        
+        if (response.ok) {
+          const text = await response.text();
+          console.log(`Checking directory ${dir} for MIDI files...`);
+          
+          // Parse the HTML response to extract MIDI files
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          
+          // Look for links to .mid or .MID files
+          const links = doc.querySelectorAll('a');
+          let foundInDir = 0;
+          links.forEach(link => {
+            const href = link.getAttribute('href');
+            
+            if (href && (href.toLowerCase().endsWith('.mid') || href.toLowerCase().endsWith('.midi'))) {
+              // Clean up the filename and add to our list
+              const fileName = decodeURIComponent(href.replace(/^\.\//, '').replace(/^\//, ''));
+              console.log(`  Found: ${fileName}`);
+              midiFiles.push({
+                name: fileName.replace(/\.(mid|midi|MID|MIDI)$/, ''),
+                path: `${dir}/${fileName}`,
+                category: dir
+              });
+              foundInDir++;
+            }
+          });
+          
+          if (foundInDir === 0) {
+            console.log(`  No MIDI files found in ${dir}`);
+          }
+        }
+      } catch (error) {
+        console.warn(`Could not fetch directory listing for ${dir}:`, error);
+      }
+    }
+    
+    if (midiFiles.length === 0) {
+      console.warn('No MIDI files found in any directories');
+    } else {
+      console.log(`Found ${midiFiles.length} MIDI files total`);
+    }
+    
+    console.log('Discovered MIDI files:', midiFiles);
+    return midiFiles;
+  }
+
+  async scanForMidiFiles() {
+    // Dynamically fetch the MIDI files
+    const midiFiles = await this.fetchMidiFiles();
+    
+    // Build pattern groups from the file list
+    return this.buildPatternGroupsFromFiles(midiFiles);
+  }
+
+  buildPatternGroupsFromFiles(midiFiles) {
+    const groups = {};
+    
+    // Always start with Favorites group
+    groups.favorites = {
+      name: "Favorites",
+      patterns: [],
+      deletable: false,
+      editable: true
+    };
+    
+    // Get all pattern names (without extensions) from all directories
+    const allPatterns = midiFiles.map(file => file.name);
+    
+    // Remove duplicates and sort
+    const uniquePatterns = [...new Set(allPatterns)].sort();
+    
+    // For now, just put all patterns in favorites as a starting point
+    // Users can organize them into groups as they wish
+    groups.favorites.patterns = uniquePatterns.slice(0, 16); // Start with first 16 patterns
+    
+    // Additional groups can be added by the user through the UI
+    // We don't auto-create Group 1, Group 2, etc. - let users create what they need
+    
+    console.log('Built pattern groups:', groups);
+    console.log('Total unique patterns found:', uniquePatterns.length);
+    
+    // Store all patterns for reference (not in groups, just for pattern list)
+    this.allAvailablePatterns = uniquePatterns;
+    
+    return groups;
   }
   
   buildDrumkitsFromList(sfzFiles) {
     const drumkits = {};
+    console.log('Building drumkits from files:', sfzFiles); // Debug log
     
     // Process each SFZ file
     sfzFiles.forEach(filePath => {
-      // Extract the kit name from the file path
+      // Extract just the filename without path or extension
       const pathParts = filePath.split('/');
       const fileName = pathParts[pathParts.length - 1];
-      const kitName = fileName.replace('.sfz', '').trim();
+      // Just remove the .sfz extension, nothing else
+      const kitName = fileName.replace('.sfz', '');
       
-      // Create a unique key for the drumkit
+      console.log(`Processing: ${filePath} -> filename: ${fileName} -> kitName: ${kitName}`); // Debug log
+      
+      // Create a unique key for the drumkit (remove special characters for the key only)
       const kitKey = kitName.replace(/[^a-zA-Z0-9]/g, '');
       
-      // Initialize drumkit with empty mixer settings as requested
+      // Initialize drumkit
       drumkits[kitKey] = {
         name: kitName,
         path: `./Assets/Drumkits/${filePath}`,
@@ -3946,12 +4120,13 @@ class OTTOAccurateInterface {
       };
     });
     
-    // Ensure we have at least one drumkit
+    // If no drumkits found, create a minimal "No Kits" placeholder
     if (Object.keys(drumkits).length === 0) {
-      // Fallback to a default Acoustic kit
-      drumkits.Acoustic = {
-        name: "Acoustic",
-        path: "./Assets/Drumkits/Acoustic/Acoustic.sfz",
+      console.warn('No SFZ files found in Assets/Drumkits directory'); // Debug log
+      // Create a placeholder so the app doesn't break
+      drumkits.NoKitsFound = {
+        name: "No Kits Found",
+        path: "",
         selectedMixerPreset: "default",
         mixerPresets: {
           default: {
@@ -3962,6 +4137,7 @@ class OTTOAccurateInterface {
       };
     }
     
+    console.log('Final built drumkits:', drumkits);
     return drumkits;
   }
 
@@ -3969,6 +4145,61 @@ class OTTOAccurateInterface {
     // Use safe wrapper with error handling
     this.safeLocalStorageSet("ottoDrumkits", this.drumkits);
     this.setDirty("player", false);
+  }
+
+  async refreshDrumkits() {
+    debugLog("Refreshing drumkit list...");
+    
+    // Rescan for drumkits
+    this.drumkits = await this.scanForDrumkits();
+    
+    // Save the updated list
+    this.saveDrumkits();
+    
+    // Repopulate the dropdown
+    this.populateKitDropdown();
+    
+    debugLog("Drumkit list refreshed:", Object.keys(this.drumkits));
+    
+    return this.drumkits;
+  }
+
+  clearDrumkitCache() {
+    // Clear all drumkit-related localStorage items
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.includes('drumkit') || key.includes('Drumkit') || key.includes('kit') || key === 'ottoDrumkits' || key === 'ottoDrumkitList')) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    keysToRemove.forEach(key => {
+      console.log(`Removing cached item: ${key}`);
+      localStorage.removeItem(key);
+    });
+    
+    console.log(`Drumkit cache cleared - removed ${keysToRemove.length} items`);
+  }
+
+  async resetDrumkitSystem() {
+    console.log('=== RESETTING ENTIRE DRUMKIT SYSTEM ===');
+    
+    // Clear ALL drumkit-related storage
+    this.clearDrumkitCache();
+    
+    // Clear the drumkitManager's internal map
+    if (this.drumkitManager) {
+      this.drumkitManager.drumkits.clear();
+    }
+    
+    // Clear our drumkits object
+    this.drumkits = {};
+    
+    // Now reload fresh from filesystem
+    await this.loadDrumkits();
+    
+    console.log('=== DRUMKIT SYSTEM RESET COMPLETE ===');
   }
 
   getDrumkitMixerPreset(kitName) {
@@ -6030,7 +6261,7 @@ class OTTOAccurateInterface {
 
       this.initAppState(); // Initialize app state FIRST to restore saved values
       this.initPresetSystem(); // Initialize preset system second
-      this.loadPatternGroups(); // Load pattern groups early
+      await this.loadPatternGroups(); // Load pattern groups dynamically from filesystem
       this.initializeMidiRegistry(); // Initialize MIDI file registry
       this.ensureAllMidiFilesAssigned(); // Ensure all MIDI files have groups
       await this.loadDrumkits(); // Load drumkit manager
