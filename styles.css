@@ -224,7 +224,7 @@ body {
   position: relative;
   border: 1px solid var(--border-color);
   overflow: hidden;
-  /* Clip panels when they're below the interface */
+  /* Clip content at interface boundaries */
 }
 
 /* Mute Overlay - covers rows 3-5 */
@@ -1179,6 +1179,10 @@ body {
   padding: 10px 20px 0 20px;
   /* Add small top padding for alignment */
   /* gap removed to allow proper percentage-based layout */
+  overflow: visible;
+  /* Ensure dropdown can overflow this section */
+  position: relative;
+  z-index: 50;
 }
 
 .player-number-display {
@@ -1294,6 +1298,8 @@ body {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  z-index: 1000; /* Ensure proper stacking context */
+  pointer-events: auto !important; /* Ensure clicks work */
 }
 
 .kit-dropdown .dropdown-selected {
@@ -1313,6 +1319,9 @@ body {
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
+  pointer-events: auto !important; /* Ensure element can be clicked */
+  position: relative;
+  z-index: 1;
 }
 
 .kit-dropdown .dropdown-selected:hover {
@@ -1343,18 +1352,23 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-top: 5px;
-  /* Allow dropdown to extend through row 4 and row 5 */
-  /* Row 4 (12%) + Row 5 (47%) = 59vh available */
-  max-height: calc(59vh - 20px);
-  /* Subtract some padding */
+  /* Limit dropdown to not extend past interface bottom */
+  /* From row 3 position, we have approximately 72% of interface height remaining */
+  /* Row 4 (12%) + Row 5 (47%) + Row 6 (13%) = 72% */
+  /* Using fixed pixel height based on interface height of 720px */
+  /* 72% of 720px = ~518px, minus some padding for safety */
+  max-height: 400px;
+  /* Safe height that won't extend past interface */
   overflow-y: auto;
-  z-index: 1000;
+  overflow-x: hidden;
+  z-index: 10000; /* Increased to ensure dropdown appears above panels */
   display: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .kit-dropdown.open .dropdown-options {
   display: block;
+  pointer-events: auto; /* Ensure clicks work */
 }
 
 .kit-dropdown .dropdown-option {
@@ -1380,6 +1394,25 @@ body {
 .kit-dropdown .dropdown-option.selected {
   color: var(--text-primary);
   background: var(--bg-secondary);
+}
+
+/* Scrollbar styling for kit dropdown */
+.kit-dropdown .dropdown-options::-webkit-scrollbar {
+  width: 8px;
+}
+
+.kit-dropdown .dropdown-options::-webkit-scrollbar-track {
+  background: var(--bg-darker);
+  border-radius: 4px;
+}
+
+.kit-dropdown .dropdown-options::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.kit-dropdown .dropdown-options::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .kit-name-display {
@@ -2273,8 +2306,10 @@ body {
   justify-content: center;
   gap: 5px;
   /* Reduced gap for tighter spacing */
-  overflow: hidden;
-  /* Prevent overflow */
+  overflow: visible;
+  /* Changed from hidden to visible to allow dropdown to show */
+  position: relative;
+  z-index: 100;
 }
 
 .row3-area-4 {
@@ -3419,6 +3454,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
 }
 
 /* Full height panels (Settings, Presets, Link, Cloud) - from row 2 to row 6 */
@@ -3443,15 +3479,22 @@ body {
   transition: transform 0.3s ease;
 }
 
+/* Ensure panels are hidden by default but ready to animate */
+.slide-up-panel {
+  pointer-events: none; /* Can't interact when hidden */
+}
+
 /* Active state - slide up into view */
 .slide-up-panel.full-height-panel.active {
   transform: translateY(0);
   /* Slide up to normal position */
+  pointer-events: auto; /* Can interact when visible */
 }
 
 .slide-up-panel.partial-height-panel.active {
   transform: translateY(0);
   /* Slide up to normal position */
+  pointer-events: auto; /* Can interact when visible */
 }
 
 /* Panel header styling */
@@ -3776,16 +3819,21 @@ body {
   box-sizing: border-box;
   z-index: 100;
   transform: translateY(100%);
-  transition: transform 0.3s ease-in-out;
-  display: none; /* Hidden by default */
+  transition: transform 0.3s ease-in-out, visibility 0.3s, opacity 0.3s ease-in-out;
+  display: flex; /* Always flex, control visibility with transform */
   flex-direction: column;
   overflow: hidden; /* Prevent any overflow */
+  visibility: hidden; /* Hidden when not active */
+  opacity: 0;
+  pointer-events: none; /* Can't interact when hidden */
 }
 
 #mixer-panel.active {
   transform: translateY(0);
   z-index: 9999;
-  display: flex; /* Show when active */
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto; /* Can interact when visible */
 }
 
 #mixer-panel .panel-header {
