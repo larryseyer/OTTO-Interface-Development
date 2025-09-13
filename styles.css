@@ -3777,7 +3777,7 @@ body {
   z-index: 100;
   transform: translateY(100%);
   transition: transform 0.3s ease-in-out;
-  display: flex;
+  display: none; /* Hidden by default */
   flex-direction: column;
   overflow: hidden; /* Prevent any overflow */
 }
@@ -3785,6 +3785,7 @@ body {
 #mixer-panel.active {
   transform: translateY(0);
   z-index: 9999;
+  display: flex; /* Show when active */
 }
 
 #mixer-panel .panel-header {

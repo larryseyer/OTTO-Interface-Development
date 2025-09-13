@@ -7378,6 +7378,7 @@ class OTTOAccurateInterface {
   }
 
   setupKitControls() {
+    console.log("Setting up kit controls...");
     const kitDropdown = document.getElementById("kit-dropdown");
     const kitDropdownSelected = document.getElementById("kit-selected");
     const kitDropdownOptions = document.getElementById("kit-options");
@@ -7388,6 +7389,13 @@ class OTTOAccurateInterface {
     const kitNext = document.querySelector(".kit-next");
     const kitMixerBtn = document.getElementById("kit-mixer-btn");
     const muteDrummerBtn = document.getElementById("mute-drummer-btn");
+    
+    console.log("Kit dropdown elements found:", {
+      kitDropdown: !!kitDropdown,
+      kitDropdownSelected: !!kitDropdownSelected,
+      kitDropdownOptions: !!kitDropdownOptions,
+      kitOptionsCount: kitOptions.length
+    });
 
     // Clean up existing kit dropdown listeners
     this.dropdownListeners = this.dropdownListeners.filter(({ element }) => {
@@ -7422,9 +7430,12 @@ class OTTOAccurateInterface {
 
     // Toggle dropdown
     if (kitDropdownSelected) {
+      console.log("Adding click handler to kit dropdown selected");
       const toggleHandler = (e) => {
+        console.log("Kit dropdown clicked!");
         e.stopPropagation();
         kitDropdown.classList.toggle("open");
+        console.log("Dropdown open state:", kitDropdown.classList.contains("open"));
       };
       this.addEventListener(
         kitDropdownSelected,
@@ -7432,6 +7443,11 @@ class OTTOAccurateInterface {
         toggleHandler,
         "dropdown",
       );
+      
+      // Also add a direct event listener as a fallback
+      kitDropdownSelected.addEventListener("click", toggleHandler);
+    } else {
+      console.error("Kit dropdown selected element not found!");
     }
 
     // Kit selection from dropdown
@@ -7477,9 +7493,14 @@ class OTTOAccurateInterface {
       });
     }
 
-    // Kit mixer button
+    // Kit mixer button - Use WindowManager to handle the panel
     if (kitMixerBtn) {
       const mixerHandler = () => {
+        // Use WindowManager to toggle the mixer panel
+        if (window.windowManager) {
+          window.windowManager.toggleWindow("panel", "mixer");
+        }
+        
         // Toggle kit mixer state
         this.playerStates[this.currentPlayer].kitMixerActive =
           !this.playerStates[this.currentPlayer].kitMixerActive;
@@ -7504,9 +7525,13 @@ class OTTOAccurateInterface {
       this.addEventListener(kitMixerBtn, "click", mixerHandler, "dropdown");
     }
 
-    // Edit kit buttons
+    // Edit kit buttons - Use WindowManager to handle the panel
     document.querySelectorAll(".edit-btn").forEach((editBtn) => {
       const editHandler = () => {
+        // Use WindowManager to open the kit edit panel
+        if (window.windowManager) {
+          window.windowManager.openWindow("panel", "kit-edit");
+        }
         this.onEditKit(this.currentPlayer);
         debugLog(`Edit kit for Player ${this.currentPlayer}`);
       };

@@ -618,14 +618,14 @@
     console.log(`Debug mode ${isDebug ? "enabled" : "disabled"}`);
   }
 
-  // Show debug panel in development
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
-    document.getElementById("debug-panel").style.display = "block";
-    setInterval(updateDebugPanel, 1000);
-  }
+  // Show debug panel in development - Commented out to hide by default
+  // if (
+  //   window.location.hostname === "localhost" ||
+  //   window.location.hostname === "127.0.0.1"
+  // ) {
+  //   document.getElementById("debug-panel").style.display = "block";
+  //   setInterval(updateDebugPanel, 1000);
+  // }
   </script>
 </body>
 

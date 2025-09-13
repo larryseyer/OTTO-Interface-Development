@@ -166,7 +166,7 @@ class WindowManager {
     // Full-screen mixer panel
     this.registerWindow("panel", "mixer", {
       element: "mixer-panel",
-      triggerButton: "kit-mixer-btn",
+      triggerButton: null, // Handled manually in script.js setupKitControls
       closeButton: "mixer-panel-close",
       mutexGroup: "fullHeightPanels",
       cssClass: "slide-up-panel full-height-panel",
@@ -191,7 +191,7 @@ class WindowManager {
 
     this.registerWindow("panel", "kit-edit", {
       element: "kit-edit-panel",
-      triggerButton: ".kit-edit-btn", // Multiple buttons
+      triggerButton: null, // Handled manually in script.js setupKitControls
       closeButton: "kit-edit-panel-close",
       mutexGroup: "partialHeightPanels",
       cssClass: "slide-up-panel partial-height-panel",
