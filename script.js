@@ -197,6 +197,9 @@ class OTTOAccurateInterface {
           energy: 50,
           volume: 75,
         },
+        // Track which button is active for each group this player has visited
+        // Format: { groupName: buttonIndex (0-15) }
+        activeSelections: {}
       };
     }
 
@@ -4766,6 +4769,74 @@ class OTTOAccurateInterface {
     });
 
     this.batchDOMUpdates(updates);
+
+    // After updating the grid, restore the correct active selection for this group
+    // First, clear ALL active states since we're switching groups
+    patternButtons.forEach(btn => btn.classList.remove("active"));
+
+    // Now restore or set the correct active button for THIS group
+    const currentPlayer = this.currentPlayer;
+    const currentGroup = this.playerStates[currentPlayer].patternGroup;
+    const activeSelections = this.playerStates[currentPlayer].activeSelections || {};
+
+    let buttonActivated = false;
+
+    // Check if we have a saved selection for this specific group
+    if (typeof activeSelections[currentGroup] === 'number') {
+      const savedIndex = activeSelections[currentGroup];
+
+      // Validate that the saved index still has a valid pattern
+      if (savedIndex >= 0 && savedIndex < 16 &&
+          patterns[savedIndex] && patterns[savedIndex].trim() !== "" &&
+          patternButtons[savedIndex]) {
+        // Restore the saved selection
+        patternButtons[savedIndex].classList.add("active");
+        this.playerStates[currentPlayer].selectedPattern = patterns[savedIndex];
+        this.playerStates[currentPlayer].midiFile = patterns[savedIndex];
+        buttonActivated = true;
+        debugLog(`Restored saved selection: button ${savedIndex + 1} (${patterns[savedIndex]}) for group "${currentGroup}"`);
+      }
+    }
+
+    // If no saved selection or saved selection is invalid, default to button 1
+    if (!buttonActivated) {
+      if (patterns[0] && patterns[0].trim() !== "") {
+        // Button 1 has a valid pattern - select it
+        if (patternButtons[0]) {
+          patternButtons[0].classList.add("active");
+          this.playerStates[currentPlayer].selectedPattern = patterns[0];
+          this.playerStates[currentPlayer].midiFile = patterns[0];
+
+          // Save this selection to activeSelections
+          if (!this.playerStates[currentPlayer].activeSelections) {
+            this.playerStates[currentPlayer].activeSelections = {};
+          }
+          this.playerStates[currentPlayer].activeSelections[currentGroup] = 0;
+
+          debugLog(`Auto-selected button 1 (${patterns[0]}) as default for group "${currentGroup}"`);
+        }
+      } else {
+        // Button 1 is empty, find first available pattern
+        for (let i = 1; i < patterns.length && i < 16; i++) {
+          if (patterns[i] && patterns[i].trim() !== "") {
+            if (patternButtons[i]) {
+              patternButtons[i].classList.add("active");
+              this.playerStates[currentPlayer].selectedPattern = patterns[i];
+              this.playerStates[currentPlayer].midiFile = patterns[i];
+
+              // Save this selection to activeSelections
+              if (!this.playerStates[currentPlayer].activeSelections) {
+                this.playerStates[currentPlayer].activeSelections = {};
+              }
+              this.playerStates[currentPlayer].activeSelections[currentGroup] = i;
+
+              debugLog(`Auto-selected first available pattern at index ${i} (${patterns[i]}) for group "${currentGroup}"`);
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 
   updatePatternGroupDropdown() {
@@ -8089,6 +8160,13 @@ class OTTOAccurateInterface {
       // NEW: Also update the midiFile field
       this.playerStates[this.currentPlayer].midiFile = fullPatternName;
 
+      // Save the active button index for this group
+      // currentGroup is already declared above
+      if (!this.playerStates[this.currentPlayer].activeSelections) {
+        this.playerStates[this.currentPlayer].activeSelections = {};
+      }
+      this.playerStates[this.currentPlayer].activeSelections[currentGroup] = buttonIndex;
+
       // Groups no longer track selected pattern - they are purely organizational
 
       this.onPatternSelected(this.currentPlayer, fullPatternName);
@@ -9380,30 +9458,78 @@ class OTTOAccurateInterface {
       }
 
       // Restore the selected pattern for this group
-      const selectedPattern = group.selectedPattern;
-      if (selectedPattern) {
-        const patternButtons = document.querySelectorAll(
-          ".pattern-grid .pattern-btn",
-        );
-        let patternFound = false;
+      const patternButtons = document.querySelectorAll(".pattern-grid .pattern-btn");
+      let buttonActivated = false;
 
-        patternButtons.forEach((btn) => {
-          btn.classList.remove("active");
-          // Check both full name and first 8 characters
-          if (
-            btn.textContent === selectedPattern ||
-            btn.textContent === selectedPattern.substring(0, 8)
-          ) {
+      // Clear all active states first
+      patternButtons.forEach((btn) => {
+        btn.classList.remove("active");
+      });
+
+      // Try to restore from activeSelections
+      const activeSelections = this.playerStates[playerNumber].activeSelections;
+      if (activeSelections && typeof activeSelections[groupName] === 'number') {
+        const savedIndex = activeSelections[groupName];
+
+        // Validate the saved index
+        if (savedIndex >= 0 && savedIndex < 16 && patternButtons[savedIndex]) {
+          const btn = patternButtons[savedIndex];
+          const patternName = group.patterns[savedIndex];
+
+          // Only activate if the button has a valid pattern
+          if (patternName && patternName.trim() !== "") {
             btn.classList.add("active");
-            this.playerStates[playerNumber].selectedPattern = selectedPattern;
-            patternFound = true;
+            this.playerStates[playerNumber].selectedPattern = patternName;
+            this.playerStates[playerNumber].midiFile = patternName;
+            buttonActivated = true;
+            debugLog(`Restored active button ${savedIndex} for group "${groupName}"`);
           }
-        });
-
-        // If pattern wasn't found, just warn
-        if (!patternFound) {
-          debugWarn(`Selected pattern "${selectedPattern}" not found in grid`);
         }
+      }
+
+      // FALLBACK: If no button was activated, default to button 1 (index 0) or first valid pattern
+      if (!buttonActivated) {
+        // Always try button 1 (index 0) first as the default
+        if (group.patterns[0] && group.patterns[0].trim() !== "" && patternButtons[0]) {
+          patternButtons[0].classList.add("active");
+          this.playerStates[playerNumber].selectedPattern = group.patterns[0];
+          this.playerStates[playerNumber].midiFile = group.patterns[0];
+
+          // Save this as the active selection
+          if (!this.playerStates[playerNumber].activeSelections) {
+            this.playerStates[playerNumber].activeSelections = {};
+          }
+          this.playerStates[playerNumber].activeSelections[groupName] = 0;
+
+          buttonActivated = true;
+          debugLog(`Default selected button 1 (index 0) for group "${groupName}"`);
+        } else {
+          // If button 1 is empty, find the first available pattern
+          for (let i = 1; i < 16; i++) {
+            if (group.patterns[i] && group.patterns[i].trim() !== "") {
+              if (patternButtons[i]) {
+                patternButtons[i].classList.add("active");
+                this.playerStates[playerNumber].selectedPattern = group.patterns[i];
+                this.playerStates[playerNumber].midiFile = group.patterns[i];
+
+                // Save this as the active selection
+                if (!this.playerStates[playerNumber].activeSelections) {
+                  this.playerStates[playerNumber].activeSelections = {};
+                }
+                this.playerStates[playerNumber].activeSelections[groupName] = i;
+
+                buttonActivated = true;
+                debugLog(`Auto-selected first available pattern at index ${i} for group "${groupName}"`);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      // If still no button is active, warn (this means the group has no patterns)
+      if (!buttonActivated) {
+        debugWarn(`No patterns available in group "${groupName}" to activate`);
       }
     }
 
