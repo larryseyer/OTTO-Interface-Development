@@ -153,6 +153,13 @@ class OTTOAccurateInterface {
     // Initialize drumkit manager
     this.drumkits = null; // Will be loaded from storage or initialized with defaults
 
+    // Initialize drum mapping system
+    this.drumMapManager = null;
+    this.drumMapPresets = null;
+    this.sfzEditor = null;
+    this.midiTranslator = null;
+    this.drumMapUI = null;
+
     // Simplified dirty flags - only 2 levels now:
     // 1. Player (tracks changes to current player's state)
     // 2. Preset (tracks changes to all players/global settings)
@@ -3907,9 +3914,41 @@ class OTTOAccurateInterface {
   async scanForDrumkits() {
     // Dynamically fetch the drumkit files
     const sfzFiles = await this.fetchDrumkitFiles();
-    
+
     // Build drumkit objects from the file list
     return this.buildDrumkitsFromList(sfzFiles);
+  }
+
+  initializeDrumMappingSystem() {
+    try {
+      console.log('=== Initializing Drum Mapping System ===');
+
+      // Initialize drum map presets database
+      this.drumMapPresets = new DrumMapPresets();
+
+      // Initialize drum map manager
+      this.drumMapManager = new DrumMapManager(this.storageManager);
+
+      // Initialize SFZ editor
+      this.sfzEditor = new SFZEditor();
+
+      // Initialize MIDI translator
+      this.midiTranslator = new MidiTranslator(this.drumMapManager, this.drumMapPresets);
+
+      // Initialize drum map UI
+      this.drumMapUI = new DrumMapUI(this.drumMapManager, this.sfzEditor, this.midiTranslator);
+
+      // Store reference in window manager for panel open hook
+      if (this.windowManager) {
+        this.windowManager.otto.drumMapUI = this.drumMapUI;
+      }
+
+      console.log('Drum Mapping System initialized successfully');
+
+    } catch (error) {
+      console.error('Error initializing drum mapping system:', error);
+      // Continue without drum mapping if it fails
+    }
   }
 
   async fetchDrumkitFiles() {
@@ -6341,6 +6380,9 @@ class OTTOAccurateInterface {
       if (this.drumkitManager) {
         this.mixerComponent = new MixerComponent(this);
       }
+
+      // Initialize Drum Mapping System
+      this.initializeDrumMappingSystem();
       
       this.setupVersion();
       this.setupSplashScreen();

@@ -4647,3 +4647,478 @@ body {
     transform: translateX(20px);
   }
 }
+
+/* ========================================
+   Drum Mapping System Styles
+   ======================================== */
+
+.drum-map-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.drum-map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.map-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drum-map-select {
+  min-width: 200px;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.map-actions-group {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  background: var(--accent-color);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.btn-secondary {
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn-secondary.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+/* Main content area */
+.drum-map-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Panel - Note Grid */
+.note-grid-panel {
+  flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+}
+
+.panel-title {
+  padding: 12px 15px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.note-grid-controls {
+  display: flex;
+  padding: 10px 15px;
+  gap: 5px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.view-btn {
+  flex: 1;
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-btn.active {
+  background: var(--accent-color);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.note-grid-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+}
+
+.note-btn {
+  position: relative;
+  padding: 8px 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 45px;
+}
+
+.note-btn:hover {
+  background: var(--bg-tertiary);
+  transform: scale(1.05);
+}
+
+.note-btn.selected {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.note-btn.mapped {
+  font-weight: bold;
+}
+
+.note-number {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.note-name {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* Center Panel - Mapping */
+.mapping-panel {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+}
+
+.mapping-canvas-container {
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
+}
+
+#mapping-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mapping-assignments {
+  padding: 15px;
+}
+
+.sample-browser {
+  height: 200px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.browser-title {
+  padding: 10px 15px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.sample-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+/* Right Panel - Mixer Channels */
+.mixer-channels-panel {
+  flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+
+.mixer-channels {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mixer-channel {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.channel-header {
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.channel-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.channel-note-count {
+  background: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.channel-notes {
+  padding: 10px;
+  min-height: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.note-tag {
+  padding: 4px 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.channel-actions {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-small {
+  padding: 4px 12px;
+  font-size: 11px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-small:hover {
+  background: var(--accent-color);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.channel-info {
+  padding: 15px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.channel-stats {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Footer */
+.drum-map-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.status-bar {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.preview-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-primary {
+  padding: 8px 20px;
+  background: var(--accent-color);
+  color: var(--text-primary);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#preview-velocity {
+  width: 100px;
+}
+
+#velocity-display {
+  font-size: 13px;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* List View */
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.note-list-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 15px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.note-list-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.list-note-num {
+  min-width: 30px;
+  font-weight: bold;
+}
+
+.list-note-name {
+  min-width: 50px;
+  color: var(--text-secondary);
+}
+
+.list-channel {
+  flex: 1;
+  font-weight: 600;
+}
+
+.list-sample {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* Piano View */
+.piano-roll {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+}
+
+.piano-octave {
+  display: flex;
+  gap: 2px;
+  position: relative;
+}
+
+.piano-key {
+  flex: 1;
+  min-height: 60px;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 0 0 4px 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.piano-key.black {
+  background: #2a2a2a;
+  min-height: 40px;
+  margin: 0 -10px;
+  z-index: 1;
+  flex: 0 0 20px;
+}
+
+.piano-key:hover {
+  background: var(--accent-color);
+}
+
+.piano-key.mapped {
+  border-width: 2px;
+}
+
+/* Drag and Drop */
+.note-btn[draggable="true"] {
+  cursor: move;
+}
+
+.mixer-channel.drag-over {
+  background: var(--accent-color-alpha);
+  border-color: var(--accent-color);
+}
+
+.note-info-display {
+  padding: 12px 15px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+}
