@@ -193,11 +193,17 @@ class WindowManager {
       element: "kit-edit-panel",
       triggerButton: null, // Handled manually in script.js setupKitControls
       closeButton: "kit-edit-panel-close",
-      mutexGroup: "partialHeightPanels",
-      cssClass: "slide-up-panel partial-height-panel",
+      mutexGroup: "fullHeightPanels", // Changed to full height
+      cssClass: "slide-up-panel full-height-panel", // Now full screen
       activeClass: "active",
       buttonActiveClass: "panel-active",
       multipleButtons: true,
+      onOpen: () => {
+        // Initialize drum mapping UI when opened
+        if (this.otto.drumMapUI) {
+          this.otto.drumMapUI.initialize();
+        }
+      },
     });
 
     // Slide-out panel (no mutex group - can stay open)
