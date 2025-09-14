@@ -51,7 +51,7 @@ class OTTOAccurateInterface {
     this.mixerComponent = null; // Will be initialized after drumkit manager
 
     this.maxPlayers = 8; // Maximum possible players
-    this.numberOfPlayers = 4; // Default active players (configurable 4-8)
+    this.numberOfPlayers = 8; // Default active players (configurable 4-8)
     this.currentPlayer = 1;
     this.splashScreenLength = 1000; // 1 second like original
     this.tempo = 120;
@@ -2717,13 +2717,14 @@ class OTTOAccurateInterface {
       ) {
         this.tempo = savedState.tempo;
       }
-      if (
-        savedState.numberOfPlayers &&
-        savedState.numberOfPlayers >= 1 &&
-        savedState.numberOfPlayers <= this.maxPlayers
-      ) {
-        this.numberOfPlayers = savedState.numberOfPlayers;
-      }
+      // Skip loading numberOfPlayers from saved state - always use the default value
+      // if (
+      //   savedState.numberOfPlayers &&
+      //   savedState.numberOfPlayers >= 1 &&
+      //   savedState.numberOfPlayers <= this.maxPlayers
+      // ) {
+      //   this.numberOfPlayers = savedState.numberOfPlayers;
+      // }
       if (savedState.currentPreset) {
         this.currentPreset = savedState.currentPreset;
         debugLog("Restored currentPreset:", this.currentPreset);
@@ -5446,7 +5447,8 @@ class OTTOAccurateInterface {
 
         // Restore global settings
         this.tempo = preset.tempo || 120;
-        this.numberOfPlayers = preset.numberOfPlayers || 4;
+        // Don't restore numberOfPlayers from preset - keep the initial value from line 54
+        // this.numberOfPlayers = preset.numberOfPlayers || this.numberOfPlayers;
         // NOTE: Do NOT restore loopPosition - it's a real-time transport position
 
         // Update current preset reference
@@ -5877,7 +5879,7 @@ class OTTOAccurateInterface {
       playerStates: {},
       linkStates: null,
       tempo: 120,
-      numberOfPlayers: 4,
+      numberOfPlayers: this.numberOfPlayers,
       loopPosition: 0,
     };
 
@@ -5959,7 +5961,7 @@ class OTTOAccurateInterface {
       playerStates: {},
       linkStates: null,
       tempo: 120,
-      numberOfPlayers: 4,
+      numberOfPlayers: this.numberOfPlayers,
       loopPosition: 0,
     };
 
@@ -6071,7 +6073,7 @@ class OTTOAccurateInterface {
       playerStates: {},
       linkStates: null,
       tempo: 120,
-      numberOfPlayers: 4,
+      numberOfPlayers: this.numberOfPlayers,
       loopPosition: 0,
     };
 
@@ -6155,7 +6157,7 @@ class OTTOAccurateInterface {
       playerStates: {},
       linkStates: null,
       tempo: 120,
-      numberOfPlayers: 4,
+      numberOfPlayers: this.numberOfPlayers,
       loopPosition: 0,
     };
 
@@ -6811,13 +6813,43 @@ class OTTOAccurateInterface {
     const playerNextBtn = document.getElementById("player-next-btn");
 
     // Clean up existing player tab and navigation button listeners
-    this.eventListeners = this.eventListeners.filter(({ element }) => {
+    // First clean up from eventListenerRegistry.element (used by addEventListener method)
+    if (this.eventListenerRegistry && this.eventListenerRegistry.element) {
+      this.eventListenerRegistry.element = this.eventListenerRegistry.element.filter(
+        ({ element, event, handler }) => {
+          // Remove player tab listeners
+          if (
+            element &&
+            element.classList &&
+            element.classList.contains("player-tab")
+          ) {
+            element.removeEventListener(event, handler);
+            return false;
+          }
+          // Remove player navigation button listeners
+          if (
+            element &&
+            (element.id === "player-prev-btn" || element.id === "player-next-btn")
+          ) {
+            element.removeEventListener(event, handler);
+            return false;
+          }
+          return true;
+        }
+      );
+    }
+
+    // Also clean up from eventListeners array (for backward compatibility)
+    this.eventListeners = this.eventListeners.filter(({ element, event, handler }) => {
       // Remove player tab listeners
       if (
         element &&
         element.classList &&
         element.classList.contains("player-tab")
       ) {
+        if (event && handler) {
+          element.removeEventListener(event, handler);
+        }
         return false;
       }
       // Remove player navigation button listeners
@@ -6825,7 +6857,9 @@ class OTTOAccurateInterface {
         element &&
         (element.id === "player-prev-btn" || element.id === "player-next-btn")
       ) {
-        element.replaceWith(element.cloneNode(true));
+        if (event && handler) {
+          element.removeEventListener(event, handler);
+        }
         return false;
       }
       return true;
@@ -6837,7 +6871,7 @@ class OTTOAccurateInterface {
 
       // Show/hide tabs based on numberOfPlayers
       if (playerNumber <= this.numberOfPlayers) {
-        tab.style.display = "block";
+        tab.style.display = "flex";
         tab.classList.remove("disabled");
       } else {
         tab.style.display = "none";
@@ -8987,12 +9021,12 @@ class OTTOAccurateInterface {
 
     const min = parseInt(slider.dataset.min) || 0;
     const max = parseInt(slider.dataset.max) || 100;
-    
+
     // Ensure value is within bounds
     value = Math.max(min, Math.min(max, value));
-    
+
     const percentage = ((value - min) / (max - min)) * 100;
-    
+
     // Clamp percentage to 0-100 to prevent going past boundaries
     const clampedPercentage = Math.max(0, Math.min(100, percentage));
 
@@ -9010,7 +9044,7 @@ class OTTOAccurateInterface {
       thumb.style.bottom = `${clampedPercentage}%`;
       // Keep the centering transform
       thumb.style.transform = 'translateX(-50%) translateY(50%)';
-      
+
       // Ensure thumb is visible
       thumb.style.display = 'block';
       thumb.style.opacity = '1';

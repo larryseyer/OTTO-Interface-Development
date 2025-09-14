@@ -63,9 +63,12 @@
   /* Cloud, Logo and Version - increased for hover space */
   /* Total: 18% + 28% + 8% + 18% + 28% = 100% */
 
-  /* Row 2 - Single area for player tabs */
-  --row2-area1-width: 100%;
-  /* Player tabs full width */
+  /* Row 2 Area Percentages - Must total 100% */
+  --row2-area1-width: 5%; /*Blank area for future use*/
+  --row2-area2-width: 5%; /*left player chevron*/
+  --row2-area3-width: 80%; /*player buttons default 4 but support up to 8*/
+  --row2-area4-width: 5%; /*right player chevron*/
+  --row2-area5-width: 5%; /*save player setting icon*/
 
   /* Row 3 Area Percentages - 5 areas */
   --row3-area1-width: 10%;
@@ -1048,22 +1051,64 @@ body {
   height: var(--row2-height);
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--row2-area1-width) var(--row2-area2-width) var(--row2-area3-width) var(--row2-area4-width) var(--row2-area5-width);
+  grid-template-areas: "area1 area2 area3 area4 area5";
   align-items: center;
-  justify-content: center;
-  padding: 0 20px;
-  /* Add horizontal padding */
+  padding: 0;
 }
 
 .player-tabs {
   display: flex;
-  gap: var(--player-tab-gap);
-  /* Dynamic gap based on player count */
+  gap: 8px;
+  /* Fixed gap that works for up to 8 players */
   padding: 8px 0;
-  /* Reduced horizontal padding since chevrons are closer */
   background: transparent;
-  margin: 0 15px;
-  /* Space between tabs and chevrons */
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Row 2 Grid Areas */
+.row2-area1 {
+  grid-area: area1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.row2-area2 {
+  grid-area: area2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.row2-area3 {
+  grid-area: area3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+.row2-area4 {
+  grid-area: area4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.row2-area5 {
+  grid-area: area5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 /* Player navigation chevrons - sized for row2 */
@@ -1105,23 +1150,25 @@ body {
 }
 
 .player-tab {
-  padding: 15px 15px;
-  /* Reduced horizontal padding to save space */
+  padding: 10px 12px;
+  /* Optimized padding for 8 players */
   background: transparent;
   border: none;
   color: var(--button-text-normal);
   font-family: "Playfair Display", serif;
-  font-size: 24px !important;
+  font-size: 22px !important;
+  /* Slightly smaller to fit better */
   font-weight: 400;
   /* Regular weight */
   cursor: pointer;
   transition: all 0.2s ease;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   position: relative;
   border-radius: 3px;
   min-height: 60px;
   height: 60px;
   width: auto;
+  white-space: nowrap;
   min-width: 120px;
   /* Reduced from 140px to save space */
   display: flex;

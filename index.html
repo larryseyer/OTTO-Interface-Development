@@ -319,26 +319,41 @@
       </div>
       <!-- Mute Overlay for rows 2-5 -->
       <div class="mute-overlay"></div>
-      <!-- Row 2: Player Tabs with Chevron Navigation -->
+      <!-- Row 2: Player Tabs with Chevron Navigation - 5 Areas -->
       <div class="player-tabs-section">
-        <!-- Left chevron for player navigation -->
-        <button class="player-nav-btn player-nav-prev" id="player-prev-btn">
-          <i class="ph-thin ph-caret-left"></i>
-        </button>
-        <div class="player-tabs">
-          <button class="player-tab active" data-player="1">PLAYER 1</button>
-          <button class="player-tab" data-player="2">PLAYER 2</button>
-          <button class="player-tab" data-player="3">PLAYER 3</button>
-          <button class="player-tab" data-player="4">PLAYER 4</button>
-          <button class="player-tab" data-player="5">PLAYER 5</button>
-          <button class="player-tab" data-player="6">PLAYER 6</button>
-          <button class="player-tab" data-player="7">PLAYER 7</button>
-          <button class="player-tab" data-player="8">PLAYER 8</button>
+        <!-- Area 1: Blank area for future use -->
+        <div class="row2-area1"></div>
+        <!-- Area 2: Left chevron for player navigation -->
+        <div class="row2-area2">
+          <button class="player-nav-btn player-nav-prev" id="player-prev-btn">
+            <i class="ph-thin ph-caret-left"></i>
+          </button>
         </div>
-        <!-- Right chevron for player navigation -->
-        <button class="player-nav-btn player-nav-next" id="player-next-btn">
-          <i class="ph-thin ph-caret-right"></i>
-        </button>
+        <!-- Area 3: Player tabs (centered) -->
+        <div class="row2-area3">
+          <div class="player-tabs">
+            <button class="player-tab active" data-player="1">PLAYER 1</button>
+            <button class="player-tab" data-player="2">PLAYER 2</button>
+            <button class="player-tab" data-player="3">PLAYER 3</button>
+            <button class="player-tab" data-player="4">PLAYER 4</button>
+            <button class="player-tab" data-player="5">PLAYER 5</button>
+            <button class="player-tab" data-player="6">PLAYER 6</button>
+            <button class="player-tab" data-player="7">PLAYER 7</button>
+            <button class="player-tab" data-player="8">PLAYER 8</button>
+          </div>
+        </div>
+        <!-- Area 4: Right chevron for player navigation -->
+        <div class="row2-area4">
+          <button class="player-nav-btn player-nav-next" id="player-next-btn">
+            <i class="ph-thin ph-caret-right"></i>
+          </button>
+        </div>
+        <!-- Area 5: Save player settings icon -->
+        <div class="row2-area5">
+          <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player">
+            <i class="ph-thin ph-floppy-disk"></i>
+          </button>
+        </div>
       </div>
       <!-- Row 3: Drum Kit Section - 5 Areas -->
       <div class="drum-kit-section">
@@ -376,11 +391,8 @@
             <i class="ph-thin ph-faders"></i>
           </button>
         </div>
-        <!-- Area 4: Save button only -->
+        <!-- Area 4: Empty (save button moved to row2) -->
         <div class="row3-area-4">
-          <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player">
-            <i class="ph-thin ph-floppy-disk"></i>
-          </button>
         </div>
         <!-- Area 5: Mute/Unmute drummer icon (right-aligned) -->
         <div class="row3-area-5">
