@@ -2615,8 +2615,8 @@ body {
 
 /* Mute drummer button - using Phosphor icons */
 .mute-drummer-btn {
-  width: 75px !important;
-  height: 75px !important;
+  width: 60px !important;
+  height: 60px !important;
   background: transparent !important;
   border: none !important;
   cursor: pointer;
@@ -2631,7 +2631,7 @@ body {
 }
 
 .mute-drummer-btn i {
-  font-size: 63px;
+  font-size: 50px;
   color: inherit;
   line-height: 1;
   margin: 0;
@@ -4522,10 +4522,16 @@ body {
 /* Player save button */
 .player-save-btn {
   display: none;
+  width: 60px !important;
+  height: 60px !important;
 }
 
 .player-save-btn.visible {
   display: flex;
+}
+
+.player-save-btn i {
+  font-size: 60px !important;
 }
 
 /* Group delete button */

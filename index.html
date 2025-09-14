@@ -321,8 +321,12 @@
       <div class="mute-overlay"></div>
       <!-- Row 2: Player Tabs with Chevron Navigation - 5 Areas -->
       <div class="player-tabs-section">
-        <!-- Area 1: Blank area for future use -->
-        <div class="row2-area1"></div>
+        <!-- Area 1: Save player settings icon -->
+        <div class="row2-area1">
+          <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player">
+            <i class="ph-thin ph-floppy-disk"></i>
+          </button>
+        </div>
         <!-- Area 2: Left chevron for player navigation -->
         <div class="row2-area2">
           <button class="player-nav-btn player-nav-prev" id="player-prev-btn">
@@ -348,10 +352,11 @@
             <i class="ph-thin ph-caret-right"></i>
           </button>
         </div>
-        <!-- Area 5: Save player settings icon -->
+        <!-- Area 5: Mute/Unmute drummer icon -->
         <div class="row2-area5">
-          <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player">
-            <i class="ph-thin ph-floppy-disk"></i>
+          <button class="mute-drummer-btn" id="mute-drummer-btn">
+            <i class="ph-thin ph-speaker-high mute-icon-unmuted"></i>
+            <i class="ph-thin ph-speaker-slash mute-icon-muted"></i>
           </button>
         </div>
       </div>
@@ -394,12 +399,8 @@
         <!-- Area 4: Empty (save button moved to row2) -->
         <div class="row3-area-4">
         </div>
-        <!-- Area 5: Mute/Unmute drummer icon (right-aligned) -->
+        <!-- Area 5: Empty -->
         <div class="row3-area-5">
-          <button class="mute-drummer-btn" id="mute-drummer-btn">
-            <i class="ph-thin ph-speaker-high mute-icon-unmuted"></i>
-            <i class="ph-thin ph-speaker-slash mute-icon-muted"></i>
-          </button>
         </div>
       </div>
       <!-- Row 4: Pattern Groups - 50/50 Split -->
