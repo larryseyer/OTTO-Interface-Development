@@ -7951,11 +7951,18 @@ class OTTOAccurateInterface {
     }
 
     // Edit kit buttons - Use WindowManager to handle the panel
-    document.querySelectorAll(".edit-btn").forEach((editBtn) => {
+    const editButtons = document.querySelectorAll(".edit-btn");
+    console.log('Found edit buttons:', editButtons.length);
+    editButtons.forEach((editBtn) => {
+      console.log('Setting up edit button:', editBtn);
       const editHandler = () => {
+        console.log('Edit button clicked!');
         // Use WindowManager to open the kit edit panel
         if (this.windowManager) {
+          console.log('Calling windowManager.openWindow("panel", "kit-edit")');
           this.windowManager.openWindow("panel", "kit-edit");
+        } else {
+          console.error('WindowManager not available!');
         }
         this.onEditKit(this.currentPlayer);
         debugLog(`Edit kit for Player ${this.currentPlayer}`);

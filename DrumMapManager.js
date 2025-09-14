@@ -72,10 +72,11 @@ class DrumMapManager {
   }
 
   loadCustomMaps() {
-    const stored = this.storageManager.get('customDrumMaps');
+    const stored = this.storageManager.load('customDrumMaps');
     if (stored) {
       try {
-        const maps = JSON.parse(stored);
+        // StorageManager.load already returns parsed data
+        const maps = typeof stored === 'string' ? JSON.parse(stored) : stored;
         Object.entries(maps).forEach(([id, map]) => {
           this.customMaps.set(id, map);
         });
@@ -90,7 +91,7 @@ class DrumMapManager {
     this.customMaps.forEach((map, id) => {
       maps[id] = map;
     });
-    this.storageManager.set('customDrumMaps', JSON.stringify(maps));
+    this.storageManager.save('customDrumMaps', maps);
   }
 
   getGeneralMidiMap() {
