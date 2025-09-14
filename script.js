@@ -3976,6 +3976,35 @@ class OTTOAccurateInterface {
       // Also store globally for debugging
       window.otto = this;
 
+      // Add test function for debugging
+      window.testDrumPanel = () => {
+        console.log('Testing drum panel...');
+        const panel = document.getElementById('kit-edit-panel');
+        console.log('Panel element:', panel);
+        if (panel) {
+          console.log('Current classes:', panel.className);
+          console.log('Adding active class...');
+          panel.classList.add('active');
+          console.log('New classes:', panel.className);
+
+          // Try to initialize drum UI
+          if (this.drumMapUI) {
+            console.log('Initializing drum UI...');
+            this.drumMapUI.initialize();
+          }
+        }
+
+        // Also test close button
+        const closeBtn = document.getElementById('kit-edit-panel-close');
+        console.log('Close button:', closeBtn);
+        if (closeBtn) {
+          closeBtn.onclick = () => {
+            console.log('Close button clicked (manual handler)');
+            panel?.classList.remove('active');
+          };
+        }
+      };
+
       // Enable auto-save for custom maps
       this.drumMapManager.addListener((event, data) => {
         if (event === 'mapUpdated' || event === 'mapCreated') {

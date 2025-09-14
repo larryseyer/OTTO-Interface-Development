@@ -345,6 +345,8 @@ class WindowManager {
     const key = `${type}-${name}`;
     const config = this.registry[key];
 
+    console.log(`Opening window: ${key}`, config);
+
     if (!config) {
       console.error(`Window not registered: ${key}`);
       return false;
@@ -376,12 +378,15 @@ class WindowManager {
 
     // Get element
     const element = this.getElement(config);
+    console.log(`Element for ${key}:`, element, 'Config:', config.element || config.elementClass);
+
     if (!element) {
-      console.error(`Element not found for ${key}: ${config.element}`);
+      console.error(`Element not found for ${key}: ${config.element || config.elementClass}`);
       this.transitioning.delete(key);
       return false;
     }
 
+    console.log(`Adding class '${config.activeClass}' to element`);
     // Open the window
     element.classList.add(config.activeClass);
 
@@ -401,7 +406,10 @@ class WindowManager {
 
     // Run custom onOpen
     if (config.onOpen) {
+      console.log(`Running onOpen callback for ${key}`);
       config.onOpen();
+    } else {
+      console.log(`No onOpen callback for ${key}`);
     }
 
     // Wait for transition
