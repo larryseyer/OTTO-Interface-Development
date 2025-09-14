@@ -2849,11 +2849,12 @@ body {
   position: fixed;
   right: -100%;
   /* Fully hidden off-screen initially */
-  top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height));
-  /* Start at row 4 */
-  width: 50%;
-  height: calc(var(--row4-height) + var(--row5-height));
-  /* Cover rows 4 and 5 */
+  top: calc(var(--interface-height) * 0.36);
+  /* Start at top of row 4 (10% + 8% + 18% = 36%) */
+  width: calc(var(--interface-width) * 0.5);
+  /* Exactly 50% of interface width */
+  height: calc(var(--interface-height) * 0.59);
+  /* Cover rows 4 and 5 (12% + 47% = 59%) */
   background: var(--bg-primary);
   border-left: 2px solid var(--border-color);
   box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
@@ -2865,8 +2866,8 @@ body {
 }
 
 .pattern-edit-panel.active {
-  right: 0;
-  /* Slide in when active */
+  right: calc(50% - var(--interface-width) * 0.5);
+  /* Slide in to align with right half of interface */
 }
 
 .panel-header {
