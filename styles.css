@@ -3810,7 +3810,8 @@ body {
 #mixer-panel {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
   width: 1280px;
   height: 720px;
   background: var(--bg-primary);
@@ -3818,7 +3819,6 @@ body {
   box-shadow: none; /* Removed inner border shadow */
   box-sizing: border-box;
   z-index: 100;
-  transform: translateY(100%);
   transition: transform 0.3s ease-in-out, visibility 0.3s, opacity 0.3s ease-in-out;
   display: flex; /* Always flex, control visibility with transform */
   flex-direction: column;
@@ -3829,7 +3829,7 @@ body {
 }
 
 #mixer-panel.active {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
   z-index: 9999;
   visibility: visible;
   opacity: 1;
