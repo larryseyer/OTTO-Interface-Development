@@ -199,9 +199,19 @@ class WindowManager {
       buttonActiveClass: "panel-active",
       multipleButtons: true,
       onOpen: () => {
+        console.log('Kit-edit panel onOpen callback triggered');
+        console.log('this.otto:', this.otto);
+        console.log('this.otto.drumMapUI:', this.otto?.drumMapUI);
+
         // Initialize drum mapping UI when opened
-        if (this.otto.drumMapUI) {
+        if (this.otto && this.otto.drumMapUI) {
+          console.log('Calling drumMapUI.initialize()');
           this.otto.drumMapUI.initialize();
+        } else {
+          console.error('DrumMapUI not available:', {
+            otto: !!this.otto,
+            drumMapUI: !!this.otto?.drumMapUI
+          });
         }
       },
     });
@@ -651,13 +661,17 @@ class WindowManager {
       if (config.closeButton) {
         const closeBtn = document.getElementById(config.closeButton);
         if (closeBtn) {
+          console.log(`Setting up close button for ${key}:`, config.closeButton);
           const handler = (e) => {
+            console.log(`Close button clicked for ${key}`);
             e.preventDefault();
             e.stopPropagation();
             this.closeWindow(type, name);
           };
           closeBtn.addEventListener("click", handler);
           this.listeners.push({ element: closeBtn, event: "click", handler });
+        } else {
+          console.warn(`Close button not found for ${key}:`, config.closeButton);
         }
       }
 

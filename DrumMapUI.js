@@ -13,12 +13,20 @@ class DrumMapUI {
   }
 
   initialize() {
-    if (this.initialized) return;
+    console.log('DrumMapUI.initialize() called, initialized:', this.initialized);
+    if (this.initialized) {
+      console.log('Already initialized, returning');
+      return;
+    }
 
+    console.log('Creating UI structure...');
     this.createUIStructure();
+    console.log('Attaching event listeners...');
     this.attachEventListeners();
+    console.log('Loading current map...');
     this.loadCurrentMap();
     this.initialized = true;
+    console.log('DrumMapUI initialization complete');
   }
 
   createUIStructure() {

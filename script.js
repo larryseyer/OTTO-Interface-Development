@@ -3936,7 +3936,9 @@ class OTTOAccurateInterface {
       this.midiTranslator = new MidiTranslator(this.drumMapManager, this.drumMapPresets);
 
       // Initialize drum map UI
+      console.log('Creating DrumMapUI instance...');
       this.drumMapUI = new DrumMapUI(this.drumMapManager, this.sfzEditor, this.midiTranslator);
+      console.log('DrumMapUI instance created:', this.drumMapUI);
 
       // Initialize advanced features
       this.drumMapAdvanced = new DrumMapAdvanced(
@@ -3963,9 +3965,16 @@ class OTTOAccurateInterface {
 
       // Store reference in window manager for panel open hook
       if (this.windowManager) {
+        // Ensure otto object exists
+        if (!this.windowManager.otto) {
+          this.windowManager.otto = this;
+        }
         this.windowManager.otto.drumMapUI = this.drumMapUI;
         this.windowManager.otto.drumMapAdvanced = this.drumMapAdvanced;
       }
+
+      // Also store globally for debugging
+      window.otto = this;
 
       // Enable auto-save for custom maps
       this.drumMapManager.addListener((event, data) => {
@@ -7916,8 +7925,8 @@ class OTTOAccurateInterface {
     document.querySelectorAll(".edit-btn").forEach((editBtn) => {
       const editHandler = () => {
         // Use WindowManager to open the kit edit panel
-        if (window.windowManager) {
-          window.windowManager.openWindow("panel", "kit-edit");
+        if (this.windowManager) {
+          this.windowManager.openWindow("panel", "kit-edit");
         }
         this.onEditKit(this.currentPlayer);
         debugLog(`Edit kit for Player ${this.currentPlayer}`);
