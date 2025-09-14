@@ -17,30 +17,37 @@ class DrumMapUI {
       "DrumMapUI.initialize() called, initialized:",
       this.initialized,
     );
-    if (this.initialized) {
-      console.log("Already initialized, returning");
-      return;
-    }
-
-    console.log("Creating UI structure...");
+    
+    // Always refresh the UI when the panel opens
+    console.log("Creating/refreshing UI structure...");
     this.createUIStructure();
+    
+    // Always re-attach event listeners since we recreated the DOM
     console.log("Attaching event listeners...");
     this.attachEventListeners();
+    
+    if (!this.initialized) {
+      this.initialized = true;
+    }
+    
     console.log("Loading current map...");
     this.loadCurrentMap();
-    this.initialized = true;
-    console.log("DrumMapUI initialization complete");
+    console.log("DrumMapUI initialization/refresh complete");
   }
 
   createUIStructure() {
     const panel = document.getElementById("kit-edit-panel");
+    console.log("createUIStructure - panel found:", !!panel);
     if (!panel) return;
 
     const panelBody = panel.querySelector(".panel-body");
+    console.log("createUIStructure - panelBody found:", !!panelBody);
+    console.log("createUIStructure - panelBody current content:", panelBody?.innerHTML?.substring(0, 100));
     if (!panelBody) return;
 
     // Clear placeholder content
     panelBody.innerHTML = "";
+    console.log("createUIStructure - cleared panelBody");
 
     // Create main container
     const container = document.createElement("div");
@@ -130,11 +137,18 @@ class DrumMapUI {
     `;
 
     panelBody.appendChild(container);
+    console.log("createUIStructure - container added to panelBody");
 
     // Generate UI elements
+    console.log("createUIStructure - generating note grid...");
     this.generateNoteGrid();
+    console.log("createUIStructure - generating mixer channels...");
     this.generateMixerChannels();
+    console.log("createUIStructure - updating map selector...");
     this.updateMapSelector();
+    console.log("createUIStructure - populating sample library...");
+    this.populateSampleLibrary();
+    console.log("createUIStructure - complete!");
   }
 
   generateNoteGrid() {
@@ -177,6 +191,7 @@ class DrumMapUI {
 
   generateMixerChannels() {
     const container = document.getElementById("mixer-channels");
+    console.log("generateMixerChannels - container found:", !!container);
     if (!container) return;
 
     container.innerHTML = "";
@@ -187,83 +202,146 @@ class DrumMapUI {
       channelDiv.dataset.channel = channel;
 
       const color = this.drumMapManager.channelColors[channel];
-      channelDiv.style.borderColor = color;
-
-      channelDiv.innerHTML = `
-        <div class="channel-header" style="background: ${color}20;">
-          <span class="channel-name">${this.formatChannelName(channel)}</span>
-          <span class="channel-note-count">0</span>
-        </div>
-        <div class="channel-notes" data-channel="${channel}">
-          <!-- Assigned notes will appear here -->
-        </div>
-        <div class="channel-actions">
-          <button class="btn-small clear-channel" data-channel="${channel}">Clear</button>
-        </div>
+      const channelName = this.formatChannelName(channel);
+      
+      // Create a simple colored bar with text overlay
+      channelDiv.style.cssText = `
+        background: linear-gradient(90deg, ${color}cc, ${color}88);
+        border: 2px solid ${color};
+        border-radius: 6px;
+        min-height: 40px;
+        margin-bottom: 4px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
       `;
 
+      // Add the channel name as white text directly
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = channelName;
+      nameSpan.style.cssText = `
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        z-index: 10;
+        pointer-events: none;
+      `;
+      
+      // Add note count badge
+      const countSpan = document.createElement("span");
+      countSpan.className = "channel-note-count";
+      countSpan.textContent = "0";
+      countSpan.style.cssText = `
+        position: absolute;
+        right: 12px;
+        background: rgba(0,0,0,0.5);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        pointer-events: none;
+      `;
+      
+      channelDiv.appendChild(nameSpan);
+      channelDiv.appendChild(countSpan);
+      
+      // Store the channel name for drag/drop
+      channelDiv.dataset.channel = channel;
+
       container.appendChild(channelDiv);
+      console.log(`Added channel ${channel}: ${channelName} with color ${color}`);
     });
 
     this.updateChannelDisplay();
   }
 
   attachEventListeners() {
-    // Close button handler (fallback in case WindowManager doesn't work)
+    // Close button handler
     const closeBtn = document.getElementById("kit-edit-panel-close");
     if (closeBtn) {
-      console.log("Setting up close button handler in DrumMapUI");
-      closeBtn.addEventListener("click", (e) => {
-        console.log("Close button clicked (DrumMapUI handler)");
+      closeBtn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
         const panel = document.getElementById("kit-edit-panel");
         if (panel) {
           panel.classList.remove("active");
         }
-      });
+      };
     }
 
     // Map selector
     const mapSelector = document.getElementById("drum-map-selector");
     if (mapSelector) {
-      mapSelector.addEventListener("change", (e) =>
-        this.onMapSelected(e.target.value),
-      );
+      mapSelector.onchange = (e) => this.onMapSelected(e.target.value);
     }
 
-    // Keyboard shortcuts
-    this.attachKeyboardShortcuts();
+    // Map action buttons
+    const newMapBtn = document.getElementById("new-map-btn");
+    if (newMapBtn) {
+      newMapBtn.onclick = () => this.createNewMap();
+    }
 
-    // Map actions
-    this.attachButtonListener("new-map-btn", () => this.createNewMap());
-    this.attachButtonListener("duplicate-map-btn", () =>
-      this.duplicateCurrentMap(),
-    );
-    this.attachButtonListener("delete-map-btn", () => this.deleteCurrentMap());
-    this.attachButtonListener("import-map-btn", () => this.importMap());
-    this.attachButtonListener("export-map-btn", () => this.exportMap());
-    this.attachButtonListener("midi-learn-btn", () => this.toggleMidiLearn());
+    const duplicateBtn = document.getElementById("duplicate-map-btn");
+    if (duplicateBtn) {
+      duplicateBtn.onclick = () => this.duplicateCurrentMap();
+    }
+
+    const deleteBtn = document.getElementById("delete-map-btn");
+    if (deleteBtn) {
+      deleteBtn.onclick = () => this.deleteCurrentMap();
+    }
+
+    const importBtn = document.getElementById("import-map-btn");
+    if (importBtn) {
+      importBtn.onclick = () => this.importMap();
+    }
+
+    const exportBtn = document.getElementById("export-map-btn");
+    if (exportBtn) {
+      exportBtn.onclick = () => this.exportMap();
+    }
+
+    const midiLearnBtn = document.getElementById("midi-learn-btn");
+    if (midiLearnBtn) {
+      midiLearnBtn.onclick = () => this.toggleMidiLearn();
+    }
 
     // View mode buttons
-    this.attachButtonListener("grid-view-btn", () => this.setViewMode("grid"));
-    this.attachButtonListener("list-view-btn", () => this.setViewMode("list"));
-    this.attachButtonListener("piano-view-btn", () =>
-      this.setViewMode("piano"),
-    );
+    const gridViewBtn = document.getElementById("grid-view-btn");
+    if (gridViewBtn) {
+      gridViewBtn.onclick = () => this.setViewMode("grid");
+    }
 
-    // Note grid interactions
+    const listViewBtn = document.getElementById("list-view-btn");
+    if (listViewBtn) {
+      listViewBtn.onclick = () => this.setViewMode("list");
+    }
+
+    const pianoViewBtn = document.getElementById("piano-view-btn");
+    if (pianoViewBtn) {
+      pianoViewBtn.onclick = () => this.setViewMode("piano");
+    }
+
+    // Note grid interactions - use event delegation for dynamically created elements
     const noteGrid = document.getElementById("note-grid-container");
     if (noteGrid) {
-      noteGrid.addEventListener("click", (e) => {
+      // Click handler for note selection
+      noteGrid.onclick = (e) => {
         const noteBtn = e.target.closest(".note-btn");
         if (noteBtn) {
-          this.selectNote(parseInt(noteBtn.dataset.note));
+          const noteNumber = parseInt(noteBtn.dataset.note);
+          this.selectNote(noteNumber);
         }
-      });
+      };
 
       // Drag and drop for notes
-      noteGrid.addEventListener("dragstart", (e) => {
+      noteGrid.ondragstart = (e) => {
         const noteBtn = e.target.closest(".note-btn");
         if (noteBtn) {
           this.draggedElement = {
@@ -271,55 +349,89 @@ class DrumMapUI {
             note: parseInt(noteBtn.dataset.note),
           };
           e.dataTransfer.effectAllowed = "copy";
+          e.dataTransfer.setData("text/plain", noteBtn.dataset.note);
+          console.log("Dragging note:", this.draggedElement.note);
         }
-      });
+      };
+
+      noteGrid.ondragend = (e) => {
+        this.draggedElement = null;
+      };
     }
 
     // Mixer channel interactions
     const mixerChannels = document.getElementById("mixer-channels");
     if (mixerChannels) {
-      // Drop zones for channels
-      mixerChannels.addEventListener("dragover", (e) => {
+      // Allow drop on mixer channels
+      mixerChannels.ondragover = (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
-      });
+        
+        // Highlight the channel being hovered
+        const channel = e.target.closest(".mixer-channel");
+        if (channel) {
+          channel.style.opacity = "0.8";
+          channel.style.transform = "scale(1.02)";
+        }
+      };
 
-      mixerChannels.addEventListener("drop", (e) => {
+      mixerChannels.ondragleave = (e) => {
+        const channel = e.target.closest(".mixer-channel");
+        if (channel) {
+          channel.style.opacity = "1";
+          channel.style.transform = "scale(1)";
+        }
+      };
+
+      mixerChannels.ondrop = (e) => {
         e.preventDefault();
         const channel = e.target.closest(".mixer-channel");
-        if (channel && this.draggedElement) {
-          this.assignNoteToChannel(
-            this.draggedElement.note,
-            channel.dataset.channel,
-          );
+        if (channel) {
+          channel.style.opacity = "1";
+          channel.style.transform = "scale(1)";
+          
+          if (this.draggedElement && this.draggedElement.type === "note") {
+            const channelName = channel.dataset.channel;
+            console.log("Dropping note", this.draggedElement.note, "on channel", channelName);
+            this.assignNoteToChannel(this.draggedElement.note, channelName);
+          }
         }
-      });
+        this.draggedElement = null;
+      };
 
       // Clear channel buttons
-      mixerChannels.addEventListener("click", (e) => {
+      mixerChannels.onclick = (e) => {
         if (e.target.classList.contains("clear-channel")) {
           this.clearChannel(e.target.dataset.channel);
         }
-      });
+      };
     }
 
     // Preview controls
-    this.attachButtonListener("preview-note-btn", () =>
-      this.previewSelectedNote(),
-    );
+    const previewBtn = document.getElementById("preview-note-btn");
+    if (previewBtn) {
+      previewBtn.onclick = () => this.previewSelectedNote();
+    }
 
     const velocitySlider = document.getElementById("preview-velocity");
     if (velocitySlider) {
-      velocitySlider.addEventListener("input", (e) => {
-        document.getElementById("velocity-display").textContent =
-          e.target.value;
-      });
+      velocitySlider.oninput = (e) => {
+        const display = document.getElementById("velocity-display");
+        if (display) {
+          display.textContent = e.target.value;
+        }
+      };
     }
 
-    // Listen to drum map manager events
-    this.drumMapManager.addListener((event, data) =>
-      this.handleMapEvent(event, data),
-    );
+    // Keyboard shortcuts
+    this.attachKeyboardShortcuts();
+
+    // Listen to drum map manager events (only if not already listening)
+    if (!this.initialized) {
+      this.drumMapManager.addListener((event, data) =>
+        this.handleMapEvent(event, data),
+      );
+    }
   }
 
   attachButtonListener(id, handler) {
@@ -628,6 +740,33 @@ class DrumMapUI {
       if (countElement) {
         countElement.textContent = data.notes.length;
       }
+    });
+  }
+
+  populateSampleLibrary() {
+    const sampleList = document.getElementById("sample-list");
+    if (!sampleList) return;
+
+    // For now, show a list of common drum samples
+    const samples = [
+      "kick.wav", "kick2.wav", "snare.wav", "snare2.wav",
+      "hihat_closed.wav", "hihat_open.wav", "hihat_pedal.wav",
+      "tom_high.wav", "tom_mid.wav", "tom_low.wav",
+      "crash.wav", "crash2.wav", "ride.wav", "ride_bell.wav",
+      "clap.wav", "cowbell.wav", "tambourine.wav", "splash.wav"
+    ];
+
+    sampleList.innerHTML = "";
+    samples.forEach(sample => {
+      const sampleItem = document.createElement("div");
+      sampleItem.className = "sample-item";
+      sampleItem.style.cssText = "padding: 5px 10px; cursor: pointer; color: var(--text-secondary); font-size: 12px; hover: background: var(--bg-secondary);";
+      sampleItem.textContent = sample;
+      sampleItem.onclick = () => {
+        console.log("Selected sample:", sample);
+        this.updateStatus(`Selected: ${sample}`);
+      };
+      sampleList.appendChild(sampleItem);
     });
   }
 
