@@ -5338,6 +5338,7 @@ class OTTOAccurateInterface {
       );
       this.presets[this.currentPreset] = preset;
       this.savePresetsToStorage();
+      this.showNotification(`Saved preset "${preset.name}"`, "success");
       return preset;
     } finally {
       // Always clear the flag
@@ -5347,7 +5348,7 @@ class OTTOAccurateInterface {
 
   saveCurrentPreset() {
     const preset = this.savePreset();
-    this.showNotification(`Preset "${preset.name}" saved`);
+    // Notification is now shown in savePreset()
     this.renderPresetList();
   }
 
@@ -5532,7 +5533,10 @@ class OTTOAccurateInterface {
         debugLog(
           `Successfully loaded preset "${preset.name}" (version ${version})`,
         );
-        this.showNotification(`Loaded preset "${preset.name}"`);
+        // Only show notification if not during initial load
+        if (!this.isInitialLoad) {
+          this.showNotification(`Loaded preset "${preset.name}"`);
+        }
 
         return true;
       } catch (error) {
@@ -5563,8 +5567,9 @@ class OTTOAccurateInterface {
     debugLog("Current preset:", this.currentPreset);
     debugLog("Available presets:", Object.keys(this.presets || {}));
 
-    // Set a flag to bypass lock checking during initial preset load
+    // Set flags to bypass lock checking and suppress notifications during initial preset load
     this.bypassLockCheck = true;
+    this.isInitialLoad = true;
 
     // Check if we have a saved current preset
     if (
@@ -5579,10 +5584,12 @@ class OTTOAccurateInterface {
         .then(() => {
           debugLog(`Successfully loaded preset: ${this.currentPreset}`);
           this.bypassLockCheck = false;
+          this.isInitialLoad = false;
         })
         .catch((error) => {
           debugError("Failed to load last used preset:", error);
           this.bypassLockCheck = false;
+          this.isInitialLoad = false;
           // If loading fails, try to load the default preset
           if (this.currentPreset !== "default" && this.presets["default"]) {
             debugLog("Falling back to default preset");
@@ -5590,10 +5597,12 @@ class OTTOAccurateInterface {
             this.loadPreset("default")
               .then(() => {
                 this.bypassLockCheck = false;
+                this.isInitialLoad = false;
               })
               .catch((err) => {
                 debugError("Failed to load default preset:", err);
                 this.bypassLockCheck = false;
+                this.isInitialLoad = false;
               });
           }
         });
@@ -5604,14 +5613,17 @@ class OTTOAccurateInterface {
         .then(() => {
           debugLog("Successfully loaded default preset");
           this.bypassLockCheck = false;
+          this.isInitialLoad = false;
         })
         .catch((error) => {
           debugError("Failed to load default preset:", error);
           this.bypassLockCheck = false;
+          this.isInitialLoad = false;
         });
     } else {
       debugWarn("No presets available to load");
       this.bypassLockCheck = false;
+      this.isInitialLoad = false;
     }
   }
 
