@@ -63,6 +63,29 @@ class MixerComponent {
 
     // Initialize synchronously so presetManager is available immediately
     this.initializePresetManager();
+
+    // Initialize the volume slider with the current volume after DOM is ready
+    // Use requestAnimationFrame to ensure DOM updates are complete
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        this.initializeVolumeSlider();
+      }, 50);
+    });
+  }
+  initializeVolumeSlider() {
+    if (this.otto && this.otto.playerStates && this.otto.currentPlayer) {
+      const currentVolume = this.otto.playerStates[this.otto.currentPlayer]?.sliderValues?.volume || 75;
+      console.log('Initializing volume slider with value:', currentVolume);
+      this.updateMasterVolumeSlider(currentVolume);
+    }
+  }
+
+  initializeVolumeSlider() {
+    if (this.otto && this.otto.playerStates && this.otto.currentPlayer) {
+      const currentVolume = this.otto.playerStates[this.otto.currentPlayer]?.sliderValues?.volume || 75;
+      console.log('Initializing volume slider with value:', currentVolume);
+      this.updateMasterVolumeSlider(currentVolume);
+    }
   }
 
   initializePresetManager() {
@@ -1026,6 +1049,29 @@ class MixerComponent {
     if (mixerPreset && mixerPreset.channels) {
       this.updateMixerUI(mixerPreset.channels);
     }
+
+    // Sync the mixer's master fader with the current volume slider value
+    // They represent the same thing - the master output level
+    if (this.otto && this.otto.playerStates && this.otto.currentPlayer) {
+      const currentVolume = this.otto.playerStates[this.otto.currentPlayer]?.sliderValues?.volume || 75;
+      
+      // Update the master channel in the mixer to match the volume slider
+      const masterStrip = this.channelElements["master"];
+      if (masterStrip) {
+        const fader = masterStrip.querySelector(".fader-thumb");
+        const faderValue = masterStrip.querySelector(".fader-value");
+        
+        if (fader && faderValue) {
+          const track = fader.parentElement;
+          const y = (currentVolume / 100) * track.offsetHeight;
+          fader.style.bottom = `${y - 10}px`;
+          faderValue.textContent = currentVolume.toFixed(1);
+        }
+      }
+      
+      // Also ensure the volume slider visual is correct
+      this.updateMasterVolumeSlider(currentVolume);
+    }
   }
 
   updateMixerUI(channels) {
@@ -1404,33 +1450,43 @@ class MixerComponent {
   }
 
   updateMasterVolumeSlider(value) {
-    // Find the master volume slider in row5-right-area5
+    // Simply update the volume slider to reflect the master channel value
     const volumeSlider = document.querySelector(
       '.row5-right-area5 .custom-slider[data-param="volume"]',
     );
+    
     if (volumeSlider) {
-      // Update the data-value attribute
-      volumeSlider.setAttribute("data-value", value);
+      // Update the data attributes to keep them in sync
+      volumeSlider.dataset.value = value;
+      volumeSlider.currentValue = value;
 
       // Update the visual elements
       const fill = volumeSlider.querySelector(".slider-fill");
       const thumb = volumeSlider.querySelector(".slider-thumb");
+      
+      // Calculate percentage for positioning
+      const min = parseInt(volumeSlider.dataset.min) || 0;
+      const max = parseInt(volumeSlider.dataset.max) || 100;
+      const percentage = ((value - min) / (max - min)) * 100;
 
       if (fill) {
-        fill.style.width = `${value}%`;
+        fill.style.height = `${percentage}%`;
       }
+      
       if (thumb) {
-        thumb.style.left = `${value}%`;
+        thumb.style.bottom = `${percentage}%`;
+        // Keep the centering transform from CSS
+        thumb.style.transform = 'translateX(-50%) translateY(50%)';
+        // Ensure thumb is visible
+        thumb.style.display = 'block';
+        thumb.style.opacity = '1';
+        thumb.style.visibility = 'visible';
       }
 
-      // Trigger the otto slider update method if available
-      if (this.otto.updateCustomSlider) {
-        this.otto.updateCustomSlider(volumeSlider, value);
-      }
-
-      // Also trigger any JUCE callbacks if needed
-      if (this.otto.propagateSliderValue) {
-        this.otto.propagateSliderValue("volume", value, false);
+      // Update the player state to keep it in sync
+      // This represents the master output level for the current player
+      if (this.otto && this.otto.playerStates && this.otto.currentPlayer) {
+        this.otto.playerStates[this.otto.currentPlayer].sliderValues.volume = value;
       }
     }
   }

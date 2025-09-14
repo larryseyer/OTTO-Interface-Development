@@ -6683,6 +6683,14 @@ class OTTOAccurateInterface {
           setTimeout(() => {
             // Switch to the saved player to properly update tabs and UI
             this.switchToPlayer(this.currentPlayer);
+
+            // Ensure volume slider is properly initialized
+            const volumeSlider = document.querySelector('.custom-slider[data-param="volume"]');
+            if (volumeSlider && this.playerStates && this.currentPlayer) {
+              const volumeValue = this.playerStates[this.currentPlayer]?.sliderValues?.volume || 75;
+              this.updateCustomSlider(volumeSlider, volumeValue);
+              console.log('Initialized volume slider on startup with value:', volumeValue);
+            }
           }, 50);
         }
       }, 100); // Small delay to ensure everything is initialized
@@ -8872,8 +8880,27 @@ class OTTOAccurateInterface {
       let value = parseInt(slider.dataset.value) || 50;
       const param = slider.dataset.param;
 
+      console.log(`Setting up slider: ${param}, value: ${value}, thumb exists: ${!!thumb}`);
+
       // Initialize visual state
       this.updateCustomSlider(slider, value);
+
+      // For volume slider, ensure it's visible
+      if (param === "volume" && thumb) {
+        console.log("Ensuring volume slider thumb is visible");
+        thumb.style.display = 'block';
+        thumb.style.opacity = '1';
+        thumb.style.visibility = 'visible';
+
+        // Log the computed styles to debug
+        setTimeout(() => {
+          const computedStyle = window.getComputedStyle(thumb);
+          console.log(`Volume thumb computed display: ${computedStyle.display}`);
+          console.log(`Volume thumb computed opacity: ${computedStyle.opacity}`);
+          console.log(`Volume thumb computed visibility: ${computedStyle.visibility}`);
+          console.log(`Volume thumb computed bottom: ${computedStyle.bottom}`);
+        }, 100);
+      }
 
       // Handle mouse down on thumb
       const startDrag = (e) => {
@@ -8894,7 +8921,8 @@ class OTTOAccurateInterface {
         dragState.currentSlider = slider;
         dragState.currentParam = param;
         dragState.startY = e.clientY;
-        dragState.startValue = value;
+        // Use the current value from the slider, not the initial value
+        dragState.startValue = parseInt(slider.dataset.value) || parseInt(slider.currentValue) || value;
         dragState.min = min;
         dragState.max = max;
 
@@ -8959,13 +8987,35 @@ class OTTOAccurateInterface {
 
     const min = parseInt(slider.dataset.min) || 0;
     const max = parseInt(slider.dataset.max) || 100;
+    
+    // Ensure value is within bounds
+    value = Math.max(min, Math.min(max, value));
+    
     const percentage = ((value - min) / (max - min)) * 100;
+    
+    // Clamp percentage to 0-100 to prevent going past boundaries
+    const clampedPercentage = Math.max(0, Math.min(100, percentage));
 
     // Update fill height (light grey below thumb)
-    fill.style.height = `${percentage}%`;
+    if (fill) {
+      fill.style.height = `${clampedPercentage}%`;
+    }
 
     // Update thumb position
-    thumb.style.bottom = `${percentage}%`;
+    if (thumb) {
+      // For vertical sliders, the thumb moves from bottom (0%) to top (100%)
+      // But we need to account for the thumb's own height
+      // The transform translateY(50%) moves it up by half its height
+      // So at 100%, we need to stop it from going past the top
+      thumb.style.bottom = `${clampedPercentage}%`;
+      // Keep the centering transform
+      thumb.style.transform = 'translateX(-50%) translateY(50%)';
+      
+      // Ensure thumb is visible
+      thumb.style.display = 'block';
+      thumb.style.opacity = '1';
+      thumb.style.visibility = 'visible';
+    }
 
     // Store current value
     slider.currentValue = value;

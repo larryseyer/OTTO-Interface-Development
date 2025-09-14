@@ -1265,6 +1265,33 @@ body {
   padding: 0;
 }
 
+/* Add margins to separate chevrons from dropdown */
+.kit-nav-btn.kit-prev {
+  margin-right: 15px;
+  /* Space between left chevron and dropdown */
+  margin-left: 10px;
+  /* Space between edit icon and left chevron */
+}
+
+.kit-nav-btn.kit-next {
+  margin-left: 15px;
+  /* Space between dropdown and right chevron */
+  margin-right: 10px;
+  /* Space between right chevron and mixer icon */
+}
+
+/* Add spacing for kit edit button next to left chevron */
+.kit-edit-btn {
+  margin-right: 5px;
+  /* Small space before left chevron */
+}
+
+/* Add spacing for kit mixer button next to right chevron */
+.kit-mixer-btn {
+  margin-left: 5px;
+  /* Small space after right chevron */
+}
+
 .kit-nav-btn:hover {
   transform: scale(var(--row1-hover-scale));
 }
@@ -1293,6 +1320,8 @@ body {
   /* Take available space between chevrons */
   min-width: 0;
   /* Allow shrinking if needed */
+  max-width: 465px;
+  /* Wider dropdown for better kit name display */
   font-family: "Playfair Display", serif;
   user-select: none;
   -webkit-user-select: none;
@@ -1914,10 +1943,11 @@ body {
   position: relative;
   width: 32px;
   /* Width for click area */
-  height: calc(100vh * 0.55 * 0.6 - 40px);
-  /* Same height as before */
+  /* Row5 is 47% of interface (720px) = 338px, minus icon (40px), gap (6px), and padding (20px top/bottom) */
+  height: calc(var(--interface-height) * 0.47 - 86px);
+  /* This should be about 252px */
   min-height: 200px;
-  max-height: 400px;
+  max-height: 260px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1958,8 +1988,8 @@ body {
 .slider-thumb {
   position: absolute;
   left: 50%;
-  bottom: 50%;
-  /* Will be updated dynamically */
+  bottom: 0;
+  /* Start at bottom, will be updated dynamically */
   transform: translateX(-50%) translateY(50%);
   width: 30px;
   height: 24px;
