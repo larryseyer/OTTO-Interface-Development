@@ -3,32 +3,36 @@
  * Eliminates DOM-based state tracking and prevents synchronization issues
  */
 class WindowManager {
-  constructor(ottoInterface) {
-    this.otto = ottoInterface;
+  constructor(otto) {
+    // Store reference to OTTO interface
+    this.otto = otto;
 
-    // Window state tracking
+    // Window registry - stores configuration for each window
+    this.registry = {};
+
+    // State tracking
     this.states = {
       panels: {},
+      modals: {},
       dropdowns: {},
       overlays: {},
     };
 
-    // Window registry with configurations
-    this.registry = {};
-
-    // Mutex groups for exclusive windows
+    // Mutex groups - only one window in a group can be open at a time
     this.mutexGroups = {
       fullHeightPanels: new Set(),
       partialHeightPanels: new Set(),
       dropdowns: new Set(),
     };
 
-    // Currently active windows for mutex handling
-    this.activeInGroup = {
-      fullHeightPanels: null,
-      partialHeightPanels: null,
-      dropdowns: null,
-    };
+    // Track which window is active in each mutex group
+    this.activeInGroup = {};
+
+    // Track windows that are currently transitioning
+    this.transitioning = new Set();
+
+    // Event listeners storage for cleanup
+    this.listeners = [];
 
     // Lifecycle hooks
     this.hooks = {
@@ -38,14 +42,11 @@ class WindowManager {
       afterClose: {},
     };
 
-    // Event listeners for cleanup
-    this.listeners = [];
-
-    // Animation/transition tracking
-    this.transitioning = new Set();
-
-    // Initialize the window registry
+    // Register all windows
     this.initializeRegistry();
+
+    // Initialize
+    this.init();
   }
 
   /**
@@ -181,7 +182,7 @@ class WindowManager {
         if (kitName && selectedKit) {
           kitName.textContent = selectedKit.textContent;
         }
-        
+
         // Load current kit mixer settings
         if (this.otto.mixerComponent) {
           this.otto.mixerComponent.loadCurrentKitMixer();
@@ -199,18 +200,18 @@ class WindowManager {
       buttonActiveClass: "panel-active",
       multipleButtons: true,
       onOpen: () => {
-        console.log('Kit-edit panel onOpen callback triggered');
-        console.log('this.otto:', this.otto);
-        console.log('this.otto.drumMapUI:', this.otto?.drumMapUI);
+        console.log("Kit-edit panel onOpen callback triggered");
+        console.log("this.otto:", this.otto);
+        console.log("this.otto.drumMapUI:", this.otto?.drumMapUI);
 
         // Initialize drum mapping UI when opened
         if (this.otto && this.otto.drumMapUI) {
-          console.log('Calling drumMapUI.initialize()');
+          console.log("Calling drumMapUI.initialize()");
           this.otto.drumMapUI.initialize();
         } else {
-          console.error('DrumMapUI not available:', {
+          console.error("DrumMapUI not available:", {
             otto: !!this.otto,
-            drumMapUI: !!this.otto?.drumMapUI
+            drumMapUI: !!this.otto?.drumMapUI,
           });
         }
       },
@@ -231,7 +232,8 @@ class WindowManager {
         const deleteBtn = document.getElementById("group-delete-btn");
         if (deleteBtn) {
           // Check if Favorites is currently selected
-          const currentGroup = this.otto.playerStates[this.otto.currentPlayer].patternGroup;
+          const currentGroup =
+            this.otto.playerStates[this.otto.currentPlayer].patternGroup;
           if (currentGroup === "favorites") {
             deleteBtn.style.display = "none";
           } else {
@@ -378,10 +380,17 @@ class WindowManager {
 
     // Get element
     const element = this.getElement(config);
-    console.log(`Element for ${key}:`, element, 'Config:', config.element || config.elementClass);
+    console.log(
+      `Element for ${key}:`,
+      element,
+      "Config:",
+      config.element || config.elementClass,
+    );
 
     if (!element) {
-      console.error(`Element not found for ${key}: ${config.element || config.elementClass}`);
+      console.error(
+        `Element not found for ${key}: ${config.element || config.elementClass}`,
+      );
       this.transitioning.delete(key);
       return false;
     }
@@ -523,7 +532,8 @@ class WindowManager {
     const promises = [];
     for (const key of group) {
       if (key !== exceptKey) {
-        const [type, name] = key.split("-");
+        const [type, ...nameParts] = key.split("-");
+        const name = nameParts.join("-");
         const stateCategory = type + "s";
 
         // Check if state exists before accessing isOpen
@@ -663,13 +673,17 @@ class WindowManager {
   setupEventListeners() {
     // Setup close buttons
     for (const [key, config] of Object.entries(this.registry)) {
-      const [type, name] = key.split("-");
+      const [type, ...nameParts] = key.split("-");
+      const name = nameParts.join("-");
 
       // Close button
       if (config.closeButton) {
         const closeBtn = document.getElementById(config.closeButton);
         if (closeBtn) {
-          console.log(`Setting up close button for ${key}:`, config.closeButton);
+          console.log(
+            `Setting up close button for ${key}:`,
+            config.closeButton,
+          );
           const handler = (e) => {
             console.log(`Close button clicked for ${key}`);
             e.preventDefault();
@@ -679,7 +693,10 @@ class WindowManager {
           closeBtn.addEventListener("click", handler);
           this.listeners.push({ element: closeBtn, event: "click", handler });
         } else {
-          console.warn(`Close button not found for ${key}:`, config.closeButton);
+          console.warn(
+            `Close button not found for ${key}:`,
+            config.closeButton,
+          );
         }
       }
 
@@ -725,10 +742,12 @@ class WindowManager {
         const partialHeight = this.activeInGroup["partialHeightPanels"];
 
         if (fullHeight) {
-          const [type, name] = fullHeight.split("-");
+          const [type, ...nameParts] = fullHeight.split("-");
+          const name = nameParts.join("-");
           this.closeWindow(type, name);
         } else if (partialHeight) {
-          const [type, name] = partialHeight.split("-");
+          const [type, ...nameParts] = partialHeight.split("-");
+          const name = nameParts.join("-");
           this.closeWindow(type, name);
         }
       }
@@ -791,10 +810,12 @@ class WindowManager {
         const partialHeight = this.activeInGroup["partialHeightPanels"];
 
         if (fullHeight) {
-          const [type, name] = fullHeight.split("-");
+          const [type, ...nameParts] = fullHeight.split("-");
+          const name = nameParts.join("-");
           this.closeWindow(type, name);
         } else if (partialHeight) {
-          const [type, name] = partialHeight.split("-");
+          const [type, ...nameParts] = partialHeight.split("-");
+          const name = nameParts.join("-");
           this.closeWindow(type, name);
         }
 

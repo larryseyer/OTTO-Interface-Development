@@ -48,7 +48,6 @@ class DrumkitManager {
     this.loadFromStorage();
   }
 
-
   /**
    * Create default mixer preset
    */
@@ -62,7 +61,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         snare: {
           level: 75,
@@ -70,7 +69,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         sideStick: {
           level: 75,
@@ -78,7 +77,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         hiHat: {
           level: 75,
@@ -86,7 +85,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         tom1: {
           level: 75,
@@ -94,7 +93,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         tom2: {
           level: 75,
@@ -102,7 +101,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         tom3: {
           level: 75,
@@ -110,7 +109,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         tom4: {
           level: 75,
@@ -118,7 +117,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         tom5: {
           level: 75,
@@ -126,7 +125,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         crash1: {
           level: 75,
@@ -134,7 +133,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         crash2: {
           level: 75,
@@ -142,7 +141,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         crash3: {
           level: 75,
@@ -150,7 +149,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         ride: {
           level: 75,
@@ -158,7 +157,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         bell: {
           level: 75,
@@ -166,7 +165,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         splash: {
           level: 75,
@@ -174,7 +173,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         room: {
           level: 75,
@@ -182,7 +181,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         reverb1: {
           level: 75,
@@ -190,7 +189,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         reverb2: {
           level: 75,
@@ -198,7 +197,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         delay: {
           level: 75,
@@ -206,7 +205,7 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
         },
         master: {
           level: 75,
@@ -214,9 +213,9 @@ class DrumkitManager {
           mute: false,
           solo: false,
           sends: { room: 0, reverb1: 0, reverb2: 0, delay: 0 },
-          fx: { eq: false, gate: false, compressor: false, saturation: false }
-        }
-      }
+          fx: { eq: false, gate: false, compressor: false, saturation: false },
+        },
+      },
     };
   }
 
@@ -437,15 +436,15 @@ class DrumkitManager {
       this.drumkits.set(kitKey, {
         key: kitKey,
         name: kitKey,
-        category: 'custom',
+        category: "custom",
         player: 1,
         metadata: {
           addedAt: Date.now(),
           modifiedAt: Date.now(),
-          source: 'auto-created'
+          source: "auto-created",
         },
         mixerPresets: {},
-        selectedMixerPreset: presetName
+        selectedMixerPreset: presetName,
       });
     }
 

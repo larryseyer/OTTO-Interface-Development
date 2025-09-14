@@ -13,35 +13,38 @@ class DrumMapUI {
   }
 
   initialize() {
-    console.log('DrumMapUI.initialize() called, initialized:', this.initialized);
+    console.log(
+      "DrumMapUI.initialize() called, initialized:",
+      this.initialized,
+    );
     if (this.initialized) {
-      console.log('Already initialized, returning');
+      console.log("Already initialized, returning");
       return;
     }
 
-    console.log('Creating UI structure...');
+    console.log("Creating UI structure...");
     this.createUIStructure();
-    console.log('Attaching event listeners...');
+    console.log("Attaching event listeners...");
     this.attachEventListeners();
-    console.log('Loading current map...');
+    console.log("Loading current map...");
     this.loadCurrentMap();
     this.initialized = true;
-    console.log('DrumMapUI initialization complete');
+    console.log("DrumMapUI initialization complete");
   }
 
   createUIStructure() {
-    const panel = document.getElementById('kit-edit-panel');
+    const panel = document.getElementById("kit-edit-panel");
     if (!panel) return;
 
-    const panelBody = panel.querySelector('.panel-body');
+    const panelBody = panel.querySelector(".panel-body");
     if (!panelBody) return;
 
     // Clear placeholder content
-    panelBody.innerHTML = '';
+    panelBody.innerHTML = "";
 
     // Create main container
-    const container = document.createElement('div');
-    container.className = 'drum-map-container';
+    const container = document.createElement("div");
+    container.className = "drum-map-container";
     container.innerHTML = `
       <div class="drum-map-header">
         <div class="map-selector-group">
@@ -135,27 +138,27 @@ class DrumMapUI {
   }
 
   generateNoteGrid() {
-    const container = document.getElementById('note-grid-container');
+    const container = document.getElementById("note-grid-container");
     if (!container) return;
 
     // Create 128 note buttons (8x16 grid)
-    const grid = document.createElement('div');
-    grid.className = 'note-grid';
+    const grid = document.createElement("div");
+    grid.className = "note-grid";
 
     for (let note = 0; note < 128; note++) {
-      const noteBtn = document.createElement('button');
-      noteBtn.className = 'note-btn';
+      const noteBtn = document.createElement("button");
+      noteBtn.className = "note-btn";
       noteBtn.dataset.note = note;
       noteBtn.title = this.getNoteDisplay(note);
 
       // Add note number display
-      const noteNum = document.createElement('span');
-      noteNum.className = 'note-number';
+      const noteNum = document.createElement("span");
+      noteNum.className = "note-number";
       noteNum.textContent = note;
 
       // Add note name display
-      const noteName = document.createElement('span');
-      noteName.className = 'note-name';
+      const noteName = document.createElement("span");
+      noteName.className = "note-name";
       noteName.textContent = this.getNoteName(note);
 
       noteBtn.appendChild(noteNum);
@@ -167,19 +170,19 @@ class DrumMapUI {
       grid.appendChild(noteBtn);
     }
 
-    container.innerHTML = '';
+    container.innerHTML = "";
     container.appendChild(grid);
   }
 
   generateMixerChannels() {
-    const container = document.getElementById('mixer-channels');
+    const container = document.getElementById("mixer-channels");
     if (!container) return;
 
-    container.innerHTML = '';
+    container.innerHTML = "";
 
-    this.drumMapManager.standardChannels.forEach(channel => {
-      const channelDiv = document.createElement('div');
-      channelDiv.className = 'mixer-channel';
+    this.drumMapManager.standardChannels.forEach((channel) => {
+      const channelDiv = document.createElement("div");
+      channelDiv.className = "mixer-channel";
       channelDiv.dataset.channel = channel;
 
       const color = this.drumMapManager.channelColors[channel];
@@ -206,192 +209,204 @@ class DrumMapUI {
 
   attachEventListeners() {
     // Close button handler (fallback in case WindowManager doesn't work)
-    const closeBtn = document.getElementById('kit-edit-panel-close');
+    const closeBtn = document.getElementById("kit-edit-panel-close");
     if (closeBtn) {
-      console.log('Setting up close button handler in DrumMapUI');
-      closeBtn.addEventListener('click', (e) => {
-        console.log('Close button clicked (DrumMapUI handler)');
+      console.log("Setting up close button handler in DrumMapUI");
+      closeBtn.addEventListener("click", (e) => {
+        console.log("Close button clicked (DrumMapUI handler)");
         e.preventDefault();
         e.stopPropagation();
-        const panel = document.getElementById('kit-edit-panel');
+        const panel = document.getElementById("kit-edit-panel");
         if (panel) {
-          panel.classList.remove('active');
+          panel.classList.remove("active");
         }
       });
     }
 
     // Map selector
-    const mapSelector = document.getElementById('drum-map-selector');
+    const mapSelector = document.getElementById("drum-map-selector");
     if (mapSelector) {
-      mapSelector.addEventListener('change', (e) => this.onMapSelected(e.target.value));
+      mapSelector.addEventListener("change", (e) =>
+        this.onMapSelected(e.target.value),
+      );
     }
 
     // Keyboard shortcuts
     this.attachKeyboardShortcuts();
 
     // Map actions
-    this.attachButtonListener('new-map-btn', () => this.createNewMap());
-    this.attachButtonListener('duplicate-map-btn', () => this.duplicateCurrentMap());
-    this.attachButtonListener('delete-map-btn', () => this.deleteCurrentMap());
-    this.attachButtonListener('import-map-btn', () => this.importMap());
-    this.attachButtonListener('export-map-btn', () => this.exportMap());
-    this.attachButtonListener('midi-learn-btn', () => this.toggleMidiLearn());
+    this.attachButtonListener("new-map-btn", () => this.createNewMap());
+    this.attachButtonListener("duplicate-map-btn", () =>
+      this.duplicateCurrentMap(),
+    );
+    this.attachButtonListener("delete-map-btn", () => this.deleteCurrentMap());
+    this.attachButtonListener("import-map-btn", () => this.importMap());
+    this.attachButtonListener("export-map-btn", () => this.exportMap());
+    this.attachButtonListener("midi-learn-btn", () => this.toggleMidiLearn());
 
     // View mode buttons
-    this.attachButtonListener('grid-view-btn', () => this.setViewMode('grid'));
-    this.attachButtonListener('list-view-btn', () => this.setViewMode('list'));
-    this.attachButtonListener('piano-view-btn', () => this.setViewMode('piano'));
+    this.attachButtonListener("grid-view-btn", () => this.setViewMode("grid"));
+    this.attachButtonListener("list-view-btn", () => this.setViewMode("list"));
+    this.attachButtonListener("piano-view-btn", () =>
+      this.setViewMode("piano"),
+    );
 
     // Note grid interactions
-    const noteGrid = document.getElementById('note-grid-container');
+    const noteGrid = document.getElementById("note-grid-container");
     if (noteGrid) {
-      noteGrid.addEventListener('click', (e) => {
-        const noteBtn = e.target.closest('.note-btn');
+      noteGrid.addEventListener("click", (e) => {
+        const noteBtn = e.target.closest(".note-btn");
         if (noteBtn) {
           this.selectNote(parseInt(noteBtn.dataset.note));
         }
       });
 
       // Drag and drop for notes
-      noteGrid.addEventListener('dragstart', (e) => {
-        const noteBtn = e.target.closest('.note-btn');
+      noteGrid.addEventListener("dragstart", (e) => {
+        const noteBtn = e.target.closest(".note-btn");
         if (noteBtn) {
           this.draggedElement = {
-            type: 'note',
-            note: parseInt(noteBtn.dataset.note)
+            type: "note",
+            note: parseInt(noteBtn.dataset.note),
           };
-          e.dataTransfer.effectAllowed = 'copy';
+          e.dataTransfer.effectAllowed = "copy";
         }
       });
     }
 
     // Mixer channel interactions
-    const mixerChannels = document.getElementById('mixer-channels');
+    const mixerChannels = document.getElementById("mixer-channels");
     if (mixerChannels) {
       // Drop zones for channels
-      mixerChannels.addEventListener('dragover', (e) => {
+      mixerChannels.addEventListener("dragover", (e) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = "copy";
       });
 
-      mixerChannels.addEventListener('drop', (e) => {
+      mixerChannels.addEventListener("drop", (e) => {
         e.preventDefault();
-        const channel = e.target.closest('.mixer-channel');
+        const channel = e.target.closest(".mixer-channel");
         if (channel && this.draggedElement) {
           this.assignNoteToChannel(
             this.draggedElement.note,
-            channel.dataset.channel
+            channel.dataset.channel,
           );
         }
       });
 
       // Clear channel buttons
-      mixerChannels.addEventListener('click', (e) => {
-        if (e.target.classList.contains('clear-channel')) {
+      mixerChannels.addEventListener("click", (e) => {
+        if (e.target.classList.contains("clear-channel")) {
           this.clearChannel(e.target.dataset.channel);
         }
       });
     }
 
     // Preview controls
-    this.attachButtonListener('preview-note-btn', () => this.previewSelectedNote());
+    this.attachButtonListener("preview-note-btn", () =>
+      this.previewSelectedNote(),
+    );
 
-    const velocitySlider = document.getElementById('preview-velocity');
+    const velocitySlider = document.getElementById("preview-velocity");
     if (velocitySlider) {
-      velocitySlider.addEventListener('input', (e) => {
-        document.getElementById('velocity-display').textContent = e.target.value;
+      velocitySlider.addEventListener("input", (e) => {
+        document.getElementById("velocity-display").textContent =
+          e.target.value;
       });
     }
 
     // Listen to drum map manager events
-    this.drumMapManager.addListener((event, data) => this.handleMapEvent(event, data));
+    this.drumMapManager.addListener((event, data) =>
+      this.handleMapEvent(event, data),
+    );
   }
 
   attachButtonListener(id, handler) {
     const btn = document.getElementById(id);
     if (btn) {
-      btn.addEventListener('click', handler);
+      btn.addEventListener("click", handler);
     }
   }
 
   attachKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener("keydown", (e) => {
       // Only handle shortcuts when drum editor is open
-      const panel = document.getElementById('kit-edit-panel');
-      if (!panel || !panel.classList.contains('active')) return;
+      const panel = document.getElementById("kit-edit-panel");
+      if (!panel || !panel.classList.contains("active")) return;
 
       // Prevent shortcuts when typing in input fields
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+        return;
 
       const key = e.key.toLowerCase();
       const ctrl = e.ctrlKey || e.metaKey;
 
       // Handle shortcuts
       switch (true) {
-        case key === ' ' && !ctrl:
+        case key === " " && !ctrl:
           e.preventDefault();
           this.previewSelectedNote();
           break;
 
-        case key === '1' && !ctrl:
+        case key === "1" && !ctrl:
           e.preventDefault();
-          this.setViewMode('grid');
+          this.setViewMode("grid");
           break;
 
-        case key === '2' && !ctrl:
+        case key === "2" && !ctrl:
           e.preventDefault();
-          this.setViewMode('list');
+          this.setViewMode("list");
           break;
 
-        case key === '3' && !ctrl:
+        case key === "3" && !ctrl:
           e.preventDefault();
-          this.setViewMode('piano');
+          this.setViewMode("piano");
           break;
 
-        case key === 'delete' && !ctrl:
+        case key === "delete" && !ctrl:
           e.preventDefault();
           if (this.selectedNote !== null) {
             this.drumMapManager.removeNoteAssignment(this.selectedNote);
           }
           break;
 
-        case key === 's' && ctrl:
+        case key === "s" && ctrl:
           e.preventDefault();
           this.drumMapManager.saveCustomMaps();
-          this.updateStatus('Map saved');
+          this.updateStatus("Map saved");
           break;
 
-        case key === 'd' && ctrl:
+        case key === "d" && ctrl:
           e.preventDefault();
           this.duplicateCurrentMap();
           break;
 
-        case key === 'z' && ctrl:
+        case key === "z" && ctrl:
           e.preventDefault();
           // Undo functionality would need to be implemented
-          this.updateStatus('Undo not yet implemented');
+          this.updateStatus("Undo not yet implemented");
           break;
 
-        case key === 'y' && ctrl:
+        case key === "y" && ctrl:
           e.preventDefault();
           // Redo functionality would need to be implemented
-          this.updateStatus('Redo not yet implemented');
+          this.updateStatus("Redo not yet implemented");
           break;
 
-        case key === 'tab' && !ctrl:
+        case key === "tab" && !ctrl:
           e.preventDefault();
           this.cyclePanel();
           break;
 
-        case key === 'escape':
+        case key === "escape":
           e.preventDefault();
           // Close the drum editor panel
           if (window.otto && window.otto.windowManager) {
-            window.otto.windowManager.closeWindow('kit-edit');
+            window.otto.windowManager.closeWindow("kit-edit");
           }
           break;
 
-        case key === 'a' && !ctrl:
+        case key === "a" && !ctrl:
           if (window.otto && window.otto.drumMapAdvanced) {
             if (window.otto.drumMapAdvanced.comparisonMode) {
               e.preventDefault();
@@ -401,7 +416,7 @@ class DrumMapUI {
           }
           break;
 
-        case key === 'b' && !ctrl:
+        case key === "b" && !ctrl:
           if (window.otto && window.otto.drumMapAdvanced) {
             if (window.otto.drumMapAdvanced.comparisonMode) {
               e.preventDefault();
@@ -411,27 +426,27 @@ class DrumMapUI {
           }
           break;
 
-        case key === 'm' && !ctrl:
+        case key === "m" && !ctrl:
           e.preventDefault();
           this.toggleMidiLearn();
           break;
 
-        case key === 'arrowup':
+        case key === "arrowup":
           e.preventDefault();
           this.selectAdjacentNote(-8); // Move up in grid
           break;
 
-        case key === 'arrowdown':
+        case key === "arrowdown":
           e.preventDefault();
           this.selectAdjacentNote(8); // Move down in grid
           break;
 
-        case key === 'arrowleft':
+        case key === "arrowleft":
           e.preventDefault();
           this.selectAdjacentNote(-1); // Move left in grid
           break;
 
-        case key === 'arrowright':
+        case key === "arrowright":
           e.preventDefault();
           this.selectAdjacentNote(1); // Move right in grid
           break;
@@ -441,12 +456,12 @@ class DrumMapUI {
 
   cyclePanel() {
     // Cycle focus between the three panels
-    const panels = ['note-grid-panel', 'mapping-panel', 'mixer-channels-panel'];
+    const panels = ["note-grid-panel", "mapping-panel", "mixer-channels-panel"];
     const activeElement = document.activeElement;
     let currentPanel = null;
 
     // Find current panel
-    panels.forEach(panelId => {
+    panels.forEach((panelId) => {
       const panel = document.querySelector(`.${panelId}`);
       if (panel && panel.contains(activeElement)) {
         currentPanel = panelId;
@@ -459,7 +474,7 @@ class DrumMapUI {
     const nextPanel = document.querySelector(`.${panels[nextIndex]}`);
 
     if (nextPanel) {
-      const firstFocusable = nextPanel.querySelector('button, input, select');
+      const firstFocusable = nextPanel.querySelector("button, input, select");
       if (firstFocusable) {
         firstFocusable.focus();
       }
@@ -477,38 +492,48 @@ class DrumMapUI {
   }
 
   updateMapSelector() {
-    const selector = document.getElementById('drum-map-selector');
+    const selector = document.getElementById("drum-map-selector");
     if (!selector) return;
 
     const maps = this.drumMapManager.getAllMaps();
     const currentMap = this.drumMapManager.getCurrentMap();
 
-    selector.innerHTML = '';
+    selector.innerHTML = "";
 
     // Add factory maps
-    const factoryGroup = document.createElement('optgroup');
-    factoryGroup.label = 'Factory Presets';
-    maps.filter(m => m.type === 'factory').forEach(map => {
-      const option = document.createElement('option');
-      option.value = `${map.type}:${map.id}`;
-      option.textContent = `${map.name} (${map.vendor})`;
-      if (currentMap && currentMap.id === map.id && currentMap.type === map.type) {
-        option.selected = true;
-      }
-      factoryGroup.appendChild(option);
-    });
+    const factoryGroup = document.createElement("optgroup");
+    factoryGroup.label = "Factory Presets";
+    maps
+      .filter((m) => m.type === "factory")
+      .forEach((map) => {
+        const option = document.createElement("option");
+        option.value = `${map.type}:${map.id}`;
+        option.textContent = `${map.name} (${map.vendor})`;
+        if (
+          currentMap &&
+          currentMap.id === map.id &&
+          currentMap.type === map.type
+        ) {
+          option.selected = true;
+        }
+        factoryGroup.appendChild(option);
+      });
     selector.appendChild(factoryGroup);
 
     // Add custom maps
-    const customMaps = maps.filter(m => m.type === 'custom');
+    const customMaps = maps.filter((m) => m.type === "custom");
     if (customMaps.length > 0) {
-      const customGroup = document.createElement('optgroup');
-      customGroup.label = 'Custom Maps';
-      customMaps.forEach(map => {
-        const option = document.createElement('option');
+      const customGroup = document.createElement("optgroup");
+      customGroup.label = "Custom Maps";
+      customMaps.forEach((map) => {
+        const option = document.createElement("option");
         option.value = `${map.type}:${map.id}`;
         option.textContent = map.name;
-        if (currentMap && currentMap.id === map.id && currentMap.type === map.type) {
+        if (
+          currentMap &&
+          currentMap.id === map.id &&
+          currentMap.type === map.type
+        ) {
           option.selected = true;
         }
         customGroup.appendChild(option);
@@ -520,7 +545,7 @@ class DrumMapUI {
   onMapSelected(value) {
     if (!value) return;
 
-    const [type, id] = value.split(':');
+    const [type, id] = value.split(":");
     this.drumMapManager.setActiveMap(id, type);
     this.loadCurrentMap();
   }
@@ -535,7 +560,7 @@ class DrumMapUI {
     this.updateStatus(`Loaded: ${map.name}`);
 
     // Enable/disable edit controls based on map type
-    const isEditable = map.type === 'custom';
+    const isEditable = map.type === "custom";
     this.setEditableState(isEditable);
   }
 
@@ -544,7 +569,7 @@ class DrumMapUI {
     if (!map) return;
 
     // Update each note button
-    document.querySelectorAll('.note-btn').forEach(btn => {
+    document.querySelectorAll(".note-btn").forEach((btn) => {
       const note = parseInt(btn.dataset.note);
       this.updateNoteButtonStyle(btn, note);
     });
@@ -553,7 +578,7 @@ class DrumMapUI {
   updateNoteButtonStyle(btn, note) {
     const map = this.drumMapManager.getCurrentMap();
     if (!map || !map.mapping[note]) {
-      btn.className = 'note-btn';
+      btn.className = "note-btn";
       return;
     }
 
@@ -561,8 +586,8 @@ class DrumMapUI {
     const channel = mapping.mixerChannel;
     const color = this.drumMapManager.channelColors[channel];
 
-    btn.className = 'note-btn mapped';
-    btn.style.backgroundColor = color + '40';
+    btn.className = "note-btn mapped";
+    btn.style.backgroundColor = color + "40";
     btn.style.borderColor = color;
   }
 
@@ -571,23 +596,27 @@ class DrumMapUI {
     if (!map) return;
 
     // Clear all channel displays
-    document.querySelectorAll('.channel-notes').forEach(container => {
-      container.innerHTML = '';
+    document.querySelectorAll(".channel-notes").forEach((container) => {
+      container.innerHTML = "";
     });
 
-    document.querySelectorAll('.channel-note-count').forEach(count => {
-      count.textContent = '0';
+    document.querySelectorAll(".channel-note-count").forEach((count) => {
+      count.textContent = "0";
     });
 
     // Update each channel
     Object.entries(map.mixerChannels).forEach(([channel, data]) => {
-      const container = document.querySelector(`.channel-notes[data-channel="${channel}"]`);
-      const countElement = document.querySelector(`.mixer-channel[data-channel="${channel}"] .channel-note-count`);
+      const container = document.querySelector(
+        `.channel-notes[data-channel="${channel}"]`,
+      );
+      const countElement = document.querySelector(
+        `.mixer-channel[data-channel="${channel}"] .channel-note-count`,
+      );
 
       if (container && data.notes.length > 0) {
-        data.notes.forEach(note => {
-          const noteTag = document.createElement('span');
-          noteTag.className = 'note-tag';
+        data.notes.forEach((note) => {
+          const noteTag = document.createElement("span");
+          noteTag.className = "note-tag";
           noteTag.textContent = `${note} (${this.getNoteName(note)})`;
           noteTag.dataset.note = note;
           container.appendChild(noteTag);
@@ -603,23 +632,25 @@ class DrumMapUI {
   selectNote(note) {
     // Deselect previous
     if (this.selectedNote !== null) {
-      const prevBtn = document.querySelector(`.note-btn[data-note="${this.selectedNote}"]`);
-      if (prevBtn) prevBtn.classList.remove('selected');
+      const prevBtn = document.querySelector(
+        `.note-btn[data-note="${this.selectedNote}"]`,
+      );
+      if (prevBtn) prevBtn.classList.remove("selected");
     }
 
     // Select new
     this.selectedNote = note;
     const btn = document.querySelector(`.note-btn[data-note="${note}"]`);
-    if (btn) btn.classList.add('selected');
+    if (btn) btn.classList.add("selected");
 
     // Update info display
     const map = this.drumMapManager.getCurrentMap();
     const mapping = map && map.mapping[note];
     const info = mapping
-      ? `Note ${note} (${this.getNoteDisplay(note)}) → ${mapping.mixerChannel} | ${mapping.samplePath || 'No sample'}`
+      ? `Note ${note} (${this.getNoteDisplay(note)}) → ${mapping.mixerChannel} | ${mapping.samplePath || "No sample"}`
       : `Note ${note} (${this.getNoteDisplay(note)}) - Not mapped`;
 
-    document.getElementById('selected-note-info').textContent = info;
+    document.getElementById("selected-note-info").textContent = info;
 
     // Trigger MIDI learn if active
     if (this.midiLearnActive && this.midiLearnTarget) {
@@ -638,10 +669,10 @@ class DrumMapUI {
 
   clearChannel(channel) {
     const map = this.drumMapManager.getCurrentMap();
-    if (!map || map.type !== 'custom') return;
+    if (!map || map.type !== "custom") return;
 
     const notes = map.mixerChannels[channel].notes.slice();
-    notes.forEach(note => {
+    notes.forEach((note) => {
       this.drumMapManager.removeNoteAssignment(note);
     });
 
@@ -651,13 +682,13 @@ class DrumMapUI {
   }
 
   createNewMap() {
-    const name = prompt('Enter name for new drum map:');
+    const name = prompt("Enter name for new drum map:");
     if (!name) return;
 
     const id = this.drumMapManager.createCustomMap(name);
     if (id) {
       this.updateMapSelector();
-      this.drumMapManager.setActiveMap(id, 'custom');
+      this.drumMapManager.setActiveMap(id, "custom");
       this.loadCurrentMap();
       this.updateStatus(`Created new map: ${name}`);
     }
@@ -667,13 +698,16 @@ class DrumMapUI {
     const currentMap = this.drumMapManager.getCurrentMap();
     if (!currentMap) return;
 
-    const name = prompt('Enter name for duplicated map:', currentMap.name + ' Copy');
+    const name = prompt(
+      "Enter name for duplicated map:",
+      currentMap.name + " Copy",
+    );
     if (!name) return;
 
     const id = this.drumMapManager.createCustomMap(name, currentMap.id);
     if (id) {
       this.updateMapSelector();
-      this.drumMapManager.setActiveMap(id, 'custom');
+      this.drumMapManager.setActiveMap(id, "custom");
       this.loadCurrentMap();
       this.updateStatus(`Duplicated map: ${name}`);
     }
@@ -681,8 +715,8 @@ class DrumMapUI {
 
   deleteCurrentMap() {
     const currentMap = this.drumMapManager.getCurrentMap();
-    if (!currentMap || currentMap.type !== 'custom') {
-      alert('Cannot delete factory presets');
+    if (!currentMap || currentMap.type !== "custom") {
+      alert("Cannot delete factory presets");
       return;
     }
 
@@ -690,14 +724,14 @@ class DrumMapUI {
       this.drumMapManager.deleteCustomMap(currentMap.id);
       this.updateMapSelector();
       this.loadCurrentMap();
-      this.updateStatus('Map deleted');
+      this.updateStatus("Map deleted");
     }
   }
 
   importMap() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -707,11 +741,11 @@ class DrumMapUI {
         const id = this.drumMapManager.importMap(event.target.result);
         if (id) {
           this.updateMapSelector();
-          this.drumMapManager.setActiveMap(id, 'custom');
+          this.drumMapManager.setActiveMap(id, "custom");
           this.loadCurrentMap();
-          this.updateStatus('Map imported successfully');
+          this.updateStatus("Map imported successfully");
         } else {
-          alert('Failed to import map');
+          alert("Failed to import map");
         }
       };
       reader.readAsText(file);
@@ -724,32 +758,36 @@ class DrumMapUI {
     if (!currentMap) return;
 
     const json = this.drumMapManager.exportMap(currentMap.id, currentMap.type);
-    const blob = new Blob([json], { type: 'application/json' });
+    const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `${currentMap.name.replace(/[^a-z0-9]/gi, '_')}.json`;
+    a.download = `${currentMap.name.replace(/[^a-z0-9]/gi, "_")}.json`;
     a.click();
     URL.revokeObjectURL(url);
 
-    this.updateStatus('Map exported');
+    this.updateStatus("Map exported");
   }
 
   toggleMidiLearn() {
     this.midiLearnActive = !this.midiLearnActive;
-    const btn = document.getElementById('midi-learn-btn');
+    const btn = document.getElementById("midi-learn-btn");
     if (btn) {
-      btn.classList.toggle('active', this.midiLearnActive);
-      btn.textContent = this.midiLearnActive ? 'MIDI Learn (Active)' : 'MIDI Learn';
+      btn.classList.toggle("active", this.midiLearnActive);
+      btn.textContent = this.midiLearnActive
+        ? "MIDI Learn (Active)"
+        : "MIDI Learn";
     }
-    this.updateStatus(this.midiLearnActive ? 'MIDI Learn activated' : 'MIDI Learn deactivated');
+    this.updateStatus(
+      this.midiLearnActive ? "MIDI Learn activated" : "MIDI Learn deactivated",
+    );
   }
 
   learnMidiNote(note) {
     if (!this.midiLearnTarget) return;
 
     // Assign the learned note to the target
-    if (this.midiLearnTarget.type === 'channel') {
+    if (this.midiLearnTarget.type === "channel") {
       this.assignNoteToChannel(note, this.midiLearnTarget.channel);
     }
 
@@ -760,7 +798,9 @@ class DrumMapUI {
   previewSelectedNote() {
     if (this.selectedNote === null) return;
 
-    const velocity = parseInt(document.getElementById('preview-velocity').value);
+    const velocity = parseInt(
+      document.getElementById("preview-velocity").value,
+    );
 
     // Trigger preview through audio system
     if (window.otto && window.otto.audioScheduler) {
@@ -772,20 +812,20 @@ class DrumMapUI {
 
   setViewMode(mode) {
     // Update button states
-    document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.classList.remove('active');
+    document.querySelectorAll(".view-btn").forEach((btn) => {
+      btn.classList.remove("active");
     });
-    document.getElementById(`${mode}-view-btn`).classList.add('active');
+    document.getElementById(`${mode}-view-btn`).classList.add("active");
 
     // Update grid display
-    const container = document.getElementById('note-grid-container');
+    const container = document.getElementById("note-grid-container");
     if (!container) return;
 
     container.className = `note-grid-container ${mode}-view`;
 
-    if (mode === 'list') {
+    if (mode === "list") {
       this.generateListView();
-    } else if (mode === 'piano') {
+    } else if (mode === "piano") {
       this.generatePianoView();
     } else {
       this.generateNoteGrid();
@@ -793,18 +833,18 @@ class DrumMapUI {
   }
 
   generateListView() {
-    const container = document.getElementById('note-grid-container');
+    const container = document.getElementById("note-grid-container");
     if (!container) return;
 
     const map = this.drumMapManager.getCurrentMap();
-    const list = document.createElement('div');
-    list.className = 'note-list';
+    const list = document.createElement("div");
+    list.className = "note-list";
 
     // Only show mapped notes in list view
     if (map && map.mapping) {
       Object.entries(map.mapping).forEach(([note, data]) => {
-        const item = document.createElement('div');
-        item.className = 'note-list-item';
+        const item = document.createElement("div");
+        item.className = "note-list-item";
         item.dataset.note = note;
 
         const color = this.drumMapManager.channelColors[data.mixerChannel];
@@ -814,35 +854,50 @@ class DrumMapUI {
           <span class="list-note-num">${note}</span>
           <span class="list-note-name">${this.getNoteDisplay(note)}</span>
           <span class="list-channel">${data.mixerChannel}</span>
-          <span class="list-sample">${data.samplePath || 'No sample'}</span>
+          <span class="list-sample">${data.samplePath || "No sample"}</span>
         `;
 
         list.appendChild(item);
       });
     }
 
-    container.innerHTML = '';
+    container.innerHTML = "";
     container.appendChild(list);
   }
 
   generatePianoView() {
-    const container = document.getElementById('note-grid-container');
+    const container = document.getElementById("note-grid-container");
     if (!container) return;
 
-    const piano = document.createElement('div');
-    piano.className = 'piano-roll';
+    const piano = document.createElement("div");
+    piano.className = "piano-roll";
 
     // Generate piano keys for all octaves
     for (let octave = -1; octave < 10; octave++) {
-      const octaveDiv = document.createElement('div');
-      octaveDiv.className = 'piano-octave';
+      const octaveDiv = document.createElement("div");
+      octaveDiv.className = "piano-octave";
 
-      const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      const notes = [
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B",
+      ];
       notes.forEach((noteName, index) => {
         const noteNum = (octave + 1) * 12 + index;
         if (noteNum >= 0 && noteNum < 128) {
-          const key = document.createElement('button');
-          key.className = noteName.includes('#') ? 'piano-key black' : 'piano-key white';
+          const key = document.createElement("button");
+          key.className = noteName.includes("#")
+            ? "piano-key black"
+            : "piano-key white";
           key.dataset.note = noteNum;
           key.title = `${noteName}${octave} (${noteNum})`;
 
@@ -854,7 +909,7 @@ class DrumMapUI {
       piano.appendChild(octaveDiv);
     }
 
-    container.innerHTML = '';
+    container.innerHTML = "";
     container.appendChild(piano);
   }
 
@@ -870,17 +925,15 @@ class DrumMapUI {
 
   formatChannelName(channel) {
     // Convert camelCase to Title Case
-    return channel.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    return channel
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (str) => str.toUpperCase());
   }
 
   setEditableState(editable) {
-    const controls = [
-      'delete-map-btn',
-      'preview-note-btn',
-      'midi-learn-btn'
-    ];
+    const controls = ["delete-map-btn", "preview-note-btn", "midi-learn-btn"];
 
-    controls.forEach(id => {
+    controls.forEach((id) => {
       const element = document.getElementById(id);
       if (element) {
         element.disabled = !editable;
@@ -888,34 +941,34 @@ class DrumMapUI {
     });
 
     // Update drag and drop
-    document.querySelectorAll('.note-btn').forEach(btn => {
+    document.querySelectorAll(".note-btn").forEach((btn) => {
       btn.draggable = editable;
     });
   }
 
   updateStatus(message) {
-    const statusElement = document.getElementById('map-status');
+    const statusElement = document.getElementById("map-status");
     if (statusElement) {
       statusElement.textContent = message;
       // Clear status after 3 seconds
       setTimeout(() => {
-        statusElement.textContent = 'Ready';
+        statusElement.textContent = "Ready";
       }, 3000);
     }
   }
 
   handleMapEvent(event, data) {
     switch (event) {
-      case 'mapChanged':
+      case "mapChanged":
         this.loadCurrentMap();
         break;
-      case 'noteAssigned':
-      case 'noteRemoved':
+      case "noteAssigned":
+      case "noteRemoved":
         this.updateNoteGrid();
         this.updateChannelDisplay();
         break;
-      case 'mapCreated':
-      case 'mapDeleted':
+      case "mapCreated":
+      case "mapDeleted":
         this.updateMapSelector();
         break;
     }
@@ -931,6 +984,6 @@ class DrumMapUI {
 }
 
 // Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = DrumMapUI;
 }

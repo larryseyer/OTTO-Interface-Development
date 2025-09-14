@@ -15,7 +15,7 @@ class DrumMapAdvanced {
     this.comparisonMode = false;
     this.mapA = null;
     this.mapB = null;
-    this.activeComparison = 'A';
+    this.activeComparison = "A";
 
     // MIDI learn state
     this.midiLearnActive = false;
@@ -39,20 +39,23 @@ class DrumMapAdvanced {
     const layers = this.velocityLayers.get(note);
 
     // Check for overlapping ranges
-    const overlap = layers.find(layer =>
-      (velocityRange.min >= layer.min && velocityRange.min <= layer.max) ||
-      (velocityRange.max >= layer.min && velocityRange.max <= layer.max)
+    const overlap = layers.find(
+      (layer) =>
+        (velocityRange.min >= layer.min && velocityRange.min <= layer.max) ||
+        (velocityRange.max >= layer.min && velocityRange.max <= layer.max),
     );
 
     if (overlap) {
-      console.warn(`Velocity range ${velocityRange.min}-${velocityRange.max} overlaps with existing layer`);
+      console.warn(
+        `Velocity range ${velocityRange.min}-${velocityRange.max} overlaps with existing layer`,
+      );
       return false;
     }
 
     layers.push({
       min: velocityRange.min,
       max: velocityRange.max,
-      sample: samplePath
+      sample: samplePath,
     });
 
     // Sort layers by min velocity
@@ -68,7 +71,7 @@ class DrumMapAdvanced {
     if (!this.velocityLayers.has(note)) return false;
 
     const layers = this.velocityLayers.get(note);
-    const index = layers.findIndex(layer => layer.min === velocityMin);
+    const index = layers.findIndex((layer) => layer.min === velocityMin);
 
     if (index === -1) return false;
 
@@ -87,7 +90,7 @@ class DrumMapAdvanced {
     this.sfzEditor.removeRegion({ key: note });
 
     // Add velocity layers to SFZ
-    layers.forEach(layer => {
+    layers.forEach((layer) => {
       this.sfzEditor.addRegion({
         sample: layer.sample,
         key: note,
@@ -96,7 +99,7 @@ class DrumMapAdvanced {
         lovel: layer.min,
         hivel: layer.max,
         pitch_keycenter: note,
-        loop_mode: 'one_shot'
+        loop_mode: "one_shot",
       });
     });
   }
@@ -105,7 +108,7 @@ class DrumMapAdvanced {
     return this.velocityLayers.get(note) || [];
   }
 
-  autoCreateVelocityLayers(note, samples, velocityCurve = 'linear') {
+  autoCreateVelocityLayers(note, samples, velocityCurve = "linear") {
     if (!samples || samples.length === 0) return false;
 
     const layers = [];
@@ -120,18 +123,18 @@ class DrumMapAdvanced {
       }
 
       // Apply velocity curve
-      if (velocityCurve === 'exponential') {
+      if (velocityCurve === "exponential") {
         min = Math.floor(Math.pow(min / 127, 2) * 127);
         max = Math.floor(Math.pow(max / 127, 2) * 127);
-      } else if (velocityCurve === 'logarithmic') {
-        min = Math.floor(Math.log(min + 1) / Math.log(128) * 127);
-        max = Math.floor(Math.log(max + 1) / Math.log(128) * 127);
+      } else if (velocityCurve === "logarithmic") {
+        min = Math.floor((Math.log(min + 1) / Math.log(128)) * 127);
+        max = Math.floor((Math.log(max + 1) / Math.log(128)) * 127);
       }
 
       layers.push({
         min: Math.max(0, min),
         max: Math.min(127, max),
-        sample: sample
+        sample: sample,
       });
     });
 
@@ -188,7 +191,7 @@ class DrumMapAdvanced {
     this.comparisonMode = true;
     this.mapA = mapA;
     this.mapB = mapB;
-    this.activeComparison = 'A';
+    this.activeComparison = "A";
 
     // Set initial map
     this.drumMapManager.setActiveMap(mapA.id, mapA.type);
@@ -199,11 +202,11 @@ class DrumMapAdvanced {
   switchComparison() {
     if (!this.comparisonMode) return false;
 
-    if (this.activeComparison === 'A') {
-      this.activeComparison = 'B';
+    if (this.activeComparison === "A") {
+      this.activeComparison = "B";
       this.drumMapManager.setActiveMap(this.mapB.id, this.mapB.type);
     } else {
-      this.activeComparison = 'A';
+      this.activeComparison = "A";
       this.drumMapManager.setActiveMap(this.mapA.id, this.mapA.type);
     }
 
@@ -214,7 +217,7 @@ class DrumMapAdvanced {
     this.comparisonMode = false;
     this.mapA = null;
     this.mapB = null;
-    this.activeComparison = 'A';
+    this.activeComparison = "A";
     return true;
   }
 
@@ -224,24 +227,27 @@ class DrumMapAdvanced {
     const differences = {
       notesOnlyInA: [],
       notesOnlyInB: [],
-      differentMappings: []
+      differentMappings: [],
     };
 
     // Check notes in A
-    Object.keys(this.mapA.mapping).forEach(note => {
+    Object.keys(this.mapA.mapping).forEach((note) => {
       if (!this.mapB.mapping[note]) {
         differences.notesOnlyInA.push(note);
-      } else if (this.mapA.mapping[note].mixerChannel !== this.mapB.mapping[note].mixerChannel) {
+      } else if (
+        this.mapA.mapping[note].mixerChannel !==
+        this.mapB.mapping[note].mixerChannel
+      ) {
         differences.differentMappings.push({
           note,
           channelA: this.mapA.mapping[note].mixerChannel,
-          channelB: this.mapB.mapping[note].mixerChannel
+          channelB: this.mapB.mapping[note].mixerChannel,
         });
       }
     });
 
     // Check notes only in B
-    Object.keys(this.mapB.mapping).forEach(note => {
+    Object.keys(this.mapB.mapping).forEach((note) => {
       if (!this.mapA.mapping[note]) {
         differences.notesOnlyInB.push(note);
       }
@@ -256,7 +262,7 @@ class DrumMapAdvanced {
 
   async initializeMidiLearn() {
     if (!navigator.requestMIDIAccess) {
-      console.error('Web MIDI API not supported');
+      console.error("Web MIDI API not supported");
       return false;
     }
 
@@ -270,17 +276,17 @@ class DrumMapAdvanced {
         return true;
       }
 
-      console.warn('No MIDI inputs available');
+      console.warn("No MIDI inputs available");
       return false;
     } catch (error) {
-      console.error('MIDI access denied:', error);
+      console.error("MIDI access denied:", error);
       return false;
     }
   }
 
   startMidiLearn(callback) {
     if (!this.midiInput) {
-      console.error('MIDI input not initialized');
+      console.error("MIDI input not initialized");
       return false;
     }
 
@@ -322,7 +328,8 @@ class DrumMapAdvanced {
 
   async initializeAudition() {
     if (!this.auditionContext) {
-      this.auditionContext = new (window.AudioContext || window.webkitAudioContext)();
+      this.auditionContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
     }
     return true;
   }
@@ -335,12 +342,13 @@ class DrumMapAdvanced {
     try {
       const response = await fetch(samplePath);
       const arrayBuffer = await response.arrayBuffer();
-      const audioBuffer = await this.auditionContext.decodeAudioData(arrayBuffer);
+      const audioBuffer =
+        await this.auditionContext.decodeAudioData(arrayBuffer);
 
       this.auditionBuffers.set(samplePath, audioBuffer);
       return audioBuffer;
     } catch (error) {
-      console.error('Error loading sample:', error);
+      console.error("Error loading sample:", error);
       return null;
     }
   }
@@ -352,7 +360,7 @@ class DrumMapAdvanced {
 
     const currentMap = this.drumMapManager.getCurrentMap();
     if (!currentMap || !currentMap.mapping[note]) {
-      console.warn('No mapping for note:', note);
+      console.warn("No mapping for note:", note);
       return false;
     }
 
@@ -362,7 +370,9 @@ class DrumMapAdvanced {
     // Check for velocity layers
     const velocityLayers = this.getVelocityLayers(note);
     if (velocityLayers.length > 0) {
-      const layer = velocityLayers.find(l => velocity >= l.min && velocity <= l.max);
+      const layer = velocityLayers.find(
+        (l) => velocity >= l.min && velocity <= l.max,
+      );
       if (layer) {
         samplePath = layer.sample;
       }
@@ -415,7 +425,7 @@ class DrumMapAdvanced {
             success: true,
             vendor: detectedVendor,
             events: parsed.events,
-            analysis: this.midiTranslator.analyzeMidiFile(parsed)
+            analysis: this.midiTranslator.analyzeMidiFile(parsed),
           });
         } catch (error) {
           reject(error);
@@ -423,18 +433,18 @@ class DrumMapAdvanced {
       };
 
       reader.onerror = () => {
-        reject(new Error('Failed to read MIDI file'));
+        reject(new Error("Failed to read MIDI file"));
       };
 
       reader.readAsArrayBuffer(file);
     });
   }
 
-  translateImportedMidi(midiData, targetVendor = 'generalMidi') {
+  translateImportedMidi(midiData, targetVendor = "generalMidi") {
     return this.midiTranslator.translateMidiFile(
       midiData,
       midiData.vendor,
-      targetVendor
+      targetVendor,
     );
   }
 
@@ -447,13 +457,17 @@ class DrumMapAdvanced {
 
     for (const assignment of assignments) {
       const { note, channel, sample } = assignment;
-      const success = this.drumMapManager.assignNoteToChannel(note, channel, sample);
+      const success = this.drumMapManager.assignNoteToChannel(
+        note,
+        channel,
+        sample,
+      );
 
       results.push({
         note,
         channel,
         sample,
-        success
+        success,
       });
     }
 
@@ -462,12 +476,12 @@ class DrumMapAdvanced {
 
   exportCurrentConfiguration() {
     const config = {
-      version: '1.0',
+      version: "1.0",
       timestamp: new Date().toISOString(),
       currentMap: this.drumMapManager.getCurrentMap(),
       velocityLayers: Array.from(this.velocityLayers.entries()),
       roundRobinSamples: Array.from(this.roundRobinSamples.entries()),
-      sfzData: this.sfzEditor.toJSON()
+      sfzData: this.sfzEditor.toJSON(),
     };
 
     return JSON.stringify(config, null, 2);
@@ -494,7 +508,7 @@ class DrumMapAdvanced {
 
       return true;
     } catch (error) {
-      console.error('Error importing configuration:', error);
+      console.error("Error importing configuration:", error);
       return false;
     }
   }
@@ -508,13 +522,14 @@ class DrumMapAdvanced {
       noteFrequency: {},
       velocityDistribution: {},
       timingPatterns: [],
-      suggestedMapping: {}
+      suggestedMapping: {},
     };
 
     // Count note frequencies
-    midiEvents.forEach(event => {
-      if (event.type === 'noteOn') {
-        analysis.noteFrequency[event.note] = (analysis.noteFrequency[event.note] || 0) + 1;
+    midiEvents.forEach((event) => {
+      if (event.type === "noteOn") {
+        analysis.noteFrequency[event.note] =
+          (analysis.noteFrequency[event.note] || 0) + 1;
 
         if (!analysis.velocityDistribution[event.note]) {
           analysis.velocityDistribution[event.note] = [];
@@ -524,8 +539,9 @@ class DrumMapAdvanced {
     });
 
     // Suggest channel mappings based on frequency
-    const sortedNotes = Object.entries(analysis.noteFrequency)
-      .sort((a, b) => b[1] - a[1]);
+    const sortedNotes = Object.entries(analysis.noteFrequency).sort(
+      (a, b) => b[1] - a[1],
+    );
 
     // Common drum patterns
     const patterns = {
@@ -533,7 +549,7 @@ class DrumMapAdvanced {
       snare: [38, 40],
       hihat: [42, 44, 46],
       ride: [51, 59],
-      crash: [49, 57]
+      crash: [49, 57],
     };
 
     sortedNotes.forEach(([note, count]) => {
@@ -567,7 +583,7 @@ class DrumMapAdvanced {
       optimizedLayers.push({
         min: Math.max(0, min),
         max: Math.min(127, max),
-        sample: layers[i].sample
+        sample: layers[i].sample,
       });
     }
 
@@ -580,15 +596,15 @@ class DrumMapAdvanced {
   generateSFZFromCurrentState() {
     const sfzData = {
       global: {
-        loop_mode: 'one_shot',
-        ampeg_release: 0.5
+        loop_mode: "one_shot",
+        ampeg_release: 0.5,
       },
       groups: [],
-      regions: []
+      regions: [],
     };
 
     const currentMap = this.drumMapManager.getCurrentMap();
-    if (!currentMap) return '';
+    if (!currentMap) return "";
 
     // Process each mapped note
     Object.entries(currentMap.mapping).forEach(([note, mapping]) => {
@@ -597,7 +613,7 @@ class DrumMapAdvanced {
       // Check for velocity layers
       const velocityLayers = this.velocityLayers.get(noteNum);
       if (velocityLayers && velocityLayers.length > 0) {
-        velocityLayers.forEach(layer => {
+        velocityLayers.forEach((layer) => {
           sfzData.regions.push({
             sample: layer.sample,
             key: noteNum,
@@ -605,7 +621,7 @@ class DrumMapAdvanced {
             hikey: noteNum,
             lovel: layer.min,
             hivel: layer.max,
-            pitch_keycenter: noteNum
+            pitch_keycenter: noteNum,
           });
         });
       } else if (mapping.samplePath) {
@@ -615,7 +631,7 @@ class DrumMapAdvanced {
           key: noteNum,
           lokey: noteNum,
           hikey: noteNum,
-          pitch_keycenter: noteNum
+          pitch_keycenter: noteNum,
         });
       }
 
@@ -630,7 +646,7 @@ class DrumMapAdvanced {
             hikey: noteNum,
             pitch_keycenter: noteNum,
             seq_length: rrSamples.length,
-            seq_position: index + 1
+            seq_position: index + 1,
           });
         });
       }
@@ -653,6 +669,6 @@ class DrumMapAdvanced {
 }
 
 // Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = DrumMapAdvanced;
 }
