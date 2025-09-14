@@ -4586,15 +4586,19 @@ body {
 .notification {
   position: fixed;
   padding: 12px 20px;
-  background: var(--bg-secondary);
+  background: rgba(173, 216, 230, 0.15); /* Light blue transparent background */
   color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(173, 216, 230, 0.3);
   border-radius: 4px;
   z-index: 2000;
   font-family: 'Playfair Display', serif;
-  animation: fadeIn 0.3s ease;
+  animation: notificationFadeIn 0.5s ease;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(16% + 10px); /* Position just below row3 */
+  min-width: 300px;
+  text-align: center;
 }
 
 .notification.success {
@@ -4709,25 +4713,21 @@ body {
 }
 
 /* Animation keyframes */
-@keyframes fadeIn {
+@keyframes notificationFadeIn {
   from {
     opacity: 0;
-    transform: translateX(20px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
   }
 }
 
-@keyframes fadeOut {
+@keyframes notificationFadeOut {
   from {
     opacity: 1;
-    transform: translateX(0);
   }
   to {
     opacity: 0;
-    transform: translateX(20px);
   }
 }
 

@@ -10173,28 +10173,17 @@ class OTTOAccurateInterface {
   showNotification(message, type = "info") {
     if (this.isDestroyed) return;
 
-    // Track active notifications for positioning
-    if (!this.activeNotifications) {
-      this.activeNotifications = [];
+    // Only allow one notification at a time for cleaner UI
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+      existingNotification.remove();
     }
-
-    // Clear out any null entries from removed notifications
-    this.activeNotifications = this.activeNotifications.filter(
-      (n) => n && document.body.contains(n),
-    );
 
     const notification = document.createElement("div");
     notification.className = `notification ${type}`;
     notification.textContent = message;
 
-    // Calculate position based on existing notifications
-    const topOffset = 20 + this.activeNotifications.length * 60; // 60px spacing between notifications
-
-    // Set top position dynamically
-    notification.style.top = `${topOffset}px`;
-
     document.body.appendChild(notification);
-    this.activeNotifications.push(notification);
 
     // Store timer reference for cleanup if needed
     const timer1 = setTimeout(() => {
@@ -10202,25 +10191,15 @@ class OTTOAccurateInterface {
         if (document.body.contains(notification)) {
           document.body.removeChild(notification);
         }
-        // Remove from active notifications
-        const index = this.activeNotifications.indexOf(notification);
-        if (index > -1) {
-          this.activeNotifications.splice(index, 1);
-        }
         return;
       }
 
-      notification.style.animation = "fadeOut 0.3s ease";
+      notification.style.animation = "notificationFadeOut 0.5s ease";
       const timer2 = setTimeout(() => {
         if (document.body.contains(notification)) {
           document.body.removeChild(notification);
         }
-        // Remove from active notifications
-        const index = this.activeNotifications.indexOf(notification);
-        if (index > -1) {
-          this.activeNotifications.splice(index, 1);
-        }
-      }, 300);
+      }, 500);
 
       // Store timer for potential cleanup
       if (!this.notificationTimers) this.notificationTimers = new Set();
