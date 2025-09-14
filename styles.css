@@ -3813,10 +3813,12 @@ body {
   top: 0; /* Start from the very top */
   height: 100%; /* Take up full height */
   transform: translateY(calc(100% + 30px)); /* Hidden by default */
+  z-index: 1000; /* Higher than other panels to cover all elements */
 }
 
 #kit-edit-panel.active {
   transform: translateY(0); /* Slide up to show */
+  z-index: 1000; /* Maintain high z-index when active */
 }
 
 /* Scrollbar styling for panel bodies */
@@ -4950,6 +4952,71 @@ body {
 
 .mapping-assignments {
   padding: 15px;
+  overflow-y: auto;
+}
+
+/* Mapping Connection Visualization Styles */
+.mapping-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mapping-group {
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.mapping-group-header {
+  padding: 10px 12px;
+  background: var(--bg-darker);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.mapping-count {
+  background: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.mapping-notes-list {
+  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mapping-note-item {
+  background: var(--bg-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.note-label {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.note-name {
+  color: var(--text-muted);
+}
+
+.no-mappings {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 30px 15px;
+  font-size: 13px;
 }
 
 .sample-browser {
@@ -5008,7 +5075,10 @@ body {
 
 .channel-name {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .channel-note-count {

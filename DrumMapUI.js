@@ -150,6 +150,7 @@ class DrumMapUI {
       noteBtn.className = "note-btn";
       noteBtn.dataset.note = note;
       noteBtn.title = this.getNoteDisplay(note);
+      noteBtn.draggable = true; // Make the button draggable
 
       // Add note number display
       const noteNum = document.createElement("span");
@@ -557,6 +558,7 @@ class DrumMapUI {
     // Update UI to reflect current map
     this.updateNoteGrid();
     this.updateChannelDisplay();
+    this.drawMappingConnections(); // Update middle area visualization
     this.updateStatus(`Loaded: ${map.name}`);
 
     // Enable/disable edit controls based on map type
@@ -629,6 +631,60 @@ class DrumMapUI {
     });
   }
 
+  drawMappingConnections() {
+    const map = this.drumMapManager.getCurrentMap();
+    if (!map) return;
+
+    const mappingAssignments = document.getElementById("mapping-assignments");
+    if (!mappingAssignments) return;
+
+    // Clear existing connections display
+    mappingAssignments.innerHTML = "";
+
+    // Create a summary of all mappings
+    const mappingSummary = document.createElement("div");
+    mappingSummary.className = "mapping-summary";
+    
+    // Group mappings by channel
+    Object.entries(map.mixerChannels).forEach(([channel, data]) => {
+      if (data.notes.length > 0) {
+        const channelGroup = document.createElement("div");
+        channelGroup.className = "mapping-group";
+        
+        const channelHeader = document.createElement("div");
+        channelHeader.className = "mapping-group-header";
+        channelHeader.style.borderLeft = `4px solid ${this.drumMapManager.channelColors[channel]}`;
+        channelHeader.innerHTML = `
+          <strong>${this.formatChannelName(channel)}</strong>
+          <span class="mapping-count">${data.notes.length} notes</span>
+        `;
+        
+        const notesList = document.createElement("div");
+        notesList.className = "mapping-notes-list";
+        
+        data.notes.forEach(note => {
+          const noteItem = document.createElement("div");
+          noteItem.className = "mapping-note-item";
+          noteItem.innerHTML = `
+            <span class="note-label">Note ${note}</span>
+            <span class="note-name">${this.getNoteName(note)}</span>
+          `;
+          notesList.appendChild(noteItem);
+        });
+        
+        channelGroup.appendChild(channelHeader);
+        channelGroup.appendChild(notesList);
+        mappingSummary.appendChild(channelGroup);
+      }
+    });
+
+    if (mappingSummary.children.length === 0) {
+      mappingSummary.innerHTML = '<div class="no-mappings">No mappings configured yet. Drag notes from the left panel to mixer channels on the right.</div>';
+    }
+
+    mappingAssignments.appendChild(mappingSummary);
+  }
+
   selectNote(note) {
     // Deselect previous
     if (this.selectedNote !== null) {
@@ -663,6 +719,7 @@ class DrumMapUI {
     if (success) {
       this.updateNoteGrid();
       this.updateChannelDisplay();
+      this.drawMappingConnections(); // Update middle area visualization
       this.updateStatus(`Assigned note ${note} to ${channel}`);
     }
   }
@@ -678,6 +735,7 @@ class DrumMapUI {
 
     this.updateNoteGrid();
     this.updateChannelDisplay();
+    this.drawMappingConnections(); // Update middle area visualization
     this.updateStatus(`Cleared channel: ${channel}`);
   }
 
