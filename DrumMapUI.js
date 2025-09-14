@@ -205,6 +205,21 @@ class DrumMapUI {
   }
 
   attachEventListeners() {
+    // Close button handler (fallback in case WindowManager doesn't work)
+    const closeBtn = document.getElementById('kit-edit-panel-close');
+    if (closeBtn) {
+      console.log('Setting up close button handler in DrumMapUI');
+      closeBtn.addEventListener('click', (e) => {
+        console.log('Close button clicked (DrumMapUI handler)');
+        e.preventDefault();
+        e.stopPropagation();
+        const panel = document.getElementById('kit-edit-panel');
+        if (panel) {
+          panel.classList.remove('active');
+        }
+      });
+    }
+
     // Map selector
     const mapSelector = document.getElementById('drum-map-selector');
     if (mapSelector) {

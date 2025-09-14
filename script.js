@@ -7960,7 +7960,14 @@ class OTTOAccurateInterface {
         // Use WindowManager to open the kit edit panel
         if (this.windowManager) {
           console.log('Calling windowManager.openWindow("panel", "kit-edit")');
-          this.windowManager.openWindow("panel", "kit-edit");
+          // Open the panel first
+          this.windowManager.openWindow("panel", "kit-edit").then(() => {
+            // Then initialize the drum UI after panel is open
+            console.log('Panel opened, initializing drum UI...');
+            if (this.drumMapUI) {
+              this.drumMapUI.initialize();
+            }
+          });
         } else {
           console.error('WindowManager not available!');
         }
