@@ -187,12 +187,15 @@ class OTTOAccurateInterface {
           none: false,
           auto: true,
           manual: false,
-          stick: false,
-          ride: false,
+          stick: "stick",  // Can be "stick" or "snare"
+          ride: "ride",    // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
+          active: "16",      // Current active fill button
+          previousActive: "16",  // Track previous active for restore
           now: false,
+          solo: false,
           4: false,
           8: false,
           16: true,
@@ -2128,7 +2131,39 @@ class OTTOAccurateInterface {
 
     // Reset player states
     for (let i = 1; i <= this.maxPlayers; i++) {
-      this.playerStates[i] = this.createDefaultPlayerState(i);
+      this.playerStates[i] = {
+        presetName: "Default",
+        midiFile: "Basic",
+        kitName: "Acoustic",
+        patternGroup: "favorites",
+        selectedPattern: "basic",
+        kitMixerActive: false,
+        muted: false,
+        toggleStates: {
+          none: false,
+          auto: true,
+          manual: false,
+          stick: "stick",  // Can be "stick" or "snare"
+          ride: "ride",    // Can be "ride" or "hihat"
+          lock: false,
+        },
+        fillStates: {
+          active: "16",      // Current active fill button
+          previousActive: "16",  // Track previous active for restore
+          now: false,
+          solo: false,
+          4: false,
+          8: false,
+          16: true,
+          32: false,
+        },
+        sliderValues: {
+          volume: 75,
+          dynamics: 50,
+          swing: 50,
+          tuning: 50,
+        },
+      };
     }
 
     // Try to reload current preset
@@ -6103,12 +6138,15 @@ class OTTOAccurateInterface {
           none: false,
           auto: true,
           manual: false,
-          stick: false,
-          ride: false,
+          stick: "stick",  // Can be "stick" or "snare"
+          ride: "ride",    // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
+          active: "16",      // Current active fill button
+          previousActive: "16",  // Track previous active for restore
           now: false,
+          solo: false,
           4: false,
           8: false,
           16: true,
@@ -6187,12 +6225,15 @@ class OTTOAccurateInterface {
           none: false,
           auto: true,
           manual: false,
-          stick: false,
-          ride: false,
+          stick: "stick",  // Can be "stick" or "snare"
+          ride: "ride",    // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
+          active: "16",      // Current active fill button
+          previousActive: "16",  // Track previous active for restore
           now: false,
+          solo: false,
           4: false,
           8: false,
           16: true,
@@ -7945,9 +7986,41 @@ class OTTOAccurateInterface {
       if (!button || !button.dataset.toggle) return;
       updates.push(() => {
         const toggleKey = button.dataset.toggle;
-        this.safeRemoveClass(button, "active");
-        if (state.toggleStates && state.toggleStates[toggleKey]) {
-          this.safeAddClass(button, "active");
+
+        // Handle special toggle buttons text
+        if (toggleKey === "stick") {
+          // Restore correct text and active state based on state
+          if (state.toggleStates && state.toggleStates.stick === "snare") {
+            button.textContent = "Snare";
+            this.safeAddClass(button, "active");  // Snare is active (white)
+          } else {
+            button.textContent = "Stick";
+            this.safeRemoveClass(button, "active");  // Stick is normal (not white)
+          }
+        } else if (toggleKey === "ride") {
+          // Restore correct text and active state based on state
+          if (state.toggleStates && state.toggleStates.ride === "hihat") {
+            button.textContent = "Hi-Hat";
+            this.safeRemoveClass(button, "active");  // Hi-Hat is normal (not white)
+          } else {
+            button.textContent = "Ride";
+            this.safeAddClass(button, "active");  // Ride is active (white)
+          }
+        } else {
+          // Regular toggle buttons
+          this.safeRemoveClass(button, "active");
+          if (state.toggleStates && state.toggleStates[toggleKey]) {
+            this.safeAddClass(button, "active");
+          }
+        }
+
+        // Handle lock state visual indication
+        if (toggleKey !== "lock" && state.toggleStates && state.toggleStates.lock) {
+          button.style.opacity = "0.5";
+          button.style.cursor = "not-allowed";
+        } else if (toggleKey !== "lock") {
+          button.style.opacity = "";
+          button.style.cursor = "";
         }
       });
     });
@@ -7959,8 +8032,17 @@ class OTTOAccurateInterface {
       updates.push(() => {
         const fillKey = button.dataset.fill;
         this.safeRemoveClass(button, "active");
-        if (state.fillStates && state.fillStates[fillKey]) {
-          this.safeAddClass(button, "active");
+
+        // Check if this button should be active
+        if (state.fillStates) {
+          // For regular fill buttons, check their individual state
+          if (state.fillStates[fillKey]) {
+            this.safeAddClass(button, "active");
+          }
+          // Also check if this is the current active fill
+          if (state.fillStates.active === fillKey) {
+            this.safeAddClass(button, "active");
+          }
         }
       });
     });
@@ -8626,64 +8708,97 @@ class OTTOAccurateInterface {
     // Throttled toggle handler to prevent rapid state changes
     const throttledToggleHandler = this.throttle((toggleBtn, toggleType) => {
       const state = this.playerStates[this.currentPlayer];
-
-      // Handle 'None' button - turns off all other toggles
-      if (toggleType === "none") {
-        // Turn off all toggles
-        Object.keys(state.toggleStates).forEach((key) => {
-          state.toggleStates[key] = false;
-        });
-
-        // Turn on 'none'
-        state.toggleStates.none = true;
-
-        // Update UI - remove active from all, add to none
-        document.querySelectorAll(".toggle-btn").forEach((btn) => {
-          btn.classList.remove("active");
-        });
-        toggleBtn.classList.add("active");
+      
+      // Check if controls are locked
+      if (state.toggleStates.lock && toggleType !== "lock") {
+        debugLog(`Controls locked - cannot change ${toggleType}`);
+        return;
       }
-      // Handle radio group behavior for Auto/Manual
-      else if (toggleType === "auto" || toggleType === "manual") {
-        // Turn off 'none' if it's active
-        if (state.toggleStates.none) {
-          state.toggleStates.none = false;
-          document
-            .querySelector('[data-toggle="none"]')
-            .classList.remove("active");
+
+      // Handle Stick/Snare toggle
+      if (toggleType === "stick") {
+        const currentText = toggleBtn.textContent;
+        if (currentText === "Stick") {
+          toggleBtn.textContent = "Snare";
+          toggleBtn.classList.add("active");  // Snare is active (white)
+          state.toggleStates.stick = "snare";
+        } else {
+          toggleBtn.textContent = "Stick";
+          toggleBtn.classList.remove("active");  // Stick is normal (not white)
+          state.toggleStates.stick = "stick";
         }
+        this.onToggleChanged(this.currentPlayer, "stick", state.toggleStates.stick);
+        this.setDirty("preset", true);
+        debugLog(`Player ${this.currentPlayer} stick/snare: ${state.toggleStates.stick}`);
+        return;
+      }
 
-        // Clear both auto/manual
-        state.toggleStates.auto = false;
-        state.toggleStates.manual = false;
-
-        // Set the clicked one
-        state.toggleStates[toggleType] = true;
-
-        // Update all Auto/Manual buttons
-        document
-          .querySelectorAll('[data-toggle="auto"], [data-toggle="manual"]')
-          .forEach((btn) => {
-            btn.classList.remove("active");
-            if (btn.dataset.toggle === toggleType) {
-              btn.classList.add("active");
-            }
-          });
-      } else {
-        // Turn off 'none' if it's active
-        if (state.toggleStates.none) {
-          state.toggleStates.none = false;
-          document
-            .querySelector('[data-toggle="none"]')
-            .classList.remove("active");
+      // Handle Ride/Hi-Hat toggle
+      if (toggleType === "ride") {
+        const currentText = toggleBtn.textContent;
+        if (currentText === "Ride") {
+          toggleBtn.textContent = "Hi-Hat";
+          toggleBtn.classList.remove("active");  // Hi-Hat is normal (not white)
+          state.toggleStates.ride = "hihat";
+        } else {
+          toggleBtn.textContent = "Ride";
+          toggleBtn.classList.add("active");  // Ride is active (white)
+          state.toggleStates.ride = "ride";
         }
+        this.onToggleChanged(this.currentPlayer, "ride", state.toggleStates.ride);
+        this.setDirty("preset", true);
+        debugLog(`Player ${this.currentPlayer} ride/hihat: ${state.toggleStates.ride}`);
+        return;
+      }
 
-        // Toggle individual buttons
+      // Handle Lock button
+      if (toggleType === "lock") {
         const isActive = toggleBtn.classList.contains("active");
         toggleBtn.classList.toggle("active");
-        state.toggleStates[toggleType] = !isActive;
+        state.toggleStates.lock = !isActive;
+        
+        // Apply visual indication that buttons are locked/unlocked
+        const allToggleButtons = document.querySelectorAll(".toggle-btn:not([data-toggle='lock'])");
+        allToggleButtons.forEach(btn => {
+          if (!isActive) {
+            btn.style.opacity = "0.5";
+            btn.style.cursor = "not-allowed";
+          } else {
+            btn.style.opacity = "";
+            btn.style.cursor = "";
+          }
+        });
+        
+        this.onToggleChanged(this.currentPlayer, "lock", state.toggleStates.lock);
+        this.setDirty("preset", true);
+        debugLog(`Player ${this.currentPlayer} lock: ${state.toggleStates.lock}`);
+        return;
       }
 
+      // Handle None/Auto/Manual exclusive buttons
+      if (toggleType === "none" || toggleType === "auto" || toggleType === "manual") {
+        // Clear all three exclusive buttons
+        ["none", "auto", "manual"].forEach(type => {
+          state.toggleStates[type] = false;
+          const btn = document.querySelector(`[data-toggle="${type}"]`);
+          if (btn) btn.classList.remove("active");
+        });
+        
+        // Set the clicked one
+        state.toggleStates[toggleType] = true;
+        toggleBtn.classList.add("active");
+        
+        this.onToggleChanged(this.currentPlayer, toggleType, true);
+        this.setDirty("preset", true);
+        debugLog(`Player ${this.currentPlayer} ${toggleType}: true`);
+        return;
+      }
+
+      // For any other toggle buttons (if any exist)
+      const isActive = toggleBtn.classList.contains("active");
+      toggleBtn.classList.toggle("active");
+      state.toggleStates[toggleType] = !isActive;
+      
       this.onToggleChanged(
         this.currentPlayer,
         toggleType,
@@ -8707,25 +8822,130 @@ class OTTOAccurateInterface {
   }
 
   setupFillButtons() {
+    // Initialize fill states if not already present
+    const state = this.playerStates[this.currentPlayer];
+    if (!state.fillStates) {
+      state.fillStates = {
+        active: "4",  // Default active fill button
+        previousActive: "4",  // Track previous active for restore
+        now: false,
+        solo: false,
+        "4": true,
+        "8": false,
+        "16": false,
+        "32": false
+      };
+    }
+    
     // Throttled fill handler to prevent rapid state changes
     const throttledFillHandler = this.throttle((fillBtn, fillType) => {
-      const isActive = fillBtn.classList.contains("active");
-
-      // Update state through centralized system
-      this.updatePlayerState(
-        this.currentPlayer,
-        {
-          fillStates: { [fillType]: !isActive },
-        },
-        () => {
-          // Update UI and trigger callback after state is updated
-          fillBtn.classList.toggle("active");
-          this.onFillChanged(this.currentPlayer, fillType, !isActive);
-          debugLog(
-            `Player ${this.currentPlayer} fill ${fillType}: ${!isActive}`,
-          );
-        },
-      );
+      const state = this.playerStates[this.currentPlayer];
+      
+      // Handle "Now" button toggle
+      if (fillType === "now") {
+        const isActive = fillBtn.classList.contains("active");
+        
+        if (!isActive) {
+          // Deactivate Solo if it's active (mutually exclusive)
+          const soloBtn = document.querySelector('[data-fill="solo"]');
+          if (soloBtn && soloBtn.classList.contains("active")) {
+            soloBtn.classList.remove("active");
+            state.fillStates.solo = false;
+          }
+          
+          // Activating "Now" - save current active button and deactivate all others
+          const currentActiveBtn = document.querySelector(".fill-btn.active:not([data-fill='now']):not([data-fill='solo'])");
+          if (currentActiveBtn) {
+            state.fillStates.previousActive = currentActiveBtn.dataset.fill;
+            currentActiveBtn.classList.remove("active");
+            state.fillStates[currentActiveBtn.dataset.fill] = false;
+          }
+          
+          fillBtn.classList.add("active");
+          state.fillStates.now = true;
+          state.fillStates.active = "now";
+        } else {
+          // Deactivating "Now" - restore previous active button
+          fillBtn.classList.remove("active");
+          state.fillStates.now = false;
+          
+          if (state.fillStates.previousActive) {
+            const restoreBtn = document.querySelector(`[data-fill="${state.fillStates.previousActive}"]`);
+            if (restoreBtn) {
+              restoreBtn.classList.add("active");
+              state.fillStates[state.fillStates.previousActive] = true;
+              state.fillStates.active = state.fillStates.previousActive;
+            }
+          }
+        }
+        
+        this.onFillChanged(this.currentPlayer, fillType, state.fillStates.now);
+        this.setDirty("preset", true);
+        debugLog(`Player ${this.currentPlayer} fill now: ${state.fillStates.now}`);
+        return;
+      }
+      
+      // Handle "Solo" button toggle
+      if (fillType === "solo") {
+        const isActive = fillBtn.classList.contains("active");
+        
+        if (!isActive) {
+          // Deactivate Now if it's active (mutually exclusive)
+          const nowBtn = document.querySelector('[data-fill="now"]');
+          if (nowBtn && nowBtn.classList.contains("active")) {
+            nowBtn.classList.remove("active");
+            state.fillStates.now = false;
+          }
+          
+          // Activating "Solo" - save current active button and deactivate all others
+          const currentActiveBtn = document.querySelector(".fill-btn.active:not([data-fill='solo']):not([data-fill='now'])");
+          if (currentActiveBtn) {
+            state.fillStates.previousActive = currentActiveBtn.dataset.fill;
+            currentActiveBtn.classList.remove("active");
+            state.fillStates[currentActiveBtn.dataset.fill] = false;
+          }
+          
+          fillBtn.classList.add("active");
+          state.fillStates.solo = true;
+          state.fillStates.active = "solo";
+        } else {
+          // Deactivating "Solo" - restore previous active button
+          fillBtn.classList.remove("active");
+          state.fillStates.solo = false;
+          
+          if (state.fillStates.previousActive) {
+            const restoreBtn = document.querySelector(`[data-fill="${state.fillStates.previousActive}"]`);
+            if (restoreBtn) {
+              restoreBtn.classList.add("active");
+              state.fillStates[state.fillStates.previousActive] = true;
+              state.fillStates.active = state.fillStates.previousActive;
+            }
+          }
+        }
+        
+        this.onFillChanged(this.currentPlayer, fillType, state.fillStates.solo);
+        this.setDirty("preset", true);
+        debugLog(`Player ${this.currentPlayer} fill solo: ${state.fillStates.solo}`);
+        return;
+      }
+      
+      // Handle regular fill buttons (4, 8, 16, 32) - mutually exclusive
+      // Deactivate all other fill buttons including now and solo
+      document.querySelectorAll(".fill-btn").forEach(btn => {
+        btn.classList.remove("active");
+        const btnFill = btn.dataset.fill;
+        state.fillStates[btnFill] = false;
+      });
+      
+      // Activate the clicked button
+      fillBtn.classList.add("active");
+      state.fillStates[fillType] = true;
+      state.fillStates.active = fillType;
+      state.fillStates.previousActive = fillType;  // Update previous for potential restore
+      
+      this.onFillChanged(this.currentPlayer, fillType, true);
+      this.setDirty("preset", true);
+      debugLog(`Player ${this.currentPlayer} fill ${fillType}: true`);
     }, 100); // 100ms throttle for fill buttons
 
     document.querySelectorAll(".fill-btn").forEach((fillBtn) => {
