@@ -188,7 +188,7 @@ class OTTOAccurateInterface {
           auto: true,
           manual: false,
           stick: "stick",  // Can be "stick" or "snare"
-          ride: "ride",    // Can be "ride" or "hihat"
+          ride: "hihat",   // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
@@ -2144,7 +2144,7 @@ class OTTOAccurateInterface {
           auto: true,
           manual: false,
           stick: "stick",  // Can be "stick" or "snare"
-          ride: "ride",    // Can be "ride" or "hihat"
+          ride: "hihat",   // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
@@ -5434,21 +5434,10 @@ class OTTOAccurateInterface {
         // Deep clone all player states to avoid reference issues
         this.playerStates = this.structuredClone(preset.playerStates);
 
-        // MIGRATION: Handle old presets without midiFile field
+        // Ensure all player states have valid values (no migration)
         for (let i = 1; i <= this.maxPlayers; i++) {
           if (this.playerStates[i]) {
-            // If no midiFile but has selectedPattern, migrate it
-            if (
-              !this.playerStates[i].midiFile &&
-              this.playerStates[i].selectedPattern
-            ) {
-              this.playerStates[i].midiFile =
-                this.playerStates[i].selectedPattern;
-              debugLog(
-                `Migrated player ${i} selectedPattern to midiFile: ${this.playerStates[i].midiFile}`,
-              );
-            }
-            // Ensure midiFile has a default if still missing
+            // Ensure midiFile has a default if missing
             if (!this.playerStates[i].midiFile) {
               this.playerStates[i].midiFile = "Basic";
               debugLog(`Set default midiFile for player ${i}: Basic`);
@@ -5944,8 +5933,8 @@ class OTTOAccurateInterface {
           none: false,
           auto: true, // All players have Auto active
           manual: false,
-          stick: false,
-          ride: false,
+          stick: "stick",  // Can be "stick" or "snare"
+          ride: "hihat",   // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
@@ -6026,8 +6015,8 @@ class OTTOAccurateInterface {
           none: false,
           auto: true, // All players have Auto active
           manual: false,
-          stick: false,
-          ride: false,
+          stick: "stick",  // Can be "stick" or "snare"
+          ride: "hihat",   // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
@@ -6139,7 +6128,7 @@ class OTTOAccurateInterface {
           auto: true,
           manual: false,
           stick: "stick",  // Can be "stick" or "snare"
-          ride: "ride",    // Can be "ride" or "hihat"
+          ride: "hihat",   // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
@@ -6226,7 +6215,7 @@ class OTTOAccurateInterface {
           auto: true,
           manual: false,
           stick: "stick",  // Can be "stick" or "snare"
-          ride: "ride",    // Can be "ride" or "hihat"
+          ride: "hihat",   // Can be "ride" or "hihat"
           lock: false,
         },
         fillStates: {
@@ -7998,13 +7987,13 @@ class OTTOAccurateInterface {
             this.safeRemoveClass(button, "active");  // Stick is normal (not white)
           }
         } else if (toggleKey === "ride") {
-          // Restore correct text and active state based on state
+          // Restore correct text and active state based on state - REVERSED HIGHLIGHT
           if (state.toggleStates && state.toggleStates.ride === "hihat") {
             button.textContent = "Hi-Hat";
-            this.safeRemoveClass(button, "active");  // Hi-Hat is normal (not white)
+            this.safeAddClass(button, "active");  // Hi-Hat is active (white) - REVERSED
           } else {
             button.textContent = "Ride";
-            this.safeAddClass(button, "active");  // Ride is active (white)
+            this.safeRemoveClass(button, "active");  // Ride is normal (not white) - REVERSED
           }
         } else {
           // Regular toggle buttons
@@ -8733,16 +8722,16 @@ class OTTOAccurateInterface {
         return;
       }
 
-      // Handle Ride/Hi-Hat toggle
+      // Handle Ride/Hi-Hat toggle - REVERSED HIGHLIGHT
       if (toggleType === "ride") {
         const currentText = toggleBtn.textContent;
         if (currentText === "Ride") {
           toggleBtn.textContent = "Hi-Hat";
-          toggleBtn.classList.remove("active");  // Hi-Hat is normal (not white)
+          toggleBtn.classList.add("active");  // Hi-Hat is active (white) - REVERSED
           state.toggleStates.ride = "hihat";
         } else {
           toggleBtn.textContent = "Ride";
-          toggleBtn.classList.add("active");  // Ride is active (white)
+          toggleBtn.classList.remove("active");  // Ride is normal (not white) - REVERSED
           state.toggleStates.ride = "ride";
         }
         this.onToggleChanged(this.currentPlayer, "ride", state.toggleStates.ride);
