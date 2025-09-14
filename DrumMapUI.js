@@ -203,6 +203,9 @@ class DrumMapUI {
       mapSelector.addEventListener('change', (e) => this.onMapSelected(e.target.value));
     }
 
+    // Keyboard shortcuts
+    this.attachKeyboardShortcuts();
+
     // Map actions
     this.attachButtonListener('new-map-btn', () => this.createNewMap());
     this.attachButtonListener('duplicate-map-btn', () => this.duplicateCurrentMap());
@@ -286,6 +289,168 @@ class DrumMapUI {
     if (btn) {
       btn.addEventListener('click', handler);
     }
+  }
+
+  attachKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      // Only handle shortcuts when drum editor is open
+      const panel = document.getElementById('kit-edit-panel');
+      if (!panel || !panel.classList.contains('active')) return;
+
+      // Prevent shortcuts when typing in input fields
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      const key = e.key.toLowerCase();
+      const ctrl = e.ctrlKey || e.metaKey;
+
+      // Handle shortcuts
+      switch (true) {
+        case key === ' ' && !ctrl:
+          e.preventDefault();
+          this.previewSelectedNote();
+          break;
+
+        case key === '1' && !ctrl:
+          e.preventDefault();
+          this.setViewMode('grid');
+          break;
+
+        case key === '2' && !ctrl:
+          e.preventDefault();
+          this.setViewMode('list');
+          break;
+
+        case key === '3' && !ctrl:
+          e.preventDefault();
+          this.setViewMode('piano');
+          break;
+
+        case key === 'delete' && !ctrl:
+          e.preventDefault();
+          if (this.selectedNote !== null) {
+            this.drumMapManager.removeNoteAssignment(this.selectedNote);
+          }
+          break;
+
+        case key === 's' && ctrl:
+          e.preventDefault();
+          this.drumMapManager.saveCustomMaps();
+          this.updateStatus('Map saved');
+          break;
+
+        case key === 'd' && ctrl:
+          e.preventDefault();
+          this.duplicateCurrentMap();
+          break;
+
+        case key === 'z' && ctrl:
+          e.preventDefault();
+          // Undo functionality would need to be implemented
+          this.updateStatus('Undo not yet implemented');
+          break;
+
+        case key === 'y' && ctrl:
+          e.preventDefault();
+          // Redo functionality would need to be implemented
+          this.updateStatus('Redo not yet implemented');
+          break;
+
+        case key === 'tab' && !ctrl:
+          e.preventDefault();
+          this.cyclePanel();
+          break;
+
+        case key === 'escape':
+          e.preventDefault();
+          // Close the drum editor panel
+          if (window.otto && window.otto.windowManager) {
+            window.otto.windowManager.closeWindow('kit-edit');
+          }
+          break;
+
+        case key === 'a' && !ctrl:
+          if (window.otto && window.otto.drumMapAdvanced) {
+            if (window.otto.drumMapAdvanced.comparisonMode) {
+              e.preventDefault();
+              const active = window.otto.drumMapAdvanced.switchComparison();
+              this.updateStatus(`Switched to Map ${active}`);
+            }
+          }
+          break;
+
+        case key === 'b' && !ctrl:
+          if (window.otto && window.otto.drumMapAdvanced) {
+            if (window.otto.drumMapAdvanced.comparisonMode) {
+              e.preventDefault();
+              const active = window.otto.drumMapAdvanced.switchComparison();
+              this.updateStatus(`Switched to Map ${active}`);
+            }
+          }
+          break;
+
+        case key === 'm' && !ctrl:
+          e.preventDefault();
+          this.toggleMidiLearn();
+          break;
+
+        case key === 'arrowup':
+          e.preventDefault();
+          this.selectAdjacentNote(-8); // Move up in grid
+          break;
+
+        case key === 'arrowdown':
+          e.preventDefault();
+          this.selectAdjacentNote(8); // Move down in grid
+          break;
+
+        case key === 'arrowleft':
+          e.preventDefault();
+          this.selectAdjacentNote(-1); // Move left in grid
+          break;
+
+        case key === 'arrowright':
+          e.preventDefault();
+          this.selectAdjacentNote(1); // Move right in grid
+          break;
+      }
+    });
+  }
+
+  cyclePanel() {
+    // Cycle focus between the three panels
+    const panels = ['note-grid-panel', 'mapping-panel', 'mixer-channels-panel'];
+    const activeElement = document.activeElement;
+    let currentPanel = null;
+
+    // Find current panel
+    panels.forEach(panelId => {
+      const panel = document.querySelector(`.${panelId}`);
+      if (panel && panel.contains(activeElement)) {
+        currentPanel = panelId;
+      }
+    });
+
+    // Move to next panel
+    const currentIndex = panels.indexOf(currentPanel);
+    const nextIndex = (currentIndex + 1) % panels.length;
+    const nextPanel = document.querySelector(`.${panels[nextIndex]}`);
+
+    if (nextPanel) {
+      const firstFocusable = nextPanel.querySelector('button, input, select');
+      if (firstFocusable) {
+        firstFocusable.focus();
+      }
+    }
+  }
+
+  selectAdjacentNote(offset) {
+    if (this.selectedNote === null) {
+      this.selectNote(0);
+      return;
+    }
+
+    const newNote = Math.max(0, Math.min(127, this.selectedNote + offset));
+    this.selectNote(newNote);
   }
 
   updateMapSelector() {

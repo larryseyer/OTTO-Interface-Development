@@ -3938,10 +3938,41 @@ class OTTOAccurateInterface {
       // Initialize drum map UI
       this.drumMapUI = new DrumMapUI(this.drumMapManager, this.sfzEditor, this.midiTranslator);
 
+      // Initialize advanced features
+      this.drumMapAdvanced = new DrumMapAdvanced(
+        this.drumMapManager,
+        this.sfzEditor,
+        this.midiTranslator
+      );
+
+      // Initialize MIDI learn if available
+      this.drumMapAdvanced.initializeMidiLearn().then(success => {
+        if (success) {
+          console.log('MIDI Learn initialized');
+        }
+      }).catch(error => {
+        console.warn('MIDI Learn not available:', error);
+      });
+
+      // Initialize audio audition
+      this.drumMapAdvanced.initializeAudition().then(() => {
+        console.log('Sample audition initialized');
+      }).catch(error => {
+        console.warn('Sample audition not available:', error);
+      });
+
       // Store reference in window manager for panel open hook
       if (this.windowManager) {
         this.windowManager.otto.drumMapUI = this.drumMapUI;
+        this.windowManager.otto.drumMapAdvanced = this.drumMapAdvanced;
       }
+
+      // Enable auto-save for custom maps
+      this.drumMapManager.addListener((event, data) => {
+        if (event === 'mapUpdated' || event === 'mapCreated') {
+          this.scheduleDrumMapSave();
+        }
+      });
 
       console.log('Drum Mapping System initialized successfully');
 
@@ -3949,6 +3980,18 @@ class OTTOAccurateInterface {
       console.error('Error initializing drum mapping system:', error);
       // Continue without drum mapping if it fails
     }
+  }
+
+  scheduleDrumMapSave() {
+    // Debounce save operations
+    if (this.drumMapSaveTimer) {
+      clearTimeout(this.drumMapSaveTimer);
+    }
+
+    this.drumMapSaveTimer = setTimeout(() => {
+      console.log('Auto-saving drum maps...');
+      this.drumMapManager.saveCustomMaps();
+    }, 2000); // Save after 2 seconds of inactivity
   }
 
   async fetchDrumkitFiles() {
