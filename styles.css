@@ -3808,6 +3808,17 @@ body {
   padding: 40px;
 }
 
+/* Drum Kit Edit Panel - Takes up entire interface */
+#kit-edit-panel {
+  top: 0; /* Start from the very top */
+  height: 100%; /* Take up full height */
+  transform: translateY(calc(100% + 30px)); /* Hidden by default */
+}
+
+#kit-edit-panel.active {
+  transform: translateY(0); /* Slide up to show */
+}
+
 /* Scrollbar styling for panel bodies */
 .slide-up-panel .panel-body::-webkit-scrollbar {
   width: 8px;
