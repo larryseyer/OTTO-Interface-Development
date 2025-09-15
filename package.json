@@ -1,0 +1,26 @@
+{
+  "name": "otto-interface-development",
+  "version": "1.0.0",
+  "description": "**THIS IS NOT A JUCE CLIENT APPLICATION**",
+  "main": "AudioScheduler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/larryseyer/OTTO-Interface-Development.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/larryseyer/OTTO-Interface-Development/issues"
+  },
+  "homepage": "https://github.com/larryseyer/OTTO-Interface-Development#readme",
+  "devDependencies": {
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2"
+  }
+}

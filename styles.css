@@ -187,15 +187,15 @@ body {
   /* Clip content at interface boundaries */
 }
 
-/* Mute Overlay - covers rows 3-5 */
+/* Mute Overlay - covers rows 3-6 when player is muted */
 .mute-overlay {
   position: absolute;
-  top: calc(var(--row1-height) + var(--row3-height));
-  /* Start after row 1 and 2 */
+  top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height));
+  /* Start after rows 1, 2, and 3 */
   left: 0;
   width: 100%;
-  height: calc(var(--row4-height) + var(--row5-height) + var(--row6-height));
-  /* Cover rows 3-5 */
+  height: calc(var(--row4-height) + var(--row5-height) + var(--row6-height) + var(--row7-height));
+  /* Cover rows 4-7 */
   background: rgba(0, 0, 0, 0.5);
   /* Semi-transparent black overlay */
   pointer-events: none;
@@ -222,7 +222,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 10000;
   transition: opacity 0.5s ease-out;
 }
 
@@ -499,10 +499,11 @@ body {
   /* Allow shrinking */
 }
 
-/* Increase height for preset dropdown options to extend to bottom of row 5 */
+/* Preset dropdown options - limited to available space below row1 */
 #preset-dropdown .dropdown-options {
-  max-height: calc(85vh);
-  /* Can extend through row 5 (10% + 8% + 18% + 12% + 47% = 95% - 10% for row1 = 85%) */
+  max-height: calc(100% - var(--row1-height) - var(--row2-height));
+  /* Limit to space below row2 to prevent blocking */
+  overflow-y: auto;
 }
 
 /* Row 1 Area 3: Play/Pause Transport (centered) */
@@ -827,11 +828,13 @@ body {
   overflow-y: auto;
   z-index: 5000 !important; /* Very high to ensure it's on top */
   display: none;
+  pointer-events: none; /* Prevent interaction when hidden */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .custom-dropdown.open .dropdown-options {
   display: block;
+  pointer-events: auto; /* Allow interaction when visible */
 }
 
 .dropdown-option {
@@ -1016,7 +1019,7 @@ body {
   align-items: center;
   padding: 0;
   position: relative;
-  z-index: 5; /* Lower than row1 and dropdowns */
+  z-index: 50; /* Increased to match row4 and avoid conflicts */
 }
 
 /* Row 3: Player Tabs  - 8 Player Selection */

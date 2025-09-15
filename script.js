@@ -230,10 +230,16 @@ class OTTOAccurateInterface {
     // Pending storage writes for debouncing
     this.pendingStorageWrites = new Map();
 
-    this.init();
+    // Flag to track parent-level operations
+    this.isParentOperation = false;
+
+    // Call init with proper error handling since it's async
+    this.init().catch(error => {
+      console.error("CRITICAL: Init failed in constructor:", error);
+      console.error("Stack:", error.stack);
+    });
   }
-  // Flag to track parent-level operations
-  isParentOperation = false;
+
   // Enhanced Timer Management System
   createSafeTimeout(callback, delay, type = "general") {
     if (this.isDestroyed) return null;
@@ -4289,57 +4295,55 @@ class OTTOAccurateInterface {
     const midiFiles = [];
     const basePath = "./Assets/MidiFiles/";
 
-    // Define the subdirectories to scan
-    const directories = ["Grooves", "Fills", "Intros", "Endings"];
-
     console.log("Starting MIDI file scan...");
 
-    for (const dir of directories) {
+    // Recursively scan directory and subdirectories
+    const scanDirectory = async (path, category = "") => {
       try {
-        // Try to fetch the directory listing
-        const response = await fetch(`${basePath}${dir}/`);
-
+        const response = await fetch(path);
+        
         if (response.ok) {
           const text = await response.text();
-          console.log(`Checking directory ${dir} for MIDI files...`);
-
-          // Parse the HTML response to extract MIDI files
           const parser = new DOMParser();
           const doc = parser.parseFromString(text, "text/html");
-
-          // Look for links to .mid or .MID files
           const links = doc.querySelectorAll("a");
-          let foundInDir = 0;
-          links.forEach((link) => {
+          
+          for (const link of links) {
             const href = link.getAttribute("href");
-
-            if (
-              href &&
-              (href.toLowerCase().endsWith(".mid") ||
-                href.toLowerCase().endsWith(".midi"))
-            ) {
-              // Clean up the filename and add to our list
-              const fileName = decodeURIComponent(
-                href.replace(/^\.\//, "").replace(/^\//, ""),
-              );
-              console.log(`  Found: ${fileName}`);
+            if (!href) continue;
+            
+            // Skip parent directory links and query parameters
+            if (href === "../" || href.includes("?") || href === "./") continue;
+            
+            const decodedHref = decodeURIComponent(href);
+            const cleanName = decodedHref.replace(/\/$/, "");
+            
+            // Check if it's a MIDI file
+            if (decodedHref.toLowerCase().endsWith(".mid") || 
+                decodedHref.toLowerCase().endsWith(".midi")) {
+              console.log(`  Found: ${category}/${cleanName}`);
               midiFiles.push({
-                name: fileName.replace(/\.(mid|midi|MID|MIDI)$/, ""),
-                path: `${dir}/${fileName}`,
-                category: dir,
+                name: cleanName.replace(/\.(mid|midi|MID|MIDI)$/, ""),
+                path: `${category}/${cleanName}`,
+                category: category || "Root"
               });
-              foundInDir++;
+            } 
+            // If it ends with /, it's likely a directory - scan it recursively
+            else if (decodedHref.endsWith("/")) {
+              const subCategory = category ? `${category}/${cleanName}` : cleanName;
+              console.log(`Scanning directory: ${subCategory}`);
+              await scanDirectory(`${path}${decodedHref}`, subCategory);
             }
-          });
-
-          if (foundInDir === 0) {
-            console.log(`  No MIDI files found in ${dir}`);
           }
         }
       } catch (error) {
-        console.warn(`Could not fetch directory listing for ${dir}:`, error);
+        // Silently skip directories that don't exist or can't be accessed
+        console.log(`Skipping inaccessible path: ${path}`);
       }
-    }
+    };
+
+    // Start scanning from the base path
+    await scanDirectory(basePath);
 
     if (midiFiles.length === 0) {
       console.warn("No MIDI files found in any directories");
@@ -6704,35 +6708,35 @@ class OTTOAccurateInterface {
       }
 
       // Initialize Drum Mapping System
+      console.log("Step X: Initializing drum mapping system...");
       this.initializeDrumMappingSystem();
 
+      console.log("Step X+1: Setting up version...");
       this.setupVersion();
+      console.log("Step X+2: Setting up splash screen...");
       this.setupSplashScreen();
-      this.setupPhraseTabs();
 
+      console.log("Step X+3: About to setup phrase tabs...");
+      try {
+        this.setupPhraseTabs();
+        console.log("Step X+3a: Phrase tabs setup complete");
+      } catch (error) {
+        console.error("ERROR setting up phrase tabs:", error);
+        console.error("Stack trace:", error.stack);
+      }
+
+      console.log("Step X+4: Creating phrase interface...");
       // Make phrase methods globally accessible IMMEDIATELY after setup
+      // Methods are already bound in setupPhraseTabs()
       window.phraseInterface = {
-        switchToPhrase: (phrase) => this.switchToPhrase(phrase),
-        navigatePhrase: (direction) => this.navigatePhrase(direction),
+        switchToPhrase: this.switchToPhrase,
+        navigatePhrase: this.navigatePhrase,
         getCurrentPhrase: () => this.currentPhrase,
-        updatePhraseTabStates: () => this.updatePhraseTabStates()
+        updatePhraseTabStates: this.updatePhraseTabStates
       };
-      console.log("Phrase interface created:", window.phraseInterface);
+      console.log("Step X+5: Phrase interface created:", window.phraseInterface);
 
       this.setupPlayerTabs();
-
-      // Ensure phrase tabs are set up after a delay if they failed initially
-      setTimeout(() => {
-        const phraseTabs = document.querySelectorAll(".phrase-tab");
-        if (phraseTabs.length > 0) {
-          const firstTab = phraseTabs[0];
-          // Check if handlers are attached
-          if (!firstTab.hasAttribute("data-phrase-initialized")) {
-            console.warn("Phrase tabs not initialized, retrying...");
-            this.setupPhraseTabs();
-          }
-        }
-      }, 500);
       this.setupPresetControls();
       this.setupSettingsWindow(); // Setup settings window
       this.setupAllModals(); // Setup all modal windows
@@ -6790,6 +6794,8 @@ class OTTOAccurateInterface {
         ")",
       );
     } catch (error) {
+      console.error("ERROR DURING INITIALIZATION:", error);
+      console.error("Stack trace:", error.stack);
       debugError("Error during initialization:", error);
       debugError("Stack trace:", error.stack);
 
@@ -6933,24 +6939,24 @@ class OTTOAccurateInterface {
       );
     }
 
-    // Create bound handlers to preserve 'this' context
-    const self = this;
+    // Bind methods to preserve 'this' context
+    this.switchToPhrase = this.switchToPhrase.bind(this);
+    this.navigatePhrase = this.navigatePhrase.bind(this);
+    this.updatePhraseTabStates = this.updatePhraseTabStates.bind(this);
 
-    // Setup phrase tab click handlers - use direct addEventListener with arrow functions
+    // Setup phrase tab click handlers
     phraseTabs.forEach((tab) => {
-      // Use arrow function to preserve 'this' context
+      // Add click handler directly without cloning
       const handler = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
         const phrase = tab.dataset.phrase;
-        console.log("Phrase tab clicked:", phrase, "Current phrase:", self.currentPhrase);
+        console.log("Phrase tab clicked:", phrase, "Current phrase:", this.currentPhrase);
         if (phrase) {
-          self.switchToPhrase(phrase);
+          this.switchToPhrase(phrase);
         }
       };
 
       tab.addEventListener("click", handler);
-      // Also add pointer events to ensure clickability
+      // Ensure clickability
       tab.style.pointerEvents = "auto";
       tab.style.cursor = "pointer";
       // Mark as initialized
@@ -6966,13 +6972,11 @@ class OTTOAccurateInterface {
       this.eventListenerRegistry.element.push({ element: tab, event: "click", handler });
     });
 
-    // Setup phrase navigation buttons - use direct addEventListener
+    // Setup phrase navigation buttons
     if (phrasePrevBtn) {
       const prevHandler = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log("Phrase prev clicked, current:", self.currentPhrase);
-        self.navigatePhrase(-1);
+        console.log("Phrase prev clicked, current:", this.currentPhrase);
+        this.navigatePhrase(-1);
       };
       phrasePrevBtn.addEventListener("click", prevHandler);
       phrasePrevBtn.style.pointerEvents = "auto";
@@ -6984,10 +6988,8 @@ class OTTOAccurateInterface {
 
     if (phraseNextBtn) {
       const nextHandler = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log("Phrase next clicked, current:", self.currentPhrase);
-        self.navigatePhrase(1);
+        console.log("Phrase next clicked, current:", this.currentPhrase);
+        this.navigatePhrase(1);
       };
       phraseNextBtn.addEventListener("click", nextHandler);
       phraseNextBtn.style.pointerEvents = "auto";
@@ -7004,8 +7006,9 @@ class OTTOAccurateInterface {
     console.log("=== setupPhraseTabs complete ===");
     console.log("Current phrase:", this.currentPhrase);
     if (phraseTabs.length > 0) {
-      console.log("First tab element:", phraseTabs[0]);
-      console.log("First tab dataset:", phraseTabs[0].dataset);
+      const tabs = document.querySelectorAll(".phrase-tab");
+      console.log("First tab element after setup:", tabs[0]);
+      console.log("First tab dataset:", tabs[0].dataset);
     }
   }
 
@@ -7155,8 +7158,11 @@ class OTTOAccurateInterface {
       }
 
       // Add click handler using tracked event listener
-      const clickHandler = () => {
+      const clickHandler = (e) => {
         this.switchToPlayer(playerNumber);
+        // Prevent focus from getting stuck
+        tab.blur();
+        e.target.blur();
       };
 
       this.addEventListener(tab, "click", clickHandler);
@@ -11206,6 +11212,147 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tabs.length > 1) {
       console.log("Simulating click on second tab...");
       tabs[1].click();
+    }
+  };
+
+  // Debug function to check what's blocking clicks on row2
+  window.debugRow2 = () => {
+    // First, remove any existing test listeners
+    const testHandlers = window.debugRow2.handlers || [];
+    testHandlers.forEach(({element, handler}) => {
+      element.removeEventListener('click', handler, true);
+    });
+    window.debugRow2.handlers = [];
+
+    // Add test listener at document level
+    const docHandler = (e) => {
+      if (e.target.closest('.phrase-tabs-section')) {
+        console.log('Document caught click on row2:', {
+          target: e.target,
+          currentTarget: e.currentTarget,
+          eventPhase: e.eventPhase,
+          defaultPrevented: e.defaultPrevented,
+          propagationStopped: e.propagationStopped,
+          isTrusted: e.isTrusted
+        });
+      }
+    };
+    document.addEventListener('click', docHandler, true);
+    window.debugRow2.handlers.push({element: document, handler: docHandler});
+
+    // Check computed styles on all dropdowns
+    console.log('=== Checking all dropdown states ===');
+    document.querySelectorAll('.dropdown-options').forEach(dropdown => {
+      const styles = window.getComputedStyle(dropdown);
+      const parent = dropdown.closest('.custom-dropdown');
+      console.log('Dropdown:', {
+        parent: parent?.id || parent?.className,
+        display: styles.display,
+        pointerEvents: styles.pointerEvents,
+        zIndex: styles.zIndex,
+        visibility: styles.visibility,
+        isOpen: parent?.classList.contains('open')
+      });
+    });
+
+    console.log('Debug listeners added. Click a phrase button to see what happens.');
+  };
+
+  window.debugRow2Alt = () => {
+    console.log("=== DEBUGGING ROW2 CLICKS ===");
+
+    // Check all elements at different points on row2
+    const row2 = document.querySelector('.phrase-tabs-section');
+    const phraseTab = document.querySelector('.phrase-tab');
+    const prevBtn = document.getElementById('phrase-prev-btn');
+
+    if (phraseTab) {
+      const rect = phraseTab.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      console.log("Phrase tab position:", { x, y });
+      console.log("Elements at phrase tab position:");
+
+      const elements = document.elementsFromPoint(x, y);
+      elements.forEach((el, i) => {
+        const styles = window.getComputedStyle(el);
+        console.log(`  ${i}:`, {
+          element: el,
+          className: el.className,
+          id: el.id,
+          tagName: el.tagName,
+          pointerEvents: styles.pointerEvents,
+          zIndex: styles.zIndex,
+          position: styles.position,
+          display: styles.display,
+          visibility: styles.visibility
+        });
+      });
+    }
+
+    // Add click event listeners with capture to see what's intercepting
+    console.log("\n=== Adding capture listeners to trace click path ===");
+
+    document.addEventListener('click', function(e) {
+      console.log('Document captured click:', e.target, 'at phase:', e.eventPhase);
+    }, true);
+
+    if (row2) {
+      row2.addEventListener('click', function(e) {
+        console.log('Row2 captured click:', e.target, 'at phase:', e.eventPhase);
+      }, true);
+    }
+
+    if (phraseTab) {
+      phraseTab.addEventListener('click', function(e) {
+        console.log('Phrase tab clicked!', e.target);
+        console.log('Event details:', {
+          bubbles: e.bubbles,
+          cancelable: e.cancelable,
+          defaultPrevented: e.defaultPrevented,
+          eventPhase: e.eventPhase
+        });
+      }, true);
+    }
+
+    console.log("\n=== Checking for event listeners ===");
+    // Check if there are any listeners that might be interfering
+    if (phraseTab) {
+      // This is a hack to see registered listeners (Chrome DevTools specific)
+      console.log("To see all listeners, run in Chrome DevTools: getEventListeners(document.querySelector('.phrase-tab'))");
+    }
+
+    console.log("\n=== Z-index stack for row2 area ===");
+    const allElements = document.querySelectorAll('*');
+    const row2Rect = row2?.getBoundingClientRect();
+    if (row2Rect) {
+      const overlapping = [];
+      allElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const styles = window.getComputedStyle(el);
+        if (rect.top < row2Rect.bottom &&
+            rect.bottom > row2Rect.top &&
+            rect.left < row2Rect.right &&
+            rect.right > row2Rect.left &&
+            styles.position !== 'static' &&
+            parseInt(styles.zIndex) > 0) {
+          overlapping.push({
+            element: el,
+            className: el.className,
+            zIndex: styles.zIndex,
+            position: styles.position,
+            pointerEvents: styles.pointerEvents
+          });
+        }
+      });
+      console.log("Elements overlapping row2 with z-index:", overlapping);
+    }
+
+    console.log("\n=== Test programmatic click ===");
+    if (phraseTab) {
+      console.log("Attempting programmatic click on first phrase tab...");
+      phraseTab.click();
     }
   };
 
