@@ -1054,13 +1054,13 @@ class MixerComponent {
     // They represent the same thing - the master output level
     if (this.otto && this.otto.playerStates && this.otto.currentPlayer) {
       const currentVolume = this.otto.playerStates[this.otto.currentPlayer]?.sliderValues?.volume || 75;
-      
+
       // Update the master channel in the mixer to match the volume slider
       const masterStrip = this.channelElements["master"];
       if (masterStrip) {
         const fader = masterStrip.querySelector(".fader-thumb");
         const faderValue = masterStrip.querySelector(".fader-value");
-        
+
         if (fader && faderValue) {
           const track = fader.parentElement;
           const y = (currentVolume / 100) * track.offsetHeight;
@@ -1068,7 +1068,7 @@ class MixerComponent {
           faderValue.textContent = currentVolume.toFixed(1);
         }
       }
-      
+
       // Also ensure the volume slider visual is correct
       this.updateMasterVolumeSlider(currentVolume);
     }
@@ -1452,9 +1452,9 @@ class MixerComponent {
   updateMasterVolumeSlider(value) {
     // Simply update the volume slider to reflect the master channel value
     const volumeSlider = document.querySelector(
-      '.row5-right-area5 .custom-slider[data-param="volume"]',
+      '.row6-right-area5 .custom-slider[data-param="volume"]',
     );
-    
+
     if (volumeSlider) {
       // Update the data attributes to keep them in sync
       volumeSlider.dataset.value = value;
@@ -1463,7 +1463,7 @@ class MixerComponent {
       // Update the visual elements
       const fill = volumeSlider.querySelector(".slider-fill");
       const thumb = volumeSlider.querySelector(".slider-thumb");
-      
+
       // Calculate percentage for positioning
       const min = parseInt(volumeSlider.dataset.min) || 0;
       const max = parseInt(volumeSlider.dataset.max) || 100;
@@ -1472,7 +1472,7 @@ class MixerComponent {
       if (fill) {
         fill.style.height = `${percentage}%`;
       }
-      
+
       if (thumb) {
         thumb.style.bottom = `${percentage}%`;
         // Keep the centering transform from CSS

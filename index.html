@@ -19,6 +19,7 @@
   <script src="StateManager.js"></script>
   <!-- Phase 2: Manager Classes -->
   <script src="PlayerStateManager.js"></script>
+  <script src="PhraseStateManager.js"></script>
   <script src="PatternGroupManager.js"></script>
   <script src="DrumkitManager.js"></script>
   <script src="MixerPresetManager.js"></script>
@@ -319,22 +320,63 @@
       </div>
       <!-- Mute Overlay for rows 2-5 -->
       <div class="mute-overlay"></div>
-      <!-- Row 2: Player Tabs with Chevron Navigation - 5 Areas -->
+      <!-- Row 2: Phrase Manager Section - 5 Areas -->
+      <div class="phrase-tabs-section">
+        <!-- Area 1: Save phrase settings icon -->
+        <div class="row2-area1">
+          <button class="quick-save-btn phrase-save-btn" id="phrase-save-btn" title="Save Phrase">
+            <i class="ph-thin ph-floppy-disk"></i>
+          </button>
+        </div>
+        <!-- Area 2: Left chevron for phrase navigation -->
+        <div class="row2-area2">
+          <button class="phrase-nav-btn phrase-nav-prev" id="phrase-prev-btn">
+            <i class="ph-thin ph-caret-left"></i>
+          </button>
+        </div>
+        <!-- Area 3: Phrase tabs (centered) -->
+        <div class="row2-area3">
+          <div class="phrase-tabs">
+            <button class="phrase-tab active" data-phrase="general">General</button>
+            <button class="phrase-tab" data-phrase="intro">Intro</button>
+            <button class="phrase-tab" data-phrase="verse">Verse</button>
+            <button class="phrase-tab" data-phrase="prechorus">PreChorus</button>
+            <button class="phrase-tab" data-phrase="chorus">Chorus</button>
+            <button class="phrase-tab" data-phrase="bridge">Bridge</button>
+            <button class="phrase-tab" data-phrase="solo">Solo</button>
+            <button class="phrase-tab" data-phrase="outro">Outro</button>
+          </div>
+        </div>
+        <!-- Area 4: Right chevron for phrase navigation -->
+        <div class="row2-area4">
+          <button class="phrase-nav-btn phrase-nav-next" id="phrase-next-btn">
+            <i class="ph-thin ph-caret-right"></i>
+          </button>
+        </div>
+        <!-- Area 5: Mute/Unmute phrase icon -->
+        <div class="row2-area5">
+          <button class="mute-phrase-btn" id="mute-phrase-btn">
+            <i class="ph-thin ph-speaker-high mute-icon-unmuted"></i>
+            <i class="ph-thin ph-speaker-slash mute-icon-muted"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Row 3: Player Tabs with Chevron Navigation - 5 Areas -->
       <div class="player-tabs-section">
         <!-- Area 1: Save player settings icon -->
-        <div class="row2-area1">
+        <div class="row3-area1">
           <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player">
             <i class="ph-thin ph-floppy-disk"></i>
           </button>
         </div>
         <!-- Area 2: Left chevron for player navigation -->
-        <div class="row2-area2">
+        <div class="row3-area2">
           <button class="player-nav-btn player-nav-prev" id="player-prev-btn">
             <i class="ph-thin ph-caret-left"></i>
           </button>
         </div>
         <!-- Area 3: Player tabs (centered) -->
-        <div class="row2-area3">
+        <div class="row3-area3">
           <div class="player-tabs">
             <button class="player-tab active" data-player="1">PLAYER 1</button>
             <button class="player-tab" data-player="2">PLAYER 2</button>
@@ -347,32 +389,32 @@
           </div>
         </div>
         <!-- Area 4: Right chevron for player navigation -->
-        <div class="row2-area4">
+        <div class="row3-area4">
           <button class="player-nav-btn player-nav-next" id="player-next-btn">
             <i class="ph-thin ph-caret-right"></i>
           </button>
         </div>
         <!-- Area 5: Mute/Unmute drummer icon -->
-        <div class="row2-area5">
+        <div class="row3-area5">
           <button class="mute-drummer-btn" id="mute-drummer-btn">
             <i class="ph-thin ph-speaker-high mute-icon-unmuted"></i>
             <i class="ph-thin ph-speaker-slash mute-icon-muted"></i>
           </button>
         </div>
       </div>
-      <!-- Row 3: Drum Kit Section - 5 Areas -->
+      <!-- Row 4: Drum Kit Section - 5 Areas -->
       <div class="drum-kit-section">
         <!-- Area 1: Player number display -->
-        <div class="row3-area-1">
+        <div class="row4-area-1">
           <div class="player-number-display">
             <span class="player-number" id="current-player-number">1</span>
           </div>
         </div>
         <!-- Area 2: Empty (icons moved to area 3) -->
-        <div class="row3-area-2">
+        <div class="row4-area-2">
         </div>
         <!-- Area 3: Drum kit dropdown with icons and chevrons -->
-        <div class="row3-area-3">
+        <div class="row4-area-3">
           <button class="edit-btn kit-edit-btn">
             <i class="ph-thin ph-pencil-simple"></i>
           </button>
@@ -396,25 +438,25 @@
             <i class="ph-thin ph-faders"></i>
           </button>
         </div>
-        <!-- Area 4: Empty (save button moved to row2) -->
-        <div class="row3-area-4">
+        <!-- Area 4: Empty (save button moved to row3) -->
+        <div class="row4-area-4">
         </div>
         <!-- Area 5: Empty -->
-        <div class="row3-area-5">
+        <div class="row4-area-5">
         </div>
       </div>
-      <!-- Row 4: Pattern Groups - 50/50 Split -->
+      <!-- Row 5: Pattern Groups - 50/50 Split -->
       <div class="pattern-groups-section">
         <!-- Left Half (50%) -->
-        <div class="row4-left">
+        <div class="row5-left">
           <!-- Left Area 1: Edit pattern icon (25% of left) -->
-          <div class="row4-left-area1">
+          <div class="row5-left-area1">
             <button class="edit-pattern-btn">
               <i class="ph-thin ph-pencil-simple"></i>
             </button>
           </div>
           <!-- Left Area 2: Pattern group chevron combo (50% of left) -->
-          <div class="row4-left-area2">
+          <div class="row5-left-area2">
             <button class="group-nav-btn group-prev">
               <i class="ph-thin ph-caret-left"></i>
             </button>
@@ -434,40 +476,40 @@
             </button>
           </div>
           <!-- Left Area 3: Delete button (only shows in edit mode) -->
-          <div class="row4-left-area3">
+          <div class="row5-left-area3">
             <button class="group-delete-btn" id="group-delete-btn">
               <i class="ph-thin ph-trash"></i>
             </button>
           </div>
         </div>
         <!-- Right Half (50%) - Labels -->
-        <div class="row4-right">
+        <div class="row5-right">
           <!-- Right Area 1: Toggles label (20% of right) -->
-          <div class="row4-right-area1">
+          <div class="row5-right-area1">
             <div class="section-label">Toggles</div>
           </div>
           <!-- Right Area 2: Fills label (20% of right) -->
-          <div class="row4-right-area2">
+          <div class="row5-right-area2">
             <div class="section-label">Fills</div>
           </div>
           <!-- Right Area 3: Swing label (20% of right) -->
-          <div class="row4-right-area3">
+          <div class="row5-right-area3">
             <div class="section-label">Swing</div>
           </div>
           <!-- Right Area 4: Energy label (20% of right) -->
-          <div class="row4-right-area4">
+          <div class="row5-right-area4">
             <div class="section-label">Energy</div>
           </div>
           <!-- Right Area 5: Volume label (20% of right) -->
-          <div class="row4-right-area5">
+          <div class="row5-right-area5">
             <div class="section-label">Volume</div>
           </div>
         </div>
       </div>
-      <!-- Row 5: Pattern Matrix - 50/50 Split -->
+      <!-- Row 6: Pattern Matrix - 50/50 Split -->
       <div class="pattern-matrix-section">
         <!-- Left Half (50%): 4x4 Pattern Grid -->
-        <div class="row5-left">
+        <div class="row6-left">
           <div class="pattern-grid">
             <button class="pattern-btn" data-pattern="basic">Basic</button>
             <button class="pattern-btn" data-pattern="bassa">Bassa</button>
@@ -498,9 +540,9 @@
           </div>
         </div>
         <!-- Right Half (50%): Controls divided into 5 areas -->
-        <div class="row5-right">
+        <div class="row6-right">
           <!-- Right Area 1 (20%): Toggles -->
-          <div class="row5-right-area1">
+          <div class="row6-right-area1">
             <div class="toggles-column">
               <button class="toggle-btn" data-toggle="none">None</button>
               <button class="toggle-btn active" data-toggle="auto">
@@ -513,7 +555,7 @@
             </div>
           </div>
           <!-- Right Area 2 (20%): Fills -->
-          <div class="row5-right-area2">
+          <div class="row6-right-area2">
             <div class="fills-column">
               <button class="fill-btn" data-fill="now">Now</button>
               <button class="fill-btn" data-fill="4">4</button>
@@ -524,7 +566,7 @@
             </div>
           </div>
           <!-- Right Area 3 (20%): Swing Slider -->
-          <div class="row5-right-area3">
+          <div class="row6-right-area3">
             <div class="slider-container">
               <div class="custom-slider" data-param="swing" data-min="0" data-max="100" data-value="25">
                 <div class="slider-track">
@@ -538,7 +580,7 @@
             </div>
           </div>
           <!-- Right Area 4 (20%): Energy Slider -->
-          <div class="row5-right-area4">
+          <div class="row6-right-area4">
             <div class="slider-container">
               <div class="custom-slider" data-param="energy" data-min="0" data-max="100" data-value="50">
                 <div class="slider-track">
@@ -552,7 +594,7 @@
             </div>
           </div>
           <!-- Right Area 5 (20%): Volume Slider -->
-          <div class="row5-right-area5">
+          <div class="row6-right-area5">
             <div class="slider-container">
               <div class="custom-slider" data-param="volume" data-min="0" data-max="100" data-value="75">
                 <div class="slider-track">
@@ -567,7 +609,7 @@
           </div>
         </div>
       </div>
-      <!-- Row 6: Loop Section - Timeline Controls -->
+      <!-- Row 7: Loop Section - Timeline Controls -->
       <div class="loop-section">
         <div class="loop-start-label">LOOP START</div>
         <div class="loop-timeline">

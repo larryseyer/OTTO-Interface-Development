@@ -61,7 +61,6 @@
   /* Tempo Display - reduced to give area5 more space */
   --row1-area5-width: 28%;
   /* Cloud, Logo and Version - increased for hover space */
-  /* Total: 18% + 28% + 8% + 18% + 28% = 100% */
 
   /* Row 2 Area Percentages - Must total 100% */
   --row2-area1-width: 5%; /*Blank area for future use*/
@@ -70,78 +69,87 @@
   --row2-area4-width: 5%; /*right player chevron*/
   --row2-area5-width: 5%; /*save player setting icon*/
 
-  /* Row 3 Area Percentages - 5 areas */
-  --row3-area1-width: 10%;
+  /* Row 3 Area Percentages - Must total 100% */
+  --row3-area1-width: 5%; /*Blank area for future use*/
+  --row3-area2-width: 5%; /*left player chevron*/
+  --row3-area3-width: 80%; /*player buttons default 4 but support up to 8*/
+  --row3-area4-width: 5%; /*right player chevron*/
+  --row3-area5-width: 5%; /*save player setting icon*/
+
+  /* Row 4 Area Percentages - 5 areas */
+  --row4-area1-width: 10%;
   /* Player number display */
-  --row3-area2-width: 10%;
+  --row4-area2-width: 10%;
   /* Kit edit icon */
-  --row3-area3-width: 60%;
+  --row4-area3-width: 60%;
   /* Kit selection center */
-  --row3-area4-width: 10%;
+  --row4-area4-width: 10%;
   /* Mixer icon */
-  --row3-area5-width: 10%;
+  --row4-area5-width: 10%;
   /* Mute drummer icon */
-
-  /* Row 4 - Main 50/50 split */
-  --row4-left-width: 50%;
-  /* Left half */
-  --row4-right-width: 50%;
-  /* Right half */
-
-  /* Row 4 Left side - 3 areas */
-  --row4-left-area1-width: 20%;
-  /* Edit button area */
-  --row4-left-area2-width: 60%;
-  /* Pattern group selection */
-  --row4-left-area3-width: 20%;
-  /* Navigation controls */
-
-  /* Row 4 Right side - 5 areas */
-  --row4-right-area1-width: 23%;
-  /* Right area 1 */
-  --row4-right-area2-width: 23%;
-  /* Right area 2 */
-  --row4-right-area3-width: 18%;
-  /* Right area 3 */
-  --row4-right-area4-width: 18%;
-  /* Right area 4 */
-  --row4-right-area5-width: 18%;
-  /* Right area 5 */
 
   /* Row 5 - Main 50/50 split */
   --row5-left-width: 50%;
-  /* Left half - Pattern matrix */
+  /* Left half */
   --row5-right-width: 50%;
+  /* Right half */
+
+  /* Row 5 Left side - 3 areas */
+  --row5-left-area1-width: 20%;
+  /* Edit button area */
+  --row5-left-area2-width: 60%;
+  /* Pattern group selection */
+  --row5-left-area3-width: 20%;
+  /* Navigation controls */
+
+  /* Row 5 Right side - 5 areas */
+  --row5-right-area1-width: 23%;
+  /* Right area 1 */
+  --row5-right-area2-width: 23%;
+  /* Right area 2 */
+  --row5-right-area3-width: 18%;
+  /* Right area 3 */
+  --row5-right-area4-width: 18%;
+  /* Right area 4 */
+  --row5-right-area5-width: 18%;
+  /* Right area 5 */
+
+  /* Row 6 - Main 50/50 split */
+  --row6-left-width: 50%;
+  /* Left half - Pattern matrix */
+  --row6-right-width: 50%;
   /* Right half - Controls */
 
-  /* Row 5 Right side - 5 areas (same as Row 4 right) */
-  --row5-right-area1-width: 23%;
+  /* Row 6 Right side - 5 areas (same as Row 4 right) */
+  --row6-right-area1-width: 23%;
   /* Toggles area */
-  --row5-right-area2-width: 23%;
+  --row6-right-area2-width: 23%;
   /* Fills area */
-  --row5-right-area3-width: 18%;
+  --row6-right-area3-width: 18%;
   /* Sliders area 1 */
-  --row5-right-area4-width: 18%;
+  --row6-right-area4-width: 18%;
   /* Sliders area 2 */
-  --row5-right-area5-width: 18%;
+  --row6-right-area5-width: 18%;
   /* Sliders area 3 */
 
-  /* Row 6 - Single area for loop timeline */
-  --row6-area1-width: 100%;
+  /* Row 7 - Single area for loop timeline */
+  --row7-area1-width: 100%;
   /* Full width loop timeline */
 
   /* Row Heights - Configurable percentages */
   --row1-height: 10%;
   /* Top bar */
-  --row2-height: 8%;
+  --row2-height: 10%;
+  /* Phrase bar */
+  --row3-height: 10%;
   /* Player tabs */
-  --row3-height: 18%;
+  --row4-height: 10%;
   /* Drum kit section */
-  --row4-height: 12%;
+  --row5-height: 10%;
   /* Pattern groups */
-  --row5-height: 47%;
+  --row6-height: 45%;
   /* Pattern matrix - largest section */
-  --row6-height: 5%;
+  --row7-height: 5%;
   /* Loop section */
 
   /* Global hover zoom for row1 elements */
@@ -233,11 +241,11 @@ body {
 /* Mute Overlay - covers rows 3-5 */
 .mute-overlay {
   position: absolute;
-  top: calc(var(--row1-height) + var(--row2-height));
+  top: calc(var(--row1-height) + var(--row3-height));
   /* Start after row 1 and 2 */
   left: 0;
   width: 100%;
-  height: calc(var(--row3-height) + var(--row4-height) + var(--row5-height));
+  height: calc(var(--row4-height) + var(--row5-height) + var(--row6-height));
   /* Cover rows 3-5 */
   background: rgba(0, 0, 0, 0.5);
   /* Semi-transparent black overlay */
@@ -1046,8 +1054,8 @@ body {
   /* Same color as parent */
 }
 
-/* Row 2: Player Tabs  - 8 Player Selection */
-.player-tabs-section {
+/* Row 2: Phrase Tabs - 8 Phrase Selection */
+.phrase-tabs-section {
   height: var(--row2-height);
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
@@ -1056,6 +1064,29 @@ body {
   grid-template-areas: "area1 area2 area3 area4 area5";
   align-items: center;
   padding: 0;
+}
+
+/* Row 3: Player Tabs  - 8 Player Selection */
+.player-tabs-section {
+  height: var(--row3-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: grid;
+  grid-template-columns: var(--row3-area1-width) var(--row3-area2-width) var(--row3-area3-width) var(--row3-area4-width) var(--row3-area5-width);
+  grid-template-areas: "area1 area2 area3 area4 area5";
+  align-items: center;
+  padding: 0;
+}
+
+.phrase-tabs {
+  display: flex;
+  gap: 8px;
+  /* Fixed gap that works for up to 8 phrases */
+  padding: 8px 0;
+  background: transparent;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .player-tabs {
@@ -1092,7 +1123,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
-  overflow: hidden;
+  width: 100%;
 }
 
 .row2-area4 {
@@ -1111,10 +1142,52 @@ body {
   height: 100%;
 }
 
-/* Player navigation chevrons - sized for row2 */
+/* Row 3 Grid Areas */
+.row3-area1 {
+  grid-area: area1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.row3-area2 {
+  grid-area: area2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.row3-area3 {
+  grid-area: area3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+.row3-area4 {
+  grid-area: area4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.row3-area5 {
+  grid-area: area5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Player navigation chevrons - sized for row3 */
 .player-nav-btn {
   width: 50px;
-  /* Smaller than row3's 75px, appropriate for row2 */
+  /* Smaller than row4's 75px, appropriate for row3 */
   height: 50px;
   background: transparent;
   border: none;
@@ -1141,12 +1214,132 @@ body {
 
 .player-nav-btn i {
   font-size: 50px;
-  /* Sized appropriately for row2 */
+  /* Sized appropriately for row3 */
   line-height: 1;
   display: block;
   color: inherit;
   margin: 0;
   padding: 0;
+}
+
+.phrase-tab {
+  padding: 10px 12px;
+  /* Optimized padding for 8 phrases */
+  background: transparent;
+  border: none;
+  color: var(--button-text-normal);
+  font-family: "Playfair Display", serif;
+  font-size: 22px !important;
+  /* Slightly smaller to fit better */
+  font-weight: 400;
+  /* Regular weight */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+  position: relative;
+  border-radius: 3px;
+  min-height: 60px;
+  height: 60px;
+  width: auto;
+  white-space: nowrap;
+  min-width: 120px;
+  /* Optimal for 8 phrases */
+}
+
+.phrase-tab:hover {
+  color: var(--button-text-hover);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.phrase-tab.active {
+  color: var(--button-text-active);
+  background: var(--bg-primary);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  /* Medium weight for active */
+}
+
+.phrase-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: var(--button-text-active);
+}
+
+.phrase-nav-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--button-text-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 3px;
+}
+
+.phrase-nav-btn:hover {
+  color: var(--button-text-hover);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.phrase-nav-btn i {
+  font-size: 24px;
+}
+
+.phrase-save-btn {
+  width: 40px;
+  height: 40px;
+}
+
+.mute-phrase-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--button-text-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 3px;
+  position: relative;
+}
+
+.mute-phrase-btn:hover {
+  color: var(--button-text-hover);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mute-phrase-btn i {
+  font-size: 24px;
+  position: absolute;
+  transition: opacity 0.2s ease;
+}
+
+.mute-phrase-btn .mute-icon-unmuted {
+  opacity: 1;
+}
+
+.mute-phrase-btn .mute-icon-muted {
+  opacity: 0;
+}
+
+.mute-phrase-btn.muted .mute-icon-unmuted {
+  opacity: 0;
+}
+
+.mute-phrase-btn.muted .mute-icon-muted {
+  opacity: 1;
+  color: #ff5555;
 }
 
 .player-tab {
@@ -1216,10 +1409,10 @@ body {
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */
 .drum-kit-section {
-  height: var(--row3-height);
+  height: var(--row4-height);
   background: var(--bg-secondary);
   /* border-bottom: 1px solid var(--border-color); */
-  /* Commented out - no border between row3 and row4 */
+  /* Commented out - no border between row4 and row5 */
   display: flex;
   align-items: flex-start;
   /* Align items to top instead of center */
@@ -1547,10 +1740,10 @@ body {
 
 /* Row 4: Pattern Groups - Pattern Groups */
 .pattern-groups-section {
-  height: var(--row4-height);
+  height: var(--row5-height);
   background: var(--bg-secondary);
   /* border-bottom: 1px solid var(--border-color); */
-  /* Commented out - no border between row4 and row5 */
+  /* Commented out - no border between row5 and row6 */
   display: flex;
   align-items: flex-end;
   /* Align items to bottom */
@@ -1700,12 +1893,12 @@ body {
 
 /* Row 5: Pattern Matrix  - 50/50 Split */
 .pattern-matrix-section {
-  height: var(--row5-height);
+  height: var(--row6-height);
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   padding: 0 20px;
-  /* Match row4's horizontal padding */
+  /* Match row5's horizontal padding */
   gap: 0;
   /* Remove gap to maintain alignment */
 }
@@ -1946,7 +2139,6 @@ body {
 .fill-btn[data-fill="32"] {
   font-family: "Roboto", sans-serif;
   font-weight: 400;
-  /* Regular weight */
 }
 
 /* Now button and Solo button use Playfair Display */
@@ -1990,7 +2182,7 @@ body {
   position: relative;
   width: 32px;
   /* Width for click area */
-  /* Row5 is 47% of interface (720px) = 338px, minus icon (40px), gap (6px), and padding (20px top/bottom) */
+  /* row6 is 47% of interface (720px) = 338px, minus icon (40px), gap (6px), and padding (20px top/bottom) */
   height: calc(var(--interface-height) * 0.47 - 86px);
   /* This should be about 252px */
   min-height: 200px;
@@ -2068,9 +2260,9 @@ body {
 }
 
 /* Row 5 specific slider knob dimensions (Swing, Energy, Volume) */
-.row5-right-area3 .slider-thumb,
-.row5-right-area4 .slider-thumb,
-.row5-right-area5 .slider-thumb {
+.row6-right-area3 .slider-thumb,
+.row6-right-area4 .slider-thumb,
+.row6-right-area5 .slider-thumb {
   width: 44px;
   height: 24px;
 }
@@ -2172,7 +2364,7 @@ body {
 
 /* Row 6: Loop Section  - Timeline Controls */
 .loop-section {
-  height: var(--row6-height);
+  height: var(--row7-height);
   background: var(--bg-secondary);
   display: flex;
   align-items: center;
@@ -2351,8 +2543,8 @@ body {
 /* ===== NEW ROW AREA STYLES ===== */
 
 /* Row 3 Areas */
-.row3-area-1 {
-  flex: 0 0 var(--row3-area1-width);
+.row4-area-1 {
+  flex: 0 0 var(--row4-area1-width);
   display: flex;
   align-items: flex-start;
   /* Top-align player number */
@@ -2364,8 +2556,8 @@ body {
   /* Small top padding */
 }
 
-.row3-area-2 {
-  flex: 0 0 var(--row3-area2-width);
+.row4-area-2 {
+  flex: 0 0 var(--row4-area2-width);
   display: flex;
   align-items: flex-start;
   /* Top-align edit button */
@@ -2375,8 +2567,8 @@ body {
   /* Small top padding */
 }
 
-.row3-area-3 {
-  flex: 0 0 var(--row3-area3-width);
+.row4-area-3 {
+  flex: 0 0 var(--row4-area3-width);
   display: flex;
   align-items: center;
   /* Center-align dropdown and chevrons vertically */
@@ -2389,8 +2581,8 @@ body {
   z-index: 100;
 }
 
-.row3-area-4 {
-  flex: 0 0 var(--row3-area4-width);
+.row4-area-4 {
+  flex: 0 0 var(--row4-area4-width);
   display: flex;
   align-items: center;
   /* Center vertically for both icons */
@@ -2400,8 +2592,8 @@ body {
   /* Space between mixer and save buttons */
 }
 
-.row3-area-5 {
-  flex: 0 0 var(--row3-area5-width);
+.row4-area-5 {
+  flex: 0 0 var(--row4-area5-width);
   display: flex;
   align-items: flex-start;
   /* Top-align mute button */
@@ -2414,23 +2606,23 @@ body {
 }
 
 /* Row 4 Main Divisions */
-.row4-left {
-  flex: 0 0 var(--row4-left-width);
+.row5-left {
+  flex: 0 0 var(--row5-left-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
 }
 
-.row4-right {
-  flex: 0 0 var(--row4-right-width);
+.row5-right {
+  flex: 0 0 var(--row5-right-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
 }
 
 /* Row 4 Left Areas */
-.row4-left-area1 {
-  flex: 0 0 var(--row4-left-area1-width);
+.row5-left-area1 {
+  flex: 0 0 var(--row5-left-area1-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
@@ -2440,8 +2632,8 @@ body {
   /* Add some space from the edge */
 }
 
-.row4-left-area2 {
-  flex: 0 0 var(--row4-left-area2-width);
+.row5-left-area2 {
+  flex: 0 0 var(--row5-left-area2-width);
   display: flex;
   align-items: center;
   /* Center vertically */
@@ -2450,11 +2642,11 @@ body {
   /* Reduced gap for tighter grouping */
 }
 
-.row4-left-area3 {
-  flex: 0 0 var(--row4-left-area3-width);
+.row5-left-area3 {
+  flex: 0 0 var(--row5-left-area3-width);
   display: flex;
   align-items: flex-end;
-  /* Align to bottom like other row4 areas */
+  /* Align to bottom like other row5 areas */
   justify-content: flex-start;
   /* Align to left */
   padding-left: 10px;
@@ -2462,8 +2654,8 @@ body {
 }
 
 /* Row 4 Right Areas - Labels */
-.row4-right-area1 {
-  flex: 0 0 var(--row4-right-area1-width);
+.row5-right-area1 {
+  flex: 0 0 var(--row5-right-area1-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
@@ -2471,8 +2663,8 @@ body {
   height: 100%;
 }
 
-.row4-right-area2 {
-  flex: 0 0 var(--row4-right-area2-width);
+.row5-right-area2 {
+  flex: 0 0 var(--row5-right-area2-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
@@ -2480,8 +2672,8 @@ body {
   height: 100%;
 }
 
-.row4-right-area3 {
-  flex: 0 0 var(--row4-right-area3-width);
+.row5-right-area3 {
+  flex: 0 0 var(--row5-right-area3-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
@@ -2489,8 +2681,8 @@ body {
   height: 100%;
 }
 
-.row4-right-area4 {
-  flex: 0 0 var(--row4-right-area4-width);
+.row5-right-area4 {
+  flex: 0 0 var(--row5-right-area4-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
@@ -2498,8 +2690,8 @@ body {
   height: 100%;
 }
 
-.row4-right-area5 {
-  flex: 0 0 var(--row4-right-area5-width);
+.row5-right-area5 {
+  flex: 0 0 var(--row5-right-area5-width);
   display: flex;
   align-items: flex-end;
   /* Align to bottom */
@@ -2519,8 +2711,8 @@ body {
 }
 
 /* Row 5 Main Divisions */
-.row5-left {
-  flex: 0 0 var(--row5-left-width);
+.row6-left {
+  flex: 0 0 var(--row6-left-width);
   display: flex;
   align-items: stretch;
   /* Stretch to full height */
@@ -2529,15 +2721,15 @@ body {
   /* Reduced top padding */
 }
 
-.row5-right {
-  flex: 0 0 var(--row5-right-width);
+.row6-right {
+  flex: 0 0 var(--row6-right-width);
   display: flex;
   align-items: stretch;
 }
 
 /* Row 5 Right Areas */
-.row5-right-area1 {
-  flex: 0 0 var(--row5-right-area1-width);
+.row6-right-area1 {
+  flex: 0 0 var(--row6-right-area1-width);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2547,11 +2739,11 @@ body {
   box-sizing: border-box;
   overflow: hidden;
   height: 100%;
-  /* Match row5 height */
+  /* Match row6 height */
 }
 
-.row5-right-area2 {
-  flex: 0 0 var(--row5-right-area2-width);
+.row6-right-area2 {
+  flex: 0 0 var(--row6-right-area2-width);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2561,11 +2753,11 @@ body {
   box-sizing: border-box;
   overflow: hidden;
   height: 100%;
-  /* Match row5 height */
+  /* Match row6 height */
 }
 
-.row5-right-area3 {
-  flex: 0 0 var(--row5-right-area3-width);
+.row6-right-area3 {
+  flex: 0 0 var(--row6-right-area3-width);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2577,8 +2769,8 @@ body {
   overflow: hidden;
 }
 
-.row5-right-area4 {
-  flex: 0 0 var(--row5-right-area4-width);
+.row6-right-area4 {
+  flex: 0 0 var(--row6-right-area4-width);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2590,8 +2782,8 @@ body {
   overflow: hidden;
 }
 
-.row5-right-area5 {
-  flex: 0 0 var(--row5-right-area5-width);
+.row6-right-area5 {
+  flex: 0 0 var(--row6-right-area5-width);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2989,7 +3181,7 @@ body {
 }
 
 /* Delete button in row 4 area 3 */
-.row4-left-area3 .group-delete-btn {
+.row5-left-area3 .group-delete-btn {
   width: 62px;
   /* Matched to chevron size */
   height: 62px;
@@ -3004,12 +3196,12 @@ body {
   justify-content: center;
 }
 
-.row4-left-area3 .group-delete-btn:hover {
+.row5-left-area3 .group-delete-btn:hover {
   color: #8b0000;
   transform: scale(1.1);
 }
 
-.row4-left-area3 .group-delete-btn i {
+.row5-left-area3 .group-delete-btn i {
   font-size: 68px;
   /* Matched to chevron icon size */
 }
@@ -3055,9 +3247,9 @@ body {
   /* Ensure opaque background */
 }
 
-/* Left side matches row5-left exactly */
+/* Left side matches row6-left exactly */
 .pattern-group-left {
-  flex: 0 0 var(--row5-left-width);
+  flex: 0 0 var(--row6-left-width);
   /* Use the actual variable! */
   display: flex;
   flex-direction: column;
@@ -3065,7 +3257,7 @@ body {
 
 /* Right side for available patterns */
 .pattern-group-right {
-  flex: 0 0 var(--row5-right-width);
+  flex: 0 0 var(--row6-right-width);
   /* Use the actual variable! */
   display: flex;
   flex-direction: column;
@@ -3086,7 +3278,7 @@ body {
 
 /* Pattern Group Selector Row - Using actual row 4 variables */
 .pattern-group-selector-row {
-  height: var(--row4-height);
+  height: var(--row5-height);
   /* Use the actual row 4 height variable! */
   display: flex;
   align-items: flex-end;
@@ -3233,13 +3425,13 @@ body {
 
 /* Pattern Grid Editor - Using row 5 variables */
 .pattern-grid-editor {
-  height: var(--row5-height);
+  height: var(--row6-height);
   /* Use the actual row 5 height variable! */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 5px 10px 20px 10px;
-  /* Same padding as row5-left */
+  /* Same padding as row6-left */
 }
 
 .pattern-edit-grid {
@@ -3548,9 +3740,9 @@ body {
 
 /* Partial height panels (Drumkit, Mixer) - from row 4 to row 6 */
 .slide-up-panel.partial-height-panel {
-  top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height));
+  top: calc(var(--row1-height) + var(--row3-height) + var(--row4-height));
   /* Position at row 4 */
-  height: calc(100% - var(--row1-height) - var(--row2-height) - var(--row3-height));
+  height: calc(100% - var(--row1-height) - var(--row3-height) - var(--row4-height));
   /* Cover rows 4-6 */
   transform: translateY(calc(100% + 30px));
   /* Move further down to hide shadow (20px shadow + 10px buffer) */
@@ -4554,7 +4746,7 @@ body {
 }
 
 .edit-mode .group-delete-btn,
-.edit-mode .row4-left-area3 .group-delete-btn {
+.edit-mode .row5-left-area3 .group-delete-btn {
   display: flex;
 }
 
@@ -4610,7 +4802,7 @@ body {
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   left: 50%;
   transform: translateX(-50%);
-  top: calc(16% + 10px); /* Position just below row3 */
+  top: calc(16% + 10px); /* Position just below row4 */
   min-width: 300px;
   text-align: center;
 }
