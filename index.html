@@ -265,7 +265,7 @@
     </div>
     <!-- Main Interface - 6 Rows -->
     <div class="main-interface">
-      <!-- Row 1: Top Bar (8% height) - 5 Main Areas -->
+      <!-- Row 1: Top Bar (10% height) - 5 Main Areas -->
       <div class="top-bar">
         <!-- Area 1: Settings, Link, and Preset Edit buttons -->
         <div class="row1-area1">
@@ -322,11 +322,8 @@
       <div class="mute-overlay"></div>
       <!-- Row 2: Phrase Manager Section - 5 Areas -->
       <div class="phrase-tabs-section">
-        <!-- Area 1: Save phrase settings icon -->
+        <!-- Area 1: Empty (save icon moved to row3) -->
         <div class="row2-area1">
-          <button class="quick-save-btn phrase-save-btn" id="phrase-save-btn" title="Save Phrase">
-            <i class="ph-thin ph-floppy-disk"></i>
-          </button>
         </div>
         <!-- Area 2: Left chevron for phrase navigation -->
         <div class="row2-area2">
@@ -353,19 +350,15 @@
             <i class="ph-thin ph-caret-right"></i>
           </button>
         </div>
-        <!-- Area 5: Mute/Unmute phrase icon -->
+        <!-- Area 5: Empty (mute button removed) -->
         <div class="row2-area5">
-          <button class="mute-phrase-btn" id="mute-phrase-btn">
-            <i class="ph-thin ph-speaker-high mute-icon-unmuted"></i>
-            <i class="ph-thin ph-speaker-slash mute-icon-muted"></i>
-          </button>
         </div>
       </div>
       <!-- Row 3: Player Tabs with Chevron Navigation - 5 Areas -->
       <div class="player-tabs-section">
-        <!-- Area 1: Save player settings icon -->
+        <!-- Area 1: Save phrase/player settings icon -->
         <div class="row3-area1">
-          <button class="quick-save-btn player-save-btn" id="player-save-btn" title="Save Player">
+          <button class="quick-save-btn phrase-save-btn" id="phrase-save-btn" title="Save Settings">
             <i class="ph-thin ph-floppy-disk"></i>
           </button>
         </div>
@@ -630,6 +623,8 @@
   <script src="DrumMapAdvanced.js"></script>
   <!-- Load original script with new managers available -->
   <script src="script.js"></script>
+  <!-- Temporary fix for phrase tabs -->
+  <script src="phrase-fix.js"></script>
   <!-- Debug panel for Phase 1 testing -->
   <div id="debug-panel" class="debug-panel">
     <h4>Phase 1 Debug Info</h4>
@@ -688,6 +683,7 @@
   //   document.getElementById("debug-panel").style.display = "block";
   //   setInterval(updateDebugPanel, 1000);
   // }
+
   </script>
 </body>
 

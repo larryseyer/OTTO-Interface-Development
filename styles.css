@@ -1,9 +1,4 @@
-/* OTTO - Organic Timing Trigger Orchestrator - ACCURATE Web Interface */
-
-/* Font import removed - fonts are loaded in HTML with proper weights */
-
 :root {
-  /* Accurate colors from HISE interface */
   --bg-primary: #3a3a3a;
   --bg-secondary: #2a2a2a;
   --bg-darker: #1e1e1e;
@@ -11,154 +6,108 @@
   --text-secondary: #cccccc;
   --text-muted: #999999;
   --text-icon: #777777;
-  /* Icon color */
   --text-black: #111111;
-  /* Black text color - was #000000 */
 
-  /* Global button text states */
-  --button-text-normal: #777777;
-  /* Normal state */
-  --button-text-hover: #aaaaaa;
-  /* Hover state */
-  --button-text-active: #ffffff;
-  /* Active/selected state */
-  --border-color: #000000;
-  /* Black borders between rows */
+ /* Global button text states */
+  --button-text-normal: #777777; /* Normal state */
+  --button-text-hover: #aaaaaa; /* Hover state */
+  --button-text-active: #ffffff; /* Active/selected state */
+  --border-color: #000000; /* Black borders between rows */
 
-  /* Button colors - 3D metallic style */
+ /* Button colors - 3D metallic style */
   --button-face: #888888;
   --button-highlight: #aaaaaa;
   --button-shadow: #333333;
   --button-active-face: #999999;
   --button-active-highlight: #bbbbbb;
 
-  /* Modal overlay settings */
-  --modal-overlay-opacity: 0.8;
-  /* Global overlay darkness - adjust as needed */
-  --modal-animation-speed: 0.3s;
-  /* Animation duration for modal transitions */
+ /* Modal overlay settings */
+  --modal-overlay-opacity: 0.8; /* Global overlay darkness - adjust as needed */
+  --modal-animation-speed: 0.3s; /* Animation duration for modal transitions */
 
-  /* Interface dimensions */
-  --interface-width: 1280px;
-  --interface-height: 720px;
+ /* Interface dimensions */
+  --interface-width: 1280px; /* Must always maintain 16X9 ratio */
+  --interface-height: 720px; /* Must always maintain 16X9 ratio */
 
-  /* Icon sizes */
+ /* Icon sizes */
   --icon-size-standard: 60px;
   --icon-size-small: 20px;
 
-  /* Dropdown menu font size */
-  --dropdown-menu-font-size: 24px;
-  /* Base font size for all dropdown menu items */
+ /* Dropdown menu font size */
+  --dropdown-menu-font-size: 24px; /* Base font size for all dropdown menu items */
 
-  /* Row 1 Area Percentages - Must total 100% */
-  --row1-area1-width: 18%;
-  /* Settings, Link, Preset Edit buttons - increased for 3 icons */
-  --row1-area2-width: 28%;
-  /* Presets dropdown - needs space for text */
-  --row1-area3-width: 8%;
-  /* Play/Pause button (centered) */
-  --row1-area4-width: 18%;
-  /* Tempo Display - reduced to give area5 more space */
-  --row1-area5-width: 28%;
-  /* Cloud, Logo and Version - increased for hover space */
+ /* Row 1 Area Percentages - Must total 100% */
+  --row1-area1-width: 18%; /* Settings, Link, Preset Edit buttons - increased for 3 icons */
+  --row1-area2-width: 28%; /* Presets dropdown - needs space for text */
+  --row1-area3-width: 8%; /* Play/Pause button (centered) */
+  --row1-area4-width: 18%; /* Tempo Display - reduced to give area5 more space */
+  --row1-area5-width: 28%; /* Cloud, Logo and Version - increased for hover space */
 
-  /* Row 2 Area Percentages - Must total 100% */
+ /* Row 2 Area Percentages - Must total 100% */
   --row2-area1-width: 5%; /*Blank area for future use*/
-  --row2-area2-width: 5%; /*left player chevron*/
-  --row2-area3-width: 80%; /*player buttons default 4 but support up to 8*/
-  --row2-area4-width: 5%; /*right player chevron*/
-  --row2-area5-width: 5%; /*save player setting icon*/
+  --row2-area2-width: 5%; /*left phrase chevron*/
+  --row2-area3-width: 80%; /*8 phrase buttons */
+  --row2-area4-width: 5%; /*right phrase chevron*/
+  --row2-area5-width: 5%; /*Blank area for future use*/
 
-  /* Row 3 Area Percentages - Must total 100% */
+ /* Row 3 Area Percentages - Must total 100% */
   --row3-area1-width: 5%; /*Blank area for future use*/
   --row3-area2-width: 5%; /*left player chevron*/
-  --row3-area3-width: 80%; /*player buttons default 4 but support up to 8*/
+  --row3-area3-width: 80%; /*player buttons default 8*/
   --row3-area4-width: 5%; /*right player chevron*/
   --row3-area5-width: 5%; /*save player setting icon*/
 
-  /* Row 4 Area Percentages - 5 areas */
-  --row4-area1-width: 10%;
-  /* Player number display */
-  --row4-area2-width: 10%;
-  /* Kit edit icon */
-  --row4-area3-width: 60%;
-  /* Kit selection center */
-  --row4-area4-width: 10%;
-  /* Mixer icon */
-  --row4-area5-width: 10%;
-  /* Mute drummer icon */
+ /* Row 4 Area Percentages - 5 areas */
+  --row4-area1-width: 10%; /* Player number display */
+  --row4-area2-width: 10%; /* Kit edit icon */
+  --row4-area3-width: 60%; /* Kit selection center */
+  --row4-area4-width: 10%; /* Mixer icon */
+  --row4-area5-width: 10%; /* Mute drummer icon */
 
-  /* Row 5 - Main 50/50 split */
-  --row5-left-width: 50%;
-  /* Left half */
-  --row5-right-width: 50%;
-  /* Right half */
+ /* Row 5 - Main 50/50 split */
+  --row5-left-width: 50%; /* Left half */
+  --row5-right-width: 50%; /* Right half */
 
-  /* Row 5 Left side - 3 areas */
-  --row5-left-area1-width: 20%;
-  /* Edit button area */
-  --row5-left-area2-width: 60%;
-  /* Pattern group selection */
-  --row5-left-area3-width: 20%;
-  /* Navigation controls */
+ /* Row 5 Left side - 3 areas */
+  --row5-left-area1-width: 20%; /* Edit button area */
+  --row5-left-area2-width: 60%; /* Pattern group selection */
+  --row5-left-area3-width: 20%; /* Navigation controls */
 
-  /* Row 5 Right side - 5 areas */
-  --row5-right-area1-width: 23%;
-  /* Right area 1 */
-  --row5-right-area2-width: 23%;
-  /* Right area 2 */
-  --row5-right-area3-width: 18%;
-  /* Right area 3 */
-  --row5-right-area4-width: 18%;
-  /* Right area 4 */
-  --row5-right-area5-width: 18%;
-  /* Right area 5 */
+ /* Row 5 Right side - 5 areas */
+  --row5-right-area1-width: 23%; /* Right area 1 */
+  --row5-right-area2-width: 23%; /* Right area 2 */
+  --row5-right-area3-width: 18%; /* Right area 3 */
+  --row5-right-area4-width: 18%; /* Right area 4 */
+  --row5-right-area5-width: 18%; /* Right area 5 */
 
-  /* Row 6 - Main 50/50 split */
-  --row6-left-width: 50%;
-  /* Left half - Pattern matrix */
-  --row6-right-width: 50%;
-  /* Right half - Controls */
+ /* Row 6 - Main 50/50 split */
+  --row6-left-width: 50%; /* Left half - Pattern matrix */
+  --row6-right-width: 50%; /* Right half - Controls */
 
-  /* Row 6 Right side - 5 areas (same as Row 4 right) */
-  --row6-right-area1-width: 23%;
-  /* Toggles area */
-  --row6-right-area2-width: 23%;
-  /* Fills area */
-  --row6-right-area3-width: 18%;
-  /* Sliders area 1 */
-  --row6-right-area4-width: 18%;
-  /* Sliders area 2 */
-  --row6-right-area5-width: 18%;
-  /* Sliders area 3 */
+ /* Row 6 Right side - 5 areas (same as Row 4 right) */
+  --row6-right-area1-width: 23%; /* Toggles area */
+  --row6-right-area2-width: 23%; /* Fills area */
+  --row6-right-area3-width: 18%; /* Sliders area 1 */
+  --row6-right-area4-width: 18%; /* Sliders area 2 */
+  --row6-right-area5-width: 18%; /* Sliders area 3 */
 
-  /* Row 7 - Single area for loop timeline */
-  --row7-area1-width: 100%;
-  /* Full width loop timeline */
+ /* Row 7 - Single area for loop timeline */
+  --row7-area1-width: 100%; /* Full width loop timeline */
 
-  /* Row Heights - Configurable percentages */
-  --row1-height: 10%;
-  /* Top bar */
-  --row2-height: 10%;
-  /* Phrase bar */
-  --row3-height: 10%;
-  /* Player tabs */
-  --row4-height: 10%;
-  /* Drum kit section */
-  --row5-height: 10%;
-  /* Pattern groups */
-  --row6-height: 45%;
-  /* Pattern matrix - largest section */
-  --row7-height: 5%;
-  /* Loop section */
+ /* Row Heights - Configurable percentages */
+  --row1-height: 10%; /* Top bar */
+  --row2-height: 10%; /* Phrase bar */
+  --row3-height: 10%; /* Player tabs */
+  --row4-height: 10%; /* Drum kit section */
+  --row5-height: 10%; /* Pattern groups */
+  --row6-height: 45%; /* Pattern matrix - largest section */
+  --row7-height: 5%; /* Loop section */
 
-  /* Global hover zoom for row1 elements */
-  --row1-hover-scale: 1.2;
-  /* 20% increase (was 1.05-1.1, now 1.2) */
+ /* Global hover zoom for row1 elements */
+  --row1-hover-scale: 1.2; /* Top Row */
 
-  /* Dynamic player tab spacing */
-  --player-tab-gap: 5px;
-  /* Default for 8 players */
+ /* Dynamic player tab spacing */
+  --player-tab-gap: 5px; /* Default for 8 players */
 }
 
 * {
@@ -486,6 +435,7 @@ body {
   position: relative;
   box-sizing: border-box;
   /* Include padding in width calculation */
+  z-index: 1000; /* High z-index to ensure dropdowns appear above row2 */
 }
 
 /* Row 1 Area 1: Settings, Link, and Preset Edit buttons */
@@ -868,13 +818,14 @@ body {
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--bg-darker);
+  background: var(--bg-darker) !important;
+  opacity: 1 !important;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   margin-top: 5px;
   max-height: 300px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 5000 !important; /* Very high to ensure it's on top */
   display: none;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
@@ -1064,6 +1015,8 @@ body {
   grid-template-areas: "area1 area2 area3 area4 area5";
   align-items: center;
   padding: 0;
+  position: relative;
+  z-index: 5; /* Lower than row1 and dropdowns */
 }
 
 /* Row 3: Player Tabs  - 8 Player Selection */
@@ -1244,6 +1197,8 @@ body {
   white-space: nowrap;
   min-width: 120px;
   /* Optimal for 8 phrases */
+  z-index: 10;
+  pointer-events: auto !important;
 }
 
 .phrase-tab:hover {
@@ -1272,8 +1227,8 @@ body {
 }
 
 .phrase-nav-btn {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border: none;
   background: transparent;
   color: var(--button-text-normal);
@@ -1282,21 +1237,36 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-radius: 3px;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto !important;
 }
 
 .phrase-nav-btn:hover {
-  color: var(--button-text-hover);
-  background: rgba(255, 255, 255, 0.05);
+  transform: scale(var(--row1-hover-scale));
+}
+
+.phrase-nav-btn:active,
+.phrase-nav-btn.active {
+  color: var(--text-primary);
+  transform: scale(0.95);
 }
 
 .phrase-nav-btn i {
-  font-size: 24px;
+  font-size: 50px;
+  line-height: 1;
+  display: block;
+  color: inherit;
 }
 
 .phrase-save-btn {
-  width: 40px;
-  height: 40px;
+  width: 60px !important;
+  height: 60px !important;
+  display: flex;
+}
+
+.phrase-save-btn i {
+  font-size: 60px !important;
 }
 
 .mute-phrase-btn {

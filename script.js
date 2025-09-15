@@ -1,6 +1,6 @@
 /**
  * OTTO - Organic Timing Trigger Orchestrator
- * UI/UX Template for JUCE 8 Native Implementation
+ * UI/UX Template
  * (c) Automagic Art Inc.
  * Larry Seyer - https://LarrySeyer.com
  *
@@ -10,7 +10,6 @@
  * - The actual OTTO app will be built natively in JUCE 8
  * - This serves as a visual and behavioral reference for JUCE developers
  *
- * Based on actual HISE interface screenshot with correct 6-row structure
  */
 
 // Debug logging system - set to false for production
@@ -53,6 +52,8 @@ class OTTOAccurateInterface {
     this.maxPlayers = 8; // Maximum possible players
     this.numberOfPlayers = 8; // Default active players (configurable 4-8)
     this.currentPlayer = 1;
+    this.currentPhrase = "general"; // Track current phrase
+    this.phraseStates = {}; // Store phrase-specific states
     this.splashScreenLength = 1000; // 1 second like original
     this.tempo = 120;
     this.loopPosition = 0;
@@ -694,15 +695,23 @@ class OTTOAccurateInterface {
       presetSaveBtn.style.display = "none";
     }
 
-    // Player save button (saves current player state)
-    const playerSaveBtn = document.getElementById("player-save-btn");
-    if (playerSaveBtn) {
-      playerSaveBtn.addEventListener("click", () => {
+    // Phrase save button (saves current phrase/player state)
+    const phraseSaveBtn = document.getElementById("phrase-save-btn");
+    if (phraseSaveBtn) {
+      const saveHandler = () => {
+        console.log("Phrase save button clicked");
+        // Save both phrase and player state
+        this.savePhraseState(this.currentPhrase);
         this.saveCurrentPlayerState();
         this.setDirty("player", false);
-      });
-      // Initially hide
-      playerSaveBtn.style.display = "none";
+        // Save to storage
+        this.scheduleSave("preset", true);
+        // Show notification that state was saved
+        this.showNotification(`Saved ${this.currentPhrase} settings`, "success");
+      };
+      phraseSaveBtn.addEventListener("click", saveHandler);
+      // Show the button only when there are changes
+      phraseSaveBtn.style.display = "flex";
     }
 
     // Old save buttons removed - no longer in HTML
@@ -6699,7 +6708,31 @@ class OTTOAccurateInterface {
 
       this.setupVersion();
       this.setupSplashScreen();
+      this.setupPhraseTabs();
+
+      // Make phrase methods globally accessible IMMEDIATELY after setup
+      window.phraseInterface = {
+        switchToPhrase: (phrase) => this.switchToPhrase(phrase),
+        navigatePhrase: (direction) => this.navigatePhrase(direction),
+        getCurrentPhrase: () => this.currentPhrase,
+        updatePhraseTabStates: () => this.updatePhraseTabStates()
+      };
+      console.log("Phrase interface created:", window.phraseInterface);
+
       this.setupPlayerTabs();
+
+      // Ensure phrase tabs are set up after a delay if they failed initially
+      setTimeout(() => {
+        const phraseTabs = document.querySelectorAll(".phrase-tab");
+        if (phraseTabs.length > 0) {
+          const firstTab = phraseTabs[0];
+          // Check if handlers are attached
+          if (!firstTab.hasAttribute("data-phrase-initialized")) {
+            console.warn("Phrase tabs not initialized, retrying...");
+            this.setupPhraseTabs();
+          }
+        }
+      }, 500);
       this.setupPresetControls();
       this.setupSettingsWindow(); // Setup settings window
       this.setupAllModals(); // Setup all modal windows
@@ -6847,6 +6880,200 @@ class OTTOAccurateInterface {
         }, 500);
       }
     }, this.splashScreenLength);
+  }
+
+  setupPhraseTabs() {
+    console.log("=== Starting setupPhraseTabs ===");
+    const phraseTabs = document.querySelectorAll(".phrase-tab");
+    const phrasePrevBtn = document.getElementById("phrase-prev-btn");
+    const phraseNextBtn = document.getElementById("phrase-next-btn");
+
+    console.log("Setting up phrase tabs, found:", phraseTabs.length, "tabs");
+    console.log("Phrase prev button:", phrasePrevBtn);
+    console.log("Phrase next button:", phraseNextBtn);
+
+    // Verify methods exist
+    console.log("switchToPhrase exists?", typeof this.switchToPhrase);
+    console.log("navigatePhrase exists?", typeof this.navigatePhrase);
+
+    // Phrase order for navigation
+    this.phraseOrder = ["general", "intro", "verse", "prechorus", "chorus", "bridge", "solo", "outro"];
+
+    // Initialize current phrase if not set
+    if (!this.currentPhrase) {
+      this.currentPhrase = "general";
+    }
+
+    // Initialize phrase states if not set
+    if (!this.phraseStates) {
+      this.phraseStates = {};
+    }
+
+    // Clean up existing phrase tab listeners
+    if (this.eventListenerRegistry && this.eventListenerRegistry.element) {
+      this.eventListenerRegistry.element = this.eventListenerRegistry.element.filter(
+        ({ element, event, handler }) => {
+          if (
+            element &&
+            element.classList &&
+            element.classList.contains("phrase-tab")
+          ) {
+            element.removeEventListener(event, handler);
+            return false;
+          }
+          if (
+            element &&
+            (element.id === "phrase-prev-btn" || element.id === "phrase-next-btn")
+          ) {
+            element.removeEventListener(event, handler);
+            return false;
+          }
+          return true;
+        }
+      );
+    }
+
+    // Create bound handlers to preserve 'this' context
+    const self = this;
+
+    // Setup phrase tab click handlers - use direct addEventListener with arrow functions
+    phraseTabs.forEach((tab) => {
+      // Use arrow function to preserve 'this' context
+      const handler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const phrase = tab.dataset.phrase;
+        console.log("Phrase tab clicked:", phrase, "Current phrase:", self.currentPhrase);
+        if (phrase) {
+          self.switchToPhrase(phrase);
+        }
+      };
+
+      tab.addEventListener("click", handler);
+      // Also add pointer events to ensure clickability
+      tab.style.pointerEvents = "auto";
+      tab.style.cursor = "pointer";
+      // Mark as initialized
+      tab.setAttribute("data-phrase-initialized", "true");
+
+      // Track for cleanup
+      if (!this.eventListenerRegistry) {
+        this.eventListenerRegistry = { element: [] };
+      }
+      if (!this.eventListenerRegistry.element) {
+        this.eventListenerRegistry.element = [];
+      }
+      this.eventListenerRegistry.element.push({ element: tab, event: "click", handler });
+    });
+
+    // Setup phrase navigation buttons - use direct addEventListener
+    if (phrasePrevBtn) {
+      const prevHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Phrase prev clicked, current:", self.currentPhrase);
+        self.navigatePhrase(-1);
+      };
+      phrasePrevBtn.addEventListener("click", prevHandler);
+      phrasePrevBtn.style.pointerEvents = "auto";
+      phrasePrevBtn.style.cursor = "pointer";
+      this.eventListenerRegistry.element.push({ element: phrasePrevBtn, event: "click", handler: prevHandler });
+    } else {
+      console.error("Phrase prev button not found!");
+    }
+
+    if (phraseNextBtn) {
+      const nextHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Phrase next clicked, current:", self.currentPhrase);
+        self.navigatePhrase(1);
+      };
+      phraseNextBtn.addEventListener("click", nextHandler);
+      phraseNextBtn.style.pointerEvents = "auto";
+      phraseNextBtn.style.cursor = "pointer";
+      this.eventListenerRegistry.element.push({ element: phraseNextBtn, event: "click", handler: nextHandler });
+    } else {
+      console.error("Phrase next button not found!");
+    }
+
+    // Set initial active phrase
+    this.updatePhraseTabStates();
+
+    // Test if elements are clickable
+    console.log("=== setupPhraseTabs complete ===");
+    console.log("Current phrase:", this.currentPhrase);
+    if (phraseTabs.length > 0) {
+      console.log("First tab element:", phraseTabs[0]);
+      console.log("First tab dataset:", phraseTabs[0].dataset);
+    }
+  }
+
+  switchToPhrase(phrase) {
+    if (!this.phraseOrder.includes(phrase)) return;
+
+    // Save current phrase state before switching
+    this.savePhraseState(this.currentPhrase);
+
+    this.currentPhrase = phrase;
+    this.updatePhraseTabStates();
+
+    // Load the new phrase state
+    this.loadPhraseState(phrase);
+
+    console.log(`Switched to phrase: ${phrase}`);
+  }
+
+  savePhraseState(phrase) {
+    // Save the current UI state for this phrase
+    if (!this.phraseStates[phrase]) {
+      this.phraseStates[phrase] = {};
+    }
+
+    // Save current player and its state
+    this.phraseStates[phrase].currentPlayer = this.currentPlayer;
+    this.phraseStates[phrase].playerStates = JSON.parse(JSON.stringify(this.playerStates));
+
+    console.log(`Saved state for phrase: ${phrase}`);
+  }
+
+  loadPhraseState(phrase) {
+    // Load the saved state for this phrase
+    if (this.phraseStates[phrase]) {
+      // Restore player if saved
+      if (this.phraseStates[phrase].currentPlayer) {
+        this.switchToPlayer(this.phraseStates[phrase].currentPlayer);
+      }
+
+      // Could restore more state here if needed
+      console.log(`Loaded state for phrase: ${phrase}`);
+    } else {
+      console.log(`No saved state for phrase: ${phrase}, using defaults`);
+    }
+  }
+
+  navigatePhrase(direction) {
+    const currentIndex = this.phraseOrder.indexOf(this.currentPhrase);
+    let newIndex = currentIndex + direction;
+
+    // Wrap around navigation
+    if (newIndex < 0) {
+      newIndex = this.phraseOrder.length - 1;
+    } else if (newIndex >= this.phraseOrder.length) {
+      newIndex = 0;
+    }
+
+    console.log(`Navigating phrase from ${this.currentPhrase} to ${this.phraseOrder[newIndex]}`);
+    this.switchToPhrase(this.phraseOrder[newIndex]);
+  }
+
+  updatePhraseTabStates() {
+    document.querySelectorAll(".phrase-tab").forEach((tab) => {
+      tab.classList.remove("active");
+      if (tab.dataset.phrase === this.currentPhrase) {
+        tab.classList.add("active");
+      }
+    });
   }
 
   setupPlayerTabs() {
@@ -8697,7 +8924,7 @@ class OTTOAccurateInterface {
     // Throttled toggle handler to prevent rapid state changes
     const throttledToggleHandler = this.throttle((toggleBtn, toggleType) => {
       const state = this.playerStates[this.currentPlayer];
-      
+
       // Check if controls are locked
       if (state.toggleStates.lock && toggleType !== "lock") {
         debugLog(`Controls locked - cannot change ${toggleType}`);
@@ -8745,7 +8972,7 @@ class OTTOAccurateInterface {
         const isActive = toggleBtn.classList.contains("active");
         toggleBtn.classList.toggle("active");
         state.toggleStates.lock = !isActive;
-        
+
         // Apply visual indication that buttons are locked/unlocked
         const allToggleButtons = document.querySelectorAll(".toggle-btn:not([data-toggle='lock'])");
         allToggleButtons.forEach(btn => {
@@ -8757,7 +8984,7 @@ class OTTOAccurateInterface {
             btn.style.cursor = "";
           }
         });
-        
+
         this.onToggleChanged(this.currentPlayer, "lock", state.toggleStates.lock);
         this.setDirty("preset", true);
         debugLog(`Player ${this.currentPlayer} lock: ${state.toggleStates.lock}`);
@@ -8772,11 +8999,11 @@ class OTTOAccurateInterface {
           const btn = document.querySelector(`[data-toggle="${type}"]`);
           if (btn) btn.classList.remove("active");
         });
-        
+
         // Set the clicked one
         state.toggleStates[toggleType] = true;
         toggleBtn.classList.add("active");
-        
+
         this.onToggleChanged(this.currentPlayer, toggleType, true);
         this.setDirty("preset", true);
         debugLog(`Player ${this.currentPlayer} ${toggleType}: true`);
@@ -8787,7 +9014,7 @@ class OTTOAccurateInterface {
       const isActive = toggleBtn.classList.contains("active");
       toggleBtn.classList.toggle("active");
       state.toggleStates[toggleType] = !isActive;
-      
+
       this.onToggleChanged(
         this.currentPlayer,
         toggleType,
@@ -8825,15 +9052,15 @@ class OTTOAccurateInterface {
         "32": false
       };
     }
-    
+
     // Throttled fill handler to prevent rapid state changes
     const throttledFillHandler = this.throttle((fillBtn, fillType) => {
       const state = this.playerStates[this.currentPlayer];
-      
+
       // Handle "Now" button toggle
       if (fillType === "now") {
         const isActive = fillBtn.classList.contains("active");
-        
+
         if (!isActive) {
           // Deactivate Solo if it's active (mutually exclusive)
           const soloBtn = document.querySelector('[data-fill="solo"]');
@@ -8841,7 +9068,7 @@ class OTTOAccurateInterface {
             soloBtn.classList.remove("active");
             state.fillStates.solo = false;
           }
-          
+
           // Activating "Now" - save current active button and deactivate all others
           const currentActiveBtn = document.querySelector(".fill-btn.active:not([data-fill='now']):not([data-fill='solo'])");
           if (currentActiveBtn) {
@@ -8849,7 +9076,7 @@ class OTTOAccurateInterface {
             currentActiveBtn.classList.remove("active");
             state.fillStates[currentActiveBtn.dataset.fill] = false;
           }
-          
+
           fillBtn.classList.add("active");
           state.fillStates.now = true;
           state.fillStates.active = "now";
@@ -8857,7 +9084,7 @@ class OTTOAccurateInterface {
           // Deactivating "Now" - restore previous active button
           fillBtn.classList.remove("active");
           state.fillStates.now = false;
-          
+
           if (state.fillStates.previousActive) {
             const restoreBtn = document.querySelector(`[data-fill="${state.fillStates.previousActive}"]`);
             if (restoreBtn) {
@@ -8867,17 +9094,17 @@ class OTTOAccurateInterface {
             }
           }
         }
-        
+
         this.onFillChanged(this.currentPlayer, fillType, state.fillStates.now);
         this.setDirty("preset", true);
         debugLog(`Player ${this.currentPlayer} fill now: ${state.fillStates.now}`);
         return;
       }
-      
+
       // Handle "Solo" button toggle
       if (fillType === "solo") {
         const isActive = fillBtn.classList.contains("active");
-        
+
         if (!isActive) {
           // Deactivate Now if it's active (mutually exclusive)
           const nowBtn = document.querySelector('[data-fill="now"]');
@@ -8885,7 +9112,7 @@ class OTTOAccurateInterface {
             nowBtn.classList.remove("active");
             state.fillStates.now = false;
           }
-          
+
           // Activating "Solo" - save current active button and deactivate all others
           const currentActiveBtn = document.querySelector(".fill-btn.active:not([data-fill='solo']):not([data-fill='now'])");
           if (currentActiveBtn) {
@@ -8893,7 +9120,7 @@ class OTTOAccurateInterface {
             currentActiveBtn.classList.remove("active");
             state.fillStates[currentActiveBtn.dataset.fill] = false;
           }
-          
+
           fillBtn.classList.add("active");
           state.fillStates.solo = true;
           state.fillStates.active = "solo";
@@ -8901,7 +9128,7 @@ class OTTOAccurateInterface {
           // Deactivating "Solo" - restore previous active button
           fillBtn.classList.remove("active");
           state.fillStates.solo = false;
-          
+
           if (state.fillStates.previousActive) {
             const restoreBtn = document.querySelector(`[data-fill="${state.fillStates.previousActive}"]`);
             if (restoreBtn) {
@@ -8911,13 +9138,13 @@ class OTTOAccurateInterface {
             }
           }
         }
-        
+
         this.onFillChanged(this.currentPlayer, fillType, state.fillStates.solo);
         this.setDirty("preset", true);
         debugLog(`Player ${this.currentPlayer} fill solo: ${state.fillStates.solo}`);
         return;
       }
-      
+
       // Handle regular fill buttons (4, 8, 16, 32) - mutually exclusive
       // Deactivate all other fill buttons including now and solo
       document.querySelectorAll(".fill-btn").forEach(btn => {
@@ -8925,13 +9152,13 @@ class OTTOAccurateInterface {
         const btnFill = btn.dataset.fill;
         state.fillStates[btnFill] = false;
       });
-      
+
       // Activate the clicked button
       fillBtn.classList.add("active");
       state.fillStates[fillType] = true;
       state.fillStates.active = fillType;
       state.fillStates.previousActive = fillType;  // Update previous for potential restore
-      
+
       this.onFillChanged(this.currentPlayer, fillType, true);
       this.setDirty("preset", true);
       debugLog(`Player ${this.currentPlayer} fill ${fillType}: true`);
@@ -10960,7 +11187,41 @@ document.addEventListener("DOMContentLoaded", () => {
   // Make interface available globally for JUCE integration
   window.OTTO = window.ottoInterface;
 
-  debugLog("OTTO Accurate Web Interface (6-Row Layout) loaded successfully");
+  // Add test function for debugging phrase tabs
+  window.testPhraseTabs = () => {
+    console.log("Testing phrase tabs...");
+    const tabs = document.querySelectorAll(".phrase-tab");
+    const prevBtn = document.getElementById("phrase-prev-btn");
+    const nextBtn = document.getElementById("phrase-next-btn");
+
+    console.log("Found tabs:", tabs.length);
+    console.log("Prev button:", prevBtn);
+    console.log("Next button:", nextBtn);
+
+    tabs.forEach((tab, index) => {
+      console.log(`Tab ${index}:`, tab, "Dataset:", tab.dataset);
+    });
+
+    // Test direct click simulation
+    if (tabs.length > 1) {
+      console.log("Simulating click on second tab...");
+      tabs[1].click();
+    }
+  };
+
+  // Add direct global functions for testing
+  window.switchPhrase = (phrase) => {
+    if (window.ottoInterface && window.ottoInterface.switchToPhrase) {
+      window.ottoInterface.switchToPhrase(phrase);
+    } else if (window.phraseInterface) {
+      window.phraseInterface.switchToPhrase(phrase);
+    } else {
+      console.error("Phrase interface not ready");
+    }
+  };
+
+  debugLog("OTTO Accurate Web Interface (7-Row Layout) loaded successfully");
+  console.log("Phrase tabs test available. Run testPhraseTabs() in console to debug.");
 });
 
 // Clean up on page unload

@@ -13,38 +13,6 @@ class PhraseStateManager {
 
     // Default Phrase configuration
     this.defaultPhraseState = {
-      presetName: "Default",
-      kitName: "Acoustic",
-      patternGroup: "favorites",
-      selectedPattern: "basic",
-      kitMixerActive: false,
-      muted: false,
-      toggleStates: {
-        none: false,
-        auto: true,
-        manual: false,
-        stick: false,
-        ride: false,
-        lock: false,
-      },
-      fillStates: {
-        now: false,
-        4: false,
-        8: false,
-        16: true,
-        32: false,
-        solo: false,
-      },
-      sliderValues: {
-        swing: 10,
-        energy: 50,
-        volume: 75,
-      },
-      linkStates: {
-        swing: false,
-        energy: false,
-        volume: false,
-      },
     };
 
     // Phrase state cache for quick access
