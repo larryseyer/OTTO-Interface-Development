@@ -1049,13 +1049,17 @@ body {
 
 .player-tabs {
   display: flex;
-  gap: 8px;
-  /* Fixed gap that works for up to 8 players */
-  padding: 8px 0;
+  gap: 3px;
+  /* Small gap between players to prevent overlap */
+  padding: 0 2px;
+  margin: 0;
   background: transparent;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
   width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* No scrolling */
 }
 
 /* Row 2 Grid Areas */
@@ -1319,29 +1323,31 @@ body {
 }
 
 .player-tab {
-  padding: 10px 12px;
-  /* Optimized padding for 8 players */
+  padding: 3px 5px;
+  /* Balanced padding for 8 players */
   background: transparent;
   border: none;
   color: var(--button-text-normal);
   font-family: "Playfair Display", serif;
-  font-size: 22px !important;
-  /* Slightly smaller to fit better */
+  font-size: 15px !important;
+  /* Readable size */
   font-weight: 400;
   /* Regular weight */
   text-transform: uppercase;
   /* All caps for players */
   cursor: pointer;
   transition: all 0.2s ease;
-  letter-spacing: 0.3px;
+  letter-spacing: 0;
   position: relative;
   border-radius: 3px;
-  min-height: 60px;
-  height: 60px;
+  min-height: 32px;
+  height: 32px;
   width: auto;
   white-space: nowrap;
-  min-width: 120px;
-  /* Reduced from 140px to save space */
+  min-width: 75px;
+  /* Proper width to fit text */
+  max-width: 90px;
+  /* Maximum width to prevent too wide */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1351,6 +1357,8 @@ body {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+  flex: 1 1 auto;
+  /* Allow flex grow and shrink */
 }
 
 .player-tab:first-child {
@@ -1397,6 +1405,89 @@ body {
 .player-tab.muted.active {
   color: var(--text-black);
   /* Stay black even when active and muted */
+}
+
+/* Player Tab Container - Holds tab and tempo controls */
+.player-tab-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+  height: 100%;
+  padding: 12px 0;
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Player Tempo Control Buttons */
+.player-tempo-btn {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--button-text-normal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 1;
+  flex-shrink: 0;
+}
+
+.player-tempo-btn:hover {
+  color: var(--button-text-hover);
+  transform: scale(var(--row1-hover-scale));
+}
+
+.player-tempo-btn:active {
+  transform: scale(0.98);
+}
+
+.player-tempo-btn i {
+  font-size: 10px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Tempo button active states */
+.player-tempo-btn.tempo-active {
+  color: var(--button-text-active);
+}
+
+.player-tempo-double {
+  margin-bottom: -2px;
+}
+
+.player-tempo-half {
+  margin-top: -2px;
+}
+
+/* Player tab with modified tempo */
+.player-tab.tempo-modified {
+  color: var(--accent-color);
+  font-style: italic;
+}
+
+.player-tab.tempo-modified::after {
+  background: var(--accent-color);
+}
+
+/* Disabled tempo buttons */
+.player-tempo-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.player-tempo-btn:disabled:hover {
+  transform: none;
+  color: var(--button-text-normal);
 }
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */

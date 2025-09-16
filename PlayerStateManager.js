@@ -19,6 +19,7 @@ class PlayerStateManager {
       selectedPattern: "basic",
       kitMixerActive: false,
       muted: false,
+      tempoMultiplier: 1.0, // 1.0 = normal, 2.0 = double time, 0.5 = half time
       toggleStates: {
         none: false,
         auto: true,
@@ -285,6 +286,69 @@ class PlayerStateManager {
     return this.updatePlayerState(playerNum, {
       muted: !state.muted,
     });
+  }
+
+  /**
+   * Set tempo multiplier for a player
+   * @param {number} playerNum - Player number (1-8)
+   * @param {number} multiplier - Tempo multiplier (0.5 for half, 1.0 for normal, 2.0 for double)
+   * @returns {boolean} Success status
+   */
+  setPlayerTempoMultiplier(playerNum, multiplier) {
+    if (multiplier <= 0) return false;
+    
+    return this.updatePlayerState(playerNum, {
+      tempoMultiplier: multiplier,
+    });
+  }
+
+  /**
+   * Get tempo multiplier for a player
+   * @param {number} playerNum - Player number (1-8)
+   * @returns {number} Tempo multiplier
+   */
+  getPlayerTempoMultiplier(playerNum) {
+    const state = this.getPlayerState(playerNum);
+    return state ? state.tempoMultiplier || 1.0 : 1.0;
+  }
+
+  /**
+   * Double the tempo for a player
+   * @param {number} playerNum - Player number (1-8)
+   * @returns {boolean} Success status
+   */
+  doublePlayerTempo(playerNum) {
+    const currentMultiplier = this.getPlayerTempoMultiplier(playerNum);
+    const newMultiplier = currentMultiplier * 2.0;
+    
+    // Limit max multiplier to 4x
+    if (newMultiplier > 4.0) return false;
+    
+    return this.setPlayerTempoMultiplier(playerNum, newMultiplier);
+  }
+
+  /**
+   * Half the tempo for a player
+   * @param {number} playerNum - Player number (1-8)
+   * @returns {boolean} Success status
+   */
+  halfPlayerTempo(playerNum) {
+    const currentMultiplier = this.getPlayerTempoMultiplier(playerNum);
+    const newMultiplier = currentMultiplier * 0.5;
+    
+    // Limit min multiplier to 0.25x
+    if (newMultiplier < 0.25) return false;
+    
+    return this.setPlayerTempoMultiplier(playerNum, newMultiplier);
+  }
+
+  /**
+   * Reset tempo multiplier to normal for a player
+   * @param {number} playerNum - Player number (1-8)
+   * @returns {boolean} Success status
+   */
+  resetPlayerTempo(playerNum) {
+    return this.setPlayerTempoMultiplier(playerNum, 1.0);
   }
 
   /**
