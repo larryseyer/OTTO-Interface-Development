@@ -46,11 +46,11 @@
   --row1-area5-width: 26%; /* Cloud settings + OTTO Logo/version/store button */
 
  /* Row 2 Area Percentages - Must total 100% */
-  --row2-area1-width: 15%; /* Phrase Rec, Play, Pause, Simplify/Normal/Complicate icons */
-  --row2-area2-width: 5%; /* Prev Chevron (aligned Right) */
+  --row2-area1-width: 15%; /* Phrase Save, Edit, Add,  Delete icons */
+  --row2-area2-width: 5%;  /* Prev Chevron (aligned Right) */
   --row2-area3-width: 60%; /* General, Intro, Verse, PreChorus, Chorus, Bridge, Solo, Outro */
-  --row2-area4-width: 5%; /* Next Chevron (aligned Left) */
-  --row2-area5-width: 15%; /* Phrase Save, Add, Mute, Delete icons */
+  --row2-area4-width: 5%;  /* Next Chevron (aligned Left) */
+  --row2-area5-width: 15%; /* Phrase Rec, (Play, Pause), (Simplify/Normal/Complicate), Mute icons */
 
  /* Dynamic player tab spacing */
   --phrase-tab-gap: 5px; /* Default for 8 Phrases */
