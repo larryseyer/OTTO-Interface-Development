@@ -109,6 +109,13 @@
  /* Dynamic player tab spacing */
   --player-tab-gap: 5px; /* Default for 8 players */
 
+ /* Tempo control settings - global for both phrase and player tabs */
+  --tempo-btn-size: 16px; /* Size of tempo buttons */
+  --tempo-icon-size: 10px; /* Size of plus/minus icons */
+  --tempo-btn-color: var(--button-text-normal); /* Normal color */
+  --tempo-btn-hover-color: var(--button-text-hover); /* Hover color */
+  --tempo-btn-active-color: var(--button-text-active); /* Active color */
+
 }
 
 * {
@@ -1038,13 +1045,17 @@ body {
 
 .phrase-tabs {
   display: flex;
-  gap: 8px;
-  /* Fixed gap that works for up to 8 phrases */
-  padding: 8px 0;
+  gap: 3px;
+  /* Small gap between phrases to prevent overlap */
+  padding: 0 2px;
+  margin: 0;
   background: transparent;
   justify-content: center;
-  align-items: center;
+  align-items: stretch;
   width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* No scrolling */
 }
 
 .player-tabs {
@@ -1185,14 +1196,14 @@ body {
 }
 
 .phrase-tab {
-  padding: 10px 12px;
-  /* Optimized padding for 8 phrases */
+  padding: 3px 5px;
+  /* Match player-tab vertical padding exactly */
   background: transparent;
   border: none;
   color: var(--button-text-normal);
   font-family: "Playfair Display", serif;
   font-size: 22px !important;
-  /* Slightly smaller to fit better */
+  /* Original font size */
   font-weight: 400;
   /* Regular weight */
   text-transform: capitalize;
@@ -1202,12 +1213,22 @@ body {
   letter-spacing: 0.3px;
   position: relative;
   border-radius: 3px;
-  min-height: 60px;
-  height: 60px;
+  min-height: 32px;
+  height: 32px;
   width: auto;
   white-space: nowrap;
   min-width: 120px;
   /* Optimal for 8 phrases */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  line-height: 1;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  flex: 1 1 auto;
+  /* Allow flex grow and shrink */
   z-index: 10;
   pointer-events: auto !important;
 }
@@ -1234,6 +1255,78 @@ body {
   width: 40px;
   height: 2px;
   background: var(--button-text-active);
+}
+
+/* Phrase Tab Container - Holds tab and tempo controls (matches player structure) */
+.phrase-tab-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  position: relative;
+  height: 100%;
+  padding: 12px 0;
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Phrase Tempo Control Buttons */
+.phrase-tempo-btn {
+  width: var(--tempo-btn-size);
+  height: var(--tempo-btn-size);
+  min-height: var(--tempo-btn-size);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--tempo-btn-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 1;
+  flex-shrink: 0;
+}
+
+.phrase-tempo-btn:hover {
+  color: var(--tempo-btn-hover-color);
+  transform: scale(var(--row1-hover-scale));
+}
+
+.phrase-tempo-btn:active {
+  transform: scale(0.98);
+}
+
+.phrase-tempo-btn i {
+  font-size: var(--tempo-icon-size);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Phrase tempo button active states */
+.phrase-tempo-btn.tempo-active {
+  color: var(--tempo-btn-active-color);
+}
+
+.phrase-tempo-double {
+  margin-bottom: -2px;
+}
+
+.phrase-tempo-half {
+  margin-top: -2px;
+}
+
+.phrase-tempo-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.phrase-tempo-btn:disabled:hover {
+  transform: none;
+  color: var(--tempo-btn-color);
 }
 
 .phrase-nav-btn {
@@ -1424,14 +1517,14 @@ body {
 
 /* Player Tempo Control Buttons */
 .player-tempo-btn {
-  width: 16px;
-  height: 16px;
-  min-height: 16px;
+  width: var(--tempo-btn-size);
+  height: var(--tempo-btn-size);
+  min-height: var(--tempo-btn-size);
   padding: 0;
   background: transparent;
   border: none;
   border-radius: 50%;
-  color: var(--button-text-normal);
+  color: var(--tempo-btn-color);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1442,7 +1535,7 @@ body {
 }
 
 .player-tempo-btn:hover {
-  color: var(--button-text-hover);
+  color: var(--tempo-btn-hover-color);
   transform: scale(var(--row1-hover-scale));
 }
 
@@ -1451,14 +1544,14 @@ body {
 }
 
 .player-tempo-btn i {
-  font-size: 10px;
+  font-size: var(--tempo-icon-size);
   line-height: 1;
   pointer-events: none;
 }
 
 /* Tempo button active states */
 .player-tempo-btn.tempo-active {
-  color: var(--button-text-active);
+  color: var(--tempo-btn-active-color);
 }
 
 .player-tempo-double {
@@ -1487,7 +1580,7 @@ body {
 
 .player-tempo-btn:disabled:hover {
   transform: none;
-  color: var(--button-text-normal);
+  color: var(--tempo-btn-color);
 }
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */
