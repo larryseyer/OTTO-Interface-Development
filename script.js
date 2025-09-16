@@ -9565,67 +9565,58 @@ class OTTOAccurateInterface {
       };
 
       try {
-        // Determine current state of this link icon
         const isMaster = linkState.master === currentPlayer;
         const isSlave = linkState.slaves.has(currentPlayer);
 
         if (!isMaster && !isSlave) {
-          // Currently unlinked - toggle to become a slave if master exists, otherwise become master
-          if (linkState.master !== null && linkState.master !== currentPlayer) {
-            // There's already a master, become a slave
-            linkState.slaves.add(currentPlayer);
-            linkIcon.classList.add("linked");
-            linkIcon.classList.remove("master");
+          // Player is not currently linked - activating makes them the broadcaster
+          // ALL other players (1-8) become slaves automatically
 
-            // Sync this slave's value with the master's value
-            const masterValue = this.playerStates[linkState.master].sliderValues[param];
-            this.playerStates[currentPlayer].sliderValues[param] = masterValue;
+          // Clear any existing relationships
+          linkState.slaves.clear();
 
-            // Update the slider display
-            const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
-            if (slider) {
-              const fill = slider.querySelector('.slider-fill');
-              const thumb = slider.querySelector('.slider-thumb');
-              const min = parseFloat(slider.dataset.min);
-              const max = parseFloat(slider.dataset.max);
-              const percentage = ((masterValue - min) / (max - min)) * 100;
-
-              fill.style.height = `${percentage}%`;
-              thumb.style.bottom = `${percentage}%`;
-              slider.dataset.value = masterValue;
+          // Make ALL other players slaves (regardless of their link button state)
+          for (let player = 1; player <= this.maxPlayers; player++) {
+            if (player !== currentPlayer) {
+              linkState.slaves.add(player);
             }
-
-            debugLog(
-              `Player ${currentPlayer} is now slave for ${param}, synced to value: ${masterValue}`,
-            );
-          } else {
-            // No master exists, become the master
-            linkState.master = currentPlayer;
-            linkIcon.classList.add("master");
-            linkIcon.classList.remove("linked");
-
-            debugLog(
-              `Player ${currentPlayer} is now master for ${param}`,
-            );
           }
+
+          // Current player becomes the master/broadcaster
+          linkState.master = currentPlayer;
+          linkIcon.classList.add("master");
+          linkIcon.classList.remove("linked", "slave");
+
+          // Get current player's value to broadcast to all slaves
+          const broadcasterValue = this.playerStates[currentPlayer].sliderValues[param];
+
+          // Sync all slaves to the new broadcaster's value
+          linkState.slaves.forEach(slavePlayer => {
+            if (this.playerStates[slavePlayer]) {
+              this.playerStates[slavePlayer].sliderValues[param] = broadcasterValue;
+            }
+          });
+
+          debugLog(
+            `Player ${currentPlayer} activated link and became broadcaster for ${param}`,
+            `ALL other players are now slaves`,
+            `Broadcasting value: ${broadcasterValue} to ${linkState.slaves.size} slaves`,
+          );
+
         } else if (isMaster) {
-          // Currently master - unlink (become normal)
+          // Master is deactivating - release all slaves
           linkState.master = null;
           linkState.slaves.clear();
-          linkIcon.classList.remove("master");
+          linkIcon.classList.remove("master", "linked", "slave");
 
-          debugLog(`Player ${currentPlayer} unlinked ${param} (was master)`);
+          debugLog(`Player ${currentPlayer} deactivated broadcaster for ${param} - all players now free`);
+
         } else if (isSlave) {
-          // Currently slave - unlink from master
+          // Slave is clicking their link to become free
           linkState.slaves.delete(currentPlayer);
-          linkIcon.classList.remove("linked");
+          linkIcon.classList.remove("master", "linked", "slave");
 
-          // If this was the last slave and no master, clean up completely
-          if (linkState.slaves.size === 0 && !linkState.master) {
-            linkState.master = null;
-          }
-
-          debugLog(`Player ${currentPlayer} unlinked ${param} (was slave)`);
+          debugLog(`Player ${currentPlayer} freed themselves from ${param} link`);
         }
 
         // Validate the final state
@@ -9738,7 +9729,8 @@ class OTTOAccurateInterface {
         `.custom-slider[data-param="${param}"]`,
       );
 
-      linkIcon.classList.remove("master", "linked");
+      // Clear all link-related classes
+      linkIcon.classList.remove("master", "linked", "slave");
 
       // Also update slider visual states
       if (slider) {
@@ -9746,13 +9738,15 @@ class OTTOAccurateInterface {
       }
 
       if (linkState.master === this.currentPlayer) {
+        // This player is the broadcaster/master
         linkIcon.classList.add("master");
         if (slider) {
           slider.classList.add("master");
           slider.style.pointerEvents = "auto"; // Enable interaction
         }
       } else if (linkState.slaves.has(this.currentPlayer)) {
-        linkIcon.classList.add("linked");
+        // This player is a slave/listener
+        linkIcon.classList.add("slave");
         if (slider) {
           slider.classList.add("slave");
           slider.style.pointerEvents = "none"; // Disable interaction for slaves

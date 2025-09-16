@@ -2314,21 +2314,21 @@ body {
 }
 
 /* Unlinked state (default) */
-.param-link-icon:not(.linked):not(.master) i {
+.param-link-icon:not(.slave):not(.master) i {
   color: var(--text-icon);
   /* Grey */
 }
 
-/* Linked slave state */
-.param-link-icon.linked:not(.master) i {
+/* Slave/listener state */
+.param-link-icon.slave i {
   color: var(--text-black);
-  /* Black for slaves */
+  /* Black for slaves/listeners */
 }
 
-/* Master state */
+/* Master/broadcaster state */
 .param-link-icon.master i {
   color: var(--text-primary);
-  /* White for master */
+  /* White for master/broadcaster */
 }
 
 /* Hover effects */
@@ -2336,12 +2336,12 @@ body {
   transform: scale(1.1);
 }
 
-.param-link-icon:hover:not(.linked):not(.master) i {
+.param-link-icon:hover:not(.slave):not(.master) i {
   color: var(--text-secondary);
   /* Lighter grey on hover when unlinked */
 }
 
-.param-link-icon.linked:hover:not(.master) i {
+.param-link-icon.slave:hover i {
   color: var(--text-muted);
   /* Darker on hover when slave */
 }
