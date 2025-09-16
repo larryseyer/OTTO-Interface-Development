@@ -1189,6 +1189,8 @@ body {
   /* Slightly smaller to fit better */
   font-weight: 400;
   /* Regular weight */
+  text-transform: capitalize;
+  /* First letter capitalized for phrases */
   cursor: pointer;
   transition: all 0.2s ease;
   letter-spacing: 0.3px;
@@ -1206,14 +1208,13 @@ body {
 
 .phrase-tab:hover {
   color: var(--button-text-hover);
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-1px);
+  transform: scale(var(--row1-hover-scale));
 }
 
 .phrase-tab.active {
   color: var(--button-text-active);
-  background: var(--bg-primary);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: transparent;
+  /* Transparent background for selected phrase, matching player tabs */
   font-weight: 500;
   /* Medium weight for active */
 }
@@ -1326,6 +1327,8 @@ body {
   /* Slightly smaller to fit better */
   font-weight: 400;
   /* Regular weight */
+  text-transform: uppercase;
+  /* All caps for players */
   cursor: pointer;
   transition: all 0.2s ease;
   letter-spacing: 0.3px;
@@ -1363,8 +1366,22 @@ body {
 
 .player-tab.active {
   color: var(--button-text-active);
+  background: transparent;
+  /* Keep transparent background for consistency */
   font-weight: 400;
   /* Keep regular weight even when active */
+}
+
+.player-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: var(--button-text-active);
+  /* White underline for active player tab */
 }
 
 /* Muted player tab styling */
