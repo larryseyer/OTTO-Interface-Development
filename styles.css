@@ -38,10 +38,10 @@
 
  /* Row 1 Area Percentages - Must total 100% */
   --row1-area1-width: 18%; /* Settings, Link, Preset Edit buttons - increased for 3 icons */
-  --row1-area2-width: 28%; /* Presets dropdown - needs space for text */
-  --row1-area3-width: 8%; /* Play/Pause button (centered) */
+  --row1-area2-width: 26%; /* Presets dropdown - needs space for text */
+  --row1-area3-width: 12%; /* Play/Pause/Double/Half buttons (centered) */
   --row1-area4-width: 18%; /* Tempo Display - reduced to give area5 more space */
-  --row1-area5-width: 28%; /* Cloud, Logo and Version - increased for hover space */
+  --row1-area5-width: 26%; /* Cloud, Logo and Version - increased for hover space */
 
  /* Row 2 Area Percentages - Must total 100% */
   --row2-area1-width: 5%; /*Blank area for future use*/
@@ -521,6 +521,7 @@ body {
   align-items: center;
   flex: 0 0 var(--row1-area4-width);
   justify-content: center;
+  gap: 2px; /* Minimal space between buttons and tempo display */
 }
 
 /* Row 1 Area 5: Cloud Upload, Logo and Version */
@@ -911,7 +912,7 @@ body {
   letter-spacing: -2px;
   border: 2px solid transparent;
   border-radius: 8px;
-  padding: 10px 20px;
+  padding: 10px 8px;
   outline: none;
   cursor: pointer;
   /* Pointer cursor for tap functionality */
@@ -5481,4 +5482,40 @@ body {
   background: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
   font-size: 12px;
+}
+
+
+/* Tempo Control Buttons (Half/Double) */
+.tempo-control-btn {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+  outline: none;
+}
+
+.tempo-control-btn:focus {
+  outline: none;
+}
+
+.tempo-control-btn i {
+  font-size: 30px;
+  color: var(--text-icon);
+  transition: all 0.3s ease;
+}
+
+.tempo-control-btn:hover i {
+  color: var(--button-text-hover);
+  transform: scale(1.1);
+}
+
+.tempo-control-btn:active i {
+  color: var(--button-text-active);
+  transform: scale(0.95);
 }

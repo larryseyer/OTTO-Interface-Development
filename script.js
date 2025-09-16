@@ -15,6 +15,12 @@
 // Debug logging system - set to false for production
 const DEBUG_MODE = false; // Can be controlled via environment variable or build process
 
+// Tempo control constants
+const TEMPO_DOUBLE_MULTIPLIER = 2.0;
+const TEMPO_HALF_MULTIPLIER = 0.5;
+const MIN_TEMPO = 30;
+const MAX_TEMPO = 300;
+
 // Debug logging functions
 function debugLog(...args) {
   if (DEBUG_MODE) {
@@ -9907,6 +9913,30 @@ class OTTOAccurateInterface {
         this.togglePlayPause();
       };
       this.addEventListener(playPauseBtn, "click", playPauseHandler);
+    }
+
+    // Tempo Half button
+    const tempoHalfBtn = document.getElementById("tempo-half-btn");
+    if (tempoHalfBtn) {
+      const tempoHalfHandler = () => {
+        const newTempo = Math.round(this.tempo * TEMPO_HALF_MULTIPLIER);
+        const clampedTempo = Math.max(MIN_TEMPO, Math.min(MAX_TEMPO, newTempo));
+        this.setTempo(clampedTempo);
+        debugLog(`Half tempo: ${this.tempo} -> ${clampedTempo}`);
+      };
+      this.addEventListener(tempoHalfBtn, "click", tempoHalfHandler);
+    }
+
+    // Tempo Double button
+    const tempoDoubleBtn = document.getElementById("tempo-double-btn");
+    if (tempoDoubleBtn) {
+      const tempoDoubleHandler = () => {
+        const newTempo = Math.round(this.tempo * TEMPO_DOUBLE_MULTIPLIER);
+        const clampedTempo = Math.max(MIN_TEMPO, Math.min(MAX_TEMPO, newTempo));
+        this.setTempo(clampedTempo);
+        debugLog(`Double tempo: ${this.tempo} -> ${clampedTempo}`);
+      };
+      this.addEventListener(tempoDoubleBtn, "click", tempoDoubleHandler);
     }
 
     // Tempo display - dual function (tap tempo & edit)
