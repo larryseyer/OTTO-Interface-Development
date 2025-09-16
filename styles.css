@@ -3042,12 +3042,12 @@ body {
   position: fixed;
   right: -100%;
   /* Fully hidden off-screen initially */
-  top: calc(var(--interface-height) * 0.36);
-  /* Start at top of row 4 (10% + 8% + 18% = 36%) */
+  top: calc(var(--row1-height) + var(--row2-height) + var(--row3-height) + var(--row4-height));
+  /* Start at top of row 5 (sum of rows 1-4) */
   width: calc(var(--interface-width) * 0.5);
   /* Exactly 50% of interface width */
-  height: calc(var(--interface-height) * 0.59);
-  /* Cover rows 4 and 5 (12% + 47% = 59%) */
+  height: calc(var(--row5-height) + var(--row6-height));
+  /* Cover rows 5 and 6 */
   background: var(--bg-primary);
   border-left: 2px solid var(--border-color);
   box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
