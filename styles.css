@@ -108,6 +108,7 @@
 
  /* Dynamic player tab spacing */
   --player-tab-gap: 5px; /* Default for 8 players */
+
 }
 
 * {
@@ -435,7 +436,7 @@ body {
   position: relative;
   box-sizing: border-box;
   /* Include padding in width calculation */
-  z-index: 1000; /* High z-index to ensure dropdowns appear above row2 */
+  z-index: 100; /* High z-index to ensure dropdowns appear above row2 */
 }
 
 /* Row 1 Area 1: Settings, Link, and Preset Edit buttons */
@@ -1401,13 +1402,11 @@ body {
 .drum-kit-section {
   height: var(--row4-height);
   background: var(--bg-secondary);
-  /* border-bottom: 1px solid var(--border-color); */
-  /* Commented out - no border between row4 and row5 */
+  border-bottom: 1px solid var(--border-color);
   display: flex;
-  align-items: flex-start;
-  /* Align items to top instead of center */
-  padding: 10px 20px 0 20px;
-  /* Add small top padding for alignment */
+  align-items: center;
+  /* Center all items vertically */
+  padding: 0 20px;
   /* gap removed to allow proper percentage-based layout */
   overflow: visible;
   /* Ensure dropdown can overflow this section */
@@ -1732,13 +1731,12 @@ body {
 .pattern-groups-section {
   height: var(--row5-height);
   background: var(--bg-secondary);
-  /* border-bottom: 1px solid var(--border-color); */
-  /* Commented out - no border between row5 and row6 */
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: flex-end;
   /* Align items to bottom */
-  padding: 0 20px 10px 20px;
-  /* Add bottom padding */
+  padding: 0;
+  /* Adjusted bottom padding to compensate for left side offset */
 }
 
 .pattern-group-controls {
@@ -1748,6 +1746,8 @@ body {
 }
 
 .group-nav-btn {
+  flex: 0 0 auto;
+  /* Don't grow or shrink, maintain fixed size */
   width: 62px;
   /* 40% larger than 44px */
   height: 62px;
@@ -1762,6 +1762,8 @@ body {
   justify-content: center;
   padding: 0;
   margin: 0;
+  margin-top: auto;
+  /* Push chevrons to bottom */
 }
 
 .group-nav-btn i {
@@ -1785,10 +1787,14 @@ body {
 /* Group dropdown - increased by 50% */
 .group-dropdown {
   position: relative;
-  min-width: 216px;
-  /* 50% larger than 144px */
+  flex: 1;
+  /* Take up available space between chevrons */
+  max-width: 216px;
+  /* Limit maximum width */
   margin: 0;
-  padding: 0;
+  padding-bottom: 12px;
+  margin-top: auto;
+  /* Push dropdown to bottom to align with buttons */
 }
 
 .group-dropdown .dropdown-selected {
@@ -1803,6 +1809,8 @@ body {
   white-space: nowrap;
   max-width: 216px;
   /* Match the dropdown width */
+  height: 100%;
+  /* Full height of parent */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2537,25 +2545,21 @@ body {
 .row4-area-1 {
   flex: 0 0 var(--row4-area1-width);
   display: flex;
-  align-items: flex-start;
-  /* Top-align player number */
+  align-items: center;
+  /* Center-align player number vertically */
   justify-content: flex-start;
   /* Left-align player number */
   padding-left: 20px;
   /* Match the container padding */
-  padding-top: 5px;
-  /* Small top padding */
 }
 
 .row4-area-2 {
   flex: 0 0 var(--row4-area2-width);
   display: flex;
-  align-items: flex-start;
-  /* Top-align edit button */
+  align-items: center;
+  /* Center-align edit button vertically */
   justify-content: flex-end;
   /* Right-align edit button */
-  padding-top: 5px;
-  /* Small top padding */
 }
 
 .row4-area-3 {
@@ -2586,14 +2590,12 @@ body {
 .row4-area-5 {
   flex: 0 0 var(--row4-area5-width);
   display: flex;
-  align-items: flex-start;
-  /* Top-align mute button */
+  align-items: center;
+  /* Center-align mute button vertically */
   justify-content: flex-end;
   /* Right-align mute button */
   padding-right: 20px;
   /* Match the container padding */
-  padding-top: 5px;
-  /* Small top padding */
 }
 
 /* Row 4 Main Divisions */
@@ -2621,16 +2623,20 @@ body {
   /* Right-align gear icon */
   padding-right: 10px;
   /* Add some space from the edge */
+  height: 100%;
+  /* Full height of parent */
 }
 
 .row5-left-area2 {
   flex: 0 0 var(--row5-left-area2-width);
   display: flex;
-  align-items: center;
-  /* Center vertically */
+  align-items: flex-end;
+  /* Align to bottom */
   justify-content: center;
-  gap: 10px;
-  /* Reduced gap for tighter grouping */
+  gap: var(--spacing-small);
+  /* Use consistent spacing */
+  height: 100%;
+  /* Full height of parent */
 }
 
 .row5-left-area3 {
@@ -2642,6 +2648,8 @@ body {
   /* Align to left */
   padding-left: 10px;
   /* Add spacing from area2 */
+  height: 100%;
+  /* Full height of parent */
 }
 
 /* Row 4 Right Areas - Labels */
@@ -2869,6 +2877,8 @@ body {
   transition: all 0.2s ease;
   margin: 0;
   padding: 0;
+  margin-top: auto;
+  /* Push button to bottom */
 }
 
 .edit-pattern-btn i {
@@ -3185,6 +3195,8 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
+  margin-top: auto;
+  /* Push delete button to bottom */
 }
 
 .row5-left-area3 .group-delete-btn:hover {
