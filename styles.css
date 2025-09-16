@@ -10,7 +10,9 @@
 
  /* Global button text states */
   --button-text-normal: #777777; /* Normal state */
-  --button-text-hover: #aaaaaa; /* Hover state */
+  --button-text-brighter: #AAAAAA; /* Brighter for Plus Minus Icons */
+  --button-text-brighter-hover: #CCCCCC; /* Brighter Hover for Plus Minus Icons */
+  --button-text-hover: #AAAAAA; /* Hover state */
   --button-text-active: #ffffff; /* Active/selected state */
   --border-color: #111111; /* Black borders between rows */
 
@@ -105,15 +107,16 @@
 
  /* Global hover zoom for row1 elements */
   --row1-hover-scale: 1.2; /* Top Row */
+  --row1-hover-bigger-scale: 1.8; /* Top Row */
 
  /* Dynamic player tab spacing */
   --player-tab-gap: 5px; /* Default for 8 players */
 
  /* Tempo control settings - global for both phrase and player tabs */
   --tempo-btn-size: 16px; /* Size of tempo buttons */
-  --tempo-icon-size: 10px; /* Size of plus/minus icons */
-  --tempo-btn-color: var(--button-text-normal); /* Normal color */
-  --tempo-btn-hover-color: var(--button-text-hover); /* Hover color */
+  --tempo-icon-size: 20px; /* Size of plus/minus icons */
+  --tempo-btn-color: var(--button-text-brighter); /* Brighter color */
+  --tempo-btn-hover-color: var(--button-text-brighter-hover); /* Brighter Hover color */
   --tempo-btn-active-color: var(--button-text-active); /* Active color */
 
 }
@@ -1294,7 +1297,7 @@ body {
 
 .phrase-tempo-btn:hover {
   color: var(--tempo-btn-hover-color);
-  transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-bigger-scale));
 }
 
 .phrase-tempo-btn:active {
@@ -1537,7 +1540,7 @@ body {
 
 .player-tempo-btn:hover {
   color: var(--tempo-btn-hover-color);
-  transform: scale(var(--row1-hover-scale));
+  transform: scale(var(--row1-hover-bigger-scale));
 }
 
 .player-tempo-btn:active {
