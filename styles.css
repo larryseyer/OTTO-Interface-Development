@@ -12,7 +12,7 @@
   --button-text-normal: #777777; /* Normal state */
   --button-text-hover: #aaaaaa; /* Hover state */
   --button-text-active: #ffffff; /* Active/selected state */
-  --border-color: #000000; /* Black borders between rows */
+  --border-color: #111111; /* Black borders between rows */
 
  /* Button colors - 3D metallic style */
   --button-face: #888888;
@@ -3993,8 +3993,8 @@ body {
   height: 100%;
 }
 
-/* Link panel specific styles */
-#link-panel .panel-placeholder,
+/* Sync panel specific styles */
+#sync-panel .panel-placeholder,
 #mixer-panel .panel-placeholder,
 #kit-edit-panel .panel-placeholder {
   color: var(--text-muted);
@@ -4793,7 +4793,7 @@ body {
 
 /* Notification styles */
 .notification {
-  position: fixed;
+  position: absolute; /* Changed to absolute to be relative to interface-container */
   padding: 12px 20px;
   background: rgba(173, 216, 230, 0.15); /* Light blue transparent background */
   color: var(--text-primary);
@@ -4804,8 +4804,8 @@ body {
   animation: notificationFadeIn 0.5s ease;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   left: 50%;
-  transform: translateX(-50%);
-  top: calc(16% + 10px); /* Position just below row4 */
+  top: 24%;
+  transform: translate(-50%, -50%);
   min-width: 300px;
   text-align: center;
 }

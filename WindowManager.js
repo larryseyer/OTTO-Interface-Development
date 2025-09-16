@@ -95,10 +95,10 @@ class WindowManager {
       buttonActiveClass: "panel-active",
     });
 
-    this.registerWindow("panel", "link", {
-      element: "link-panel",
-      triggerButton: "link-btn",
-      closeButton: "link-panel-close",
+    this.registerWindow("panel", "sync", {
+      element: "sync-panel",
+      triggerButton: "sync-btn",
+      closeButton: "sync-panel-close",
       mutexGroup: "fullHeightPanels",
       cssClass: "slide-up-panel full-height-panel",
       activeClass: "active",
