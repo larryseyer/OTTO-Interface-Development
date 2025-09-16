@@ -1276,8 +1276,8 @@ body {
   box-sizing: border-box;
 }
 
-/* Phrase Tempo Control Buttons */
-.phrase-tempo-btn {
+/* Phrase Tempo Control Buttons - COMMENTED OUT */
+/* .phrase-tempo-btn {
   width: var(--tempo-btn-size);
   height: var(--tempo-btn-size);
   min-height: var(--tempo-btn-size);
@@ -1308,10 +1308,10 @@ body {
   font-size: var(--tempo-icon-size);
   line-height: 1;
   pointer-events: none;
-}
+} */
 
-/* Phrase tempo button active states */
-.phrase-tempo-btn.tempo-active {
+/* Phrase tempo button active states - COMMENTED OUT */
+/* .phrase-tempo-btn.tempo-active {
   color: var(--tempo-btn-active-color);
 }
 
@@ -1331,7 +1331,7 @@ body {
 .phrase-tempo-btn:disabled:hover {
   transform: none;
   color: var(--tempo-btn-color);
-}
+} */
 
 .phrase-nav-btn {
   width: 50px;
@@ -1519,8 +1519,8 @@ body {
   min-width: 0;
 }
 
-/* Player Tempo Control Buttons */
-.player-tempo-btn {
+/* Player Tempo Control Buttons - COMMENTED OUT */
+/* .player-tempo-btn {
   width: var(--tempo-btn-size);
   height: var(--tempo-btn-size);
   min-height: var(--tempo-btn-size);
@@ -1551,10 +1551,10 @@ body {
   font-size: var(--tempo-icon-size);
   line-height: 1;
   pointer-events: none;
-}
+} */
 
-/* Tempo button active states */
-.player-tempo-btn.tempo-active {
+/* Tempo button active states - COMMENTED OUT */
+/* .player-tempo-btn.tempo-active {
   color: var(--tempo-btn-active-color);
 }
 
@@ -1564,7 +1564,7 @@ body {
 
 .player-tempo-half {
   margin-top: -2px;
-}
+} */
 
 /* Player tab with modified tempo */
 .player-tab.tempo-modified {
@@ -1576,8 +1576,8 @@ body {
   background: var(--accent-color);
 }
 
-/* Disabled tempo buttons */
-.player-tempo-btn:disabled {
+/* Disabled tempo buttons - COMMENTED OUT */
+/* .player-tempo-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
@@ -1585,7 +1585,7 @@ body {
 .player-tempo-btn:disabled:hover {
   transform: none;
   color: var(--tempo-btn-color);
-}
+} */
 
 /* Row 3: Drum Kit Section  - Kit Selection & Controls */
 .drum-kit-section {

@@ -7215,8 +7215,8 @@ class OTTOAccurateInterface {
    * Setup tempo control buttons for each player
    */
   setupPlayerTempoControls() {
-    // Clean up existing tempo button listeners
-    if (this.eventListenerRegistry && this.eventListenerRegistry.element) {
+    // COMMENTED OUT - Clean up existing tempo button listeners
+    /* if (this.eventListenerRegistry && this.eventListenerRegistry.element) {
       this.eventListenerRegistry.element = this.eventListenerRegistry.element.filter(
         ({ element, event, handler }) => {
           if (
@@ -7231,16 +7231,16 @@ class OTTOAccurateInterface {
           return true;
         }
       );
-    }
+    } */
 
-    // Get all tempo control buttons
-    const doubleButtons = document.querySelectorAll(".player-tempo-double");
-    const halfButtons = document.querySelectorAll(".player-tempo-half");
+    // COMMENTED OUT - Get all tempo control buttons
+    /* const doubleButtons = document.querySelectorAll(".player-tempo-double");
+    const halfButtons = document.querySelectorAll(".player-tempo-half"); */
 
-    // Setup double tempo buttons
-    doubleButtons.forEach((btn) => {
+    // COMMENTED OUT - Setup double tempo buttons
+    /* doubleButtons.forEach((btn) => {
       const playerNum = parseInt(btn.dataset.player);
-      
+
       // Update button visibility based on active players
       const container = btn.closest(".player-tab-container");
       if (container) {
@@ -7250,43 +7250,43 @@ class OTTOAccurateInterface {
           container.style.display = "none";
         }
       }
-      
+
       const doubleHandler = (e) => {
         e.stopPropagation(); // Prevent triggering player tab click
         this.handlePlayerTempoDouble(playerNum);
       };
-      
-      this.addEventListener(btn, "click", doubleHandler);
-    });
 
-    // Setup half tempo buttons
-    halfButtons.forEach((btn) => {
+      this.addEventListener(btn, "click", doubleHandler);
+    }); */
+
+    // COMMENTED OUT - Setup half tempo buttons
+    /* halfButtons.forEach((btn) => {
       const playerNum = parseInt(btn.dataset.player);
-      
+
       const halfHandler = (e) => {
         e.stopPropagation(); // Prevent triggering player tab click
         this.handlePlayerTempoHalf(playerNum);
       };
-      
-      this.addEventListener(btn, "click", halfHandler);
-    });
 
-    // Update tempo button states for all players
-    this.updateAllPlayerTempoStates();
+      this.addEventListener(btn, "click", halfHandler);
+    }); */
+
+    // COMMENTED OUT - Update tempo button states for all players
+    // this.updateAllPlayerTempoStates();
   }
 
   /**
-   * Handle double tempo for a player
+   * COMMENTED OUT - Handle double tempo for a player
    * @param {number} playerNum - Player number (1-8)
    */
-  handlePlayerTempoDouble(playerNum) {
+  /* handlePlayerTempoDouble(playerNum) {
     if (!this.playerStateManager) return;
-    
+
     const success = this.playerStateManager.doublePlayerTempo(playerNum);
     if (success) {
       debugLog(`Player ${playerNum} tempo doubled`);
       this.updatePlayerTempoState(playerNum);
-      
+
       // Visual feedback
       const btn = document.querySelector(`.player-tempo-double[data-player="${playerNum}"]`);
       if (btn) {
@@ -7296,20 +7296,20 @@ class OTTOAccurateInterface {
     } else {
       debugWarn(`Player ${playerNum} tempo already at maximum`);
     }
-  }
+  } */
 
   /**
-   * Handle half tempo for a player
+   * COMMENTED OUT - Handle half tempo for a player
    * @param {number} playerNum - Player number (1-8)
    */
-  handlePlayerTempoHalf(playerNum) {
+  /* handlePlayerTempoHalf(playerNum) {
     if (!this.playerStateManager) return;
-    
+
     const success = this.playerStateManager.halfPlayerTempo(playerNum);
     if (success) {
       debugLog(`Player ${playerNum} tempo halved`);
       this.updatePlayerTempoState(playerNum);
-      
+
       // Visual feedback
       const btn = document.querySelector(`.player-tempo-half[data-player="${playerNum}"]`);
       if (btn) {
@@ -7319,7 +7319,7 @@ class OTTOAccurateInterface {
     } else {
       debugWarn(`Player ${playerNum} tempo already at minimum`);
     }
-  }
+  } */
 
   /**
    * Update tempo state visual indicators for a player
@@ -7347,27 +7347,27 @@ class OTTOAccurateInterface {
       }
     }
     
-    // Update button states
-    const doubleBtn = document.querySelector(`.player-tempo-double[data-player="${playerNum}"]`);
+    // COMMENTED OUT - Update button states
+    /* const doubleBtn = document.querySelector(`.player-tempo-double[data-player="${playerNum}"]`);
     const halfBtn = document.querySelector(`.player-tempo-half[data-player="${playerNum}"]`);
-    
+
     if (doubleBtn) {
       doubleBtn.disabled = multiplier >= 4.0; // Max 4x speed
     }
-    
+
     if (halfBtn) {
       halfBtn.disabled = multiplier <= 0.25; // Min 0.25x speed
-    }
+    } */
   }
 
   /**
-   * Update tempo states for all players
+   * COMMENTED OUT - Update tempo states for all players
    */
-  updateAllPlayerTempoStates() {
+  /* updateAllPlayerTempoStates() {
     for (let i = 1; i <= this.maxPlayers; i++) {
       this.updatePlayerTempoState(i);
     }
-  }
+  } */
 
   /**
    * Get effective tempo for a player (considering tempo multiplier)
