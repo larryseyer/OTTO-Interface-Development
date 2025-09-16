@@ -39,78 +39,83 @@
   --dropdown-menu-font-size: 24px; /* Base font size for all dropdown menu items */
 
  /* Row 1 Area Percentages - Must total 100% */
-  --row1-area1-width: 18%; /* Settings, Link, Preset Edit buttons - increased for 3 icons */
-  --row1-area2-width: 26%; /* Presets dropdown - needs space for text */
+  --row1-area1-width: 18%; /* Settings, Link, Save/Edit Presets Icons */
+  --row1-area2-width: 26%; /* Preset dropdown + chevrons */
   --row1-area3-width: 12%; /* Play/Pause button (centered) */
-  --row1-area4-width: 18%; /* Tap Tempo Edit/Display and surrounding plus/minus icons */
-  --row1-area5-width: 26%; /* Cloud, Logo and Version - increased for hover space */
+  --row1-area4-width: 18%; /* Tap Tempo Edit/Display and surrounding plus/minus icons  */
+  --row1-area5-width: 26%; /* Cloud settings + OTTO Logo/version/store button */
 
  /* Row 2 Area Percentages - Must total 100% */
-  --row2-area1-width: 5%; /*Blank area for future use*/
-  --row2-area2-width: 5%; /*left phrase chevron*/
-  --row2-area3-width: 80%; /*8 phrase buttons */
-  --row2-area4-width: 5%; /*right phrase chevron*/
-  --row2-area5-width: 5%; /*Blank area for future use*/
+  --row2-area1-width: 10%; /* Phrase Rec, Play, Pause, Simplify/Normal/Complicate icons */
+  --row2-area2-width: 5%; /* Prev Chevron (aligned Right) */
+  --row2-area3-width: 70%; /* General, Intro, Verse, PreChorus, Chorus, Bridge, Solo, Outro */
+  --row2-area4-width: 5%; /* Next Chevron (aligned Left) */
+  --row2-area5-width: 10%; /* Phrase Save, Add, Mute, Delete icons */
+
+ /* Dynamic player tab spacing */
+  --phrase-tab-gap: 5px; /* Default for 8 Phrases */
 
  /* Row 3 Area Percentages - Must total 100% */
-  --row3-area1-width: 5%; /*Blank area for future use*/
-  --row3-area2-width: 5%; /*left player chevron*/
-  --row3-area3-width: 80%; /*player buttons default 8*/
-  --row3-area4-width: 5%; /*right player chevron*/
-  --row3-area5-width: 5%; /*save player setting icon*/
+  --row3-area1-width: 5%;  /* Player solo, mute buttons */
+  --row3-area2-width: 5%;  /* Prev Chevron (aligned Right) */
+  --row3-area3-width: 80%; /* Player buttons (up to 8) */
+  --row3-area4-width: 5%;  /* Next Chevron (aligned Left) */
+  --row3-area5-width: 5%;  /* Player Save, Edit icons */
+
+ /* Dynamic player tab spacing */
+  --player-tab-gap: 5px; /* Default for 8 Players */
 
  /* Row 4 Area Percentages - 5 areas */
-  --row4-area1-width: 10%; /* Player number display */
-  --row4-area2-width: 10%; /* Kit edit icon */
-  --row4-area3-width: 60%; /* Kit selection center */
-  --row4-area4-width: 10%; /* Mixer icon */
-  --row4-area5-width: 10%; /* Mute drummer icon */
+  --row4-area1-width: 10%; /* Large current player number display */
+  --row4-area2-width: 10%; /* Drumkit Save, Edit + Left chevron (aligned Right)*/
+  --row4-area3-width: 60%; /* SFZ Drumkit dropdown menu */
+  --row4-area4-width: 10%; /* Right chevron + Mixer, FX toggle icon (aligned Left)*/
+  --row4-area5-width: 10%; /* Spectrograph/audio visual indicator */
 
  /* Row 5 - Main 50/50 split */
-  --row5-left-width: 50%; /* Left half */
-  --row5-right-width: 50%; /* Right half */
+  --row5-left-width: 50%; /* Pattern Groups assembly */
+  --row5-right-width: 50%; /* Buttons and slider labels */
 
  /* Row 5 Left side - 3 areas */
-  --row5-left-area1-width: 20%; /* Edit button area */
-  --row5-left-area2-width: 60%; /* Pattern group selection */
-  --row5-left-area3-width: 20%; /* Navigation controls */
+  --row5-left-area1-width: 20%; /* Pattern Group edit + left chevron (aligned Right) */
+  --row5-left-area2-width: 60%; /* Pattern Group dropdown */
+  --row5-left-area3-width: 20%; /* Right chevron + save icon (aligned Left) */
 
  /* Row 5 Right side - 5 areas */
-  --row5-right-area1-width: 23%; /* Right area 1 */
-  --row5-right-area2-width: 23%; /* Right area 2 */
-  --row5-right-area3-width: 18%; /* Right area 3 */
-  --row5-right-area4-width: 18%; /* Right area 4 */
-  --row5-right-area5-width: 18%; /* Right area 5 */
+  --row5-right-area1-width: 23%; /* Toggle Label */
+  --row5-right-area2-width: 23%; /* Fills Label */
+  --row5-right-area3-width: 18%; /* Swing Label */
+  --row5-right-area4-width: 18%; /* Energy Label */
+  --row5-right-area5-width: 18%; /* Volume Label */
 
  /* Row 6 - Main 50/50 split */
-  --row6-left-width: 50%; /* Left half - Pattern matrix */
-  --row6-right-width: 50%; /* Right half - Controls */
+  --row6-left-width: 50%; /* 4x4 Matrix of MIDI Pattern Buttons */
+  --row6-right-width: 50%; /* Toggles, Fills, Sliders + Link buttons*/
 
  /* Row 6 Right side - 5 areas (same as Row 4 right) */
-  --row6-right-area1-width: 23%; /* Toggles area */
-  --row6-right-area2-width: 23%; /* Fills area */
-  --row6-right-area3-width: 18%; /* Sliders area 1 */
-  --row6-right-area4-width: 18%; /* Sliders area 2 */
-  --row6-right-area5-width: 18%; /* Sliders area 3 */
+  --row6-right-area1-width: 23%; /* Toggle buttons */
+  --row6-right-area2-width: 23%; /* Fills Buttons */
+  --row6-right-area3-width: 18%; /* Swing Slider + Link button */
+  --row6-right-area4-width: 18%; /* Energy Slider + Link button */
+  --row6-right-area5-width: 18%; /* Volume Slider + Link button */
 
- /* Row 7 - Single area for loop timeline */
-  --row7-area1-width: 100%; /* Full width loop timeline */
+ /* Row 7 - Loop timeline display */
+  --row7-area1-width: 10%; /* LOOP START text */
+  --row7-area2-width: 80%; /* Loop position indicator/slider */
+  --row7-area3-width: 10%; /* LOOP END text */
 
  /* Row Heights - Configurable percentages */
-  --row1-height: 10%; /* Top bar */
-  --row2-height: 10%; /* Phrase bar */
-  --row3-height: 10%; /* Player tabs */
-  --row4-height: 10%; /* Drum kit section */
-  --row5-height: 10%; /* Pattern groups */
-  --row6-height: 45%; /* Pattern matrix - largest section */
-  --row7-height: 5%; /* Loop section */
+  --row1-height: 10%; /* Top bar (settings, sync, preset menu & chevrons, tempo, logo) */
+  --row2-height: 10%; /* Phrase tabs and buttons */
+  --row3-height: 10%; /* Player tabs and buttons */
+  --row4-height: 10%; /* Player number, SFZ Drum kit drop down menu, chevrons and buttons */
+  --row5-height: 10%; /* Pattern groups menu + chevrons (left 50%) + labels (right 50%) */
+  --row6-height: 45%; /* 4x4 Pattern matrix (left 50%) + toggles/fills/sliders (right 50%) */
+  --row7-height: 5%;  /* Loop section */
 
  /* Global hover zoom for row1 elements */
   --row1-hover-scale: 1.2; /* Top Row */
   --row1-hover-bigger-scale: 1.8; /* Top Row */
-
- /* Dynamic player tab spacing */
-  --player-tab-gap: 5px; /* Default for 8 players */
 
  /* Tempo control settings - global for both phrase and player tabs */
   --tempo-btn-size: 16px; /* Size of tempo buttons */
@@ -1426,7 +1431,7 @@ body {
   border: none;
   color: var(--button-text-normal);
   font-family: "Playfair Display", serif;
-  font-size: 15px !important;
+  font-size: 22px !important;
   /* Readable size */
   font-weight: 400;
   /* Regular weight */
