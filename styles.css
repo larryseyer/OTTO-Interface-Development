@@ -2575,12 +2575,21 @@ body {
   /* Match pattern button weight */
   letter-spacing: 1.2px;
   font-family: "Playfair Display", serif;
-  min-width: 80px;
   text-align: center;
 }
 
+.loop-start-label {
+  width: var(--row7-area1-width);
+  flex-shrink: 0;
+}
+
+.loop-end-label {
+  width: var(--row7-area3-width);
+  flex-shrink: 0;
+}
+
 .loop-timeline {
-  flex: 1;
+  width: var(--row7-area2-width);
   margin: 0 25px;
   /* Reduced from 50px to 25px */
   height: 24px;
