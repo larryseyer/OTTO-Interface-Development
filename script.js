@@ -9523,7 +9523,7 @@ class OTTOAccurateInterface {
     debugLog("Setting up link icons, linkStates:", this.linkStates);
 
     // Setup link icon click handlers
-    document.querySelectorAll(".link-icon").forEach((linkIcon) => {
+    document.querySelectorAll(".param-link-icon").forEach((linkIcon) => {
       const param = linkIcon.dataset.param;
 
       const handler = (e) => {
@@ -9570,68 +9570,62 @@ class OTTOAccurateInterface {
         const isSlave = linkState.slaves.has(currentPlayer);
 
         if (!isMaster && !isSlave) {
-          // Currently unlinked - make it master
-          // Clear any existing master safely
-          if (linkState.master !== null) {
-            // Verify the master exists before converting
-            if (this.playerStates[linkState.master]) {
-              // Convert existing master to slave
-              linkState.slaves.add(linkState.master);
+          // Currently unlinked - toggle to become a slave if master exists, otherwise become master
+          if (linkState.master !== null && linkState.master !== currentPlayer) {
+            // There's already a master, become a slave
+            linkState.slaves.add(currentPlayer);
+            linkIcon.classList.add("linked");
+            linkIcon.classList.remove("master");
+
+            // Sync this slave's value with the master's value
+            const masterValue = this.playerStates[linkState.master].sliderValues[param];
+            this.playerStates[currentPlayer].sliderValues[param] = masterValue;
+
+            // Update the slider display
+            const slider = document.querySelector(`.custom-slider[data-param="${param}"]`);
+            if (slider) {
+              const fill = slider.querySelector('.slider-fill');
+              const thumb = slider.querySelector('.slider-thumb');
+              const min = parseFloat(slider.dataset.min);
+              const max = parseFloat(slider.dataset.max);
+              const percentage = ((masterValue - min) / (max - min)) * 100;
+
+              fill.style.height = `${percentage}%`;
+              thumb.style.bottom = `${percentage}%`;
+              slider.dataset.value = masterValue;
             }
+
+            debugLog(
+              `Player ${currentPlayer} is now slave for ${param}, synced to value: ${masterValue}`,
+            );
+          } else {
+            // No master exists, become the master
+            linkState.master = currentPlayer;
+            linkIcon.classList.add("master");
+            linkIcon.classList.remove("linked");
+
+            debugLog(
+              `Player ${currentPlayer} is now master for ${param}`,
+            );
           }
-
-          linkState.master = currentPlayer;
-          linkIcon.classList.add("master");
-          linkIcon.classList.remove("linked");
-
-          // Propagate this player's value to all other players
-          const masterValue =
-            this.playerStates[currentPlayer].sliderValues[param];
-
-          // Clear slaves set and rebuild to ensure consistency
-          linkState.slaves.clear();
-
-          // Add all other players as slaves
-          for (let i = 1; i <= this.numberOfPlayers; i++) {
-            if (i !== currentPlayer && this.playerStates[i]) {
-              linkState.slaves.add(i);
-            }
-          }
-
-          // Propagate value after setting up slaves
-          await this.propagateSliderValue(param, masterValue, currentPlayer);
-
-          debugLog(
-            `Player ${currentPlayer} is now master for ${param}, value: ${masterValue}`,
-          );
         } else if (isMaster) {
-          // Currently master - unlink all
+          // Currently master - unlink (become normal)
           linkState.master = null;
           linkState.slaves.clear();
           linkIcon.classList.remove("master");
 
           debugLog(`Player ${currentPlayer} unlinked ${param} (was master)`);
         } else if (isSlave) {
-          // Currently slave - check if master still exists
-          if (!linkState.master || !this.playerStates[linkState.master]) {
-            // Orphaned slave - clean up state
-            debugWarn(
-              `Player ${currentPlayer} was orphaned slave for ${param}, cleaning up`,
-            );
-            linkState.slaves.delete(currentPlayer);
-            linkIcon.classList.remove("linked");
+          // Currently slave - unlink from master
+          linkState.slaves.delete(currentPlayer);
+          linkIcon.classList.remove("linked");
 
-            // If no master and no other slaves, reset completely
-            if (!linkState.master && linkState.slaves.size === 0) {
-              linkState.master = null;
-            }
-          } else {
-            // Valid slave - can't change
-            debugLog(
-              `Player ${currentPlayer} is slave for ${param}, cannot change`,
-            );
-            return false;
+          // If this was the last slave and no master, clean up completely
+          if (linkState.slaves.size === 0 && !linkState.master) {
+            linkState.master = null;
           }
+
+          debugLog(`Player ${currentPlayer} unlinked ${param} (was slave)`);
         }
 
         // Validate the final state
@@ -9737,7 +9731,7 @@ class OTTOAccurateInterface {
 
   updateLinkIconStates() {
     // Update link icon visual states based on current player
-    document.querySelectorAll(".link-icon").forEach((linkIcon) => {
+    document.querySelectorAll(".param-link-icon").forEach((linkIcon) => {
       const param = linkIcon.dataset.param;
       const linkState = this.linkStates[param];
       const slider = document.querySelector(
@@ -9877,7 +9871,7 @@ class OTTOAccurateInterface {
     this.eventListeners = this.eventListeners.filter(({ element }) => {
       return (
         element?.id !== "settings-btn" &&
-        element?.id !== "link-btn" &&
+        element?.id !== "sync-btn" &&
         element?.id !== "upload-btn" &&
         element?.id !== "play-pause-btn" &&
         element?.id !== "tempo-display"
@@ -9893,13 +9887,13 @@ class OTTOAccurateInterface {
       this.addEventListener(settingsBtn, "click", settingsHandler);
     }
 
-    // Link button
-    const linkBtn = document.getElementById("link-btn");
-    if (linkBtn) {
-      const linkHandler = () => {
-        this.onLinkClicked();
+    // Sync button (tempo sync/Ableton Link)
+    const syncBtn = document.getElementById("sync-btn");
+    if (syncBtn) {
+      const syncHandler = () => {
+        this.onSyncClicked();
       };
-      this.addEventListener(linkBtn, "click", linkHandler);
+      this.addEventListener(syncBtn, "click", syncHandler);
     }
 
     // Upload button
@@ -10549,13 +10543,13 @@ class OTTOAccurateInterface {
     }
   }
 
-  onLinkClicked() {
-    // Use WindowManager to toggle the link panel
-    this.windowManager.toggleWindow("panel", "link");
+  onSyncClicked() {
+    // Use WindowManager to toggle the sync panel (tempo sync/Ableton Link)
+    this.windowManager.toggleWindow("panel", "sync");
 
     // Also call JUCE if available
-    if (window.juce?.onLinkClicked) {
-      window.juce.onLinkClicked();
+    if (window.juce?.onSyncClicked) {
+      window.juce.onSyncClicked();
     }
   }
 

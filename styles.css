@@ -2191,7 +2191,7 @@ body {
   /* Slightly wider for visibility */
   height: 100%;
   background: #3a3a3a;
-  /* Slightly lighter to ensure visibility */
+  /* Darker grey - unfilled portion (above thumb) */
   border-radius: 2px;
   z-index: 1;
   /* Base layer */
@@ -2206,12 +2206,14 @@ body {
   width: 100%;
   height: 50%;
   /* Will be updated dynamically */
-  background: #777777;
-  /* Light grey - filled portion (below thumb) */
+  background: #777777 !important;
+  /* Lighter grey - filled portion (below thumb) - always visible */
   border-radius: 0 0 2px 2px;
   /* Only round bottom corners */
   transition: none;
   /* No transition for immediate response */
+  opacity: 1 !important;
+  /* Ensure it's always visible */
 }
 
 .slider-thumb {
@@ -2259,33 +2261,32 @@ body {
 
 /* Slave slider states - visual feedback for linked sliders */
 .custom-slider.slave .slider-fill {
-  background: var(--text-black) !important;
-  /* Black for slave sliders */
+  background: #777777 !important;
+  /* Keep same lighter grey for consistency */
 }
 
 .custom-slider.slave .slider-thumb {
-  background: var(--text-black) !important;
-  /* Black thumb for slave sliders */
+  background: #777777 !important;
+  /* Keep same grey thumb for consistency */
   cursor: not-allowed !important;
 }
 
 .custom-slider.slave .slider-track {
-  opacity: 0.7;
-  /* Slightly dimmed track for slave sliders */
+  /* Keep same appearance, no dimming */
 }
 
-/* Master slider states - optional visual enhancement */
+/* Master slider states - keep same appearance */
 .custom-slider.master .slider-fill {
-  background: #999999;
-  /* Slightly brighter for master */
+  background: #777777 !important;
+  /* Keep same lighter grey for consistency */
 }
 
 .custom-slider.master .slider-thumb {
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-  /* Subtle glow for master */
+  /* Keep same appearance, no glow */
+  background: #777777;
 }
 
-.link-icon {
+.param-link-icon {
   width: 40px;
   /* Doubled from 20px */
   height: 40px;
@@ -2300,7 +2301,7 @@ body {
   justify-content: center;
 }
 
-.link-icon i {
+.param-link-icon i {
   font-size: 32px;
   /* Doubled from 16px */
   color: var(--text-icon);
@@ -2313,39 +2314,39 @@ body {
 }
 
 /* Unlinked state (default) */
-.link-icon:not(.linked):not(.master) i {
+.param-link-icon:not(.linked):not(.master) i {
   color: var(--text-icon);
   /* Grey */
 }
 
 /* Linked slave state */
-.link-icon.linked:not(.master) i {
+.param-link-icon.linked:not(.master) i {
   color: var(--text-black);
   /* Black for slaves */
 }
 
 /* Master state */
-.link-icon.master i {
+.param-link-icon.master i {
   color: var(--text-primary);
   /* White for master */
 }
 
 /* Hover effects */
-.link-icon:hover i {
+.param-link-icon:hover i {
   transform: scale(1.1);
 }
 
-.link-icon:hover:not(.linked):not(.master) i {
+.param-link-icon:hover:not(.linked):not(.master) i {
   color: var(--text-secondary);
   /* Lighter grey on hover when unlinked */
 }
 
-.link-icon.linked:hover:not(.master) i {
+.param-link-icon.linked:hover:not(.master) i {
   color: var(--text-muted);
   /* Darker on hover when slave */
 }
 
-.link-icon.master:hover i {
+.param-link-icon.master:hover i {
   color: var(--text-primary);
   /* Stay white on hover when master */
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
