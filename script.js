@@ -7005,6 +7005,199 @@ class OTTOAccurateInterface {
       console.error("Phrase next button not found!");
     }
 
+    // Setup Row2 Area1 Control Buttons
+    const phraseRecBtn = document.getElementById("phrase-rec-btn");
+    const phrasePlayBtn = document.getElementById("phrase-play-btn");
+    const phrasePauseBtn = document.getElementById("phrase-pause-btn");
+    const phraseComplexityBtn = document.getElementById("phrase-complexity-btn");
+
+    // Setup Row2 Area5 Action Buttons
+    const phraseSettingsSaveBtn = document.getElementById("phrase-settings-save-btn");
+    const phraseAddBtn = document.getElementById("phrase-add-btn");
+    const phraseMuteBtn = document.getElementById("phrase-mute-btn");
+    const phraseDeleteBtn = document.getElementById("phrase-delete-btn");
+
+    // Phrase Recording functionality
+    if (phraseRecBtn) {
+      const recHandler = (e) => {
+        const isRecording = phraseRecBtn.classList.contains("recording");
+        if (isRecording) {
+          phraseRecBtn.classList.remove("recording");
+          console.log("Stopped phrase recording");
+          // Stop recording logic here
+        } else {
+          phraseRecBtn.classList.add("recording");
+          console.log("Started phrase recording");
+          // Start recording logic here
+        }
+      };
+      phraseRecBtn.addEventListener("click", recHandler);
+      this.eventListenerRegistry.element.push({ element: phraseRecBtn, event: "click", handler: recHandler });
+    }
+
+    // Phrase Play functionality
+    if (phrasePlayBtn) {
+      const playHandler = (e) => {
+        const isPlaying = phrasePlayBtn.classList.contains("playing");
+        if (isPlaying) {
+          // Switch to pause
+          phrasePlayBtn.classList.remove("playing");
+          phrasePlayBtn.style.display = "flex";
+          if (phrasePauseBtn) {
+            phrasePauseBtn.classList.remove("visible");
+            phrasePauseBtn.style.display = "none";
+          }
+          console.log("Stopped phrase playback");
+          // Stop playback logic here
+        } else {
+          // Switch to play
+          phrasePlayBtn.classList.add("playing");
+          phrasePlayBtn.style.display = "none";
+          if (phrasePauseBtn) {
+            phrasePauseBtn.classList.add("visible");
+            phrasePauseBtn.style.display = "flex";
+          }
+          console.log("Started phrase playback");
+          // Start playback logic here
+        }
+      };
+      phrasePlayBtn.addEventListener("click", playHandler);
+      this.eventListenerRegistry.element.push({ element: phrasePlayBtn, event: "click", handler: playHandler });
+    }
+
+    // Phrase Pause functionality
+    if (phrasePauseBtn) {
+      const pauseHandler = (e) => {
+        // Switch back to play button
+        if (phrasePlayBtn) {
+          phrasePlayBtn.classList.remove("playing");
+          phrasePlayBtn.style.display = "flex";
+        }
+        phrasePauseBtn.classList.remove("visible");
+        phrasePauseBtn.style.display = "none";
+        console.log("Paused phrase playback");
+        // Pause playback logic here
+      };
+      phrasePauseBtn.addEventListener("click", pauseHandler);
+      this.eventListenerRegistry.element.push({ element: phrasePauseBtn, event: "click", handler: pauseHandler });
+    }
+
+    // Phrase Complexity functionality (Simplify/Normal/Complicate)
+    if (phraseComplexityBtn) {
+      const complexityHandler = (e) => {
+        const currentMode = phraseComplexityBtn.dataset.mode || "normal";
+        const icon = phraseComplexityBtn.querySelector('i');
+        let newMode;
+        let newTitle;
+        let newIconClass;
+
+        // Cycle through modes: normal -> simplify -> complicate -> normal
+        switch(currentMode) {
+          case "normal":
+            newMode = "simple";
+            newTitle = "Simplify";
+            newIconClass = "ph-thin ph-airplane-landing";
+            break;
+          case "simple":
+            newMode = "complicate";
+            newTitle = "Complicate";
+            newIconClass = "ph-thin ph-airplane-takeoff";
+            break;
+          case "complicate":
+            newMode = "normal";
+            newTitle = "Normal";
+            newIconClass = "ph-thin ph-airplane-in-flight";
+            break;
+          default:
+            newMode = "normal";
+            newTitle = "Normal";
+            newIconClass = "ph-thin ph-airplane-in-flight";
+        }
+
+        phraseComplexityBtn.dataset.mode = newMode;
+        phraseComplexityBtn.title = newTitle;
+
+        // Update the icon
+        if (icon) {
+          icon.className = newIconClass;
+        }
+
+        console.log(`Phrase complexity changed to: ${newMode}`);
+        // Apply complexity change logic here
+      };
+      phraseComplexityBtn.addEventListener("click", complexityHandler);
+      this.eventListenerRegistry.element.push({ element: phraseComplexityBtn, event: "click", handler: complexityHandler });
+    }
+
+    // Phrase Save functionality
+    if (phraseSettingsSaveBtn) {
+      const saveHandler = (e) => {
+        console.log("Saving phrase settings for:", this.currentPhrase);
+        this.savePhraseState(this.currentPhrase);
+        this.saveCurrentPlayerState();
+        this.scheduleSave("preset", true);
+        this.showNotification(`Saved ${this.currentPhrase} phrase settings`, "success");
+      };
+      phraseSettingsSaveBtn.addEventListener("click", saveHandler);
+      this.eventListenerRegistry.element.push({ element: phraseSettingsSaveBtn, event: "click", handler: saveHandler });
+    }
+
+    // Phrase Add functionality
+    if (phraseAddBtn) {
+      const addHandler = (e) => {
+        console.log("Adding new phrase");
+        // Add new phrase logic here
+        this.showNotification("Add phrase functionality coming soon", "info");
+      };
+      phraseAddBtn.addEventListener("click", addHandler);
+      this.eventListenerRegistry.element.push({ element: phraseAddBtn, event: "click", handler: addHandler });
+    }
+
+    // Phrase Mute functionality
+    if (phraseMuteBtn) {
+      const muteHandler = (e) => {
+        const icon = phraseMuteBtn.querySelector('i');
+        const isMuted = phraseMuteBtn.classList.contains("muted");
+        if (isMuted) {
+          phraseMuteBtn.classList.remove("muted");
+          phraseMuteBtn.title = "Mute Phrase";
+          if (icon) {
+            icon.className = "ph-thin ph-speaker-high";
+          }
+          console.log("Unmuted phrase:", this.currentPhrase);
+          // Unmute phrase logic here
+        } else {
+          phraseMuteBtn.classList.add("muted");
+          phraseMuteBtn.title = "Unmute Phrase";
+          if (icon) {
+            icon.className = "ph-thin ph-speaker-slash";
+          }
+          console.log("Muted phrase:", this.currentPhrase);
+          // Mute phrase logic here
+        }
+      };
+      phraseMuteBtn.addEventListener("click", muteHandler);
+      this.eventListenerRegistry.element.push({ element: phraseMuteBtn, event: "click", handler: muteHandler });
+    }
+
+    // Phrase Delete functionality
+    if (phraseDeleteBtn) {
+      const deleteHandler = (e) => {
+        if (this.currentPhrase === "general") {
+          this.showNotification("Cannot delete General phrase", "error");
+          return;
+        }
+        if (confirm(`Are you sure you want to delete the ${this.currentPhrase} phrase?`)) {
+          console.log("Deleting phrase:", this.currentPhrase);
+          // Delete phrase logic here
+          this.showNotification(`Deleted ${this.currentPhrase} phrase`, "success");
+          this.switchToPhrase("general");
+        }
+      };
+      phraseDeleteBtn.addEventListener("click", deleteHandler);
+      this.eventListenerRegistry.element.push({ element: phraseDeleteBtn, event: "click", handler: deleteHandler });
+    }
+
     // Set initial active phrase
     this.updatePhraseTabStates();
 

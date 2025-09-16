@@ -46,11 +46,11 @@
   --row1-area5-width: 26%; /* Cloud settings + OTTO Logo/version/store button */
 
  /* Row 2 Area Percentages - Must total 100% */
-  --row2-area1-width: 10%; /* Phrase Rec, Play, Pause, Simplify/Normal/Complicate icons */
+  --row2-area1-width: 15%; /* Phrase Rec, Play, Pause, Simplify/Normal/Complicate icons */
   --row2-area2-width: 5%; /* Prev Chevron (aligned Right) */
-  --row2-area3-width: 70%; /* General, Intro, Verse, PreChorus, Chorus, Bridge, Solo, Outro */
+  --row2-area3-width: 60%; /* General, Intro, Verse, PreChorus, Chorus, Bridge, Solo, Outro */
   --row2-area4-width: 5%; /* Next Chevron (aligned Left) */
-  --row2-area5-width: 10%; /* Phrase Save, Add, Mute, Delete icons */
+  --row2-area5-width: 15%; /* Phrase Save, Add, Mute, Delete icons */
 
  /* Dynamic player tab spacing */
   --phrase-tab-gap: 5px; /* Default for 8 Phrases */
@@ -1053,13 +1053,12 @@ body {
 
 .phrase-tabs {
   display: flex;
-  gap: 3px;
-  /* Small gap between phrases to prevent overlap */
+  gap: 0; /* No gap - buttons should butt up against each other */
   padding: 0 2px;
   margin: 0;
   background: transparent;
   justify-content: center;
-  align-items: stretch;
+  align-items: center;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -1204,8 +1203,8 @@ body {
 }
 
 .phrase-tab {
-  padding: 3px 5px;
-  /* Match player-tab vertical padding exactly */
+  padding: 3px 10px;
+  /* Symmetric horizontal padding for better centering */
   background: transparent;
   border: none;
   color: var(--button-text-normal);
@@ -1225,18 +1224,17 @@ body {
   height: 32px;
   width: auto;
   white-space: nowrap;
-  min-width: 120px;
-  /* Optimal for 8 phrases */
+  min-width: 0; /* Changed from 120px to 0 to prevent overlapping */
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0;
   line-height: 1;
+  text-align: center;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
-  flex: 1 1 auto;
-  /* Allow flex grow and shrink */
+  flex: 0 0 auto; /* Changed from flex: 1 1 auto to prevent overlapping */
   z-index: 10;
   pointer-events: auto !important;
 }
@@ -1268,10 +1266,8 @@ body {
 /* Phrase Tab Container - Holds tab and tempo controls (matches player structure) */
 .phrase-tab-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   position: relative;
   height: 100%;
   padding: 0;
@@ -1280,6 +1276,7 @@ body {
   min-width: 0;
   box-sizing: border-box;
 }
+
 
 /* Phrase Tempo Control Buttons - COMMENTED OUT */
 /* .phrase-tempo-btn {
@@ -1371,14 +1368,116 @@ body {
   color: inherit;
 }
 
-.phrase-save-btn {
+/* Row 3 Save button - different from row2 save button */
+.row3-area1 .phrase-save-btn {
   width: 60px !important;
   height: 60px !important;
   display: flex;
 }
 
-.phrase-save-btn i {
+.row3-area1 .phrase-save-btn i {
   font-size: 60px !important;
+}
+
+/* Row 2 Area 1 - Phrase Control Buttons */
+.phrase-control-btn {
+  width: 50px;
+  height: 50px;
+  border: none;
+  background: transparent;
+  color: var(--button-text-normal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto !important;
+}
+
+.phrase-control-btn:hover {
+  transform: scale(var(--row1-hover-scale));
+}
+
+.phrase-control-btn:active,
+.phrase-control-btn.active {
+  color: var(--text-primary);
+  transform: scale(0.95);
+}
+
+.phrase-control-btn i {
+  font-size: 40px;
+  line-height: 1;
+  display: block;
+  color: inherit;
+}
+
+/* Specific styles for phrase control buttons */
+.phrase-rec-btn.recording {
+  background: transparent;
+  color: #ff4444;
+  animation: pulse 1s infinite;
+}
+
+.phrase-play-btn.playing {
+  color: var(--text-primary);
+}
+
+.phrase-pause-btn {
+  display: none; /* Hidden by default, shown when playing */
+}
+
+.phrase-pause-btn.visible {
+  display: flex;
+}
+
+/* Row 2 Area 5 - Phrase Action Buttons */
+.phrase-action-btn {
+  width: 50px;
+  height: 50px;
+  border: none;
+  background: transparent;
+  color: var(--button-text-normal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto !important;
+}
+
+.phrase-action-btn:hover {
+  transform: scale(var(--row1-hover-scale));
+}
+
+.phrase-action-btn:active {
+  color: var(--text-primary);
+  transform: scale(0.95);
+}
+
+.phrase-action-btn i {
+  font-size: 40px;
+  line-height: 1;
+  display: block;
+  color: inherit;
+}
+
+/* Specific action button states */
+.phrase-mute-btn.muted {
+  color: var(--text-primary);
+}
+
+.phrase-delete-btn:hover {
+  color: #ff4444;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
 }
 
 .mute-phrase-btn {

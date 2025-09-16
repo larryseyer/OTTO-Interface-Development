@@ -331,8 +331,20 @@
       <div class="mute-overlay"></div>
       <!-- Row 2: Phrase Manager Section - 5 Areas -->
       <div class="phrase-tabs-section">
-        <!-- Area 1: Empty (save icon moved to row3) -->
+        <!-- Area 1: Phrase Rec, Play, Pause, Simplify/Normal/Complicate icons -->
         <div class="row2-area1">
+          <button class="phrase-control-btn phrase-rec-btn" id="phrase-rec-btn" title="Record Phrase">
+            <i class="ph-thin ph-record"></i>
+          </button>
+          <button class="phrase-control-btn phrase-play-btn" id="phrase-play-btn" title="Play Phrase">
+            <i class="ph-thin ph-play"></i>
+          </button>
+          <button class="phrase-control-btn phrase-pause-btn" id="phrase-pause-btn" title="Pause Phrase">
+            <i class="ph-thin ph-pause"></i>
+          </button>
+          <button class="phrase-control-btn phrase-complexity-btn" id="phrase-complexity-btn" data-mode="normal" title="Normal">
+            <i class="ph-thin ph-airplane-in-flight"></i>
+          </button>
         </div>
         <!-- Area 2: Left chevron for phrase navigation -->
         <div class="row2-area2">
@@ -423,8 +435,20 @@
             <i class="ph-thin ph-caret-right"></i>
           </button>
         </div>
-        <!-- Area 5: Empty (mute button removed) -->
+        <!-- Area 5: Phrase Save, Add, Mute, Delete icons -->
         <div class="row2-area5">
+          <button class="phrase-action-btn phrase-save-btn" id="phrase-settings-save-btn" title="Save Phrase">
+            <i class="ph-thin ph-floppy-disk"></i>
+          </button>
+          <button class="phrase-action-btn phrase-add-btn" id="phrase-add-btn" title="Add Phrase">
+            <i class="ph-thin ph-plus"></i>
+          </button>
+          <button class="phrase-action-btn phrase-mute-btn" id="phrase-mute-btn" title="Mute Phrase">
+            <i class="ph-thin ph-speaker-high"></i>
+          </button>
+          <button class="phrase-action-btn phrase-delete-btn" id="phrase-delete-btn" title="Delete Phrase">
+            <i class="ph-thin ph-trash"></i>
+          </button>
         </div>
       </div>
       <!-- Row 3: Player Tabs with Chevron Navigation - 5 Areas -->
