@@ -40,7 +40,7 @@
   --row1-area1-width: 18%; /* Settings, Link, Preset Edit buttons - increased for 3 icons */
   --row1-area2-width: 26%; /* Presets dropdown - needs space for text */
   --row1-area3-width: 12%; /* Play/Pause/Double/Half buttons (centered) */
-  --row1-area4-width: 18%; /* Tempo Display - reduced to give area5 more space */
+  --row1-area4-width: 18%; /* Tap Tempo Edit/Display and surroudning plus/minus icons */
   --row1-area5-width: 26%; /* Cloud, Logo and Version - increased for hover space */
 
  /* Row 2 Area Percentages - Must total 100% */
