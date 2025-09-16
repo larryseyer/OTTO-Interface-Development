@@ -14,37 +14,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet" />
   <!-- Phosphor Icons -->
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <link rel="stylesheet" href="styles.css" />
-  <!-- Load new manager classes BEFORE main script -->
-  <!-- Phase 1: Core Infrastructure -->
-  <script src="EventManager.js"></script>
-  <script src="TimerManager.js"></script>
-  <script src="StateManager.js"></script>
-  <!-- Phase 2: Manager Classes -->
-  <script src="PlayerStateManager.js"></script>
-  <script src="PhraseStateManager.js"></script>
-  <script src="PatternGroupManager.js"></script>
-  <script src="DrumkitManager.js"></script>
-  <script src="MixerPresetManager.js"></script>
-  <script src="MixerComponent.js"></script>
-  <script src="PresetManager.js"></script>
-  <script src="LinkManager.js"></script>
-  <script src="StorageManager.js"></script>
-  <!-- Phase 3: Data Integrity & Validation -->
-  <script src="DataValidator.js"></script>
-  <script src="InputSanitizer.js"></script>
-  <!-- Phase 4: Performance Optimizations -->
-  <script src="DOMCacheManager.js"></script>
-  <script src="RenderOptimizer.js"></script>
-  <script src="AudioScheduler.js"></script>
-  <script src="ResourcePool.js"></script>
-  <!-- Phase 5: UI Component Refactoring -->
-  <script src="UIComponent.js"></script>
-  <script src="SliderComponent.js"></script>
-  <script src="ButtonComponent.js"></script>
-  <script src="PatternGridComponent.js"></script>
-  <!-- Window Manager -->
-  <script src="WindowManager.js"></script>
+  <!-- CSS with automatic cache busting -->
+  <script>
+    document.write('<link rel="stylesheet" href="styles.css?t=' + Date.now() + '" />');
+  </script>
+  <!-- Dynamic Script Loader with Auto Cache Busting -->
+  <!-- This ensures ALL scripts and styles are loaded fresh on every page load -->
+  <script>
+    // Load the script loader with current timestamp to ensure it's fresh
+    document.write('<script src="load-scripts.js?t=' + Date.now() + '"><\/script>');
+  </script>
 </head>
 
 <body>
@@ -778,15 +757,7 @@
       </div>
     </div>
   </div>
-  <!-- Drum Mapping System -->
-  <script src="DrumMapManager.js"></script>
-  <script src="DrumMapPresets.js"></script>
-  <script src="SFZEditor.js"></script>
-  <script src="MidiTranslator.js"></script>
-  <script src="DrumMapUI.js"></script>
-  <script src="DrumMapAdvanced.js"></script>
-  <!-- Load original script with new managers available -->
-  <script src="script.js"></script>
+  <!-- All drum mapping and main scripts now loaded dynamically by load-scripts.js with automatic cache busting -->
   <!-- Debug panel for Phase 1 testing -->
   <div id="debug-panel" class="debug-panel">
     <h4>Phase 1 Debug Info</h4>
