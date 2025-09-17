@@ -1494,7 +1494,7 @@ body {
   color: var(--text-primary);
 }
 
-.phrase-delete-btn:hover {
+.phrase-delete-btn:active {
   color: #ff4444;
 }
 

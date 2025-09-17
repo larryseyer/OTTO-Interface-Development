@@ -4236,72 +4236,36 @@ class OTTOAccurateInterface {
     const sfzFiles = [];
     const basePath = "./Assets/Drumkits/";
 
-    // Define the subdirectories to scan
-    const directories = ["Acoustic", "Electronic", "Percussion"];
-
     console.log("Starting drumkit file scan...");
 
-    for (const dir of directories) {
+    // Since directory listing via HTTP doesn't work reliably,
+    // we'll use a hardcoded list of all available SFZ files
+    const availableFiles = [
+      "Acoustic/Acoustic.sfz",
+      "Acoustic/Acc Wet.sfz",
+      "Acoustic/Acc Dry.sfz",
+      "Acoustic/Acc Room.sfz",
+      "Electronic/Electronic.sfz",
+      "Percussion/Percussion.sfz",
+      "Percussion/Congas.sfz",
+      "Percussion/Claps.sfz",
+      "Percussion/Claves.sfz",
+      "Percussion/Shakers.sfz",
+      "Percussion/Bongos.sfz"
+    ];
+
+    // Check which files actually exist
+    for (const file of availableFiles) {
       try {
-        // Try to fetch the directory listing
-        const response = await fetch(`${basePath}${dir}/`);
-
+        const response = await fetch(`${basePath}${file}`);
         if (response.ok) {
-          const text = await response.text();
-          console.log(`Checking directory ${dir}...`);
-
-          // Parse the HTML response to extract .sfz files
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(text, "text/html");
-
-          // Look for links to .sfz files
-          const links = doc.querySelectorAll("a");
-          let foundInDir = 0;
-          links.forEach((link) => {
-            const href = link.getAttribute("href");
-
-            if (href && href.endsWith(".sfz")) {
-              // Clean up the filename and add to our list
-              const fileName = decodeURIComponent(
-                href.replace(/^\.\//, "").replace(/^\//, ""),
-              );
-              console.log(`  Found: ${fileName}`);
-              sfzFiles.push(`${dir}/${fileName}`);
-              foundInDir++;
-            }
-          });
-
-          if (foundInDir === 0) {
-            console.log(`  No SFZ files found in ${dir}`);
-          }
+          console.log(`  Found: ${file}`);
+          sfzFiles.push(file);
+        } else {
+          console.log(`  Not available: ${file}`);
         }
-      } catch (error) {
-        console.warn(`Could not fetch directory listing for ${dir}:`, error);
-      }
-    }
-
-    // If directory listing doesn't work, try checking for known common filenames
-    if (sfzFiles.length === 0) {
-      console.log(
-        "Directory listing failed or empty, checking for common SFZ files...",
-      );
-      const commonFiles = [
-        "Acoustic/Acoustic.sfz",
-        "Electronic/Electronic.sfz",
-        "Percussion/Percussion.sfz",
-      ];
-
-      // Check which files actually exist
-      for (const file of commonFiles) {
-        try {
-          const response = await fetch(`${basePath}${file}`);
-          if (response.ok) {
-            console.log(`  Found: ${file}`);
-            sfzFiles.push(file);
-          }
-        } catch (e) {
-          // File doesn't exist, continue
-        }
+      } catch (e) {
+        console.log(`  Error checking: ${file}`);
       }
     }
 
