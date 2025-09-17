@@ -14,7 +14,7 @@
   --button-text-brighter-hover: #CCCCCC; /* Brighter Hover for Plus Minus Icons */
   --button-text-hover: #AAAAAA; /* Hover state */
   --button-text-active: #ffffff; /* Active/selected state */
-  --border-color: #111111; /* Black borders between rows */
+  --border-color: rgba(17, 17, 17, 0.5); /* #111111 is rgb(17, 17, 17); 0.5 = 50% opacity */
 
  /* Button colors - 3D metallic style */
   --button-face: #888888;
