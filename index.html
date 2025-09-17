@@ -308,14 +308,16 @@
       </div>
       <!-- Mute Overlay for rows 4-7 (when player is muted) -->
       <div class="mute-overlay"></div>
+      <!-- Phrase Mute Overlay for rows 3-6 (when phrase is muted) -->
+      <div class="phrase-mute-overlay"></div>
       <!-- Row 2: Phrase Manager Section - 5 Areas -->
       <div class="phrase-tabs-section">
         <!-- Area 1: Phrase Save, Edit, Add, Delete icons -->
         <div class="row2-area1">
-          <button class="phrase-action-btn phrase-save-btn" id="phrase-save-btn" title="Save Phrase">
+          <button class="phrase-action-btn phrase-save-btn" id="phrase-save-current-btn" title="Save Current Phrase">
             <i class="ph-thin ph-floppy-disk"></i>
           </button>
-          <button class="phrase-action-btn phrase-edit-btn" id="phrase-edit-btn" title="Edit Phrase">
+          <button class="phrase-action-btn phrase-edit-btn" id="phrase-edit-name-btn" title="Edit Phrase Name">
             <i class="ph-thin ph-pencil"></i>
           </button>
           <button class="phrase-action-btn phrase-add-btn" id="phrase-add-btn" title="Add Phrase">
@@ -437,7 +439,7 @@
       <div class="player-tabs-section">
         <!-- Area 1: Save phrase/player settings icon -->
         <div class="row3-area1">
-          <button class="quick-save-btn phrase-save-btn" id="phrase-save-btn" title="Save Settings">
+          <button class="quick-save-btn phrase-save-btn" id="phrase-settings-save-btn" title="Save Settings">
             <i class="ph-thin ph-floppy-disk"></i>
           </button>
         </div>
@@ -686,7 +688,7 @@
               </button>
               <button class="toggle-btn" data-toggle="manual">Manual</button>
               <button class="toggle-btn" data-toggle="stick">Stick</button>
-              <button class="toggle-btn active" data-toggle="ride">Hi-Hat</button>
+              <button class="toggle-btn" data-toggle="ride">Hi-Hat</button>
               <button class="toggle-btn" data-toggle="lock">Lock</button>
             </div>
           </div>

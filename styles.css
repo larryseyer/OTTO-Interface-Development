@@ -227,6 +227,30 @@ body {
   display: block;
 }
 
+/* Phrase Mute Overlay - covers rows 3-6 when phrase is muted (row2 area5 mute button) */
+.phrase-mute-overlay {
+  position: absolute;
+  top: calc(var(--row1-height) + var(--row2-height));
+  /* Start after rows 1 and 2 */
+  left: 0;
+  width: 100%;
+  height: calc(var(--row3-height) + var(--row4-height) + var(--row5-height) + var(--row6-height));
+  /* Cover rows 3-6 */
+  background: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent black overlay - same as mute-overlay */
+  pointer-events: none;
+  /* Allow interaction with elements below */
+  z-index: 100;
+  /* Above content but below modals */
+  display: none;
+  /* Hidden by default */
+  transition: opacity 0.3s ease;
+}
+
+.phrase-mute-overlay.active {
+  display: block;
+}
+
 /* Splash Screen */
 .splash-screen {
   position: absolute;
@@ -1370,13 +1394,13 @@ body {
 
 /* Row 3 Save button - different from row2 save button */
 .row3-area1 .phrase-save-btn {
-  width: 60px !important;
-  height: 60px !important;
+  width: 50px !important;
+  height: 50px !important;
   display: flex;
 }
 
 .row3-area1 .phrase-save-btn i {
-  font-size: 60px !important;
+  font-size: 50px !important;
 }
 
 /* Row 2 Area 1 - Phrase Control Buttons */

@@ -707,11 +707,11 @@ class OTTOAccurateInterface {
       presetSaveBtn.style.display = "none";
     }
 
-    // Phrase save button (saves current phrase/player state)
-    const phraseSaveBtn = document.getElementById("phrase-save-btn");
-    if (phraseSaveBtn) {
+    // Row3 Phrase settings save button (saves current phrase/player state)
+    const phraseSettingsSaveBtn = document.getElementById("phrase-settings-save-btn");
+    if (phraseSettingsSaveBtn) {
       const saveHandler = () => {
-        console.log("Phrase save button clicked");
+        console.log("Phrase settings save button clicked");
         // Save both phrase and player state
         this.savePhraseState(this.currentPhrase);
         this.saveCurrentPlayerState();
@@ -721,9 +721,27 @@ class OTTOAccurateInterface {
         // Show notification that state was saved
         this.showNotification(`Saved ${this.currentPhrase} settings`, "success");
       };
-      phraseSaveBtn.addEventListener("click", saveHandler);
+      phraseSettingsSaveBtn.addEventListener("click", saveHandler);
       // Show the button only when there are changes
-      phraseSaveBtn.style.display = "flex";
+      phraseSettingsSaveBtn.style.display = "flex";
+    }
+
+    // Row2 Save current phrase button
+    const phraseSaveCurrentBtn = document.getElementById("phrase-save-current-btn");
+    if (phraseSaveCurrentBtn) {
+      const saveHandler = () => {
+        this.saveCurrentPhrase();
+      };
+      phraseSaveCurrentBtn.addEventListener("click", saveHandler);
+    }
+
+    // Row2 Edit phrase name button
+    const phraseEditNameBtn = document.getElementById("phrase-edit-name-btn");
+    if (phraseEditNameBtn) {
+      const editHandler = () => {
+        this.editPhraseName();
+      };
+      phraseEditNameBtn.addEventListener("click", editHandler);
     }
 
     // Old save buttons removed - no longer in HTML
@@ -6911,6 +6929,12 @@ class OTTOAccurateInterface {
     // Phrase order for navigation
     this.phraseOrder = ["general", "intro", "verse", "prechorus", "chorus", "bridge", "solo", "outro"];
 
+    // Default phrases that cannot be deleted
+    this.defaultPhrases = ["general", "intro", "verse", "prechorus", "chorus", "bridge", "solo", "outro"];
+
+    // User-created phrases (loaded from storage or empty)
+    this.userPhrases = [];
+
     // Initialize current phrase if not set
     if (!this.currentPhrase) {
       this.currentPhrase = "general";
@@ -7129,25 +7153,10 @@ class OTTOAccurateInterface {
       this.eventListenerRegistry.element.push({ element: phraseComplexityBtn, event: "click", handler: complexityHandler });
     }
 
-    // Phrase Save functionality
-    if (phraseSettingsSaveBtn) {
-      const saveHandler = (e) => {
-        console.log("Saving phrase settings for:", this.currentPhrase);
-        this.savePhraseState(this.currentPhrase);
-        this.saveCurrentPlayerState();
-        this.scheduleSave("preset", true);
-        this.showNotification(`Saved ${this.currentPhrase} phrase settings`, "success");
-      };
-      phraseSettingsSaveBtn.addEventListener("click", saveHandler);
-      this.eventListenerRegistry.element.push({ element: phraseSettingsSaveBtn, event: "click", handler: saveHandler });
-    }
-
     // Phrase Add functionality
     if (phraseAddBtn) {
       const addHandler = (e) => {
-        console.log("Adding new phrase");
-        // Add new phrase logic here
-        this.showNotification("Add phrase functionality coming soon", "info");
+        this.addNewPhrase();
       };
       phraseAddBtn.addEventListener("click", addHandler);
       this.eventListenerRegistry.element.push({ element: phraseAddBtn, event: "click", handler: addHandler });
@@ -7158,11 +7167,17 @@ class OTTOAccurateInterface {
       const muteHandler = (e) => {
         const icon = phraseMuteBtn.querySelector('i');
         const isMuted = phraseMuteBtn.classList.contains("muted");
+        const phraseMuteOverlay = document.querySelector('.phrase-mute-overlay');
+
         if (isMuted) {
           phraseMuteBtn.classList.remove("muted");
           phraseMuteBtn.title = "Mute Phrase";
           if (icon) {
             icon.className = "ph-thin ph-speaker-high";
+          }
+          // Remove the overlay
+          if (phraseMuteOverlay) {
+            phraseMuteOverlay.classList.remove('active');
           }
           console.log("Unmuted phrase:", this.currentPhrase);
           // Unmute phrase logic here
@@ -7171,6 +7186,10 @@ class OTTOAccurateInterface {
           phraseMuteBtn.title = "Unmute Phrase";
           if (icon) {
             icon.className = "ph-thin ph-speaker-slash";
+          }
+          // Add the overlay to dim rows 3-6
+          if (phraseMuteOverlay) {
+            phraseMuteOverlay.classList.add('active');
           }
           console.log("Muted phrase:", this.currentPhrase);
           // Mute phrase logic here
@@ -7183,16 +7202,7 @@ class OTTOAccurateInterface {
     // Phrase Delete functionality
     if (phraseDeleteBtn) {
       const deleteHandler = (e) => {
-        if (this.currentPhrase === "general") {
-          this.showNotification("Cannot delete General phrase", "error");
-          return;
-        }
-        if (confirm(`Are you sure you want to delete the ${this.currentPhrase} phrase?`)) {
-          console.log("Deleting phrase:", this.currentPhrase);
-          // Delete phrase logic here
-          this.showNotification(`Deleted ${this.currentPhrase} phrase`, "success");
-          this.switchToPhrase("general");
-        }
+        this.deleteCurrentPhrase();
       };
       phraseDeleteBtn.addEventListener("click", deleteHandler);
       this.eventListenerRegistry.element.push({ element: phraseDeleteBtn, event: "click", handler: deleteHandler });
@@ -7276,6 +7286,149 @@ class OTTOAccurateInterface {
         tab.classList.add("active");
       }
     });
+  }
+
+  // Save current phrase (saves the phrase configuration itself)
+  saveCurrentPhrase() {
+    console.log("Saving current phrase:", this.currentPhrase);
+    // Save the current phrase configuration
+    this.savePhraseState(this.currentPhrase);
+    this.saveCurrentPlayerState();
+    this.scheduleSave("preset", true);
+    this.showNotification(`Saved phrase: ${this.currentPhrase}`, "success");
+  }
+
+  // Edit phrase name
+  editPhraseName() {
+    // Check if it's a default phrase
+    if (this.defaultPhrases.includes(this.currentPhrase)) {
+      this.showNotification("Cannot rename default phrases", "error");
+      return;
+    }
+
+    const newName = prompt(`Enter new name for phrase "${this.currentPhrase}":`);
+    if (newName && newName.trim()) {
+      const trimmedName = newName.trim();
+
+      // Check if name already exists
+      if (this.phraseOrder.includes(trimmedName.toLowerCase())) {
+        this.showNotification("A phrase with this name already exists", "error");
+        return;
+      }
+
+      // Update phrase name
+      const oldName = this.currentPhrase;
+      const index = this.phraseOrder.indexOf(oldName);
+      if (index !== -1) {
+        this.phraseOrder[index] = trimmedName.toLowerCase();
+
+        // Update user phrases list
+        const userIndex = this.userPhrases.indexOf(oldName);
+        if (userIndex !== -1) {
+          this.userPhrases[userIndex] = trimmedName.toLowerCase();
+        }
+
+        // Update phrase states
+        if (this.phraseStates[oldName]) {
+          this.phraseStates[trimmedName.toLowerCase()] = this.phraseStates[oldName];
+          delete this.phraseStates[oldName];
+        }
+
+        this.currentPhrase = trimmedName.toLowerCase();
+        this.updatePhraseTabStates();
+        this.scheduleSave("preset", true);
+        this.showNotification(`Renamed phrase to: ${trimmedName}`, "success");
+      }
+    }
+  }
+
+  // Add a new phrase
+  addNewPhrase() {
+    const name = prompt("Enter name for new phrase:");
+    if (name && name.trim()) {
+      const trimmedName = name.trim().toLowerCase();
+
+      // Check if name already exists
+      if (this.phraseOrder.includes(trimmedName)) {
+        this.showNotification("A phrase with this name already exists", "error");
+        return;
+      }
+
+      // Add to phrase order and user phrases
+      this.phraseOrder.push(trimmedName);
+      this.userPhrases.push(trimmedName);
+
+      // Initialize phrase state
+      this.phraseStates[trimmedName] = {
+        currentPlayer: 1,
+        playerStates: {}
+      };
+
+      // Create a new tab for the phrase
+      const phraseTabs = document.querySelector(".phrase-tabs");
+      if (phraseTabs) {
+        const newTabContainer = document.createElement("div");
+        newTabContainer.className = "phrase-tab-container";
+        newTabContainer.dataset.phrase = trimmedName;
+
+        const newTab = document.createElement("button");
+        newTab.className = "phrase-tab";
+        newTab.dataset.phrase = trimmedName;
+        newTab.textContent = name.trim();
+
+        // Add click handler
+        newTab.addEventListener("click", () => {
+          this.switchToPhrase(trimmedName);
+        });
+
+        newTabContainer.appendChild(newTab);
+        phraseTabs.appendChild(newTabContainer);
+      }
+
+      // Switch to the new phrase
+      this.switchToPhrase(trimmedName);
+      this.scheduleSave("preset", true);
+      this.showNotification(`Added new phrase: ${name.trim()}`, "success");
+    }
+  }
+
+  // Delete current phrase (only user-created phrases)
+  deleteCurrentPhrase() {
+    // Check if it's a default phrase
+    if (this.defaultPhrases.includes(this.currentPhrase)) {
+      this.showNotification("Cannot delete default phrases", "error");
+      return;
+    }
+
+    // Confirm deletion
+    if (confirm(`Are you sure you want to delete the phrase "${this.currentPhrase}"?`)) {
+      const phraseToDelete = this.currentPhrase;
+
+      // Remove from arrays
+      const orderIndex = this.phraseOrder.indexOf(phraseToDelete);
+      if (orderIndex !== -1) {
+        this.phraseOrder.splice(orderIndex, 1);
+      }
+
+      const userIndex = this.userPhrases.indexOf(phraseToDelete);
+      if (userIndex !== -1) {
+        this.userPhrases.splice(userIndex, 1);
+      }
+
+      // Remove phrase state
+      delete this.phraseStates[phraseToDelete];
+
+      // Remove the tab from DOM
+      const tabToRemove = document.querySelector(`.phrase-tab[data-phrase="${phraseToDelete}"]`);
+      if (tabToRemove && tabToRemove.parentElement) {
+        tabToRemove.parentElement.remove();
+      }
+
+      // Switch to general phrase
+      this.switchToPhrase("general");
+      this.scheduleSave("preset", true);
+      this.showNotification(`Deleted phrase: ${phraseToDelete}`, "success");
+    }
   }
 
   setupPlayerTabs() {
@@ -8606,13 +8759,13 @@ class OTTOAccurateInterface {
             this.safeRemoveClass(button, "active");  // Stick is normal (not white)
           }
         } else if (toggleKey === "ride") {
-          // Restore correct text and active state based on state - REVERSED HIGHLIGHT
+          // Restore correct text and active state based on state
           if (state.toggleStates && state.toggleStates.ride === "hihat") {
             button.textContent = "Hi-Hat";
-            this.safeAddClass(button, "active");  // Hi-Hat is active (white) - REVERSED
+            this.safeRemoveClass(button, "active");  // Hi-Hat is normal state (not highlighted)
           } else {
             button.textContent = "Ride";
-            this.safeRemoveClass(button, "active");  // Ride is normal (not white) - REVERSED
+            this.safeAddClass(button, "active");  // Ride is active/highlighted state
           }
         } else {
           // Regular toggle buttons
@@ -9341,17 +9494,17 @@ class OTTOAccurateInterface {
         return;
       }
 
-      // Handle Ride/Hi-Hat toggle - REVERSED HIGHLIGHT
+      // Handle Ride/Hi-Hat toggle
       if (toggleType === "ride") {
         const currentText = toggleBtn.textContent;
-        if (currentText === "Ride") {
-          toggleBtn.textContent = "Hi-Hat";
-          toggleBtn.classList.add("active");  // Hi-Hat is active (white) - REVERSED
-          state.toggleStates.ride = "hihat";
-        } else {
+        if (currentText === "Hi-Hat") {
           toggleBtn.textContent = "Ride";
-          toggleBtn.classList.remove("active");  // Ride is normal (not white) - REVERSED
+          toggleBtn.classList.add("active");  // Ride is active/highlighted state
           state.toggleStates.ride = "ride";
+        } else {
+          toggleBtn.textContent = "Hi-Hat";
+          toggleBtn.classList.remove("active");  // Hi-Hat is normal state (not highlighted)
+          state.toggleStates.ride = "hihat";
         }
         this.onToggleChanged(this.currentPlayer, "ride", state.toggleStates.ride);
         this.setDirty("preset", true);
